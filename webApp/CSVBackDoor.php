@@ -2,30 +2,33 @@
 
 include("connectDB.php");
 
-$vue = "VUE_".$_GET["vue_name"];
+$vue = str_replace(" ", "_", $_GET["vue_name"]);
 
-$req = "SHOW COLUMNS FROM ".$vue;
+$req = "SELECT request FROM INFO_view WHERE name = '" . $_GET["vue_name"] ."'";
 $result = mysqli_query($conn,$req);
-$fields = array();
 while($row = mysqli_fetch_array($result)){
-  array_push($fields, $row['Field']);
-  // echo $row['Field']."<br>";
+  $req = $row['request'];
 }
-
+//print($req);
 // Fetch records from database 
-$req = "SELECT * FROM ".$vue; 
 $result = mysqli_query($conn,$req);
  
 if($result){ 
     $delimiter = ","; 
-    $filename = "members-data_" . date('Y-m-d') . ".csv"; 
-     
+    $filename = "data_" . $vue . "_" . date('Y-m-d') . ".csv"; 
+    //$filename = "data_.csv"; 
+    //print ($filename);
     // Create a file pointer 
     $f = fopen('php://memory', 'w'); 
      
     // Set column headers
-    //$fields = array('ID', 'FIRST NAME', 'LAST NAME', 'EMAIL', 'GENDER', 'COUNTRY', 'CREATED', 'STATUS'); 
-    fputcsv($f, $fields, $delimiter); 
+    /*$fields = [];
+    while ($row = mysqli_fetch_fields($result)){
+      print($row);
+      //array_push($fields, $row);
+    }
+    fputcsv($f, $fields, $delimiter);*/
+    
      
     // Output each row of the data, format line as csv and write to file pointer 
     //while($row = $query->fetch_assoc()){ 
