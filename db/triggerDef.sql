@@ -30,7 +30,9 @@ SELECT
   JOIN `INFO_module_sequencage` ON (`INFO_module`.`id_module` = `INFO_module_sequencage`.`id_module`) AND (`INFO_groupe`.`id_groupe_type` = `INFO_module_sequencage`.`id_groupe_type`)
   JOIN INFO_module_sequence ON INFO_module_sequence.id_module_sequencage = INFO_module_sequencage.id_module_sequencage
 
-INSERT IGNORE INTO INFO_seance_to_be_affected_as_enseignant (id_seance_to_be_affected)
+
+// look for the module responsible for id_responsable
+INSERT IGNORE INTO INFO_seance_to_be_affected_as_enseignant (id_seance_to_be_affected, id_responsable)
 
 SELECT id_seance_to_be_affected
 FROM INFO_seance_to_be_affected
@@ -56,8 +58,20 @@ SELECT
   JOIN `learnagement`.`INFO_groupe` ON `learnagement`.`INFO_promo`.`id_promo` = `learnagement`.`INFO_groupe`.`id_promo`
   JOIN `learnagement`.`INFO_module_sequencage` ON (`learnagement`.`INFO_module`.`id_module` = `learnagement`.`INFO_module_sequencage`.`id_module`) AND (`learnagement`.`INFO_groupe`.`id_groupe_type` = `learnagement`.`INFO_module_sequencage`.`id_groupe_type`)
 )
-INSERT IGNORE INTO INFO_type_seance_to_be_affected_as_enseignant (id_type_seance_to_be_affected)
+
+// look for the module responsible for id_responsable
+INSERT IGNORE INTO INFO_type_seance_to_be_affected_as_enseignant (id_type_seance_to_be_affected, id_responsable)
 (
 SELECT id_type_seance_to_be_affected
 FROM INFO_type_seance_to_be_affected
 )
+
+
+REPLACE INTO INFO_seance_to_be_affected_as_enseignant (id_seance_to_be_affected, `id_enseignant`, `id_responsable`)
+SELECT INFO_seance_to_be_affected.id_seance_to_be_affected, INFO_type_seance_to_be_affected_as_enseignant.id_enseignant, 18
+FROM `INFO_type_seance_to_be_affected_as_enseignant` 
+JOIN INFO_type_seance_to_be_affected ON INFO_type_seance_to_be_affected.id_type_seance_to_be_affected = INFO_type_seance_to_be_affected_as_enseignant.id_type_seance_to_be_affected
+JOIN INFO_module_sequencage ON INFO_module_sequencage.id_module_sequencage = INFO_type_seance_to_be_affected.id_module_sequencage
+JOIN INFO_module_sequence ON INFO_module_sequence.id_module_sequencage = INFO_module_sequencage.id_module_sequencage
+JOIN INFO_seance_to_be_affected ON INFO_seance_to_be_affected.id_module_sequence = INFO_module_sequence.id_module_sequence AND INFO_seance_to_be_affected.id_groupe = INFO_type_seance_to_be_affected.id_groupe
+WHERE INFO_module_sequencage.id_module =  and INFO_type_seance_to_be_affected_as_enseignant.id_enseignant is not null;
