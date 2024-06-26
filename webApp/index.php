@@ -51,7 +51,7 @@ $_SESSION['timeout'] = $session_timeout;
     <aside>
       <?php include("filter.php"); ?> 
     </aside>
-    <main>
+    <main class="tabs">
       <?php include("view.php"); ?> 
     </main>
     <footer>

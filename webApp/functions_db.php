@@ -17,12 +17,25 @@ function get_views_old($conn, $vue_name){
   return $result;
 }
 
+function get_group_of_views($conn){
+  $views_req = "SELECT DISTINCT `group_of_views` FROM `INFO_view` WHERE 1 ORDER BY  `group_of_views`";
+
+  $views = mysqli_query($conn, $views_req);
+
+if (!$views) {
+  echo 'Impossible d\'exécuter la requête : ' . $req;
+  echo 'error '.mysqli_error($conn);
+  exit;
+ }
+
+ return $views;
+}
 
 /*
  * TODO merge with get_updatables
  */
 function get_views($conn){
-  $views_req = "SELECT `name`, `request` FROM `INFO_view` WHERE 1 ORDER BY `sortIndex`";
+  $views_req = "SELECT `name`, `group_of_views`, `request` FROM `INFO_view` WHERE 1 ORDER BY  `sortIndex`";
 
   $views = mysqli_query($conn, $views_req);
 

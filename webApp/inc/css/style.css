@@ -10,6 +10,14 @@ html, body {
   width: 100%;
 }
 
+
+div.items div {
+    display: none;
+}
+div.items div:target {
+    display: block;
+}
+
 footer {
    display: table-row;
    position: fixed;
