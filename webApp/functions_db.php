@@ -48,11 +48,25 @@ if (!$views) {
  return $views;
 }
 
+function get_group_of_updatables($conn){
+  $views_req = "SELECT DISTINCT `group_of_views` FROM `INFO_updatable` WHERE 1 ORDER BY  `group_of_views`";
+
+  $views = mysqli_query($conn, $views_req);
+
+if (!$views) {
+  echo 'Impossible d\'exécuter la requête : ' . $req;
+  echo 'error '.mysqli_error($conn);
+  exit;
+ }
+
+ return $views;
+}
+
 /*
  * TODO merge with get_views
  */
 function get_updatables($conn){
-  $updatables_req = "SELECT `table_name`, `table_name_displayed`, `request` FROM `INFO_updatable` WHERE 1 ORDER BY `sortIndex`";
+  $updatables_req = "SELECT `table_name`, `table_name_displayed`, `group_of_views`, `request` FROM `INFO_updatable` WHERE 1 ORDER BY `sortIndex`";
 
   $updatables = mysqli_query($conn, $updatables_req);
 

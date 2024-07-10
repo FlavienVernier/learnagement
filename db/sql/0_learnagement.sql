@@ -3,10 +3,11 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : mysql
--- Généré le : mar. 04 juin 2024 à 14:56
--- Version du serveur : 8.0.33
--- Version de PHP : 8.2.8
+-- Généré le : mar. 09 juil. 2024 à 13:15
+-- Version du serveur : 8.0.35
+-- Version de PHP : 8.2.13
 
+SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -20,6 +21,20 @@ SET time_zone = "+00:00";
 --
 -- Base de données : `learnagement`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `INFO_check`
+--
+
+CREATE TABLE `INFO_check` (
+  `id_view` int NOT NULL,
+  `sortIndex` int NOT NULL,
+  `name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `group_of_views` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `request` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -64,18 +79,18 @@ CREATE TABLE `INFO_display_limit` (
 
 CREATE TABLE `INFO_enseignant` (
   `id_enseignant` int NOT NULL,
-  `prenom` varchar(25) NOT NULL,
-  `nom` varchar(25) NOT NULL,
-  `fullName` varchar(50) DEFAULT NULL,
+  `prenom` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `nom` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `mail` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `password` varchar(100) DEFAULT NULL,
-  `statut` enum('permanent','vacataire') NOT NULL DEFAULT 'permanent',
+  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `statut` enum('permanent','vacataire') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'permanent',
   `id_discipline` int DEFAULT NULL,
-  `composante` varchar(25) DEFAULT NULL,
+  `composante` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `service statutaire` int NOT NULL,
   `décharge` int NOT NULL,
   `service effectif` float NOT NULL DEFAULT '192',
   `HCAutorisees` tinyint(1) NOT NULL DEFAULT '1',
+  `fullName` varchar(50) DEFAULT NULL,
   `commentaire` varchar(150) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -176,7 +191,9 @@ CREATE TABLE `INFO_module` (
 
 CREATE TABLE `INFO_module_as_learning_unit` (
   `id_module` int NOT NULL,
-  `id_learning_unit` int NOT NULL
+  `id_learning_unit` int NOT NULL,
+  `modifiable` tinyint(1) NOT NULL DEFAULT '0',
+  `id_responsable` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -197,6 +214,8 @@ CREATE TABLE `INFO_module_sequencage` (
   `modifiable` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+
 -- --------------------------------------------------------
 
 --
@@ -207,10 +226,10 @@ CREATE TABLE `INFO_module_sequence` (
   `id_module_sequence` int NOT NULL,
   `id_module_sequencage` int DEFAULT NULL,
   `numero_ordre` int DEFAULT NULL,
-  `id_responsable` int DEFAULT NULL,
-  `commentaire` text,
-  `modifiable` tinyint(1) NOT NULL DEFAULT '1'
+  `commentaire` text
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
 
 -- --------------------------------------------------------
 
@@ -286,9 +305,7 @@ CREATE TABLE `INFO_seance_planned` (
 
 CREATE TABLE `INFO_seance_to_be_affected` (
   `id_seance_to_be_affected` int NOT NULL,
-  `id_module` int NOT NULL,
-  `id_seance_type` int DEFAULT NULL,
-  `numero_ordre` int NOT NULL,
+  `id_module_sequence` int DEFAULT NULL,
   `id_groupe` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -299,6 +316,7 @@ CREATE TABLE `INFO_seance_to_be_affected` (
 --
 
 CREATE TABLE `INFO_seance_to_be_affected_as_enseignant` (
+  `id_seance_to_be_affected_as_enseignant` int NOT NULL,
   `id_seance_to_be_affected` int NOT NULL,
   `id_enseignant` int DEFAULT NULL,
   `id_responsable` int NOT NULL,
@@ -331,6 +349,32 @@ CREATE TABLE `INFO_statut` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `INFO_type_seance_to_be_affected`
+--
+
+CREATE TABLE `INFO_type_seance_to_be_affected` (
+  `id_type_seance_to_be_affected` int NOT NULL,
+  `id_module_sequencage` int NOT NULL,
+  `id_groupe` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `INFO_type_seance_to_be_affected_as_enseignant`
+--
+
+CREATE TABLE `INFO_type_seance_to_be_affected_as_enseignant` (
+  `id_type_seance_to_be_affected_as_enseignant` int NOT NULL,
+  `id_type_seance_to_be_affected` int NOT NULL,
+  `id_enseignant` int DEFAULT NULL,
+  `id_responsable` int NOT NULL,
+  `modifiable` int NOT NULL DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `INFO_updatable`
 --
 
@@ -339,6 +383,9 @@ CREATE TABLE `INFO_updatable` (
   `sortIndex` int NOT NULL,
   `table_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `table_name_displayed` varchar(30) NOT NULL,
+  `group_of-views` varchar(30) DEFAULT NULL,
+  `allow_insert` tinyint NOT NULL,
+  `allow_update` tinyint NOT NULL,
   `request` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -352,13 +399,20 @@ CREATE TABLE `INFO_view` (
   `id_view` int NOT NULL,
   `sortIndex` int NOT NULL,
   `name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `group_of_views` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `group_of_views` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'Unclassified',
   `request` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Index pour les tables déchargées
 --
+
+--
+-- Index pour la table `INFO_check`
+--
+ALTER TABLE `INFO_check`
+  ADD PRIMARY KEY (`id_view`),
+  ADD UNIQUE KEY `SECONDARY` (`name`);
 
 --
 -- Index pour la table `INFO_dependance_sequence`
@@ -447,7 +501,8 @@ ALTER TABLE `INFO_module`
 --
 ALTER TABLE `INFO_module_as_learning_unit`
   ADD PRIMARY KEY (`id_module`,`id_learning_unit`),
-  ADD KEY `FK_module_as_learning_unit_as_learning_unit` (`id_learning_unit`);
+  ADD KEY `FK_module_as_learning_unit_as_learning_unit` (`id_learning_unit`),
+  ADD KEY `FK_module_sequencage_as_responsable` (`id_responsable`);
 
 --
 -- Index pour la table `INFO_module_sequencage`
@@ -465,8 +520,7 @@ ALTER TABLE `INFO_module_sequencage`
 --
 ALTER TABLE `INFO_module_sequence`
   ADD PRIMARY KEY (`id_module_sequence`),
-  ADD UNIQUE KEY `SECONDARY` (`id_module_sequencage`,`numero_ordre`) USING BTREE,
-  ADD KEY `FK_module_sequence_as_enseignant` (`id_responsable`) USING BTREE;
+  ADD UNIQUE KEY `SECONDARY` (`id_module_sequencage`,`numero_ordre`) USING BTREE;
 
 --
 -- Index pour la table `INFO_parameters_of_views`
@@ -511,15 +565,14 @@ ALTER TABLE `INFO_seance_planned`
 --
 ALTER TABLE `INFO_seance_to_be_affected`
   ADD PRIMARY KEY (`id_seance_to_be_affected`),
-  ADD UNIQUE KEY `SECONDARY` (`id_module`,`id_seance_type`,`numero_ordre`,`id_groupe`) USING BTREE,
-  ADD KEY `FK_seance_to_be_affected_as_groupe` (`id_groupe`),
-  ADD KEY `FK_seance_to_be_affected_as_seance_type` (`id_seance_type`);
+  ADD UNIQUE KEY `SECONDARY` (`id_module_sequence`,`id_groupe`) USING BTREE,
+  ADD KEY `FK_seance_to_be_affected_as_groupe` (`id_groupe`);
 
 --
 -- Index pour la table `INFO_seance_to_be_affected_as_enseignant`
 --
 ALTER TABLE `INFO_seance_to_be_affected_as_enseignant`
-  ADD PRIMARY KEY (`id_seance_to_be_affected`) USING BTREE,
+  ADD PRIMARY KEY (`id_seance_to_be_affected_as_enseignant`),
   ADD UNIQUE KEY `SECONDARY` (`id_seance_to_be_affected`) USING BTREE,
   ADD KEY `FK_seance_to_be_affected_as_enseignant_as_enseignant` (`id_enseignant`),
   ADD KEY `FK_seance_to_be_affected_as_enseignant_as_responsable` (`id_responsable`);
@@ -539,6 +592,23 @@ ALTER TABLE `INFO_statut`
   ADD UNIQUE KEY `SECONDARY` (`nom_statut`);
 
 --
+-- Index pour la table `INFO_type_seance_to_be_affected`
+--
+ALTER TABLE `INFO_type_seance_to_be_affected`
+  ADD PRIMARY KEY (`id_type_seance_to_be_affected`),
+  ADD UNIQUE KEY `SECONDARY` (`id_module_sequencage`,`id_groupe`) USING BTREE,
+  ADD KEY `FK_type_seance_to_be_affected_as_groupe` (`id_groupe`);
+
+--
+-- Index pour la table `INFO_type_seance_to_be_affected_as_enseignant`
+--
+ALTER TABLE `INFO_type_seance_to_be_affected_as_enseignant`
+  ADD PRIMARY KEY (`id_type_seance_to_be_affected_as_enseignant`),
+  ADD UNIQUE KEY `SECONDARY` (`id_type_seance_to_be_affected`) USING BTREE,
+  ADD KEY `FK_type_seance_to_be_affected_as_enseignant_as_enseignant` (`id_enseignant`),
+  ADD KEY `FK_type_seance_to_be_affected_as_enseignant_as_responsable` (`id_responsable`);
+
+--
 -- Index pour la table `INFO_updatable`
 --
 ALTER TABLE `INFO_updatable`
@@ -556,6 +626,12 @@ ALTER TABLE `INFO_view`
 --
 -- AUTO_INCREMENT pour les tables déchargées
 --
+
+--
+-- AUTO_INCREMENT pour la table `INFO_check`
+--
+ALTER TABLE `INFO_check`
+  MODIFY `id_view` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `INFO_discipline`
@@ -636,10 +712,28 @@ ALTER TABLE `INFO_seance_to_be_affected`
   MODIFY `id_seance_to_be_affected` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT pour la table `INFO_seance_to_be_affected_as_enseignant`
+--
+ALTER TABLE `INFO_seance_to_be_affected_as_enseignant`
+  MODIFY `id_seance_to_be_affected_as_enseignant` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT pour la table `INFO_statut`
 --
 ALTER TABLE `INFO_statut`
   MODIFY `id_statut` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `INFO_type_seance_to_be_affected`
+--
+ALTER TABLE `INFO_type_seance_to_be_affected`
+  MODIFY `id_type_seance_to_be_affected` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `INFO_type_seance_to_be_affected_as_enseignant`
+--
+ALTER TABLE `INFO_type_seance_to_be_affected_as_enseignant`
+  MODIFY `id_type_seance_to_be_affected_as_enseignant` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `INFO_updatable`
@@ -711,7 +805,8 @@ ALTER TABLE `INFO_module`
 --
 ALTER TABLE `INFO_module_as_learning_unit`
   ADD CONSTRAINT `FK_module_as_learning_unit_as_learning_unit` FOREIGN KEY (`id_learning_unit`) REFERENCES `INFO_learning_unit` (`id_learning_unit`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `FK_module_as_learning_unit_as_module` FOREIGN KEY (`id_module`) REFERENCES `INFO_module` (`id_module`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `FK_module_as_learning_unit_as_module` FOREIGN KEY (`id_module`) REFERENCES `INFO_module` (`id_module`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `FK_module_sequencage_as_responsable` FOREIGN KEY (`id_responsable`) REFERENCES `INFO_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Contraintes pour la table `INFO_module_sequencage`
@@ -727,8 +822,7 @@ ALTER TABLE `INFO_module_sequencage`
 -- Contraintes pour la table `INFO_module_sequence`
 --
 ALTER TABLE `INFO_module_sequence`
-  ADD CONSTRAINT `FK_module_sequence_as_enseignant` FOREIGN KEY (`id_responsable`) REFERENCES `INFO_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `FK_module_sequence_as_module_sequencage` FOREIGN KEY (`id_module_sequencage`) REFERENCES `INFO_module_sequencage` (`id_module_sequencage`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `FK_module_sequence_as_module_sequencage` FOREIGN KEY (`id_module_sequencage`) REFERENCES `INFO_module_sequencage` (`id_module_sequencage`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 --
 -- Contraintes pour la table `INFO_parameters_of_views`
@@ -761,8 +855,7 @@ ALTER TABLE `INFO_seance_planned`
 --
 ALTER TABLE `INFO_seance_to_be_affected`
   ADD CONSTRAINT `FK_seance_to_be_affected_as_groupe` FOREIGN KEY (`id_groupe`) REFERENCES `INFO_groupe` (`id_groupe`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `FK_seance_to_be_affected_as_module` FOREIGN KEY (`id_module`) REFERENCES `INFO_module` (`id_module`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `FK_seance_to_be_affected_as_seance_type` FOREIGN KEY (`id_seance_type`) REFERENCES `INFO_seanceType` (`id_seance_type`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `FK_seance_to_be_affected_as_module_sequence` FOREIGN KEY (`id_module_sequence`) REFERENCES `INFO_module_sequence` (`id_module_sequence`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 --
 -- Contraintes pour la table `INFO_seance_to_be_affected_as_enseignant`
@@ -770,7 +863,23 @@ ALTER TABLE `INFO_seance_to_be_affected`
 ALTER TABLE `INFO_seance_to_be_affected_as_enseignant`
   ADD CONSTRAINT `FK_seance_to_be_affected_as_enseignant_as_enseignant` FOREIGN KEY (`id_enseignant`) REFERENCES `INFO_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `FK_seance_to_be_affected_as_enseignant_as_responsable` FOREIGN KEY (`id_responsable`) REFERENCES `INFO_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `FK_seance_to_be_affected_as_enseignant_as_seance_to_be_affected` FOREIGN KEY (`id_seance_to_be_affected`) REFERENCES `INFO_seance_to_be_affected` (`id_seance_to_be_affected`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `FK_seance_to_be_affected_as_enseignant_as_seance_to_be_affected` FOREIGN KEY (`id_seance_to_be_affected`) REFERENCES `INFO_seance_to_be_affected` (`id_seance_to_be_affected`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+--
+-- Contraintes pour la table `INFO_type_seance_to_be_affected`
+--
+ALTER TABLE `INFO_type_seance_to_be_affected`
+  ADD CONSTRAINT `FK_type_seance_to_be_affected_as_groupe` FOREIGN KEY (`id_groupe`) REFERENCES `INFO_groupe` (`id_groupe`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `FK_type_seance_to_be_affected_as_module_sequence` FOREIGN KEY (`id_module_sequencage`) REFERENCES `INFO_module_sequencage` (`id_module_sequencage`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+--
+-- Contraintes pour la table `INFO_type_seance_to_be_affected_as_enseignant`
+--
+ALTER TABLE `INFO_type_seance_to_be_affected_as_enseignant`
+  ADD CONSTRAINT `FK_tseance_to_be_affected_as_enseignant_as_seance_to_be_affected` FOREIGN KEY (`id_type_seance_to_be_affected`) REFERENCES `INFO_type_seance_to_be_affected` (`id_type_seance_to_be_affected`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_type_seance_to_be_affected_as_enseignant_as_enseignant` FOREIGN KEY (`id_enseignant`) REFERENCES `INFO_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `FK_type_seance_to_be_affected_as_enseignant_as_responsable` FOREIGN KEY (`id_responsable`) REFERENCES `INFO_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
