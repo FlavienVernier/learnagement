@@ -105,7 +105,7 @@ function buidSecondaryKeyRequest($conn, $table){
 }
 /*
  * create view of FK for each table updatable
- * an updatable table is 1st table of each requeste of INFO_updatable
+ * an updatable table is 1st table of each requeste of VIEW_updatable
  * created view contains following fields:
  * (table_name, fk_fields, fk_table, fk_values, fk_explicit)
  * fk_values contains all primary keys of fk_table
@@ -115,7 +115,7 @@ function initViewOfExplicitFKOfUpdatable($conn){
 
   // for each foreign table of updatable table, generate the explicit (human readable) secondary keys views
   
-  $request = "SELECT table_name, request FROM INFO_updatable";
+  $request = "SELECT table_name, request FROM VIEW_updatable";
 
   $result = query($conn, $request);
 

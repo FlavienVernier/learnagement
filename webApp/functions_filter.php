@@ -12,7 +12,7 @@ function initFilter($conn, $userId, $sessionId){
     $userId = "\"" . $userId . "\"";
   }
   
-  $req = "INSERT INTO `INFO_parameters_of_views` (`id_parameters_of_views`, `userId`, `sessionId`) VALUES (NULL," . $userId . ",\"" . $sessionId . "\")";
+  $req = "INSERT INTO `VIEW_parameters_of_views` (`id_parameters_of_views`, `userId`, `sessionId`) VALUES (NULL," . $userId . ",\"" . $sessionId . "\")";
 
   $result = query($conn, $req);
 }
@@ -22,7 +22,7 @@ function initFilter($conn, $userId, $sessionId){
  */
 function __addFiltersInRequest($conn, $request){
   $parameters = getParameters($conn); //FK => Value
-  $foreignParam = getForeignKeys($conn, "INFO_parameters_of_views"); // FK => Table
+  $foreignParam = getForeignKeys($conn, "VIEW_parameters_of_views"); // FK => Table
   $tablesOfRequest = __getTableFromRequest($conn, $request);
 
   //dispDICT("parameters", $parameters);

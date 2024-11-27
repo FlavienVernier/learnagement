@@ -15,7 +15,7 @@ $parameterFieldsAndValues = getParameters($conn);
  * Get all foreign keys with their secondary keys values
  */
 $forefnK_fields_values_dic = [];
-$foreignKs = getForeignKeys($conn,  "INFO_parameters_of_views");
+$foreignKs = getForeignKeys($conn,  "VIEW_parameters_of_views");
 foreach($foreignKs as $foreignK => $foreignTable){
   $psK_values_dic = getPrimarySecondaryKeyValues($conn, $foreignTable);
   $forefnK_fields_values_dic += [$foreignK => $psK_values_dic];

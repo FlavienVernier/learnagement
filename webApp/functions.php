@@ -231,7 +231,7 @@ function getFields($conn, $table_name){
 function getParameters($conn){
   $sessionId = session_id();
   
-  $param_req = "SELECT * FROM `INFO_parameters_of_views` WHERE `sessionId` =  \"$sessionId\"";
+  $param_req = "SELECT * FROM `VIEW_parameters_of_views` WHERE `sessionId` =  \"$sessionId\"";
   
   /*
    * get parameters fields

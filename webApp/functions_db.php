@@ -18,7 +18,7 @@ function get_views_old($conn, $vue_name){
 }
 
 function get_group_of_views($conn){
-  $views_req = "SELECT DISTINCT `group_of_views` FROM `INFO_view` WHERE 1 ORDER BY  `group_of_views`";
+  $views_req = "SELECT DISTINCT `group_of_views` FROM `VIEW_display` WHERE 1 ORDER BY  `group_of_views`";
 
   $views = mysqli_query($conn, $views_req);
 
@@ -35,7 +35,7 @@ if (!$views) {
  * TODO merge with get_updatables
  */
 function get_views($conn){
-  $views_req = "SELECT `name`, `group_of_views`, `request` FROM `INFO_view` WHERE 1 ORDER BY  `sortIndex`";
+  $views_req = "SELECT `name`, `group_of_views`, `request` FROM `VIEW_display` WHERE 1 ORDER BY  `sortIndex`";
 
   $views = mysqli_query($conn, $views_req);
 
@@ -49,7 +49,7 @@ if (!$views) {
 }
 
 function get_group_of_updatables($conn){
-  $views_req = "SELECT DISTINCT `group_of_views` FROM `INFO_updatable` WHERE 1 ORDER BY  `group_of_views`";
+  $views_req = "SELECT DISTINCT `group_of_views` FROM `VIEW_updatable` WHERE 1 ORDER BY  `group_of_views`";
 
   $views = mysqli_query($conn, $views_req);
 
@@ -66,7 +66,7 @@ if (!$views) {
  * TODO merge with get_views
  */
 function get_updatables($conn){
-  $updatables_req = "SELECT `table_name`, `table_name_displayed`, `group_of_views`, `request` FROM `INFO_updatable` WHERE 1 ORDER BY `sortIndex`";
+  $updatables_req = "SELECT `table_name`, `table_name_displayed`, `group_of_views`, `request` FROM `VIEW_updatable` WHERE 1 ORDER BY `sortIndex`";
 
   $updatables = mysqli_query($conn, $updatables_req);
 
