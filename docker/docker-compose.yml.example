@@ -31,5 +31,8 @@ services:
             - 48080:80
         environment:
             - PMA_HOST=mysql
+            - RELATIONA_DISPLAY=D
+        volumes:
+            - ./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
 volumes:
     learnagement_persistent_db:
