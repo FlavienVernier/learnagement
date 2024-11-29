@@ -1,0 +1,5 @@
+root
+RootAuPif
+gpu-epu.univ-savoie.fr
+43306
+learnagement
