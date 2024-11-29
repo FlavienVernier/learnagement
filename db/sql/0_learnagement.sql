@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : mysql
--- Généré le : mer. 27 nov. 2024 à 22:34
+-- Généré le : ven. 29 nov. 2024 à 14:35
 -- Version du serveur : 8.0.33
 -- Version de PHP : 8.2.8
 
@@ -162,6 +162,21 @@ CREATE TABLE `CLASS_session_type_to_be_affected_as_enseignant` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `ETU_polypoint`
+--
+
+CREATE TABLE `ETU_polypoint` (
+  `id_polypoint` int NOT NULL,
+  `intitule` varchar(100) NOT NULL,
+  `tache` varchar(50) NOT NULL,
+  `nb_point` int NOT NULL,
+  `annee_universitaire` varchar(9) NOT NULL,
+  `id_etudiant` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `EXT_seance_planned`
 --
 
@@ -208,6 +223,21 @@ CREATE TABLE `LNM_enseignant` (
   `HCAutorisees` tinyint(1) NOT NULL DEFAULT '1',
   `fullName` varchar(50) DEFAULT NULL,
   `commentaire` varchar(150) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `LNM_etudiant`
+--
+
+CREATE TABLE `LNM_etudiant` (
+  `id_etudiant` int NOT NULL,
+  `nom` varchar(25) NOT NULL,
+  `prenom` varchar(25) NOT NULL,
+  `mail` varchar(50) NOT NULL,
+  `password` varchar(100) NOT NULL,
+  `id_promo` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -271,6 +301,41 @@ CREATE TABLE `LNM_promo` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `LNM_rendu_module`
+--
+
+CREATE TABLE `LNM_rendu_module` (
+  `id_rendu_module` int NOT NULL,
+  `description` varchar(100) NOT NULL,
+  `date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `LNM_rendu_module_as_enseignant`
+--
+
+CREATE TABLE `LNM_rendu_module_as_enseignant` (
+  `id_rendu_module` int NOT NULL,
+  `id_enseignant` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `LNM_rendu_module_as_etudiant`
+--
+
+CREATE TABLE `LNM_rendu_module_as_etudiant` (
+  `id_rendu_module` int NOT NULL,
+  `id_etudiant` int NOT NULL,
+  `date_depot` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `LNM_seanceType`
 --
 
@@ -289,6 +354,23 @@ CREATE TABLE `LNM_seanceType` (
 CREATE TABLE `LNM_semestre` (
   `id_semestre` tinyint NOT NULL,
   `semestre` varchar(3) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `LNM_stage`
+--
+
+CREATE TABLE `LNM_stage` (
+  `id_stage` int NOT NULL,
+  `entreprise` varchar(100) NOT NULL,
+  `ville` varchar(50) NOT NULL,
+  `date_debut` date NOT NULL,
+  `date_fin` date NOT NULL,
+  `nature` varchar(50) NOT NULL,
+  `id_etudiant` int NOT NULL,
+  `id_enseignant` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -396,6 +478,38 @@ CREATE TABLE `MAQUETTE_module_sequencage` (
   `modifiable` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+--
+-- Déclencheurs `MAQUETTE_module_sequencage`
+--
+DELIMITER $$
+CREATE TRIGGER `generate_sequence_from_sequencage` AFTER INSERT ON `MAQUETTE_module_sequencage` FOR EACH ROW INSERT IGNORE INTO `MAQUETTE_module_sequence`  (`id_module_sequencage`,`numero_ordre`,`commentaire`)
+SELECT `id_module_sequencage`, orders, null
+FROM `MAQUETTE_module_sequencage`, 
+(VALUES ROW (1), ROW(2), ROW(3), ROW (4), ROW(5), ROW(6), ROW (7), ROW(8), ROW(9), 
+ ROW (10), ROW (11), ROW(12), ROW(13), ROW (14), ROW(15), ROW(16), ROW (17), ROW(18), ROW(19),
+ ROW (20), ROW (21), ROW(22), ROW(23), ROW (24), ROW(25), ROW(26), ROW (27), ROW(28), ROW(29),
+ ROW (30), ROW (31), ROW(32), ROW(33), ROW (34), ROW(35), ROW(36), ROW (37), ROW(38), ROW(39)  ) sub(orders)
+WHERE orders <= nombre
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `generate_type_seance_from_sequencage` AFTER INSERT ON `MAQUETTE_module_sequencage` FOR EACH ROW INSERT IGNORE INTO CLASS_session_type_to_be_affected (`id_module_sequencage`, `id_groupe`)
+(
+SELECT
+  `learnagement`.`MAQUETTE_module_sequencage`.`id_module_sequencage` AS `id_module_sequencage`,
+  `learnagement`.`LNM_groupe`.`id_groupe` AS `id_groupe`
+  
+  FROM `learnagement`.`MAQUETTE_module`
+
+  JOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module
+  JOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_learning_unit = MAQUETTE_module_as_learning_unit.id_learning_unit
+  JOIN LNM_promo ON MAQUETTE_learning_unit.id_promo = LNM_promo.id_promo
+  
+  JOIN `learnagement`.`LNM_groupe` ON `learnagement`.`LNM_promo`.`id_promo` = `learnagement`.`LNM_groupe`.`id_promo`
+  JOIN `learnagement`.`MAQUETTE_module_sequencage` ON (`learnagement`.`MAQUETTE_module`.`id_module` = `learnagement`.`MAQUETTE_module_sequencage`.`id_module`) AND (`learnagement`.`LNM_groupe`.`id_groupe_type` = `learnagement`.`MAQUETTE_module_sequencage`.`id_groupe_type`)
+)
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -410,6 +524,27 @@ CREATE TABLE `MAQUETTE_module_sequence` (
   `commentaire` text
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+--
+-- Déclencheurs `MAQUETTE_module_sequence`
+--
+DELIMITER $$
+CREATE TRIGGER `generate_seance_from_sequence` AFTER INSERT ON `MAQUETTE_module_sequence` FOR EACH ROW INSERT IGNORE INTO CLASS_session_to_be_affected (`id_module_sequence`, `id_groupe`)
+SELECT
+  `learnagement`.`MAQUETTE_module_sequence`.`id_module_sequence` AS `id_module_sequence`,
+  `learnagement`.`LNM_groupe`.`id_groupe` AS `id_groupe`
+  
+  FROM `MAQUETTE_module`
+
+  JOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module
+  JOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_learning_unit = MAQUETTE_module_as_learning_unit.id_learning_unit
+  JOIN LNM_promo ON MAQUETTE_learning_unit.id_promo = LNM_promo.id_promo
+  
+  JOIN `LNM_groupe` ON `LNM_promo`.`id_promo` = `LNM_groupe`.`id_promo`
+  
+  JOIN `MAQUETTE_module_sequencage` ON (`MAQUETTE_module`.`id_module` = `MAQUETTE_module_sequencage`.`id_module`) AND (`LNM_groupe`.`id_groupe_type` = `MAQUETTE_module_sequencage`.`id_groupe_type`)
+  JOIN MAQUETTE_module_sequence ON MAQUETTE_module_sequence.id_module_sequencage = MAQUETTE_module_sequencage.id_module_sequencage
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -563,6 +698,13 @@ ALTER TABLE `CLASS_session_type_to_be_affected_as_enseignant`
   ADD KEY `FK_type_seance_to_be_affected_as_enseignant_as_responsable` (`id_responsable`);
 
 --
+-- Index pour la table `ETU_polypoint`
+--
+ALTER TABLE `ETU_polypoint`
+  ADD PRIMARY KEY (`id_polypoint`),
+  ADD KEY `FK_polypoint_as_etudiant` (`id_etudiant`);
+
+--
 -- Index pour la table `EXT_seance_planned`
 --
 ALTER TABLE `EXT_seance_planned`
@@ -586,6 +728,13 @@ ALTER TABLE `LNM_enseignant`
   ADD UNIQUE KEY `SECONDARY` (`prenom`,`nom`) USING BTREE,
   ADD UNIQUE KEY `mail` (`mail`),
   ADD KEY `FK_enseignant_as_discipline` (`id_discipline`);
+
+--
+-- Index pour la table `LNM_etudiant`
+--
+ALTER TABLE `LNM_etudiant`
+  ADD PRIMARY KEY (`id_etudiant`),
+  ADD KEY `FK_etudiant_as_promo` (`id_promo`);
 
 --
 -- Index pour la table `LNM_filiere`
@@ -621,6 +770,26 @@ ALTER TABLE `LNM_promo`
   ADD KEY `FK_promo_as_responsable` (`id_responsable`);
 
 --
+-- Index pour la table `LNM_rendu_module`
+--
+ALTER TABLE `LNM_rendu_module`
+  ADD PRIMARY KEY (`id_rendu_module`);
+
+--
+-- Index pour la table `LNM_rendu_module_as_enseignant`
+--
+ALTER TABLE `LNM_rendu_module_as_enseignant`
+  ADD PRIMARY KEY (`id_rendu_module`,`id_enseignant`),
+  ADD KEY `FK_rendu_module_as_enseignant_as_enseignant` (`id_enseignant`);
+
+--
+-- Index pour la table `LNM_rendu_module_as_etudiant`
+--
+ALTER TABLE `LNM_rendu_module_as_etudiant`
+  ADD PRIMARY KEY (`id_rendu_module`,`id_etudiant`),
+  ADD KEY `FK_rendu_module_as_etudiant_as_etudiant` (`id_etudiant`);
+
+--
 -- Index pour la table `LNM_seanceType`
 --
 ALTER TABLE `LNM_seanceType`
@@ -633,6 +802,14 @@ ALTER TABLE `LNM_seanceType`
 ALTER TABLE `LNM_semestre`
   ADD PRIMARY KEY (`id_semestre`),
   ADD UNIQUE KEY `SECONDARY` (`semestre`) USING BTREE;
+
+--
+-- Index pour la table `LNM_stage`
+--
+ALTER TABLE `LNM_stage`
+  ADD PRIMARY KEY (`id_stage`),
+  ADD KEY `FK_stage_as_etudiant` (`id_etudiant`),
+  ADD KEY `FK_stage_as_enseignant` (`id_enseignant`);
 
 --
 -- Index pour la table `LNM_statut`
@@ -795,6 +972,12 @@ ALTER TABLE `CLASS_session_type_to_be_affected_as_enseignant`
   MODIFY `id_type_seance_to_be_affected_as_enseignant` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT pour la table `ETU_polypoint`
+--
+ALTER TABLE `ETU_polypoint`
+  MODIFY `id_polypoint` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT pour la table `EXT_seance_planned`
 --
 ALTER TABLE `EXT_seance_planned`
@@ -813,6 +996,12 @@ ALTER TABLE `LNM_enseignant`
   MODIFY `id_enseignant` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT pour la table `LNM_etudiant`
+--
+ALTER TABLE `LNM_etudiant`
+  MODIFY `id_etudiant` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT pour la table `LNM_groupe`
 --
 ALTER TABLE `LNM_groupe`
@@ -823,6 +1012,18 @@ ALTER TABLE `LNM_groupe`
 --
 ALTER TABLE `LNM_promo`
   MODIFY `id_promo` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `LNM_rendu_module`
+--
+ALTER TABLE `LNM_rendu_module`
+  MODIFY `id_rendu_module` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `LNM_stage`
+--
+ALTER TABLE `LNM_stage`
+  MODIFY `id_stage` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `LNM_statut`
@@ -950,6 +1151,12 @@ ALTER TABLE `CLASS_session_type_to_be_affected_as_enseignant`
   ADD CONSTRAINT `FK_type_seance_to_be_affected_as_enseignant_as_responsable` FOREIGN KEY (`id_responsable`) REFERENCES `LNM_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
+-- Contraintes pour la table `ETU_polypoint`
+--
+ALTER TABLE `ETU_polypoint`
+  ADD CONSTRAINT `FK_polypoint_as_etudiant` FOREIGN KEY (`id_etudiant`) REFERENCES `LNM_etudiant` (`id_etudiant`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
 -- Contraintes pour la table `EXT_seance_planned`
 --
 ALTER TABLE `EXT_seance_planned`
@@ -966,6 +1173,12 @@ ALTER TABLE `INFO_etat_module`
 --
 ALTER TABLE `LNM_enseignant`
   ADD CONSTRAINT `FK_enseignant_as_discipline` FOREIGN KEY (`id_discipline`) REFERENCES `MAQUETTE_discipline` (`id_discipline`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
+-- Contraintes pour la table `LNM_etudiant`
+--
+ALTER TABLE `LNM_etudiant`
+  ADD CONSTRAINT `FK_etudiant_as_promo` FOREIGN KEY (`id_promo`) REFERENCES `LNM_promo` (`id_promo`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Contraintes pour la table `LNM_filiere`
@@ -987,6 +1200,27 @@ ALTER TABLE `LNM_promo`
   ADD CONSTRAINT `FK_promo_as_filiere` FOREIGN KEY (`id_filiere`) REFERENCES `LNM_filiere` (`id_filiere`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `FK_promo_as_responsable` FOREIGN KEY (`id_responsable`) REFERENCES `LNM_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `FK_promo_as_statut` FOREIGN KEY (`id_statut`) REFERENCES `LNM_statut` (`id_statut`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
+-- Contraintes pour la table `LNM_rendu_module_as_enseignant`
+--
+ALTER TABLE `LNM_rendu_module_as_enseignant`
+  ADD CONSTRAINT `FK_rendu_module_as_enseignant_as_enseignant` FOREIGN KEY (`id_enseignant`) REFERENCES `LNM_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `FK_rendu_module_as_enseignant_as_rendu_module` FOREIGN KEY (`id_rendu_module`) REFERENCES `LNM_rendu_module` (`id_rendu_module`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
+-- Contraintes pour la table `LNM_rendu_module_as_etudiant`
+--
+ALTER TABLE `LNM_rendu_module_as_etudiant`
+  ADD CONSTRAINT `FK_rendu_module_as_etudiant_as_etudiant` FOREIGN KEY (`id_etudiant`) REFERENCES `LNM_etudiant` (`id_etudiant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `FK_rendu_module_as_etudiant_as_rendu_module` FOREIGN KEY (`id_rendu_module`) REFERENCES `LNM_rendu_module` (`id_rendu_module`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
+-- Contraintes pour la table `LNM_stage`
+--
+ALTER TABLE `LNM_stage`
+  ADD CONSTRAINT `FK_stage_as_enseignant` FOREIGN KEY (`id_enseignant`) REFERENCES `LNM_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `FK_stage_as_etudiant` FOREIGN KEY (`id_etudiant`) REFERENCES `LNM_etudiant` (`id_etudiant`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Contraintes pour la table `MAQUETTE_dependance_sequence`
