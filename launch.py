@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import time
 
 def main():
     # Couleurs pour les messages (non directement nécessaires dans Python mais émulation via ANSI codes)
@@ -26,12 +27,43 @@ def main():
     os.chdir("..")
 
     ##########
-    # Création des liens pour les données privées
+    # Création du répertoire de données initiales
     print("##########")
-    print("Création des liens pour les données privées")
+    print("Création du répertoire de données initiales")
     
-    # Création du répertoire de données privées s'il n'existe pas
-    os.makedirs("db/data", exist_ok=True)
+    # Création du répertoire de données initiales s'il n'existe pas
+    try:
+        os.makedirs("db/data", exist_ok=False)
+        # Dossiers source et cible
+        source_folder = "db/freeData"
+        target_folder = "db/data"
+
+        # Vérifie si le dossier cible existe, sinon le crée
+        os.makedirs(target_folder, exist_ok=True)
+
+        # Parcourt tous les fichiers dans le dossier source
+        for filename in os.listdir(source_folder):
+            source_path = os.path.join(source_folder, filename)
+            target_path = os.path.join(target_folder, filename)
+
+            # Vérifie si l'élément est un fichier (et non un dossier)
+            if os.path.isfile(source_path):
+                # Copie le fichier
+                shutil.copy(source_path, target_path)
+                print(f"Copied: {source_path} -> {target_path}")
+            
+    except OSError as error:
+        print(f"{GREEN}Data already exist!{NC}")
+        
+    # Chemin vers le fichier db/data/README
+    readme_path = "db/data/README"
+    # Texte à ajouter
+    text_to_append = "This folder contains data inserted into DB when the system is launch at the first time.  If it doesn't exist it will contans free data"
+    # Ouvrir le fichier en mode ajout et écrire le texte
+    with open(readme_path, "a") as file:
+        file.write(text_to_append)
+        file.write("\n")  # Ajoute une nouvelle ligne, comme `echo` le ferait
+
     os.chdir("db")
     subprocess.run(["python", "insertPrivateData.py"], check=True)
     os.chdir("..")
