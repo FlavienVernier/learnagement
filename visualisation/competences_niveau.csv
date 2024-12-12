@@ -1,0 +1,19 @@
+﻿Niveau,Competence,Apprentissages_critiques,Matiere
+1,Concevoir et mettre en œuvre des systèmes informatiques,Concevoir et gérer et utiliser une base de données,PROJ531
+1,Concevoir et mettre en œuvre des systèmes informatiques,Concevoir et gérer et utiliser une base de données,INFO502
+1,Concevoir et mettre en œuvre des systèmes informatiques,Concevoir et implémenter une application orientée objet de petite taille (<10classes),INFO641
+1,Concevoir et mettre en œuvre des systèmes informatiques,Concevoir et implémenter une application orientée objet de petite taille (<10classes),PROJ631
+1,Concevoir et mettre en œuvre des systèmes informatiques,Résoudre un problème en implémentant un algorithme dans un programme informatique procédural ou objet,INFO501
+1,Concevoir et mettre en œuvre des systèmes informatiques,Mettre en œuvre une architecture client-serveur 3-tiers,INFO632
+1,Concevoir et mettre en œuvre des systèmes informatiques,Concevoir et implémenter une application web de rendu de données / intégrant une BD,INFO633
+1,Concevoir et mettre en œuvre des systèmes informatiques,Évaluer la consommation énergétique d’un programme,PROJ631
+2,Concevoir et mettre en œuvre des systèmes informatiques,Définir les caractéristiques techniques et fonctionnelles d'un système N-tiers,INFO833
+2,Concevoir et mettre en œuvre des systèmes informatiques,Définir les caractéristiques techniques et fonctionnelles d'un système N-tiers,INFO734
+2,Concevoir et mettre en œuvre des systèmes informatiques,Définir les caractéristiques techniques et fonctionnelles d'un système N-tiers,INFO732
+2,Concevoir et mettre en œuvre des systèmes informatiques,Mettre en œuvre un processus qualité et d’intégration continue dans le développement logiciel ,INFO832
+2,Concevoir et mettre en œuvre des systèmes informatiques,Choisir une méthode de développement adaptée,INFO734
+3,Concevoir et mettre en œuvre des systèmes informatiques,Définir et mettre en œuvre une architecture de système logiciel de donnée massives,DATA831
+3,Concevoir et mettre en œuvre des systèmes informatiques,Caractériser et choisir les solutions logicielles et systèmes adaptées aux besoins,INFO932
+3,Concevoir et mettre en œuvre des systèmes informatiques,S'assurer de la sûreté et la fiabilité et la sécurité du système et du traitement et des données,INFO731
+3,Concevoir et mettre en œuvre des systèmes informatiques,Concevoir des applications et architectures multitâches et distribuées,INFO833
+3,Concevoir et mettre en œuvre des systèmes informatiques,Évaluer et optimiser les performances opérationnelles et énergétiques d'un système logiciel
