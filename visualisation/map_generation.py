@@ -15,32 +15,44 @@ csv_file_path = "visualisation\map_information.csv"
 #Charger le fichier CSV en utilisant l'encodage ISO-8859-1 et le point-virgule comme délimiteur
 df = pd.read_csv(csv_file_path)
 
-# Initialiser un géocodeur pour obtenir les coordonnées géographiques
-geolocator = Nominatim(user_agent="geoapi")
-geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
+# Ajouter une colonne combinée pour afficher toutes les universités dans une ville
+df_grouped = df.groupby(["City", "Country"])['University'].apply(lambda x: ', '.join(x)).reset_index()
+df_grouped.rename(columns={'University': 'Universities'}, inplace=True)
 
-# Ajouter des colonnes de latitude et de longitude au DataFrame
+# Ajouter des coordonnées géographiques pour chaque ville et pays
+# Utilisation de geopy pour obtenir les coordonnées
+from geopy.geocoders import Nominatim
+
+geolocator = Nominatim(user_agent="university_map")
+
+# Fonction pour obtenir les coordonnées géographiques
 def get_coordinates(row):
-    location = geocode(f"{row['City']}, {row['State']}, {row['Alpha-3_Code']}")
-    return location.latitude if location else None, location.longitude if location else None
+    try:
+        location = geolocator.geocode(f"{row['City']}, {row['Country']}")
+        if location:
+            return pd.Series([location.latitude, location.longitude])
+    except Exception as e:
+        print(f"Erreur pour {row['City']}, {row['Country']}: {e}")
+    return pd.Series([None, None])
 
-df[['Latitude', 'Longitude']] = df.apply(lambda row: pd.Series(get_coordinates(row)), axis=1)
+# Appliquer cette fonction à chaque ligne pour obtenir les coordonnées
+df_grouped[['Latitude', 'Longitude']] = df_grouped.apply(get_coordinates, axis=1)
 
+# Supprimer les lignes avec des coordonnées manquantes
+df_grouped = df_grouped.dropna(subset=['Latitude', 'Longitude'])
 
-# Filtrer les lignes avec des coordonnées valides
-df = df.dropna(subset=['Latitude', 'Longitude'])
-
-# Créer une carte interactive avec Plotly Express
-fig = px.scatter_geo(
-    df,
-    lat='Latitude',
-    lon='Longitude',
-    hover_name='University',
-    scope='world',  # Vous pouvez ajuster à "usa" ou autre si nécessaire
-    title="Carte des universités"
+# Créer une carte avec Plotly Express
+fig = px.scatter_mapbox(
+    df_grouped,
+    lat="Latitude",
+    lon="Longitude",
+    hover_name="Universities",
+    hover_data={"City": True, "Country": True, "Latitude": False, "Longitude": False},
+    mapbox_style="carto-positron",
+    zoom=3,
+    color="Country",
+    title="Carte des Universités"
 )
-
+fig.update_traces(marker=dict(size=12, opacity=0.8))
 # Afficher la carte
 fig.show()
-
-
