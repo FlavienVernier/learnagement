@@ -36,6 +36,7 @@ urlcal="https://ade-usmb-ro.grenet.fr/jsp/custom/modules/plannings/direct_cal.js
 request.get(urlcal)
 donnee"""
 
+#Ne met rien dans la Bdd
 
 import chromedriver_autoinstaller
 from selenium import webdriver

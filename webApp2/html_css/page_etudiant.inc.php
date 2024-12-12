@@ -1,15 +1,16 @@
 <link rel="stylesheet" href="css/page_etudiant.inc.css"/>
 
 <?php
-// id_login est récupéré dans l'url 
-$id_login=$_SESSION["identifiant"];
+// le mail de l'utilisateur est récupéré dans l'url 
+$mail=$_SESSION["mail"];
+id_etu = "SELECT id_etudiant FROM LNM_etudiant e WHERE e.mail LIKE '".$mail."'";
 
 /* Lancement du fichier de scraping des informations de l'étudiant */
 /*$pythonScript='../python/scraping_polypoint_stage.py';
 $output=shell_exec('python ' . $pythonScript);
  */
 
-$sql="SELECT nom, prenom FROM INFO_utilisateur u WHERE u.identifiant='".$id_login."'"; //id_login : correspond au login entrée par la personne dans la page de connexion
+$sql="SELECT nom, prenom FROM LNM_etudiant e WHERE e.mail='".$mail."'"; //mail : correspond au mail universitaire entrée par la personne dans la page de connexion
 $result=mysqli_query($conn, $sql);
 $row=mysqli_fetch_array($result);
 
@@ -22,11 +23,11 @@ echo "</ul>";
 //Partie sur les polypoints
 echo "<h3> Polypoints : </h3>";
 // affichage par année
-$sql_annee="SELECT DISTINCT annee AS annee FROM INFO_polypoint WHERE id_etudiant='".$id_login."'";
+$sql_annee="SELECT DISTINCT annee_universitaire AS annee FROM ETU_polypoint WHERE id_etudiant= '".$id_etu."'";
 $result=mysqli_query($conn, $sql_annee);
 while($row = mysqli_fetch_array($result)){
     $annee=$row["annee"];
-    $sql_somme="SELECT SUM(nb_points) AS somme_polypoint, annee AS annee FROM INFO_polypoint WHERE annee='".$annee."' AND id_etudiant='".$id_login."'";
+    $sql_somme="SELECT SUM(nb_points) AS somme_polypoint, annee_universitaire AS annee FROM ETU_polypoint WHERE annee_universitaire='".$annee."' AND id_etudiant='".$id_etu."'";
     $result_somme=mysqli_query($conn, $sql_somme); // on obtient un int
     $row_somme=mysqli_fetch_array($result_somme);
     $somme=strval($row_somme["somme_polypoint"]);
@@ -40,7 +41,7 @@ while($row = mysqli_fetch_array($result)){
 
 
 // affichage de la liste de polypoints
-$sql="SELECT intitule, tache, nb_points, annee FROM INFO_polypoint p WHERE p.id_etudiant='".$id_login."'"; //id_login : correspond au login entrée par la personne dans la page de connexion
+$sql="SELECT intitule, tache, nb_points, annee_universitaire FROM ETU_polypoint p WHERE p.id_etudiant='".$id_etu."'";
 $result=mysqli_query($conn, $sql);
 
 //si on a des données associées à des polypoints :
@@ -75,22 +76,22 @@ else{
 //Partie sur les stages
 echo "<h3> Stages : </h3>";
 
-$sql="SELECT annee, entreprise, date  FROM INFO_stage s WHERE s.id_etudiant='".$id_login."'"; //id_login : correspond au login entrée par la personne dans la page de connexion
+$sql="SELECT date_debut, date_fin, entreprise, nature FROM LNM_stage s WHERE s.id_etudiant='".$id_etu."'";
 $result=mysqli_query($conn, $sql);
 // si on a déjà des stages d'enregistrés : 
 if ($row = mysqli_fetch_array($result)){
     echo "<table id='stages'>";
     echo "<tr id='entete_stages'>
-            <th>Année </th>
+            <th>Dates </th>
             <th>Entreprise</th>
-            <th>Dates</th>
+            <th>Nature</th>
         </tr>";
-        // insertions des données de polypoint dans un tableau
+        // insertions des données des stages dans un tableau
         do{
             echo "<tr>";
-            echo "<td id='annee_stage'>".$row['annee']."</td>";
+            echo "<td id='dates_stage'>".$row['date_debut']." - ".$row['date_fin']."</td>";
             echo "<td id='entreprise_stage'>".$row['entreprise']."</td>";
-            echo "<td id='date_stage'>".$row['date']."</td>";
+            echo "<td id='nature_stage'>".$row['nature']."</td>";
             echo "</tr>";
         }
         while ($row = mysqli_fetch_array($result)) ;// tant qu'on a une ligne de résultat

@@ -2,7 +2,7 @@
 
 <?php
 /*
-    Format table 'INFO_enseignant':
+    Format table 'LNM_enseignant':
     id_enseignant INT,
     prenom VARCHAR(25),
     nom VARCHAR(25),
@@ -12,7 +12,7 @@
 if(isset($_GET["id"])){
     if (isset($_GET["id"])){
         $search = $_GET["id"];
-        $sql = "SELECT * FROM INFO_enseignant WHERE id_enseignant = '".$search."'";
+        $sql = "SELECT prenom, nom, mail FROM LNM_enseignant WHERE id_enseignant = '".$search."'";
         $result = mysqli_query($conn, $sql);
     }
     else {
@@ -36,9 +36,9 @@ if(isset($_GET["id"])){
     
 }
 else{
-    $id=$_SESSION["identifiant"];
+    $mail=$_SESSION["mail"];
 
-        $sql = "SELECT * FROM INFO_enseignant WHERE nom LIKE (SELECT nom FROM INFO_utilisateur WHERE identifiant LIKE '".$id."') and prenom LIKE (SELECT prenom FROM INFO_utilisateur WHERE identifiant LIKE '".$id."')";
+        $sql = "SELECT * FROM LNM_enseignant WHERE mail LIKE '".$mail."'";
         $result = mysqli_query($conn, $sql);
         $row= mysqli_fetch_array($result);
 
@@ -51,6 +51,7 @@ else{
     echo "<div id=infos_enseignant>";
     echo "<h2>&#128100;".$row["prenom"]." ".$row["nom"]."</h2>";
     echo "<p>Mail : <a href='mailto:".$row['mail']."'>".$row['mail']."</a> </p>";
+    echo "<p>Statut : ".$row['statut']." </p>";
     echo "</div>";
 }
 ?>

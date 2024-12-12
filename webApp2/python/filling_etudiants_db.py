@@ -27,8 +27,18 @@ with open('liste_etudiants.csv', 'r') as fichier:
         #print("Prénom :", prenom)
 
          #insertion d'elt de la table 
+         
+        # Pour ajouter un étudiant : INSERT INTO LNM_etudiant ('nom', 'prenom', 'mail', 'pswd') VALUES ('{nom}','{prenom}',
+        # il manque id_promo : id_filiere = SELECT id_filiere FROM LNM_filiere WHERE nom_filiere=filiere
+        # puis SELECT id_promo FROM LNM_promo WHERE LNM_promo.id_filiere=id_filiere AND LNM_promo.annee=annee
         
-        query = f"INSERT INTO TEST_etudiant(`nom`, `prenom`, `annee`, `filiere`) VALUES ('{nom}','{prenom}','{annee}','{filiere}')"
+        id_promo = f"SELECT id_promo FROM LNM_promo WHERE LNM_promo.id_filiere=(
+            SELECT id_filiere FROM LNM_filiere WHERE nom_filiere='{filiere}'
+            AND LNM_promo.annee='{annee}'"
+        print(lien_db.execute_query(db,id_promo))
+        
+        email=nom+"."+prenom+"@etu.univ-smb.fr"
+        query = f"INSERT INTO LNM_etudiant(`nom`, `prenom`, `mail`, `password`, `password_updated`, `id_promo`) VALUES ('{nom}','{prenom}', '{email}', null, null, '{id_promo}' )"
         
         print(lien_db.execute_query(db,query))
         

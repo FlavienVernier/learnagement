@@ -80,6 +80,7 @@ for point in valeurs :
 # il faut donc générer une exception quand on a pas les intitulés de classes qu'on recherche 
     try :
         annee=point.find('li', class_='annee_convention').text
+        ville=
         entreprise=point.find('li', class_='entreprise').text
         date=point.find('li', class_='date').text
         informations_stage.append([annee, entreprise, date])
@@ -99,10 +100,10 @@ for info in informations_polypoint:
     tache=info[1]
     nb_points=info[2]
     annee=info[3]
-    query= f"INSERT INTO INFO_polypoint (intitule, tache, nb_points, annee, id_etudiant) SELECT '{intitule}', '{tache}', '{nb_points}', '{annee}', '{id}' WHERE NOT EXISTS( SELECT 1 FROM INFO_polypoint WHERE intitule='{intitule}' AND tache='{tache}' AND nb_points='{nb_points}' AND annee='{annee}' AND id_etudiant='{id}' );"
+    query= f"INSERT INTO ETU_polypoint (intitule, tache, nb_points, annee, id_etudiant) SELECT '{intitule}', '{tache}', '{nb_points}', '{annee}', '{id}' WHERE NOT EXISTS( SELECT 1 FROM ETU_polypoint WHERE intitule='{intitule}' AND tache='{tache}' AND nb_points='{nb_points}' AND annee='{annee}' AND id_etudiant='{id}' );"
     lien_db.execute_query(bd,query)
 
-print(lien_db.get_data(bd,"INFO_polypoint"))
+print(lien_db.get_data(bd,"ETU_polypoint"))
 
 #enregistrement des stages
 for info in informations_stage:

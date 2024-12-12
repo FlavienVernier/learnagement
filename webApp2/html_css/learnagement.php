@@ -6,7 +6,7 @@ if (!isset($_SESSION)){
 
     if (!isset($_SESSION["connecte"])){
         $_SESSION["connecte"] = false;
-        $_SESSION["identifiant"] = "";
+        $_SESSION["mail"] = "";
         $_SESSION["type"]=""; //etudiant ou enseignant
     }
 }
@@ -23,14 +23,7 @@ if (!isset($_SESSION)){
 </head>
 
 <?php 
-    $logs = file("../logs.txt");
-    $conn = @mysqli_connect("tp-epua:3308", substr($logs[0],0,-2), substr($logs[1],0,-2));
-    if (mysqli_connect_errno()){
-        echo "Failed to connect to MySQL: " . mysqli_connect_error();
-    } else {
-        mysqli_select_db($conn, substr($logs[0],0,-2));
-        mysqli_query($conn, "SET NAMES UTF8");
-    }
+  include("connectDB.php");
 ?>
 
 <body>
@@ -56,7 +49,7 @@ if (!isset($_SESSION)){
         <footer> 
         <?php
         if($_SESSION["connecte"]){
-            echo "Connecté en tant que : ".$_SESSION["identifiant"]." - ";
+            echo "Connecté en tant que : ".$_SESSION["mail"]." - ";
         }
         else {
             echo "Non connecté - ";

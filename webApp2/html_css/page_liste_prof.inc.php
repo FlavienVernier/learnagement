@@ -15,7 +15,7 @@ echo "</form>";
 // si y'a une recherche spéficique 
 if (isset($_POST['bouton_recherche'])){
     $query=$_POST["query"];
-    $sql="SELECT id_enseignant as prof_id, prenom as prof_prenom, nom as prof_nom, mail as prof_mail FROM INFO_enseignant WHERE mail LIKE '%$query%'";
+    $sql="SELECT id_enseignant as prof_id, prenom as prof_prenom, nom as prof_nom, mail as prof_mail FROM LNM_enseignant WHERE mail LIKE '%$query%'";
     $result=mysqli_query($conn, $sql);
     if (mysqli_num_rows($result)>0) {
         echo "<div id='enseignants'>";
@@ -31,7 +31,7 @@ if (isset($_POST['bouton_recherche'])){
 
 // si y'a pas de recherche spéficique
 else{
-    $sql="SELECT id_enseignant as prof_id, prenom as prof_prenom, nom as prof_nom, mail as prof_mail FROM INFO_enseignant";
+    $sql="SELECT id_enseignant as prof_id, prenom as prof_prenom, nom as prof_nom, mail as prof_mail FROM LNM_enseignant";
     $result=mysqli_query($conn, $sql);
     echo "<div id='enseignants'>";
     while ($row = mysqli_fetch_array($result)){ 

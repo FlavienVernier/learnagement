@@ -2,13 +2,17 @@
 
 <html>
 <head>
-    <title>Admin - Learnagement</title>
+    <title>Réinitialisation des mots de passe</title>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
 <body>
     <?php
+        require_once("../config.php");
+
+        $conn = mysqli_connect("$mysql_server","$mysql_user","$mysql_passwd","$mysql_db","$mysql_port")
+        or die("Failed to connect to MySQL: " . mysqli_connect_error());
 
         set_time_limit(300);
 
@@ -21,68 +25,48 @@
             $Chaine = substr($Chaine,0,$longueur);
             // ensuite on retourne notre chaine aléatoire de "longueur" caractères:
             return $Chaine;
-            }
-
-        function identifiant($nom,$prenom){
-            $nom = strtolower($nom);
-            $prenom = strtolower($prenom);
-            $nom = str_replace(" ","",$nom);
-            $nom = str_replace("-","", $nom);
-            $prenom = str_replace(" ","",$prenom);
-            $prenom = str_replace("-","",$prenom);
-
-            if (strlen($nom)>4){
-                $id = substr($nom,0,7).substr($prenom,0,1);
-            }
-            else{
-                $id = $nom.substr($prenom,0,5-strlen($nom));
-            }
-            $conn = @mysqli_connect("tp-epua:3308", $_POST["id"],$_POST["mdp"]);
-            mysqli_select_db($conn,$_POST["id"]);
-            mysqli_query($conn, "SET NAMES UTF8");
-
-            $sql = "SELECT * FROM INFO_utilisateur WHERE identifiant LIKE '".$id."' LIMIT 1";
-            $resultat = mysqli_query($conn, $sql) or die("Requête invalide: ". mysqli_error( $conn )."\n".$sql);
-            if (mysqli_num_rows($resultat) == 0){
-                return $id;
-            }
-            else{
-                $id = $id.substr($prenom,5-strlen($prenom),5-strlen($prenom)+1);
-                return $id;
-            }
         }
 
+        if (isset($_POST['id_admin']) && isset($_POST['mdp_admin'])) {
 
-        if (isset($_POST["id"])&&isset($_POST["mdp"])){
-            $conn = @mysqli_connect("tp-epua:3308", $_POST["id"],$_POST["mdp"]);
-            if (mysqli_connect_errno()){
-                echo "Failed to connect to MySQL: " . mysqli_connect_error();
-            } 
-        else {
-            mysqli_select_db($conn,$_POST["id"]);
-            mysqli_query($conn, "SET NAMES UTF8");
-            $sql = "DELETE FROM INFO_utilisateur";
-            $resultat = mysqli_query($conn, $sql) or die("Requête invalide: ". mysqli_error( $conn )."\n".$sql);
-            
-            $sql = "SELECT nom,prenom from INFO_etudiant UNION SELECT nom,prenom from INFO_enseignant";
-            $resultat = mysqli_query($conn, $sql) or die("Requête invalide: ". mysqli_error( $conn )."\n".$sql);
-
-            while(($ligne = mysqli_fetch_array($resultat))){
-                $sql = "INSERT INTO INFO_utilisateur(nom,prenom,identifiant,mot_de_passe,mdp_change) VALUES ('".$ligne['nom']."','".$ligne['prenom']."','".identifiant($ligne['nom'],$ligne['prenom'])."','".password_hash(motDePasse(), PASSWORD_DEFAULT)."',0)";
-                $resultat1 = mysqli_query($conn, $sql) or die("Requête invalide: ". mysqli_error( $conn )."\n".$sql);
-
+            if ($_POST['id_admin'] != $admin_user || $_POST['mdp_admin'] != $admin_passwd) {
+                $message = "<p>Identifiant ou mot de passe incorrect.</p>";
             }
+            else {
+                // Génération et mise à jour des mots de passe des étudiants
+                $sql = "SELECT mail FROM LNM_etudiant";
+                $resultat = mysqli_query($conn, $sql) or die("Requête invalide: ". mysqli_error( $conn )."\n".$sql);
 
+                while($ligne = mysqli_fetch_array($resultat)){
+                    $nouveau_mdp = password_hash(motDePasse(), PASSWORD_DEFAULT);
+                    $update_sql = "UPDATE LNM_etudiant SET password='$nouveau_mdp', password_updated=NULL WHERE mail=".$ligne['mail'];
+                    mysqli_query($conn, $update_sql) or die("Requête invalide: ". mysqli_error( $conn )."\n".$update_sql);
+                }
+
+                // Génération et mise à jour des mots de passe des enseignants
+                $sql = "SELECT mail FROM LNM_enseignant";
+                $resultat = mysqli_query($conn, $sql) or die("Requête invalide: ". mysqli_error( $conn )."\n".$sql);
+
+                while($ligne = mysqli_fetch_array($resultat)){
+                    $nouveau_mdp = password_hash(motDePasse(), PASSWORD_DEFAULT);
+                    $update_sql = "UPDATE LNM_enseignant SET password='$nouveau_mdp', password_updated=NULL WHERE mail=".$ligne['mail'];
+                    mysqli_query($conn, $update_sql) or die("Requête invalide: ". mysqli_error( $conn )."\n".$update_sql);
+                }
+
+                $message = "<p>Les mots de passe ont été mis à jour avec succès.</p>";
+            }
         }
-            
-        }
-        else {
-            echo "<h1>Réinitialisation des mots de passe :</h1>";
-            echo "<form method='post'><br>";
-            echo "<input type='text' name='id' placeholder='Identifiant'><br>";
-            echo "<input type='password' name='mdp'placeholder='Mot de passe'><br>";
-            echo "<input type='submit' value='Valider'></input>";
-        }
+    ?>
+    <h1>Réinitialisation des mots de passe :</h1>
+    <form method='post'><br>
+        <input type='text' name='id_admin' placeholder='Identifiant'><br>
+        <input type='password' name='mdp_admin' placeholder='Mot de passe'><br>
+        <input type='submit' value='Valider'></input>
+    </form>
+    <?php
+    if ($message != "") {
+        echo $message;
+    }
     ?>
 </body>
 </html>
