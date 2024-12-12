@@ -1,0 +1,36 @@
+import plotly.express as px
+import pandas as pd
+
+import pandas as pd
+import plotly.express as px
+
+# Créer le DataFrame
+df = pd.DataFrame(dict(
+    r=[1, 2, 3, 2],  # Données à récupérer dans la BDD
+    theta=[
+        'Concevoir et mettre en œuvre des systèmes informatiques',
+        'Collecter et traiter des données numériques',
+        'Gérer les usages des données numériques en lien avec le client',
+        'Gérer un projet informatique'
+    ]
+))
+
+# Créer le graphique radar
+fig = px.line_polar(df, r='r', theta='theta', line_close=True)
+
+# Ajouter un remplissage au graphe
+fig.update_traces(fill='toself')
+
+# Modifier les propriétés de l'axe radial pour ajuster les ticks
+fig.update_layout(
+    polar=dict(
+        radialaxis=dict(
+            dtick=1,  # Ajuste l'intervalle des ticks à 1
+            range=[0, 3],  # Définit la plage de l'axe radial
+            tickfont=dict(size=12),  # Optionnel : taille de la police des ticks
+        )
+    )
+)
+
+# Afficher le graphique
+fig.show()
