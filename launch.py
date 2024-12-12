@@ -85,7 +85,7 @@ def main():
 
     
     if os.name == 'nt':
-        prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose', 'up'],stdin=sp.PIPE)
+        prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose', 'up'],stdin=subprocess.PIPE)
         prog.stdin.write('password')
         prog.communicate()
     else:    
@@ -95,7 +95,7 @@ def main():
     time.sleep(5)
 
     if os.name == 'nt':
-        prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose', 'ps'],stdin=sp.PIPE)
+        prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose', 'ps'],stdin=subprocess.PIPE)
         prog.stdin.write('password')
         prog.communicate()
     else:            
