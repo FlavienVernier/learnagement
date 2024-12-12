@@ -1,0 +1,64 @@
+import plotly.graph_objects as go
+import pandas as pd
+
+# Mapper les valeurs catégoriques
+categories = ["E", "D", "C", "B", "A"]
+value_mapping = {cat: i for i, cat in enumerate(categories)}
+
+# Charger le fichier CSV
+df_competences = pd.read_csv('visualisation/competences_niveau.csv')
+
+# Vérifier les données
+print(df_competences.head())
+
+# Ajouter une colonne qui concatène apprentissages_critiques et matiere
+df_competences['theta'] = df_competences['Apprentissages_critiques'] + ' - ' + df_competences['Matiere']
+
+# Fonction pour créer le DataFrame avec des valeurs sous forme de lettres
+def choix_apprentissage_critique(df_competences, competence, niveau):
+    filtered_df = df_competences[(df_competences['Competence'] == competence) & (df_competences['Niveau'] == niveau)]
+    if filtered_df.empty:
+        print(f"Aucune donnée trouvée pour la compétence '{competence}' et le niveau '{niveau}'.")
+    return pd.DataFrame(dict(
+        r=filtered_df['Niveau'],  # Données catégoriques (niveaux sous forme de lettres)
+        theta=filtered_df['theta']  # Concatenation des colonnes
+    )) if not filtered_df.empty else pd.DataFrame(dict(r=[], theta=[]))
+
+# Générer le DataFrame pour le radar chart (exemple avec des paramètres)
+competence = 'Concevoir et mettre en œuvre des systèmes informatiques'  # Remplacer par une valeur réelle
+niveau = 1  # Remplacer par une valeur réelle
+df = choix_apprentissage_critique(df_competences, competence, niveau)
+
+if df.empty:
+    print("Le DataFrame est vide. Veuillez vérifier les paramètres de filtre ou les données source.")
+else:
+    # Convertir les lettres en valeurs numériques pour le tracé
+    df["r_numeric"] = df["r"].map(value_mapping)
+
+    # Créer le radar chart
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatterpolar(
+        r=df["r_numeric"],
+        theta=df["theta"],
+        mode='lines+markers+text',  # Inclut les lignes, marqueurs et texte
+        text=df["r"],  # Valeurs à afficher (lettres)
+        textposition='top center',  # Position des textes
+        fill='toself',  # Remplit l'intérieur
+        name="Valeurs"
+    ))
+
+    # Personnaliser l'axe radial pour afficher les lettres
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                tickvals=list(value_mapping.values()),  # Les positions des ticks
+                ticktext=list(value_mapping.keys()),   # Les étiquettes des ticks (les lettres)
+                range=[0, len(categories) - 1],       # Plage de l'axe radial
+                tickfont=dict(size=12)                # Taille de la police
+            )
+        )
+    )
+
+    # Afficher le graphique
+    fig.show()
