@@ -1,12 +1,13 @@
 import os
 import glob
+import shutil
 
 def main():
     # Couleurs pour les messages (non directement nécessaires dans Python mais émulation via ANSI codes)
     RED = "\033[0;31m"
     GREEN = "\033[0;32m"
     NC = "\033[0m"  # No color
-    
+
     # Dossier source contenant les fichiers .sql
     source_folder = os.path.join(os.getcwd(), "data")
     # Dossier cible où les liens symboliques seront créés
@@ -26,15 +27,18 @@ def main():
         
         # Construit le chemin relatif du fichier source par rapport au dossier cible
         relative_path = os.path.relpath(filepath, start=target_folder)
-
+        source_path = os.path.join(source_folder , basename)
+        
         # Crée ou met à jour le lien symbolique
         try:
-           
             if os.path.exists(target_path):  # Supprime le lien existant s'il est déjà présent
                 os.remove(target_path)
+            if os.name == 'nt':
+                shutil.copy(source_path, target_path)
+            else:
+                os.symlink(relative_path, target_path)
                 
-            os.symlink(relative_path, target_path)
-            print(f"{GREEN}Created symlink: {target_path} -> {relative_path}{NC}")
+            print(f"{GREEN}Created symlink: {target_path} -> {source_path}{NC}")
         except OSError as e:
             print(f"{RED}Error creating symlink for {filepath}: {e}{NC}")
 
