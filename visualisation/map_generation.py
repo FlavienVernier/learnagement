@@ -2,7 +2,7 @@
 # partir d'un programme de scrapping sur le site de poytech dans la rubrique
 # https://www.polytech.univ-smb.fr/intranet/international/partir-en-formation/universites-partenaires.html
 
-### Format du csv : University,City,State,ISO-3
+### Format du csv : University,City,State
 
 import pandas as pd
 import plotly.express as px
