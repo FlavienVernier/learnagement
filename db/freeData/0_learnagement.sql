@@ -4872,6 +4872,36 @@ INSERT INTO `VIEW_updatable` (`id_updatable`, `sortIndex`, `table_name`, `table_
 (5, 5, 'CLASS_session_type_to_be_affected_as_enseignant', 'Affectation types séances', 'Module', 0, 1, 'SELECT `CLASS_session_type_to_be_affected_as_enseignant`.* \r\nFROM `CLASS_session_type_to_be_affected_as_enseignant`\r\n\r\nJOIN CLASS_session_type_to_be_affected ON CLASS_session_type_to_be_affected.id_type_seance_to_be_affected = CLASS_session_type_to_be_affected_as_enseignant.id_type_seance_to_be_affected\r\nJOIN LNM_groupe ON LNM_groupe.id_groupe = CLASS_session_type_to_be_affected.id_groupe\r\nJOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = CLASS_session_type_to_be_affected.id_module_sequencage\r\n\r\nJOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module\r\nJOIN MAQUETTE_discipline ON MAQUETTE_discipline.id_discipline = MAQUETTE_module.id_discipline\r\nJOIN LNM_semestre ON LNM_semestre.id_semestre = MAQUETTE_module.id_semestre\r\nJOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module\r\nJOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_learning_unit = MAQUETTE_module_as_learning_unit.id_learning_unit\r\nJOIN LNM_promo ON LNM_promo.id_promo = MAQUETTE_learning_unit.id_promo AND LNM_groupe.id_promo = LNM_promo.id_promo\r\n\r\nJOIN LNM_statut ON LNM_statut.id_statut = LNM_promo.id_statut\r\nJOIN LNM_filiere ON LNM_filiere.id_filiere = LNM_promo.id_filiere\r\nWHERE 1;'),
 (6, 6, 'CLASS_session_to_be_affected_as_enseignant', 'Affectation séances', 'Module', 0, 1, 'SELECT `CLASS_session_to_be_affected_as_enseignant`.* \r\nFROM `CLASS_session_to_be_affected_as_enseignant`\r\n\r\nJOIN CLASS_session_to_be_affected ON CLASS_session_to_be_affected.id_seance_to_be_affected = `CLASS_session_to_be_affected_as_enseignant`.`id_seance_to_be_affected`\r\nJOIN LNM_groupe ON LNM_groupe.id_groupe = CLASS_session_to_be_affected.id_groupe\r\nJOIN MAQUETTE_module_sequence ON MAQUETTE_module_sequence.id_module_sequence = CLASS_session_to_be_affected.id_module_sequence\r\nJOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage\r\n\r\nJOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module\r\nJOIN MAQUETTE_discipline ON MAQUETTE_discipline.id_discipline = MAQUETTE_module.id_discipline\r\nJOIN LNM_semestre ON LNM_semestre.id_semestre = MAQUETTE_module.id_semestre\r\nJOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module\r\nJOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_learning_unit = MAQUETTE_module_as_learning_unit.id_learning_unit\r\nJOIN LNM_promo ON LNM_promo.id_promo = MAQUETTE_learning_unit.id_promo AND LNM_groupe.id_promo = LNM_promo.id_promo\r\n\r\nJOIN LNM_statut ON LNM_statut.id_statut = LNM_promo.id_statut\r\nJOIN LNM_filiere ON LNM_filiere.id_filiere = LNM_promo.id_filiere\r\nWHERE 1;\r\n'),
 (7, 1, 'APC_apprentissage_critique_as_module', 'Apprentissage Critique 2 Module', 'APC', 1, 1, 'SELECT DISTINCT APC_apprentissage_critique_as_module.* \r\nFROM APC_apprentissage_critique_as_module\r\nJOIN MAQUETTE_module ON APC_apprentissage_critique_as_module.id_module = MAQUETTE_module.id_module\r\nJOIN APC_apprentissage_critique ON APC_apprentissage_critique_as_module.id_apprentissage_critique = APC_apprentissage_critique.id_apprentissage_critique\r\nJOIN APC_niveau ON APC_apprentissage_critique.id_niveau = APC_niveau.id_niveau\r\nJOIN APC_competence ON APC_niveau.id_competence = APC_competence.id_competence\r\nJOIN APC_competence_as_filiere_as_statut ON APC_competence.id_competence = APC_competence_as_filiere_as_statut.id_competence\r\n\r\n\r\n  JOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module\r\n  JOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_learning_unit = MAQUETTE_module_as_learning_unit.id_learning_unit\r\n  JOIN LNM_promo ON MAQUETTE_learning_unit.id_promo = LNM_promo.id_promo\r\n\r\nJOIN LNM_statut ON LNM_statut.id_statut = LNM_promo.id_statut AND LNM_statut.id_statut = APC_competence_as_filiere_as_statut.id_status\r\nJOIN LNM_filiere ON LNM_filiere.id_filiere = LNM_promo.id_filiere AND LNM_filiere.id_filiere = APC_competence_as_filiere_as_statut.is_filiere\r\nWHERE 1;');
+
+--
+-- Déchargement des données de la table `LNM_universite`
+--
+
+INSERT INTO `LNM_universite` (`id_universite`, `nom`, `nom_court`, `ville`, `pays`) VALUES
+(1, 'Fachhochschule Aachen', 'Fachhochschule Aachen', 'Aachen', 'Allemagne'),
+(2, 'Hochschule Heilbronn', 'Hochschule Heilbronn', 'Heilbronn', 'Allemagne'),
+(3, 'Hochschule Kaiserslautern', 'Hochschule Kaiserslautern', 'Kaiserslautern', 'Allemagne'),
+(4, 'TU Bergakademie Freiberg', 'TU Bergakademie Freiberg', 'Freiberg', 'Allemagne'),
+(5, 'Hochschule Magdeburg', 'Hochschule Magdeburg', 'Magdebourg', 'Allemagne'),
+(6, 'TU Braunschweig Carolo Wilhelmina', 'TU Braunschweig Carolo Wilhelmina', 'Braunschweig', 'Allemagne'),
+(7, 'Universität Stuttgart', 'Universität Stuttgart', 'Stuttgart', 'Allemagne'),
+(8, 'Universidad Nacional de La Plata (UNLP)', 'Universidad Nacional de La Plata (UNLP)', 'La Plata', 'Argentine'),
+(9, 'Universidad Nacional de Cuyo', 'Universidad Nacional de Cuyo', 'Mendoza', 'Argentine'),
+(10, 'Fachhochschule Technikum Wien', 'Fachhochschule Technikum Wien', 'Vienne', 'Autriche'),
+(11, 'Université de Liège', 'Université de Liège', 'Liège', 'Belgique'),
+(12, 'Haute Ecole de la Communauté Française en Hainaut', 'Haute Ecole de la Communauté Française en Hainaut', 'Mons', 'Belgique'),
+(13, 'Haute Ecole de la Province de Liège', 'Haute Ecole de la Province de Liège', 'Liège', 'Belgique'),
+(14, 'Universidade Federal de Viçosa', 'Universidade Federal de Viçosa', 'Viçosa', 'Brésil'),
+(15, 'Ecole de Technologie Supérieure (ETS)', 'Ecole de Technologie Supérieure (ETS)', 'Montréal', 'Canada'),
+(16, 'Escuela Tecnica Superior de Ingeneria Informatica/Universidad de Sevilla', 'ETSII/Universidad de Sevilla', 'Sevilla', 'Espagne'),
+(17, 'Universidad Zaragoza', 'Universidad Zaragoza', 'Saragosse', 'Espagne'),
+(18, 'Escuela Tecnica Superior de Ingenieria de Sistemas Informaticos / Universidad Politecnica Madrid', 'ETSISI / Universidad Politecnica Madrid', 'Madrid', 'Espagne'),
+(19, 'University of Hyogo', 'University of Hyogo', 'Hyogo', 'Japon'),
+(20, 'Norges Teknisk-Naturvitenskaplige Universitet (NTNU)', 'NTNU', 'Trondheim', 'Norvège'),
+(21, 'Universitatea de Vest din Timisoara', 'Universitatea de Vest din Timisoara', 'Timisoara', 'Roumanie'),
+(22, 'BFH Bern University of Applied Sciences', 'BFH Bern University of Applied Sciences', 'Bern', 'Suisse');
+
+
 SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 

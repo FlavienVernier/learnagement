@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : mysql
--- Généré le : ven. 29 nov. 2024 à 14:35
+-- Généré le : jeu. 12 déc. 2024 à 10:18
 -- Version du serveur : 8.0.33
 -- Version de PHP : 8.2.8
 
@@ -388,6 +388,20 @@ CREATE TABLE `LNM_statut` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `LNM_universite`
+--
+
+CREATE TABLE `LNM_universite` (
+  `id_universite` int NOT NULL,
+  `nom` varchar(250) NOT NULL,
+  `nom_court` varchar(50) NOT NULL,
+  `ville` varchar(50) NOT NULL,
+  `pays` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `MAQUETTE_dependance_sequence`
 --
 
@@ -477,7 +491,6 @@ CREATE TABLE `MAQUETTE_module_sequencage` (
   `id_responsable` int NOT NULL,
   `modifiable` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 
 
 -- --------------------------------------------------------
@@ -767,6 +780,14 @@ ALTER TABLE `LNM_statut`
   ADD UNIQUE KEY `SECONDARY` (`nom_statut`);
 
 --
+-- Index pour la table `LNM_universite`
+--
+ALTER TABLE `LNM_universite`
+  ADD PRIMARY KEY (`id_universite`),
+  ADD UNIQUE KEY `SECONDARY` (`nom_court`) USING BTREE,
+  ADD UNIQUE KEY `nom` (`nom`);
+
+--
 -- Index pour la table `MAQUETTE_dependance_sequence`
 --
 ALTER TABLE `MAQUETTE_dependance_sequence`
@@ -978,6 +999,12 @@ ALTER TABLE `LNM_stage`
 --
 ALTER TABLE `LNM_statut`
   MODIFY `id_statut` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `LNM_universite`
+--
+ALTER TABLE `LNM_universite`
+  MODIFY `id_universite` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `MAQUETTE_discipline`
