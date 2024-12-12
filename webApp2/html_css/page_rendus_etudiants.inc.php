@@ -13,7 +13,7 @@
         foreach ($_POST['checkbox'] as $selectedCheckbox) {
             $case=$selectedCheckbox;
             echo "La case ".$case;
-            $sql="UPDATE INFO_rendus_eleves SET etat='ON' WHERE id_rendu =". $case . ";";
+            $sql="UPDATE LNM_rendu_module_as_etudiant SET etat='ON' WHERE id_rendu =". $case . ";";
             $result=mysqli_query($conn, $sql) ; // on envoie la requête dans la base de donnée
             if($result){
                 echo "Le travail a bien été rendu";
@@ -22,8 +22,8 @@
     }
 
     /* Permettre a un élève de valider le dépôt d'un rendu */
-    $sql="SELECT m.nom AS nom, date,description FROM `INFO_rendus_eleves` JOIN INFO_module m ON module LIKE m.code_module WHERE etat='OFF' ORDER BY date ASC";
-    $result=mysqli_query($conn, $sql) or die ("Problème lors de la connexion");
+    $sql="SELECT m.nom AS nom, date,description FROM `LNM_rendu_module_as_etudiant` JOIN INFO_module m ON module LIKE m.code_module WHERE etat='OFF' ORDER BY date ASC";
+    $result=mysqli_query($conn, $sql); //or //die ("Problème lors de la connexion");
 
     echo "<form method='post'> ";
     $i=0;

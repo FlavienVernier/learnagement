@@ -1,11 +1,11 @@
-import lien_db 
+import lien_db
 import csv
 #http://gpu-epu.univ-savoie.fr:48080/
 #creation de la table dans la base de données si elle n'existe pas déjà
 query ="CREATE TABLE IF NOT EXISTS TEST_etudiant(id_etudiant INT NOT NULL AUTO_INCREMENT,nom VARCHAR(255),prenom VARCHAR(255),annee VARCHAR(255),filiere VARCHAR(12),PRIMARY KEY (id_etudiant))"
 #voir avec les contraintes pour la suite
 
-db = lien_db.db
+db = lien_db.get_db()
 print(lien_db.execute_query(db,query))
 
 # Ouvrir le fichier CSV en mode lecture
@@ -32,9 +32,7 @@ with open('liste_etudiants.csv', 'r') as fichier:
         # il manque id_promo : id_filiere = SELECT id_filiere FROM LNM_filiere WHERE nom_filiere=filiere
         # puis SELECT id_promo FROM LNM_promo WHERE LNM_promo.id_filiere=id_filiere AND LNM_promo.annee=annee
         
-        id_promo = f"SELECT id_promo FROM LNM_promo WHERE LNM_promo.id_filiere=(
-            SELECT id_filiere FROM LNM_filiere WHERE nom_filiere='{filiere}'
-            AND LNM_promo.annee='{annee}'"
+        id_promo = f"SELECT id_promo FROM LNM_promo WHERE LNM_promo.id_filiere=(SELECT id_filiere FROM LNM_filiere WHERE nom_filiere=`{filiere}` AND LNM_promo.annee=`{annee}`"
         print(lien_db.execute_query(db,id_promo))
         
         email=nom+"."+prenom+"@etu.univ-smb.fr"

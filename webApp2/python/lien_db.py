@@ -4,10 +4,11 @@ Normalement faut juste importer
 """
 import mysql.connector
 
-def get_db(logs_path="logs_db.txt"):
+def get_db(logs_path="webApp2/logs_db.txt"):
     with open(logs_path, "r") as file:
         # Lire les 4 premières lignes du fichier (user/pwd/host/port/db)
         logs = file.readlines()
+    
     
     db = mysql.connector.connect(
         user=logs[0][0:-1],
@@ -47,3 +48,4 @@ def get_data(db, table_name, logs_path="logs_db.txt",columns="*",conditions=""):
     query = f"SELECT {columns} FROM {table_name} {conditions}"
     cursor.execute(query)
     return cursor.fetchall()
+

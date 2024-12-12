@@ -1,0 +1,83 @@
+#calendar-container {
+    width: 90%; /* Le calendrier occupe 90% de l'espace */
+    max-width: 1200px;
+    margin: 20px auto;
+    text-align: center;
+    background-color: #f0f0f0; /* Couleur grise pour le fond */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+button {
+    margin: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+#calendar-header, #calendar {
+    display: flex;
+}
+
+.day-header, .day {
+    flex: 1;
+    padding: 10px;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif; /* Police générale */
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+}
+
+.day-header {
+    font-weight: bold;
+    background-color: #f4f4f4;
+    text-align: center;
+}
+
+.day-header .day-name {
+    font-size: 1.2em;
+    margin-bottom: 5px;
+}
+
+.day-header .date-number {
+    display: block;
+    font-size: 1.2em;
+    color: black;
+}
+
+.day-header.current .day-name {
+    color: #007BFF; /* Bleu pour le nom du jour actuel */
+}
+
+.day-header.current .date-number {
+    background-color: #007BFF; /* Bleu pour le rond */
+    color: white; /* Blanc pour le texte */
+    border-radius: 50%; /* Forme de cercle */
+    padding: 5px 10px; /* Espace autour du texte */
+    display: inline-block;
+}
+
+.day {
+    min-height: 100px;
+    position: relative;
+}
+
+.day:first-child, .day-header:first-child {
+    border-left: none;
+}
+
+.day:last-child, .day-header:last-child {
+    border-right: none;
+}
+
+.event {
+    margin: 5px 0;
+    padding: 5px;
+    border-left: 5px solid;
+    background-color: #fff;
+    border-radius: 3px;
+}
+
+.day.current {
+    background-color: #e6f7ff; /* Bleu clair pour le jour actuel */
+}

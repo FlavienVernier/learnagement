@@ -1,4 +1,4 @@
-[
+const evenements = [
     {
         "id": 0,
         "type": "TD",
@@ -71,4 +71,6 @@
         "groupes": ["IDU4", "SNI4"],
         "couleur": "#FF0000"
     }
-]
+];
+
+export default evenements;
