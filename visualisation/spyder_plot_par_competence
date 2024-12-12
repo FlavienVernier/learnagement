@@ -43,9 +43,10 @@ else:
         theta=df["theta"],
         mode='lines+markers+text',  # Inclut les lignes, marqueurs et texte
         text=df["r"],  # Valeurs à afficher (lettres)
-        textposition='top center',  # Position des textes
+        textposition='top center',  # Position ajustée des textes pour éviter les débordements
         fill='toself',  # Remplit l'intérieur
-        name="Valeurs"
+        name="Valeurs",
+        textfont=dict(size=10)  # Réduire la taille de la police du texte
     ))
 
     # Personnaliser l'axe radial pour afficher les lettres
@@ -57,8 +58,8 @@ else:
                 range=[0, len(categories) - 1],       # Plage de l'axe radial
                 tickfont=dict(size=12)                # Taille de la police
             )
-        )
+        ),
+        margin=dict(l=100, r=100, t=50, b=50)  # Ajuste les marges gauche et droite
     )
-
     # Afficher le graphique
     fig.show()
