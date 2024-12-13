@@ -9,11 +9,11 @@ echo "<h1> Enseignants </h1>";
     echo "<h2>Liste des rendus vous concernant : </h2> ";
     $sql="SELECT r.date, r.description FROM LNM_rendu_module r 
             JOIN LNM_rendu_module_as_enseignant e ON r.id_rendu_module = e.id_rendu_module 
-            WHERE e.id_enseignant = (SELECT enseignant.id_enseignant FROM LNM_enseignant enseignant JOIN LNM_rendu_module_as_enseignant rme ON rme.id_enseignant = enseignant.id_enseignant)
+            WHERE e.id_enseignant = (SELECT DISTINCT enseignant.id_enseignant FROM LNM_enseignant enseignant JOIN LNM_rendu_module_as_enseignant rme ON rme.id_enseignant = enseignant.id_enseignant)
             AND r.date >= NOW()
             ORDER BY date ASC";
     $result=mysqli_query($conn, $sql) or die ("Problème lors de la connexion");
-
+    
     echo "<div id='listerenduseleves'><ul> ";
     while ($row=mysqli_fetch_array($result)) {
         echo"<li>".$row['date']. " - ". $row['description']. " ";
@@ -49,32 +49,30 @@ echo "<h1> Enseignants </h1>";
             $promo=$_POST["promo"];
             //$groupe=$_POST["groupe"];
             $description=$_POST["description"];
-            $date_saisie=$_POST["date_saisie"];
-            echo $nom." ; ".$description." ; ".$date_saisie;
-        
-            $sql="SELECT MAX(id_rendu) as max FROM `INFO_rendus`";
-            $result=mysqli_query($conn, $sql);
-            while ($row=mysqli_fetch_array($result)) {
-                $max=$row["max"]+1;
-            }
+            $date_saisie=$_POST["date_saisie"];        
+
             // Vérification que la description n'est pas 'OFF'
-            echo $description."<br>";
             if ($description !== '...') {
-                $sql="INSERT INTO LNM_rendus_module(description, date) VALUES ('".$description."', '".$date_saisie."');";
+                $sql="INSERT INTO LNM_rendu_module(id_rendu_module, description, date) VALUES (NULL, \"".$description."\", \"".$date_saisie."\");";
                 $result=mysqli_query($conn, $sql); // on envoie la requête dans la base de donnée
-                
-                $sql_id_rendu = "SELECT id_rendu FROM LNM_rendu_module WHERE description = ".$description." AND date = ".$date_saisie."";
-                $id_rendu=mysqli_query($conn, $sql);
 
+                $sql_id_rendu = "SELECT id_rendu_module FROM LNM_rendu_module WHERE description LIKE \"".$description."\" AND date LIKE \"".$date_saisie."\"";
+                $result1 = mysqli_query($conn, $sql_id_rendu);
+                $id_rendu=mysqli_fetch_array($result1);
+        
                 $sql_id_enseignant = "SELECT id_enseignant FROM LNM_enseignant WHERE mail LIKE '".$_SESSION["mail"]."'";
-                $id_enseignant = mysqli_query($conn, $sql_id_enseignant);
-
-                $sql_enseignant = "INSERT INTO LNM_rendu_module_as_enseignant(id_enseignant, id_rendu_module) VALUES ('".$id_rendu."','".$id_enseignant."')";
+                $result1 = mysqli_query($conn, $sql_id_enseignant);
+                $id_enseignant=mysqli_fetch_array($result1);
+                
+                $sql_enseignant = "INSERT INTO LNM_rendu_module_as_enseignant(id_rendu_module, id_enseignant) VALUES ('".$id_rendu['id_rendu_module']."','".$id_enseignant['id_enseignant']."')";
                 $result2 =mysqli_query($conn, $sql_enseignant);
 
                 //Créer une entrée dans la table LNM_rendu_as_etudiant avec l'id du rendu et la date NULL pour tous les étudiants de la promo
-
-                if($result){
+                $sql_etudiants = "INSERT INTO LNM_rendu_module_as_etudiant(id_rendu_module, id_etudiant) 
+                SELECT ".$id_rendu['id_rendu_module'].", id_etudiant FROM LNM_etudiant WHERE id_promo LIKE '(SELECT id_promo FROM LNM_promo WHERE parcour LIKE '".$promo."')'";
+                $result3 = mysqli_query($conn, $sql);
+                echo $sql_etudiants;
+                if($result && $result2 && $result3){
                     $ajout=true;
                 }
             } else {
@@ -82,21 +80,21 @@ echo "<h1> Enseignants </h1>";
             }
         }
 
-        /* Afficher un message si l'élément a bien été rajouté */
-        if ($ajout) {
-            // On vérifie qu'il y a bien un élément ajouté
-            if (mysqli_affected_rows($conn) > 0) {
-                echo "L'élément a été ajouté avec succès à la liste.";
-            } else {
-                echo "Erreur : Aucune ligne n'a été insérée dans la base de données.";
-            }
-        } else {
-            // Erreur lors de l'ajout de l'élément
-            //On stocke dans $errorCode le type d'erreur qui a été soulevé
-            $errorCode = mysqli_errno($conn);
-            // On affiche l'erreur en question, du moins le message qu'elle retourne
-            echo "Erreur lors de l'ajout de l'élément : " . mysqli_error($conn);
+        // /* Afficher un message si l'élément a bien été rajouté */
+        // if ($ajout) {
+        //     // On vérifie qu'il y a bien un élément ajouté
+        //     if (mysqli_affected_rows($conn) > 0) {
+        //         echo "L'élément a été ajouté avec succès à la liste.";
+        //     } else {
+        //         echo "Erreur : Aucune ligne n'a été insérée dans la base de données.";
+        //     }
+        // } else if($ajout = FALSE && $conn != NULL){
+        //     // Erreur lors de l'ajout de l'élément
+        //     //On stocke dans $errorCode le type d'erreur qui a été soulevé
+        //     $errorCode = mysqli_errno($conn);
+        //     // On affiche l'erreur en question, du moins le message qu'elle retourne
+        //     echo "Erreur lors de l'ajout de l'élément : " . mysqli_error($conn);
 
-        }
+        // }
 
 ?>
