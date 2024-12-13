@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const calendarHeader = document.getElementById('calendar-header');
     const prevWeekButton = document.getElementById('prev-week');
     const nextWeekButton = document.getElementById('next-week');
+    const currentMonthElement = document.getElementById('current-month'); // Élément pour le mois en cours
 
     let currentDate = new Date();
 
@@ -14,13 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Obtenir le premier jour de la semaine (lundi)
         const startOfWeek = new Date(date);
-        startOfWeek.setDate(date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1)); // Si c'est dimanche, reculer de 6 jours
+        startOfWeek.setDate(date.getDate() - (date.getDay() === 0 ? 6 : date.getDay() - 1)); // Si c'est dimanche, reculer de 6 jours, sinon reculer de day-1 jours
+
+        updateCurrentMonth(startOfWeek); // Mettre à jour l'affichage du mois
 
         for (let i = 0; i < 7; i++) {
             const dayDate = new Date(startOfWeek);
             dayDate.setDate(startOfWeek.getDate() + i);
 
-            const isCurrentDay = (new Date().toDateString() === dayDate.toDateString());
+            const isCurrentDay = (new Date().toDateString() === new Date(dayDate.setDate(dayDate.getDate() + 1)).toDateString());
 
             // En-tête du jour avec le nom et le numéro du jour
             const dayHeader = document.createElement('div');
@@ -56,6 +59,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${event.module} - ${event.enseignant} - ${event.salle}
             </div>
         `).join('');
+    }
+
+    function updateCurrentMonth(date) {
+        const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+        const startMonth = monthNames[date.getMonth()];
+        const endMonth = monthNames[new Date(date.setDate(date.getDate() + 6)).getMonth()];
+
+        currentMonthElement.textContent = (startMonth === endMonth) ? startMonth : `${startMonth} - ${endMonth}`;
     }
 
     prevWeekButton.addEventListener('click', () => {

@@ -1,3 +1,10 @@
+html {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    color: #333;
+    user-select: none;
+}
+
 #calendar-container {
     width: 90%; /* Le calendrier occupe 90% de l'espace */
     max-width: 1200px;
@@ -13,6 +20,22 @@ button {
     margin: 10px;
     padding: 10px 20px;
     cursor: pointer;
+    background-color: #007BFF; /* Bleu pour les boutons */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3; /* Bleu foncé au survol */
+}
+
+#current-month {
+    display: inline-block;
+    margin: 0 20px;
+    font-size: 1.5em;
+    font-weight: bold;
 }
 
 #calendar-header, #calendar {
@@ -23,7 +46,6 @@ button {
     flex: 1;
     padding: 10px;
     box-sizing: border-box;
-    font-family: Arial, sans-serif; /* Police générale */
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
 }
@@ -76,6 +98,12 @@ button {
     border-left: 5px solid;
     background-color: #fff;
     border-radius: 3px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.event:hover {
+    background-color: #f0f8ff; /* Bleu très clair au survol */
+    transform: scale(1.02);
 }
 
 .day.current {
