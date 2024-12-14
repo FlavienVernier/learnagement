@@ -6,11 +6,11 @@ html {
 }
 
 #calendar-container {
-    width: 90%; /* Le calendrier occupe 90% de l'espace */
+    width: 90%;
     max-width: 1200px;
     margin: 20px auto;
     text-align: center;
-    background-color: #f0f0f0; /* Couleur grise pour le fond */
+    background-color: #f0f0f0;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -20,7 +20,7 @@ button {
     margin: 10px;
     padding: 10px 20px;
     cursor: pointer;
-    background-color: #007BFF; /* Bleu pour les boutons */
+    background-color: #007BFF;
     color: white;
     border: none;
     border-radius: 5px;
@@ -28,7 +28,7 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3; /* Bleu foncé au survol */
+    background-color: #0056b3;
 }
 
 #current-month {
@@ -36,24 +36,55 @@ button:hover {
     margin: 0 20px;
     font-size: 1.5em;
     font-weight: bold;
+    width: 300px;
 }
 
-#calendar-header, #calendar {
+#calendar-wrapper {
     display: flex;
+    margin-top: 20px;
 }
 
-.day-header, .day {
-    flex: 1;
+#time-scale {
+    flex: 0 0 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#time-scale-header {
+    font-weight: bold;
+    background-color: #f4f4f4;
+    text-align: center;
     padding: 10px;
+    border-bottom: 1px solid #ccc;
+    width: 100%;
     box-sizing: border-box;
-    border-left: 1px solid #ccc;
-    border-right: 1px solid #ccc;
+    height: 80px;
+}
+
+.time-slot {
+    height: 40px;
+    border-bottom: 1px solid #ccc;
+    width: 100%;
+    text-align: right;
+    padding-right: 5px;
+    box-sizing: border-box;
+}
+
+.day-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
 }
 
 .day-header {
     font-weight: bold;
     background-color: #f4f4f4;
     text-align: center;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    height: 60px;
 }
 
 .day-header .day-name {
@@ -68,44 +99,48 @@ button:hover {
 }
 
 .day-header.current .day-name {
-    color: #007BFF; /* Bleu pour le nom du jour actuel */
+    color: #007BFF;
 }
 
 .day-header.current .date-number {
-    background-color: #007BFF; /* Bleu pour le rond */
-    color: white; /* Blanc pour le texte */
-    border-radius: 50%; /* Forme de cercle */
-    padding: 5px 10px; /* Espace autour du texte */
+    background-color: #007BFF;
+    color: white;
+    border-radius: 50%;
+    padding: 5px 10px;
     display: inline-block;
 }
 
-.day {
-    min-height: 100px;
+.day-content {
+    flex: 1;
     position: relative;
+    border-top: 1px solid #ccc;
+    background-color: #fff;
 }
 
-.day:first-child, .day-header:first-child {
-    border-left: none;
-}
-
-.day:last-child, .day-header:last-child {
-    border-right: none;
+.hour-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #ccc;
+    z-index: 0;
 }
 
 .event {
-    margin: 5px 0;
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: 5px;
     padding: 5px;
     border-left: 5px solid;
-    background-color: #fff;
+    background-color: #eee;
     border-radius: 3px;
     transition: background-color 0.3s, transform 0.3s;
+    box-sizing: border-box;
+    z-index: 2;
 }
 
 .event:hover {
-    background-color: #f0f8ff; /* Bleu très clair au survol */
+    background-color: #f0f8ff;
     transform: scale(1.02);
-}
-
-.day.current {
-    background-color: #e6f7ff; /* Bleu clair pour le jour actuel */
 }

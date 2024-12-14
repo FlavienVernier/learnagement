@@ -1,46 +1,75 @@
 import evenements from './fakedata.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const calendar = document.getElementById('calendar');
-    const calendarHeader = document.getElementById('calendar-header');
+    const calendarWrapper = document.getElementById('calendar-wrapper');
     const prevWeekButton = document.getElementById('prev-week');
     const nextWeekButton = document.getElementById('next-week');
-    const currentMonthElement = document.getElementById('current-month'); // Élément pour le mois en cours
+    const currentMonthElement = document.getElementById('current-month');
 
     let currentDate = new Date();
 
     function renderCalendar(date) {
-        calendar.innerHTML = '';
-        calendarHeader.innerHTML = '';
-
-        // Obtenir le premier jour de la semaine (lundi)
+        calendarWrapper.innerHTML = '';
+    
+        const timeScale = document.createElement('div');
+        timeScale.id = 'time-scale';
+    
+        // Ajouter l'en-tête de l'échelle de temps
+        const timeScaleHeader = document.createElement('div');
+        timeScaleHeader.id = 'time-scale-header';
+        timeScaleHeader.textContent = 'Heures';
+        timeScale.appendChild(timeScaleHeader);
+    
+        for (let hour = 0; hour < 24; hour++) {
+            const timeSlot = document.createElement('div');
+            timeSlot.className = 'time-slot';
+            timeSlot.textContent = `${String(hour).padStart(2, '0')}:00`;
+            timeScale.appendChild(timeSlot);
+        }
+        calendarWrapper.appendChild(timeScale);
+    
         const startOfWeek = new Date(date);
-        startOfWeek.setDate(date.getDate() - (date.getDay() === 0 ? 6 : date.getDay() - 1)); // Si c'est dimanche, reculer de 6 jours, sinon reculer de day-1 jours
+        startOfWeek.setDate(date.getDate() - (date.getDay() === 0 ? 6 : date.getDay() - 1));
+    
+        updateCurrentMonth(startOfWeek);
 
-        updateCurrentMonth(startOfWeek); // Mettre à jour l'affichage du mois
-
+    
         for (let i = 0; i < 7; i++) {
             const dayDate = new Date(startOfWeek);
             dayDate.setDate(startOfWeek.getDate() + i);
-
-            const isCurrentDay = (new Date().toDateString() === new Date(dayDate.setDate(dayDate.getDate() + 1)).toDateString());
-
-            // En-tête du jour avec le nom et le numéro du jour
+    
+            const isCurrentDay = (dayDate.toDateString() === new Date().toDateString());
+    
+            const dayColumn = document.createElement('div');
+            dayColumn.className = `day-column ${isCurrentDay ? 'current' : ''}`;
+            dayColumn.id = getDayName(i).toLowerCase();
+    
             const dayHeader = document.createElement('div');
             dayHeader.className = `day-header ${isCurrentDay ? 'current' : ''}`;
             dayHeader.innerHTML = `
                 <div class="day-name">${getDayName(i)}</div>
                 <div class="date-number">${dayDate.getDate()}</div>
             `;
-            calendarHeader.appendChild(dayHeader);
-
-            // Contenu du jour
-            const dayElement = document.createElement('div');
-            dayElement.className = `day ${isCurrentDay ? 'current' : ''}`;
-            dayElement.innerHTML = renderEvents(dayDate);
-            calendar.appendChild(dayElement);
+            dayColumn.appendChild(dayHeader);
+    
+            const dayContent = document.createElement('div');
+            dayContent.className = 'day-content';
+    
+            // Ajouter les lignes horaires
+            for (let hour = 0; hour < 24; hour++) {
+                const hourLine = document.createElement('div');
+                hourLine.className = 'hour-line';
+                hourLine.style.top = `${(hour / 24) * 100}%`;
+                dayContent.appendChild(hourLine);
+            }
+    
+            dayContent.innerHTML += renderEvents(dayDate);
+            dayColumn.appendChild(dayContent);
+    
+            calendarWrapper.appendChild(dayColumn);
         }
     }
+    
 
     function getDayName(index) {
         const days = ['LUN.', 'MAR.', 'MER.', 'JEU.', 'VEN.', 'SAM.', 'DIM.'];
@@ -53,18 +82,27 @@ document.addEventListener('DOMContentLoaded', () => {
             return eventDate.toDateString() === date.toDateString();
         });
 
-        return dayEvents.map(event => `
-            <div class="event" style="border-left: 5px solid ${event.couleur};">
-                ${event.type} (${event.heure} - ${event.duree_h}h)<br>
-                ${event.module} - ${event.enseignant} - ${event.salle}
-            </div>
-        `).join('');
+        return dayEvents.map(event => {
+            const startHour = parseInt(event.heure.split(':')[0]);
+            const startMinute = parseInt(event.heure.split(':')[1]);
+            const durationInMinutes = event.duree_h * 60;
+            const topPosition = (startHour * 60 + startMinute) / (24 * 60) * 100;
+            const eventHeight = durationInMinutes / (24 * 60) * 100;
+
+            return `
+                <div class="event" style="top: ${topPosition}%; height: ${eventHeight}%; border-left: 5px solid ${event.couleur};">
+                    ${event.module} - ${event.type}<br>
+                    (${event.salle})
+                </div>
+            `;
+        }).join('');
     }
 
     function updateCurrentMonth(date) {
+        const dateCopy = new Date(date);
         const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-        const startMonth = monthNames[date.getMonth()];
-        const endMonth = monthNames[new Date(date.setDate(date.getDate() + 6)).getMonth()];
+        const startMonth = monthNames[dateCopy.getMonth()];
+        const endMonth = monthNames[new Date(dateCopy.setDate(dateCopy.getDate() + 6)).getMonth()];
 
         currentMonthElement.textContent = (startMonth === endMonth) ? startMonth : `${startMonth} - ${endMonth}`;
     }
