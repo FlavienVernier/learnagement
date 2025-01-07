@@ -11,7 +11,7 @@ from geopy.extra.rate_limiter import RateLimiter
 import plotly.graph_objects as go
 
 # Chemin du fichier csv
-csv_file_path = "visualisation\partner_universities.csv"
+csv_file_path = "visualisation/data/partner_universities.csv"
 
 # Charger le fichier CSV en utilisant l'encodage ISO-8859-1 et le point-virgule comme délimiteur
 df = pd.read_csv(csv_file_path)
