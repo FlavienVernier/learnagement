@@ -70,6 +70,7 @@ driver.close()
 bd=lien_db.get_db()
 for elt in (disciplines):
     query= f"INSERT INTO MAQUETTE_discipline (nom) VALUES ('{elt}')"
+    print(query)
     lien_db.execute_query(bd,query)
 
 print(lien_db.get_data(bd,"MAQUETTE_discipline"))
