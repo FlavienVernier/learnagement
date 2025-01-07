@@ -9,12 +9,23 @@ import math
 with open('visualisation/INFO_notes.json', 'r') as fichier:
     data=json.load(fichier)
 
-index_eleve=3 # on prend le 4e de la liste en exemple
+num_etu=528
+
+def get_note_eleve(notes_promo, num_etu):
+    for note in notes_promo:
+        if note['num_etu']==num_etu:
+            return note['note']
+    return None  # dans le cas où l'étudiant n'est pas dans la promo
 
 def calcul_informations(notes_promo, note_eleve):
+    print("notes promo", notes_promo)
+    print("note eleve", note_eleve)
     # calcul des informations
+    # on récupère seulement les notes :
+    notes_promo=[eleve['note'] for eleve in notes_promo]
     # on trie les notes par ordre croissant
-    notes_promo=sorted(notes_promo)
+    notes_promo=sorted(notes_promo)  
+    print("notes promo", notes_promo)
     moyenne=sum(notes_promo)/len(notes_promo)
     ordre_notes=sorted(notes_promo, reverse=True)
     classement=ordre_notes.index(note_eleve)+1
@@ -29,7 +40,10 @@ def calcul_informations(notes_promo, note_eleve):
     X_notes=list(range(21)) #liste qui va de 0 à 20 
     Y_notes=[0]*len(X_notes) # initialisation de la liste
     for note in notes_promo :
+        print("note", note)
         note_arrondie=math.floor(note)
+        print("note arrondie", note_arrondie)
+        print("Y_notes", Y_notes)
         Y_notes[note_arrondie]+=1
 
     couleur=['#bddcf3' if math.floor(i)!=math.floor(note_eleve) else '#b14bd5' if i<10 else '#13a999' for i in X_notes]
@@ -43,15 +57,20 @@ def calcul_moyenne(matiere_selectionnee):
     notes_promo=[]
     # pour chaque élève, on calcule sa note moyenne en fonction des coefs
     for etudiant in range(len(data_matiere['controles'][0]['notes'])):
+        print("etudiant", etudiant)
         somme_notes_ponderees=0
         somme_coef=0
         for controle in data_matiere['controles']:
             coef=controle['coef']
-            somme_notes_ponderees+=controle['notes'][etudiant]*coef
+            note_etudiant=controle['notes'][etudiant]['note']
+            somme_notes_ponderees+=note_etudiant*coef
             somme_coef+=coef
-
+            print("somme_notes_ponderees", somme_notes_ponderees)
+            print("somme_coef", somme_coef)
+    
         note_etu=somme_notes_ponderees/somme_coef
-        notes_promo.append(note_etu)
+        num_etu=controle['notes'][etudiant]['num_etu']
+        notes_promo.append({'num_etu':num_etu, 'note':note_etu})
     return notes_promo
 
 # lancement de Dash
@@ -112,7 +131,7 @@ def update_controles(matiere_selectionnee):
     else : # s'il y a qu'un seul contrôle :
         options_controles=[{'label' : controle['type'], 'value':controle['type']} for controle in data_matiere['controles']]
         
-    controle_par_defaut=options_controles[0]['value'] # on prend la moyenne ou le seul CC
+    controle_par_defaut=options_controles[0]['value'] # on prend la moyenne ou le seul CC (en fonction de la matière sélectionnée)
 
     return options_controles, controle_par_defaut
 
@@ -123,9 +142,11 @@ def update_controles(matiere_selectionnee):
 )
 
 def update_graphique(matiere_selectionnee, controle_selectionne):
+    print(matiere_selectionnee, controle_selectionne)
     # le calcul des notes de la promo est différent si on veut la moyenne de tous les contrôles ou seulement un cc
     if controle_selectionne=='moyenne' :
         notes_promo=calcul_moyenne(matiere_selectionnee)
+        print("moyenne", notes_promo)
 
     else :
         # on récupère les données correspondant à la matière et au contrôle
@@ -133,10 +154,10 @@ def update_graphique(matiere_selectionnee, controle_selectionne):
         data_controle=next(c for c in data_matiere['controles'] if c['type']==controle_selectionne)
 
         # on récupère les notes des contrôles
-        notes_promo=data_controle['notes']
+        notes_promo = [{'num_etu': note['num_etu'], 'note': note['note']} for note in data_controle['notes']]
+        print("notes controle", notes_promo)
 
-    note_eleve=notes_promo[index_eleve] # à modifier plus tard avec le numéro étudiant
-
+    note_eleve=get_note_eleve(notes_promo, num_etu)
 
     classement, moyenne, mediane, X_notes, Y_notes, couleur=calcul_informations(notes_promo, note_eleve)
 
@@ -149,6 +170,7 @@ def update_graphique(matiere_selectionnee, controle_selectionne):
         annotation_text=f"Moyenne : {moyenne:.2f}",
         annotation_position="top right"
     )
+
 
     # ajout de la médiane
     fig.add_vline(
