@@ -19,6 +19,8 @@ services:
             - MYSQL_USER=learnagement
             - MYSQL_PASSWORD=LMent2Change
             - MYSQL_ROOT_PASSWORD=Root2Change
+            - MYSQL_ROOT_HOST=%
+
         volumes:
             - ../db/sql:/docker-entrypoint-initdb.d
             - ../db/data:/data
