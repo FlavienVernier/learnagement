@@ -33,7 +33,7 @@ df_competences = pd.DataFrame({
 })
 
 # Créer le DataFrame pour le premier Spyder Chart
-df_chart_1 = pd.DataFrame(dict(
+df_competence_globale = pd.DataFrame(dict(
     r=[2, 2, 3, 2],  # Scores pour les compétences
     theta=[
         'Concevoir et mettre en œuvre des systèmes informatiques',
@@ -57,13 +57,11 @@ def choix_apprentissage_critique(df, competence, niveau):
 app = dash.Dash(__name__)
 
 app.layout = html.Div([
-    html.H1("Interaction entre deux Spyder Charts"),
-    
     # Premier Spyder Chart
     dcc.Graph(
-        id="spyder-chart-1",
+        id="spyder-competence-globale",
         figure=px.line_polar(
-            df_chart_1,
+            df_competence_globale,
             r="r",
             theta="theta",
             line_close=True
@@ -79,20 +77,22 @@ app.layout = html.Div([
                     tickfont=dict(size=12)
                 )
             ),
-            title="Spyder Chart 1"
+            title="Niveau par compétence globale"
         )
     ),
     
     # Deuxième Spyder Chart
     dcc.Graph(
-        id="spyder-chart-2",
-        figure=go.Figure().update_layout(title="Spyder Chart 2")
+        id="niveau-apprentissage-critique",
+        figure=go.Figure().update_traces(fill="toself", 
+                mode="markers",  # Ajoute des marqueurs cliquables
+                marker=dict(size=10, color='blue')).update_layout(title="Niveau par apprentissage critique")
     ),
 ])
 
 @app.callback(
-    Output("spyder-chart-2", "figure"),  # Met à jour le second Spyder Chart
-    Input("spyder-chart-1", "clickData")  # Réagit au clic sur le premier graphique
+    Output("niveau-apprentissage-critique", "figure"),  # Met à jour le second Spyder Chart
+    Input("spyder-competence-globale", "clickData")  # Réagit au clic sur le premier graphique
 )
 def update_chart(click_data):
     if click_data and "points" in click_data:
@@ -107,14 +107,14 @@ def update_chart(click_data):
         filtered_df = df_competences[df_competences["Competence"] == clicked_theta]
 
         if filtered_df.empty:
-            return go.Figure().update_layout(title=f"Aucune donnée pour '{clicked_theta}'.")
+            return go.Figure().update_layout(title=f"Aucune donnée pour '{clicked_theta}'.").update_traces(fill='toself')
 
         # Créer le deuxième graphique
         fig = go.Figure()
         fig.add_trace(go.Scatterpolar(
             r=filtered_df["Niveau"],
             theta=filtered_df["Apprentissages_critiques"] + " - " + filtered_df["Matiere"],
-            mode="lines+markers+text",
+            mode="markers+text",
             text=filtered_df["Niveau"],
             textposition="top center",
             fill="toself",
@@ -128,12 +128,12 @@ def update_chart(click_data):
                     tickfont=dict(size=12)
                 )
             ),
-            title=f"Spyder Chart 2 (Compétence : {clicked_theta})"
+            title=f"Apprentissage critique (Compétence : {clicked_theta})"
         )
         return fig
 
     # Graphique vide si aucun clic
-    return go.Figure().update_layout(title="Cliquez sur une compétence dans le Spyder Chart 1.")
+    return go.Figure().update_layout(title="Cliquez sur une compétence.")
 
 # Lancer l'application
 if __name__ == "__main__":
