@@ -65,19 +65,29 @@ while not finished :
         
         for personne in data:
             # Récupérer les informations de chaque personne
-            nom_prenom = personne.find(class_="name").text
+            nom_prenom = personne.find(class_="name").text         
             telephones = personne.find(class_="telephones").text
             bureaux = personne.find(class_="bureaux").text
             email = personne.find(class_="email").text
 
             nom = nom_prenom.split(" ")[0]
             prenom = nom_prenom.split(" ")[1]
-            liste_telephones = telephones[6:].split("\n")
             liste_bureaux = bureaux[6:].split("\n")
             email = email[6:]
+            password='null'
+            password_updated='null'
+            statut='null'
+            id_discipline='null'
+            composante='null'
+            service_statutaire='null'
+            décharge='null'
+            service_effectif='null'
+            HCAutorisées='null'
+            fullName='null'
+            commentaire='null'
 
             # Ajouter les informations à la requête sql
-            query += f"INSERT INTO INFO_enseignant (nom, prenom, mail) VALUES ('{nom}', '{prenom}','{email}');\n"
+            query += f"INSERT INTO LNM_enseignants (prenom, nom, mail, password, password_updated, statut, id_discipline, composante, service statutaire, décharge, service effectif, HCAutorisées, fullName, commentaire) VALUES ('{nom}', '{prenom}','{email}');\n"
 
     except Exception as e:
         print(f"Une exception s'est produite : {e}")

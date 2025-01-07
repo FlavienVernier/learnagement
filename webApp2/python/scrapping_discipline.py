@@ -1,7 +1,10 @@
+import getpass
 from bs4 import BeautifulSoup as bs
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.keys import Keys
+
 import time
 import chromedriver_autoinstaller
 import csv
@@ -26,16 +29,17 @@ username=driver.find_element(By.ID,'user')
 password=driver.find_element(By.NAME,'pass')
 
 #Récuperation information 
-file=open("logs.txt", "r")
-lines=file.readlines()
+# partie où on demande de rentrer son identifiant et son mot de passe
+id=input("Entrez votre identifiant :")
+mdp=getpass.getpass("Entrez votre mot de passe (l'affichage est caché): ")
 
-username.send_keys(lines[0])
-password.send_keys(lines[1])
+# on envoie les identifiants et mots de passe dans la page
+username.send_keys(id)
+password.send_keys(mdp)
 
-try:
-    driver.find_element(By.NAME,"submit").submit()
-except NoSuchElementException as e:
-    pass
+# on valide les informations rentrées
+password.send_keys(Keys.RETURN)
+time.sleep(2)
 
 #Aller à la page programme
 soup =bs(driver.page_source, "lxml")
@@ -63,10 +67,10 @@ driver.close()
 #         writer.writerow(row)
         
 #Sauvegarde des données dans la bd
-bd=lien_db.get_db("logs_db.txt")
+bd=lien_db.get_db()
 for elt in (disciplines):
-    query= f"INSERT INTO INFO_discipline (nom) VALUES ('{elt}')"
+    query= f"INSERT INTO MAQUETTE_discipline (nom) VALUES ('{elt}')"
     lien_db.execute_query(bd,query)
 
-print(lien_db.get_data(bd,"INFO_discipline"))
+print(lien_db.get_data(bd,"MAQUETTE_discipline"))
 lien_db.close_db(bd)

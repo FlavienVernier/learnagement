@@ -3,8 +3,9 @@ Fonctions pour executer des requêtes sur la base de données phpmyadmin
 Normalement faut juste importer 
 """
 import mysql.connector
+import os
 
-def get_db(logs_path="webApp2/logs_db.txt"):
+def get_db(logs_path=os.path.join("webApp2", "logs_db.txt")):
     with open(logs_path, "r") as file:
         # Lire les 4 premières lignes du fichier (user/pwd/host/port/db)
         logs = file.readlines()
@@ -48,4 +49,3 @@ def get_data(db, table_name, logs_path="logs_db.txt",columns="*",conditions=""):
     query = f"SELECT {columns} FROM {table_name} {conditions}"
     cursor.execute(query)
     return cursor.fetchall()
-
