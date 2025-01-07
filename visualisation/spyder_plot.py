@@ -6,22 +6,30 @@ import pandas as pd
 
 # Charger les données pour le deuxième graphique
 df_competences = pd.DataFrame({
-    "Niveau": [1, 1, 2, 3, 3],
+    "Niveau": [1, 1, 2, 3, 3,2,1,2,3],
     "Competence": [
         "Concevoir et mettre en œuvre des systèmes informatiques",
         "Concevoir et mettre en œuvre des systèmes informatiques",
         "Concevoir et mettre en œuvre des systèmes informatiques",
         "Concevoir et mettre en œuvre des systèmes informatiques",
-        "Concevoir et mettre en œuvre des systèmes informatiques"
+        "Concevoir et mettre en œuvre des systèmes informatiques",
+        "Collecter et traiter des données numériques",
+        "Collecter et traiter des données numériques",
+        "Collecter et traiter des données numériques",
+        "Collecter et traiter des données numériques"
     ],
     "Apprentissages_critiques": [
         "Concevoir et gérer une base de données",
         "Mettre en œuvre une architecture client-serveur",
         "Choisir une méthode de développement adaptée",
         "Définir une architecture de système logiciel",
-        "Évaluer et optimiser les performances"
+        "Évaluer et optimiser les performances",
+        "Choisir et mettre en œuvre des outils d’IA (approches stochastiques deep learning) pour l’analyse et la prédiction de données",
+        "Implémenter des outils mathématiques",
+        "Répartir les fonctionnalités (acquisition stockage traitements visualisation...) sur un système N-Tieris",
+        "Développer des rendus visuels divers en vue d’une aide à la décision multi-critères"
     ],
-    "Matiere": ["INFO501", "INFO502", "INFO734", "INFO833", "DATA831"]
+    "Matiere": ["INFO501", "INFO502", "INFO734", "INFO833", "DATA831","MATH741","MATH641","INFO834","INFO931"]
 })
 
 # Créer le DataFrame pour le premier Spyder Chart
