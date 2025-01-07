@@ -1,12 +1,5 @@
-# Ce fichier génère deux graphiques des absences
-# par promo de même année et par filière sur toute les années 
-# via un fichier csv rempli "à la main" (chaque ligne représente un étudiant)
-
-### Format du csv : filiere,annee,heures_absence
-
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 from dash import Dash, dcc, html, Input, Output
 
 # Chemin du fichier csv
@@ -14,7 +7,6 @@ absences_chemin = "visualisation/data/absences.csv"
 
 # Charger le fichier CSV en utilisant l'encodage ISO-8859-1 et le point-virgule comme délimiteur
 data = pd.read_csv(absences_chemin)
-
 
 # Calculer les heures d'absence totales et la taille des promotions
 fusion = (
@@ -28,23 +20,50 @@ fusion = (
 # Calcul de l'absence moyenne par étudiant (total des heures d'absence divisé par la taille de la promo)
 fusion["absence_moyenne"] = fusion["total_heures_absence"] / fusion["taille_promo"]
 
+# Créer des figures par défaut
+default_annee = fusion['annee'].unique()[0]  # La première année par défaut
+default_figure_annee = px.bar(
+    fusion[fusion['annee'] == default_annee],
+    x='filiere',
+    y='absence_moyenne',
+    title=f"Répartition des absences par filière pour l'année {default_annee}",
+    labels={"filiere": "Filière", "absence_moyenne": "Absence moyenne"}
+)
+
+default_filiere = fusion['filiere'].unique()[0]  # La première filière par défaut
+default_figure_filiere = px.bar(
+    fusion[fusion['filiere'] == default_filiere],
+    x='annee',
+    y='absence_moyenne',
+    title=f"Répartition des absences pour la filière {default_filiere} sur plusieurs années",
+    labels={"annee": "Année", "absence_moyenne": "Absence moyenne"}
+)
+default_figure_filiere.update_layout(
+    xaxis=dict(
+        type='category'  # Forcer l'axe x à être catégoriel
+    )
+)
+
 # Application Dash
 app = Dash(__name__)
 
+# Layout de l'application
 app.layout = html.Div([
-    
     # Dropdown pour sélectionner l'année
     html.Div([
         html.Label("Sélectionnez une année :"),
         dcc.Dropdown(
             id='dropdown-annee',
             options=[{'label': str(annee), 'value': annee} for annee in sorted(fusion['annee'].unique())],
-            value=fusion['annee'].unique()[0]  # Valeur par défaut
+            value=default_annee  # Valeur par défaut
         )
     ]),
     
-    # Bar chart pour les filières d'une année
-    dcc.Graph(id='bar-chart-annee'),
+    # Bar chart pour les filières d'une année avec figure par défaut
+    dcc.Graph(
+        id='bar-chart-annee',
+        figure=default_figure_annee  # Figure par défaut
+    ),
     
     html.Hr(),
     
@@ -54,12 +73,15 @@ app.layout = html.Div([
         dcc.Dropdown(
             id='dropdown-filiere',
             options=[{'label': filiere, 'value': filiere} for filiere in sorted(fusion['filiere'].unique())],
-            value=fusion['filiere'].unique()[0]  # Valeur par défaut
+            value=default_filiere  # Valeur par défaut
         )
     ]),
     
-    # Bar chart pour les années d'une filière
-    dcc.Graph(id='bar-chart-filiere')
+    # Bar chart pour les années d'une filière avec figure par défaut
+    dcc.Graph(
+        id='bar-chart-filiere',
+        figure=default_figure_filiere  # Figure par défaut
+    )
 ])
 
 # Callbacks pour mettre à jour les graphiques en fonction des sélections
@@ -70,7 +92,7 @@ app.layout = html.Div([
 def update_bar_chart_annee(selected_annee):
     # Filtrer les données pour l'année sélectionnée
     filtered_df = fusion[fusion['annee'] == selected_annee]
-    # Créer le bar chart avec le l'absence moyenne
+    # Créer le bar chart avec l'absence moyenne
     fig = px.bar(
         filtered_df,
         x='filiere',
