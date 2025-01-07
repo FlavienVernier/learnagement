@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import os
 import shutil
 import subprocess
@@ -65,7 +67,7 @@ def main():
         file.write("\n")  # Ajoute une nouvelle ligne, comme `echo` le ferait
 
     os.chdir("db")
-    subprocess.run(["python", "insertPrivateData.py"], check=True)
+    subprocess.run(["python3", "insertPrivateData.py"], check=True)
     os.chdir("..")
 
     ##########
