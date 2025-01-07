@@ -1,14 +1,10 @@
-# Ce fichier génère une carte des mobilités via un fichier csv généré à 
-# partir d'un programme de scrapping sur le site de poytech dans la rubrique
-# https://www.polytech.univ-smb.fr/intranet/international/partir-en-formation/universites-partenaires.html
-
-### Format du csv : University,City,State
-
 import pandas as pd
-import plotly.express as px
-from geopy.geocoders import Nominatim
-from geopy.extra.rate_limiter import RateLimiter
+import dash
+from dash import dcc, html
 import plotly.graph_objects as go
+from geopy.geocoders import Nominatim
+import dash_bootstrap_components as dbc
+from dash.dependencies import Input, Output
 
 # Chemin du fichier csv
 csv_file_path = "visualisation/data/partner_universities.csv"
@@ -21,7 +17,6 @@ df_grouped = df.groupby(["City", "Country"])['University'].apply(lambda x: ', '.
 df_grouped.rename(columns={'University': 'Universities'}, inplace=True)
 
 # Ajouter des coordonnées géographiques pour chaque ville et pays
-# Utilisation de geopy pour obtenir les coordonnées
 geolocator = Nominatim(user_agent="university_map")
 
 # Fonction pour obtenir les coordonnées géographiques
@@ -54,42 +49,54 @@ for country in countries:
         marker=dict(size=12, opacity=0.8),
         name=country,  # Nom du pays pour le dropdown
         hoverinfo='text',
-         hovertext=country_data.apply(lambda row: f"Université(s): {row['Universities']}<br>Ville: {row['City']}<br>Pays: {row['Country']}", axis=1)
+        hovertext=country_data.apply(lambda row: f"Université(s): {row['Universities']}<br>Ville: {row['City']}<br>Pays: {row['Country']}", axis=1)
     ))
 
-# Configurer le style de la carte et le menu déroulant
+# Configuration de la carte
 fig.update_layout(
     mapbox=dict(
         style="carto-positron",
         zoom=3,
         center=dict(lat=0, lon=0)
     ),
-    updatemenus=[
-        dict(
-            buttons=[
-                dict(
-                    args=[{'visible': [country == selected_country for selected_country in countries]}],
-                    label=country,
-                    method='update'
-                ) for country in countries
-            ] + [
-                dict(
-                    args=[{'visible': [True] * len(countries)}],
-                    label="Tous",
-                    method='update'
-                )
-            ],
-            direction="down",
-            showactive=True,
-            x=0.1,
-            xanchor="left",
-            y=1.15,
-            yanchor="top"
-        )
-    ],
+    updatemenus=[dict(
+        buttons=[dict(
+            args=[{'visible': [country == selected_country for selected_country in countries]}],
+            label=country,
+            method='update'
+        ) for country in countries
+        ] + [
+            dict(
+                args=[{'visible': [True] * len(countries)}],
+                label="Tous",
+                method='update'
+            )
+        ],
+        direction="down",
+        showactive=True,
+        x=0.1,
+        xanchor="left",
+        y=1.15,
+        yanchor="top"
+    )],
     title="Carte des Universités",
     margin=dict(l=0, r=0, t=30, b=0)
 )
 
-# Afficher la carte
-fig.show()
+# Initialiser l'application Dash
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+# Définir la mise en page de l'application Dash
+app.layout = html.Div(
+    children=[
+        html.H1("Carte des Universités Partenaires", style={"textAlign": "center"}),
+        dcc.Graph(
+            id="university-map",
+            figure=fig
+        )
+    ]
+)
+
+# Lancer l'application Dash
+if __name__ == "__main__":
+    app.run_server(debug=True)
