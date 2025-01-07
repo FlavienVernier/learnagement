@@ -28,13 +28,10 @@ fusion = (
 # Calcul de l'absence moyenne par étudiant (total des heures d'absence divisé par la taille de la promo)
 fusion["absence_moyenne"] = fusion["total_heures_absence"] / fusion["taille_promo"]
 
-print(fusion)
-
 # Application Dash
 app = Dash(__name__)
 
 app.layout = html.Div([
-    html.H1("Visualisation des Absences"),
     
     # Dropdown pour sélectionner l'année
     html.Div([
