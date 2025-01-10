@@ -1,7 +1,7 @@
 *.log
 *~
 **/logs
-**/data
+#**/data
 __pycache__
 .*
 #*
