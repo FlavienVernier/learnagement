@@ -1,52 +1,30 @@
 import dash
 from dash import dcc, html
-from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
-import importlib
+from dash.dependencies import Input, Output
 
-# Importer les fichiers dash existants
-import taux_absenteisme  # Ce fichier contient l'application Dash pour 
-import spyder_plot_competences
-import map_generation
+# Importer les layouts des différentes applications (vous pouvez copier leurs layouts dans des fonctions ou fichiers séparés)
+from app1_map_generation import app1_layout  # Votre première application
+from app2_spyder_plot_competences import app2_layout, register_callbacks as register_callbacks_app2
+from app3_taux_absenteisme import app3_layout, register_callbacks as register_callbacks_app3
 
-# Créer l'application principale Dash
+# Initialiser l'application Dash principale
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = app.server  # Pour le déploiement
 
-# Créer un layout pour la page principale
+# Layout principal avec des onglets
 app.layout = html.Div([
-    html.H1("Tableau de Bord Principal"),
-    html.Div([
-        html.H2("Graphique 1 : Taux d'Absence"),
-        dcc.Graph(
-            id='graph-absence',
-            figure=taux_absenteisme.app.layout.children[1].figure  # Récupérer la figure de `taux_absenteisme.py`
-        )
-    ]),
-    html.Hr(),
-    html.Div([
-        html.H2("Graphique 2 : Araignée des compétences"),
-        dcc.Graph(
-            id='graph-spyder1',
-            figure=spyder_plot_competences.app.layout.children[0].figure  # Récupérer la figure de `spyder_plot_competences.py`
-        )
-    ]),
-    html.Hr(),
-    html.Div([
-        dcc.Graph(
-            id='graph-spyder2',
-            figure=spyder_plot_competences.app.layout.children[1].figure  # Récupérer la figure de `spyder_plot_competences.py`
-        )
-    ]),
-    html.Hr(),
-    html.Div([
-        html.H2("Graphique 3 : Carte des mobilités"),
-        dcc.Graph(
-            id='university-map',
-            figure=map_generation.app.layout.children[1].figure  # Récupérer la figure de `map_generation.py`
-        )
+    html.H1("Tableau de Bord - Applications Fusionnées", style={"textAlign": "center"}),
+    dcc.Tabs([
+        dcc.Tab(label="Carte des Universités", children=app1_layout),
+        dcc.Tab(label="Spyder Charts des Compétences", children=app2_layout),
+        dcc.Tab(label="Analyse des Absences", children=app3_layout),
     ])
 ])
 
-# Lancer l'application Dash principale
-if __name__ == '__main__':
+# Enregistrer les callbacks des sous-modules
+register_callbacks_app2(app)
+register_callbacks_app3(app)
+
+if __name__ == "__main__":
     app.run_server(debug=True)

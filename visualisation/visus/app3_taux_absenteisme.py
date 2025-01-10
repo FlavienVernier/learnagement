@@ -43,12 +43,12 @@ default_figure_filiere.update_layout(
         type='category'  # Forcer l'axe x à être catégoriel
     )
 )
-
+"""
 # Application Dash
 app = Dash(__name__)
-
+"""
 # Layout de l'application
-app.layout = html.Div([
+app3_layout = html.Div([
     # Dropdown pour sélectionner l'année
     html.Div([
         html.Label("Sélectionnez une année :"),
@@ -84,49 +84,51 @@ app.layout = html.Div([
     )
 ])
 
-# Callbacks pour mettre à jour les graphiques en fonction des sélections
-@app.callback(
-    Output('bar-chart-annee', 'figure'),
-    Input('dropdown-annee', 'value')
-)
-def update_bar_chart_annee(selected_annee):
-    # Filtrer les données pour l'année sélectionnée
-    filtered_df = fusion[fusion['annee'] == selected_annee]
-    # Créer le bar chart avec l'absence moyenne
-    fig = px.bar(
-        filtered_df,
-        x='filiere',
-        y='absence_moyenne',
-        title=f"Répartition des absences par filière pour l'année {selected_annee}",
-        labels={"filiere": "Filière", "absence_moyenne": "Absence moyenne"}
+def register_callbacks(app):
+    # Callbacks pour mettre à jour les graphiques en fonction des sélections
+    @app.callback(
+        Output('bar-chart-annee', 'figure'),
+        Input('dropdown-annee', 'value')
     )
-    return fig
-
-@app.callback(
-    Output('bar-chart-filiere', 'figure'),
-    Input('dropdown-filiere', 'value')
-)
-def update_bar_chart_filiere(selected_filiere):
-    # Filtrer les données pour la filière sélectionnée
-    filtered_df = fusion[fusion['filiere'] == selected_filiere]
-    # Créer le bar chart avec l'absence moyenne
-    fig = px.bar(
-        filtered_df,
-        x='annee',
-        y='absence_moyenne',
-        title=f"Répartition des absences pour la filière {selected_filiere} sur plusieurs années",
-        labels={"annee": "Année", "absence_moyenne": "Absence moyenne"}
-    )
-    
-    # Forcer l'axe x à être catégoriel
-    fig.update_layout(
-        xaxis=dict(
-            type='category'  # Assurez-vous que l'axe des années est catégoriel
+    def update_bar_chart_annee(selected_annee):
+        # Filtrer les données pour l'année sélectionnée
+        filtered_df = fusion[fusion['annee'] == selected_annee]
+        # Créer le bar chart avec l'absence moyenne
+        fig = px.bar(
+            filtered_df,
+            x='filiere',
+            y='absence_moyenne',
+            title=f"Répartition des absences par filière pour l'année {selected_annee}",
+            labels={"filiere": "Filière", "absence_moyenne": "Absence moyenne"}
         )
-    )
-    
-    return fig
+        return fig
 
+    @app.callback(
+        Output('bar-chart-filiere', 'figure'),
+        Input('dropdown-filiere', 'value')
+    )
+    def update_bar_chart_filiere(selected_filiere):
+        # Filtrer les données pour la filière sélectionnée
+        filtered_df = fusion[fusion['filiere'] == selected_filiere]
+        # Créer le bar chart avec l'absence moyenne
+        fig = px.bar(
+            filtered_df,
+            x='annee',
+            y='absence_moyenne',
+            title=f"Répartition des absences pour la filière {selected_filiere} sur plusieurs années",
+            labels={"annee": "Année", "absence_moyenne": "Absence moyenne"}
+        )
+        
+        # Forcer l'axe x à être catégoriel
+        fig.update_layout(
+            xaxis=dict(
+                type='category'  # Assurez-vous que l'axe des années est catégoriel
+            )
+        )
+        
+        return fig
+"""
 # Lancer l'application
 if __name__ == '__main__':
     app.run_server(debug=True)
+"""

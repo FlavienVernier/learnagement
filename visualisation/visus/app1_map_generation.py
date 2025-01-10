@@ -22,7 +22,7 @@ geolocator = Nominatim(user_agent="university_map")
 # Fonction pour obtenir les coordonnées géographiques
 def get_coordinates(row):
     try:
-        location = geolocator.geocode(f"{row['City']}, {row['Country']}")
+        location = geolocator.geocode(f"{row['City']}, {row['Country']}", timeout=10)
         if location:
             return pd.Series([location.latitude, location.longitude])
     except Exception as e:
@@ -83,11 +83,11 @@ fig.update_layout(
     margin=dict(l=0, r=0, t=30, b=0)
 )
 
-# Initialiser l'application Dash
+"""# Initialiser l'application Dash
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
+"""
 # Définir la mise en page de l'application Dash
-app.layout = html.Div(
+app1_layout = html.Div(
     children=[
         html.H1("Carte des Universités Partenaires", style={"textAlign": "center"}),
         dcc.Graph(
@@ -96,7 +96,8 @@ app.layout = html.Div(
         )
     ]
 )
-
+"""
 # Lancer l'application Dash
 if __name__ == "__main__":
     app.run_server(debug=True)
+"""
