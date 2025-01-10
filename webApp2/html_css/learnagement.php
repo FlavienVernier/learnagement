@@ -26,22 +26,22 @@ if (!isset($_SESSION)){
   include("connectDB.php");
 ?>
 
-<body>
-    <div id="contenu">
-            <?php
-            if(!isset($_GET["page"]) ) { 
-                $page="connexion";
-            } else {
-                $page=$_GET["page"];
-            }
+    <body>
+        <div id="contenu">
+                <?php
+                if(!isset($_GET["page"]) ) { 
+                    $page="connexion";
+                } else {
+                    $page=$_GET["page"];
+                }
 
-            if (file_exists("page_".$page.".inc.php")){
-                include("page_".$page.".inc.php");
-            }
-            else{
-                echo "Page non trouvée";
-            }
-    ?>
+                if (file_exists("page_".$page.".inc.php")){
+                    include("page_".$page.".inc.php");
+                }
+                else{
+                    echo "Page non trouvée";
+                }
+        ?>
         
     </div>
     <div id="piedpage">

@@ -14,6 +14,8 @@ if( isset( $_POST["inscription_ok"])){
       $_SESSION["connecte"]=true; 
       $_SESSION["mail"]=$_POST["id"];
       $_SESSION["type"]="etudiant";
+      //redirection
+      echo "<script>window.location.href='?page=accueil'</script>";
     }
     //Mdp pas encore changé
     else if ($val['password_updated'] == NULL && $val['password'] == $_POST['mdp']){
@@ -36,7 +38,7 @@ if( isset( $_POST["inscription_ok"])){
     }
   }
   else{
-    $sql2="SELECT mail, password FROM LNM_enseignant WHERE mail LIKE'".$_POST["id"]."'";
+    $sql2="SELECT mail, password, password_updated FROM LNM_enseignant WHERE mail LIKE'".$_POST["id"]."'";
     $result2 = mysqli_query($conn, $sql2) or die("Requête invalide: ". mysqli_error( $conn )."\n".$sql2);
     $val= mysqli_fetch_array($result2);
     //Vérification mdp
@@ -44,6 +46,8 @@ if( isset( $_POST["inscription_ok"])){
       $_SESSION["connecte"]=true; 
       $_SESSION["mail"]=$_POST["id"];
       $_SESSION["type"]="enseignant";
+      //redirection
+      echo "<script>window.location.href='?page=accueil'</script>";
     }
     //Mdp pas encore changé
     else if ($val['password_updated'] == NULL && $val['password'] == $_POST['mdp']){
@@ -66,7 +70,5 @@ if( isset( $_POST["inscription_ok"])){
     }
   }
 
-  //redirection
-  echo "<script>window.location.href='?page=accueil'</script>";
 }
 ?>
