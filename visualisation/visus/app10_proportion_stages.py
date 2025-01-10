@@ -39,11 +39,11 @@ def get_eleves_sans():
     print(eleves_sans)
     return eleves_sans
 
-# Initialisation de l'application Dash
-app = dash.Dash(__name__)
+"""# Initialisation de l'application Dash
+app = dash.Dash(__name__)"""
 
 # Définition de la mise en page de l'application
-app.layout = html.Div(children=[
+app10_layout = html.Div(children=[
     html.H1(children='Représentation des Stages'), 
     html.Div(
        style={'display': 'inline-block', 'verticalAlign': 'top',}, 
@@ -55,7 +55,8 @@ app.layout = html.Div(children=[
             html.H2(children='Étudiants sans stage'), 
             html.Ul(children=[html.Li(etudiant) for etudiant in get_eleves_sans()])])
 ])
-
+"""
 # Exécution de l'application
 if __name__ == '__main__':
     app.run_server(debug=True)
+"""
