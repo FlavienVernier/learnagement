@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 
 # Importer les layouts des différentes applications (vous pouvez copier leurs layouts dans des fonctions ou fichiers séparés)
-from app1_map_generation import app1_layout  # Votre première application
+from app1_map_generation import app1_layout, register_callbacks as register_callbacks_app1 
 from app2_spyder_plot_competences import app2_layout, register_callbacks as register_callbacks_app2
 from app3_taux_absenteisme import app3_layout, register_callbacks as register_callbacks_app3
 from app4_eleve_visu_notes import app4_layout, register_callbacks as register_callbacks_app4
@@ -27,6 +27,7 @@ app.layout = html.Div([
 ])
 
 # Enregistrer les callbacks des sous-modules
+register_callbacks_app1(app)
 register_callbacks_app2(app)
 register_callbacks_app3(app)
 register_callbacks_app4(app)
