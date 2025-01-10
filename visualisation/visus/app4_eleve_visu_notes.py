@@ -69,6 +69,18 @@ def calcul_moyenne(matiere_selectionnee):
         num_etu=controle['notes'][etudiant]['num_etu']
         notes_promo.append({'num_etu':num_etu, 'note':note_etu})
     return notes_promo
+
+def matieres_pour_etudiant(data, num_etu):
+    """Permet de récupérer les matières pour lesquelles un étudiant a des notes"""
+    matieres_disponibles=[]
+    for matiere in data:
+        for controle in matiere['controles']:
+            # on regarde si le num_etudiant est dans les notes des contrôles des matières
+            if any(note['num_etu']==num_etu for note in controle['notes']):
+                matieres_disponibles.append(matiere)
+                break  # si o a trouvé l'étudiant dans une matière, on passe à la suivante
+    return matieres_disponibles
+
 """
 # lancement de Dash
 app=dash.Dash(__name__)
@@ -80,15 +92,15 @@ app4_layout=html.Div([
     children=[
         # choix de la matière
         dcc.Dropdown(
-            id='choix_matiere',
-            options=[{'label' : matiere['matiere'], 'value':matiere['matiere']} for matiere in data],
-            value=data[0]['matiere'],
+            id='choix_matiere_eleve',
+            options=[{'label' : matiere['matiere'], 'value':matiere['matiere']} for matiere in matieres_pour_etudiant(data, num_etu)],
+            value=matieres_pour_etudiant(data, num_etu)[0]['matiere'],
             style={'width': '48%'}
         ),
 
         # choix du contrôle
         dcc.Dropdown(
-            id='choix_controle',
+            id='choix_controle_eleve',
             style={'width': '48%', 'margin':'auto'}
         ),],
 
@@ -105,8 +117,7 @@ app4_layout=html.Div([
 
     # affichage du classement
     html.Div(
-        id='affichage_classement',
-        #f"Classement : {classement}e/{len(notes_promo)} ", #- Moyenne : {moyenne:.2f}/20 - Médiane : {mediane:.2f}/20",
+        id='affichage_classement_eleve',
         style={'textAlign': 'center', 'fontSize': 18, 'marginTop': 5}
     )
 ])
@@ -114,8 +125,8 @@ app4_layout=html.Div([
 def register_callbacks(app):
     # Callback en fonction de la matière sélectionnée
     @app.callback(
-        [Output('choix_controle', 'options'), Output('choix_controle', 'value')],
-        [Input('choix_matiere', 'value')]
+        [Output('choix_controle_eleve', 'options'), Output('choix_controle_eleve', 'value')],
+        [Input('choix_matiere_eleve', 'value')]
     )
     def update_controles(matiere_selectionnee):
 
@@ -135,8 +146,8 @@ def register_callbacks(app):
 
     # Callback en fonction du controle sélectionné
     @app.callback(
-        [Output('affichage_note_eleve', 'figure'), Output('affichage_classement', 'children')],
-        [Input('choix_matiere', 'value'), Input('choix_controle', 'value')]
+        [Output('affichage_note_eleve', 'figure'), Output('affichage_classement_eleve', 'children')],
+        [Input('choix_matiere_eleve', 'value'), Input('choix_controle_eleve', 'value')]
     )
 
     def update_graphique(matiere_selectionnee, controle_selectionne):
