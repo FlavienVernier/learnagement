@@ -12,7 +12,7 @@ from app5_prof_visu_notes import app5_layout, register_callbacks as register_cal
 from app6_graph_avancement import app6_layout, register_callbacks as register_callbacks_app6
 from app7_charge_enseignant import app7_layout, register_callbacks as register_callbacks_app7
 from app8_charge_etudiant import app8_layout, register_callbacks as register_callbacks_app8
-
+from app11_dag_dependance import app11_layout, register_callbacks as register_callbacks_app11
 
 # Initialiser l'application Dash principale
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -27,9 +27,10 @@ app.layout = html.Div([
         dcc.Tab(label="Analyse des Absences", children=app3_layout),
         dcc.Tab(label="Visualisation des notes élèves", children=app4_layout),
         dcc.Tab(label="Visualisation des notes professeurs", children=app5_layout),
-        dcc.Tab(label="Avancement", children=app6_layout),
-        dcc.Tab(label="Charge de travail (enseigant)", children=app7_layout),
+        dcc.Tab(label="Avancement des cours", children=app6_layout),
+        dcc.Tab(label="Charge de travail (enseignant)", children=app7_layout),
         dcc.Tab(label="Charge de travail (étudiant)", children=app8_layout),
+        dcc.Tab(label="Dépendance des cours", children=app11_layout),
     ])
 ])
 
@@ -42,6 +43,7 @@ register_callbacks_app5(app)
 register_callbacks_app6(app)
 register_callbacks_app7(app)
 register_callbacks_app8(app)
+register_callbacks_app11(app)
 
 
 if __name__ == "__main__":

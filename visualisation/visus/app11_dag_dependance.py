@@ -4,6 +4,8 @@ import networkx as nx
 import colorsys
 import matplotlib.colors as mcolors
 import mysql.connector
+from dash import dcc, html
+from dash.dependencies import Input, Output
 
 # variables de configuration
 color_mode = "module"  # "groupe" ou "module"
@@ -147,33 +149,49 @@ def darken_color(color, factor=0.3):
     darkened_rgb = colorsys.hls_to_rgb(*darkened_hls) # Et on repasse en RGB
     return mcolors.to_hex(darkened_rgb)
 
-# Assombrir les couuleurs des contours des noeuds parce que c'est stylé
+# Assombrir les couleurs des contours des noeuds parce que c'est stylé
 dark_node_color_values = [darken_color(color) for color in node_color_values]
 
-# tracer les noeuds avec les infos et les couleurs (contours assombris)
-node_trace = go.Scatter(
-    x=node_x,
-    y=node_y,
-    mode='markers+text',
-    text=node_text,
-    textposition='top center',
-    hovertext=node_hovertext,
-    hoverinfo='text',
-    marker=dict(
-        size=10,
-        color=node_color_values,
-        line=dict(width=0.5, color=dark_node_color_values)
-    )
-)
 
-fig = go.Figure(data=[edge_trace, node_trace],
-                layout=go.Layout(
-                    showlegend=False,
-                    hovermode='closest',
-                    margin=dict(b=0, l=0, r=0, t=0),
-                    xaxis=dict(showgrid=False, zeroline=False),
-                    yaxis=dict(showgrid=False, zeroline=False),
-                    annotations=annotations
-                ))
+app11_layout = html.Div([
+    html.H1("Dépendance des cours",
+            style={'font-family': 'verdana'}
+            ),
+    dcc.Graph(id='dag', style={'marginTop': '30px', 'height':1000})
+])
 
-fig.show()
+def register_callbacks(app):
+
+    @app.callback(
+            Output('dag', 'figure'),
+            Input('dag', 'id') 
+        )
+    
+    def update_graph(_):
+        # tracer les noeuds avec les infos et les couleurs (contours assombris)
+        node_trace = go.Scatter(
+            x=node_x,
+            y=node_y,
+            mode='markers+text',
+            text=node_text,
+            textposition='top center',
+            hovertext=node_hovertext,
+            hoverinfo='text',
+            marker=dict(
+                size=10,
+                color=node_color_values,
+                line=dict(width=0.5, color=dark_node_color_values)
+            )
+        )
+
+        fig = go.Figure(data=[edge_trace, node_trace],
+                        layout=go.Layout(
+                            showlegend=False,
+                            hovermode='closest',
+                            margin=dict(b=0, l=0, r=0, t=0),
+                            xaxis=dict(showgrid=False, zeroline=False),
+                            yaxis=dict(showgrid=False, zeroline=False),
+                            annotations=annotations
+                        ))
+
+        return fig
