@@ -408,6 +408,150 @@
             {"num_etu": 783, "note": 14},
             {"num_etu": 699, "note": 18}
           ]          
-        }]}
+        }]},
+{
+  "matiere": "LANG501",
+  "controles": [
+    {
+      "type": "CC",
+      "coef": 1,
+      "notes": [
+        {"num_etu": 146, "note": 14.5},
+        {"num_etu": 624, "note": 13.0},
+        {"num_etu": 111, "note": 12.5},
+        {"num_etu": 863, "note": 15.0},
+        {"num_etu": 328, "note": 14.0}
+      ]
+    }]},
+{
+  "matiere": "SHES501",
+  "controles": [
+    {
+      "type": "CC",
+      "coef": 1,
+      "notes": [
+        {"num_etu": 146, "note": 13.5},
+        {"num_etu": 624, "note": 12.0},
+        {"num_etu": 111, "note": 14.0},
+        {"num_etu": 863, "note": 13.5},
+        {"num_etu": 328, "note": 15.5}
+      ]
+    }]},
+{
+  "matiere": "SHES505",
+  "controles": [
+    {
+      "type": "CC",
+      "coef": 1,
+      "notes": [
+        {"num_etu": 146, "note": 14.0},
+        {"num_etu": 624, "note": 12.5},
+        {"num_etu": 111, "note": 13.0},
+        {"num_etu": 863, "note": 14.5},
+        {"num_etu": 328, "note": 15.0}
+      ]
+    }]},
+{
+  "matiere": "DDRS501",
+  "controles": [
+    {
+      "type": "CC",
+      "coef": 1,
+      "notes": [
+        {"num_etu": 146, "note": 13.0},
+        {"num_etu": 624, "note": 15.0},
+        {"num_etu": 111, "note": 12.0},
+        {"num_etu": 863, "note": 14.0},
+        {"num_etu": 328, "note": 13.5}
+      ]
+    }]},
+{
+  "matiere": "EASI501",
+  "controles": [
+    {
+      "type": "CC",
+      "coef": 1,
+      "notes": [
+        {"num_etu": 146, "note": 14.0},
+        {"num_etu": 624, "note": 13.5},
+        {"num_etu": 111, "note": 12.5},
+        {"num_etu": 863, "note": 15.0},
+        {"num_etu": 328, "note": 14.5}
+      ]
+    },
+    {
+      "type": "TP",
+      "coef": 2,
+      "notes": [
+        {"num_etu": 146, "note": 16.0},
+        {"num_etu": 624, "note": 15.5},
+        {"num_etu": 111, "note": 14.0},
+        {"num_etu": 863, "note": 15.5},
+        {"num_etu": 328, "note": 16.5}
+      ]
+    }]},
+{
+  "matiere": "INFO501",
+  "controles": [
+    {
+      "type": "CC",
+      "coef": 1,
+      "notes": [
+        {"num_etu": 146, "note": 13.5},
+        {"num_etu": 624, "note": 12.0},
+        {"num_etu": 111, "note": 14.0},
+        {"num_etu": 863, "note": 13.0},
+        {"num_etu": 328, "note": 14.5}
+      ]
+    },
+    {
+      "type": "TP",
+      "coef": 2,
+      "notes": [
+        {"num_etu": 146, "note": 16.0},
+        {"num_etu": 624, "note": 15.0},
+        {"num_etu": 111, "note": 14.0},
+        {"num_etu": 863, "note": 16.5},
+        {"num_etu": 328, "note": 17.0}
+      ]
+    }]},
+{
+  "matiere": "INFO502",
+  "controles": [
+    {
+      "type": "CC",
+      "coef": 1,
+      "notes": [
+        {"num_etu": 146, "note": 12.5},
+        {"num_etu": 624, "note": 13.0},
+        {"num_etu": 111, "note": 14.5},
+        {"num_etu": 863, "note": 15.0},
+        {"num_etu": 328, "note": 13.5}
+      ]
+    },
+    {
+      "type": "TP",
+      "coef": 2,
+      "notes": [
+        {"num_etu": 146, "note": 15.0},
+        {"num_etu": 624, "note": 14.5},
+        {"num_etu": 111, "note": 16.0},
+        {"num_etu": 863, "note": 15.5},
+        {"num_etu": 328, "note": 16.0}
+      ]
+    }]},
+{
+  "matiere": "MATH501",
+  "controles": [
+    {
+      "type": "CC",
+      "coef": 1,
+      "notes": [
+        {"num_etu": 146, "note": 14.0},
+        {"num_etu": 624, "note": 13.5},
+        {"num_etu": 111, "note": 13.0},
+        {"num_etu": 863, "note": 14.5},
+        {"num_etu": 328, "note": 15.0}
+      ]
+    }]}
 ]
-  
