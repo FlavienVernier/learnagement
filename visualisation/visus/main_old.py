@@ -9,6 +9,8 @@ import visualisation.visus.app3_taux_absenteisme as app3_taux_absenteisme  # Ce 
 import visualisation.visus.app2_spyder_plot_competences as app2_spyder_plot_competences
 import visualisation.visus.app1_map_generation as app1_map_generation
 
+import visualisation.visus.app6_graph_avancement
+
 # Créer l'application principale Dash
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 

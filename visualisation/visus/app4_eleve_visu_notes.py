@@ -18,14 +18,14 @@ def get_note_eleve(notes_promo, num_etu):
     return None  # dans le cas où l'étudiant n'est pas dans la promo
 
 def calcul_informations(notes_promo, note_eleve):
-    print("notes promo", notes_promo)
-    print("note eleve", note_eleve)
+    # print("notes promo", notes_promo)
+    # print("note eleve", note_eleve)
     # calcul des informations
     # on récupère seulement les notes :
     notes_promo=[eleve['note'] for eleve in notes_promo]
     # on trie les notes par ordre croissant
     notes_promo=sorted(notes_promo)  
-    print("notes promo", notes_promo)
+    # print("notes promo", notes_promo)
     moyenne=sum(notes_promo)/len(notes_promo)
     ordre_notes=sorted(notes_promo, reverse=True)
     classement=ordre_notes.index(note_eleve)+1
@@ -40,10 +40,10 @@ def calcul_informations(notes_promo, note_eleve):
     X_notes=list(range(21)) #liste qui va de 0 à 20 
     Y_notes=[0]*len(X_notes) # initialisation de la liste
     for note in notes_promo :
-        print("note", note)
+        # print("note", note)
         note_arrondie=math.floor(note)
-        print("note arrondie", note_arrondie)
-        print("Y_notes", Y_notes)
+        # print("note arrondie", note_arrondie)
+        # print("Y_notes", Y_notes)
         Y_notes[note_arrondie]+=1
 
     couleur=['#bddcf3' if math.floor(i)!=math.floor(note_eleve) else '#b14bd5' if i<10 else '#13a999' for i in X_notes]
@@ -57,7 +57,7 @@ def calcul_moyenne(matiere_selectionnee):
     notes_promo=[]
     # pour chaque élève, on calcule sa note moyenne en fonction des coefs
     for etudiant in range(len(data_matiere['controles'][0]['notes'])):
-        print("etudiant", etudiant)
+        # print("etudiant", etudiant)
         somme_notes_ponderees=0
         somme_coef=0
         for controle in data_matiere['controles']:
@@ -98,7 +98,7 @@ app4_layout=html.Div([
 
     # affichage des notes
     dcc.Graph(
-        id='bar-chart',
+        id='affichage_note_eleve',
         config={'displayModeBar': False},
         style={'margin': '10px auto', 'marginTop':'5px', 'marginBottom':'3px'}
     ),
@@ -135,16 +135,16 @@ def register_callbacks(app):
 
     # Callback en fonction du controle sélectionné
     @app.callback(
-        [Output('bar-chart', 'figure'), Output('affichage_classement', 'children')],
+        [Output('affichage_note_eleve', 'figure'), Output('affichage_classement', 'children')],
         [Input('choix_matiere', 'value'), Input('choix_controle', 'value')]
     )
 
     def update_graphique(matiere_selectionnee, controle_selectionne):
-        print(matiere_selectionnee, controle_selectionne)
+        # print(matiere_selectionnee, controle_selectionne)
         # le calcul des notes de la promo est différent si on veut la moyenne de tous les contrôles ou seulement un cc
         if controle_selectionne=='moyenne' :
             notes_promo=calcul_moyenne(matiere_selectionnee)
-            print("moyenne", notes_promo)
+            # print("moyenne", notes_promo)
 
         else :
             # on récupère les données correspondant à la matière et au contrôle
@@ -153,7 +153,7 @@ def register_callbacks(app):
 
             # on récupère les notes des contrôles
             notes_promo = [{'num_etu': note['num_etu'], 'note': note['note']} for note in data_controle['notes']]
-            print("notes controle", notes_promo)
+            # print("notes controle", notes_promo)
 
         note_eleve=get_note_eleve(notes_promo, num_etu)
 
