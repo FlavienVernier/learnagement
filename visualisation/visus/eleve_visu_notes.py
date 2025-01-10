@@ -6,7 +6,7 @@ import json
 import math
 
 # données à récupérer dans la bdd (fichier json)
-with open('visualisation/INFO_notes.json', 'r') as fichier:
+with open('visualisation/data/INFO_notes.json', 'r') as fichier:
     data=json.load(fichier)
 
 num_etu=528
@@ -64,10 +64,7 @@ def calcul_moyenne(matiere_selectionnee):
             coef=controle['coef']
             note_etudiant=controle['notes'][etudiant]['note']
             somme_notes_ponderees+=note_etudiant*coef
-            somme_coef+=coef
-            print("somme_notes_ponderees", somme_notes_ponderees)
-            print("somme_coef", somme_coef)
-    
+            somme_coef+=coef    
         note_etu=somme_notes_ponderees/somme_coef
         num_etu=controle['notes'][etudiant]['num_etu']
         notes_promo.append({'num_etu':num_etu, 'note':note_etu})
