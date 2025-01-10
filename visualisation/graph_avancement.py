@@ -52,10 +52,9 @@ def transforme_données(data):
                 })
     return pd.DataFrame(rows)
 
-df = load_data(file_name)
-data = calcul_avancement(df)
+data_brute = load_data(file_name)
+data = calcul_avancement(data_brute)
 df = transforme_données(data)
-
 
 # Calculer les pourcentages
 df["Completion (%)"] = (df["Realized"] / df["Total"]) * 100
@@ -63,28 +62,39 @@ df["Completion (%)"] = (df["Realized"] / df["Total"]) * 100
 # Catégories par niveau d'agrégation
 levels = {
     "Année": ["Année"],
-    "Semestre": ["7", "8"],
-    "UE": df["Category"].tolist()[3:] 
+    "Semestre": list(map(str, data_brute['Semestre'].unique())),
+    "UE": list(data_brute['Module'].unique()) 
 }
+
 
 # Initialiser l'application Dash
 app = dash.Dash(__name__ , external_stylesheets=[dbc.themes.LUX])
 
 app.layout = html.Div([
-    html.H1("Suivi d'Avancement des Cours"),
+    html.H1("Suivi d'Avancement des Cours",
+            style={'font-family': 'verdana'}
+            ),
     
     # Premier menu déroulant (niveau d'agrégation)
     html.Label("Sélectionnez :"),
     dcc.Dropdown(
         id='level-dropdown',
         options=[{"label": key, "value": key} for key in levels.keys()],
-        value="Année"
+        value="Année",
+        style ={
+            'width': '50%',
+            'margin-left': '5px'
+        }
     ),
     
     # Deuxième menu déroulant (catégorie)
     html.Label("Sélectionnez les détails :"),
     dcc.Dropdown(
-        id='category-dropdown'
+        id='category-dropdown',
+        style ={
+            'width': '50%',
+            'margin-left': '5px'
+        }
     ),
     
     # Graphique
@@ -121,7 +131,7 @@ def update_graph(selected_level, selected_category):
                 color='rgba(200, 200, 200, 0.4)',
                 line=dict(color='rgba(148, 150, 152, 1)', width=3)
             ),
-            hoverinfo='none'
+            hoverinfo='none',
     )
 
     # Création de la trace des valeurs réelles
@@ -129,7 +139,7 @@ def update_graph(selected_level, selected_category):
         x=filtered_df["Completion (%)"],
         y=filtered_df["Category"],
         orientation='h',
-        text=filtered_df["Completion (%)"].map(lambda x: f"{x:.2f}%"),
+        text=filtered_df["Completion (%)"].map(lambda x: f"{x:.0f}%"),
         textposition='inside',
         marker=dict(
             color='rgba(44, 168, 235, 0.6)',
@@ -143,9 +153,9 @@ def update_graph(selected_level, selected_category):
 
     # Mise en forme de la figure
     fig.update_layout(
-        title=f"Avancement pour {selected_category}",
+        title=f"{selected_category}",
         xaxis=dict(title="Pourcentage d'achèvement", range=[0, 110]),
-        yaxis=dict(title="Catégorie"),
+        yaxis=dict(title='', showticklabels=False),
         barmode='overlay',  # Superposer les barres
         showlegend = False,
     )
