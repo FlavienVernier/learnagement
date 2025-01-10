@@ -13,10 +13,12 @@
         else{
             echo "<li><a href='?page=accueil&section=info_enseignant' class='btn_menu'>Mon Compte</a></li>";
             echo "<li><a href='?page=accueil&section=rendus_enseignants' class='btn_menu'>Mes Rendus</a></li>"; 
+            
         }
         ?>
         <li><a href="?page=accueil&section=liste_personnel" class="btn_menu ">Liste</a></li>
         <li><a href="?page=accueil&section=ressources" class="btn_menu ">Ressources</a></li>
+        <li><a href="?page=accueil&section=statistiques" class="btn_menu ">Statistiques</a></li>
         <li><br><br></li>
         <li><a href="?page=deconnexion" class="btn_menu ">Deconnexion</a></li>
     </ul>
