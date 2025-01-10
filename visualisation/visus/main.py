@@ -8,6 +8,7 @@ from app1_map_generation import app1_layout  # Votre première application
 from app2_spyder_plot_competences import app2_layout, register_callbacks as register_callbacks_app2
 from app3_taux_absenteisme import app3_layout, register_callbacks as register_callbacks_app3
 from app4_eleve_visu_notes import app4_layout, register_callbacks as register_callbacks_app4
+from app5_prof_visu_notes import app5_layout, register_callbacks as register_callbacks_app5
 
 # Initialiser l'application Dash principale
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -21,6 +22,7 @@ app.layout = html.Div([
         dcc.Tab(label="Spyder Charts des Compétences", children=app2_layout),
         dcc.Tab(label="Analyse des Absences", children=app3_layout),
         dcc.Tab(label="Visualisation des notes élèves", children=app4_layout),
+        dcc.Tab(label="Visualisation des notes professeurs", children=app5_layout),
     ])
 ])
 
@@ -28,6 +30,7 @@ app.layout = html.Div([
 register_callbacks_app2(app)
 register_callbacks_app3(app)
 register_callbacks_app4(app)
+register_callbacks_app5(app)
 
 if __name__ == "__main__":
     app.run_server(debug=True)

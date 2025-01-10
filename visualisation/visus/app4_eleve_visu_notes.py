@@ -98,7 +98,7 @@ app4_layout=html.Div([
 
     # affichage des notes
     dcc.Graph(
-        id='bar-chart',
+        id='affichage_note_eleve',
         config={'displayModeBar': False},
         style={'margin': '10px auto', 'marginTop':'5px', 'marginBottom':'3px'}
     ),
@@ -135,7 +135,7 @@ def register_callbacks(app):
 
     # Callback en fonction du controle sélectionné
     @app.callback(
-        [Output('bar-chart', 'figure'), Output('affichage_classement', 'children')],
+        [Output('affichage_note_eleve', 'figure'), Output('affichage_classement', 'children')],
         [Input('choix_matiere', 'value'), Input('choix_controle', 'value')]
     )
 
