@@ -67,10 +67,10 @@ levels = {
 }
 
 
-# Initialiser l'application Dash
-app = dash.Dash(__name__ , external_stylesheets=[dbc.themes.LUX])
+# # Initialiser l'application Dash
+# app = dash.Dash(__name__ , external_stylesheets=[dbc.themes.LUX])
 
-app.layout = html.Div([
+app6_layout = html.Div([
     html.H1("Suivi d'Avancement des Cours",
             style={'font-family': 'verdana'}
             ),
@@ -103,67 +103,68 @@ app.layout = html.Div([
     dcc.Graph(id='progress-chart', style={'marginTop': '30px'})
 ])
 
-# Callback pour mettre à jour le deuxième menu déroulant
-@app.callback(
-    Output('category-dropdown', 'options'),
-    Output('category-dropdown', 'value'),
-    Input('level-dropdown', 'value')
-)
+def register_callbacks(app):
+    # Callback pour mettre à jour le deuxième menu déroulant
+    @app.callback(
+        Output('category-dropdown', 'options'),
+        Output('category-dropdown', 'value'),
+        Input('level-dropdown', 'value')
+    )
 
-def update_category_dropdown(selected_level):
-    categories = levels[selected_level]
-    options = [{"label": cat, "value": cat} for cat in categories]
-    return options, categories[0] 
+    def update_category_dropdown(selected_level):
+        categories = levels[selected_level]
+        options = [{"label": cat, "value": cat} for cat in categories]
+        return options, categories[0] 
 
-# Callback pour mettre à jour le graphique en fonction des sélections
-@app.callback(
-    Output('progress-chart', 'figure'),
-    Input('level-dropdown', 'value'),
-    Input('category-dropdown', 'value')
-)
-def update_graph(selected_level, selected_category):
-    # Filtrer les données pour la catégorie sélectionnée
-    filtered_df = df[df["Category"] == selected_category]
-    
-    background_trace = go.Bar(
-            x=[100] * len(filtered_df),  # Toutes les barres atteignent 100 %
+    # Callback pour mettre à jour le graphique en fonction des sélections
+    @app.callback(
+        Output('progress-chart', 'figure'),
+        Input('level-dropdown', 'value'),
+        Input('category-dropdown', 'value')
+    )
+    def update_graph(selected_level, selected_category):
+        # Filtrer les données pour la catégorie sélectionnée
+        filtered_df = df[df["Category"] == selected_category]
+        
+        background_trace = go.Bar(
+                x=[100] * len(filtered_df),  # Toutes les barres atteignent 100 %
+                y=filtered_df["Category"],
+                orientation='h',
+                marker=dict(
+                    color='rgba(200, 200, 200, 0.4)',
+                    line=dict(color='rgba(148, 150, 152, 1)', width=3)
+                ),
+                hoverinfo='none',
+        )
+
+        # Création de la trace des valeurs réelles
+        actual_trace = go.Bar(
+            x=filtered_df["Completion (%)"],
             y=filtered_df["Category"],
             orientation='h',
+            text=filtered_df["Completion (%)"].map(lambda x: f"{x:.0f}%"),
+            textposition='inside',
             marker=dict(
-                color='rgba(200, 200, 200, 0.4)',
-                line=dict(color='rgba(148, 150, 152, 1)', width=3)
+                color='rgba(44, 168, 235, 0.6)',
+                line=dict(color='rgba(44, 168, 235, 1)', width=3)
             ),
-            hoverinfo='none',
-    )
+            hoverinfo='none'
+        )
 
-    # Création de la trace des valeurs réelles
-    actual_trace = go.Bar(
-        x=filtered_df["Completion (%)"],
-        y=filtered_df["Category"],
-        orientation='h',
-        text=filtered_df["Completion (%)"].map(lambda x: f"{x:.0f}%"),
-        textposition='inside',
-        marker=dict(
-            color='rgba(44, 168, 235, 0.6)',
-            line=dict(color='rgba(44, 168, 235, 1)', width=3)
-        ),
-        hoverinfo='none'
-    )
+        # Création de la figure
+        fig = go.Figure(data=[background_trace, actual_trace])
 
-    # Création de la figure
-    fig = go.Figure(data=[background_trace, actual_trace])
+        # Mise en forme de la figure
+        fig.update_layout(
+            title=f"{selected_category}",
+            xaxis=dict(title="Pourcentage d'achèvement", range=[0, 110]),
+            yaxis=dict(title='', showticklabels=False),
+            barmode='overlay',  # Superposer les barres
+            showlegend = False,
+            plot_bgcolor='rgba(0,0,0,0)',
+        )
+        return fig
 
-    # Mise en forme de la figure
-    fig.update_layout(
-        title=f"{selected_category}",
-        xaxis=dict(title="Pourcentage d'achèvement", range=[0, 110]),
-        yaxis=dict(title='', showticklabels=False),
-        barmode='overlay',  # Superposer les barres
-        showlegend = False,
-        plot_bgcolor='rgba(0,0,0,0)',
-    )
-    return fig
-
-# Lancer l'application
-if __name__ == '__main__':
-    app.run_server(debug=True)
+# # Lancer l'application
+# if __name__ == '__main__':
+#     app.run_server(debug=True)
