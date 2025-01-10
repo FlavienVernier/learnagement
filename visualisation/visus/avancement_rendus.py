@@ -28,13 +28,13 @@ app.layout = html.Div([
         id='dropdown-etudiant',
         options=[{'label': etudiant, 'value': etudiant} for etudiant in etudiants],
         value=etudiants[0],
-        style={'margin-bottom': '20px'}  # Ajouter une marge en bas
+        style={'margin-bottom': '10px'}  # Ajouter une marge en bas
     ),
     dcc.Dropdown(
         id='dropdown-ue',
         options=[{'label': ue, 'value': ue} for ue in ues],
         value='Tout',
-        style={'margin-bottom': '20px'}  # Ajouter une marge en bas
+        style={'margin-bottom': '10px'}  # Ajouter une marge en bas
     ),
     dcc.Graph(id='bar-chart')
 ])
@@ -55,9 +55,14 @@ def update_bar_chart(selected_etudiant, selected_ue):
     rendus_termines = df_etudiant['statut'].sum()
     rendus_non_termines = len(df_etudiant) - rendus_termines
 
+    # Calculer les pourcentages
+    total_rendus = rendus_termines + rendus_non_termines
+    pourcentage_termines = (rendus_termines / total_rendus) * 100
+    pourcentage_non_termines = (rendus_non_termines / total_rendus) * 100
+
     df_pourcentage = pd.DataFrame({
         'Statut': ['Terminés', 'Non terminés'],
-        'Pourcentage': [rendus_termines, rendus_non_termines]
+        'Pourcentage': [pourcentage_termines, pourcentage_non_termines]
     })
 
     # Créer le bar chart empilé horizontal
@@ -66,8 +71,13 @@ def update_bar_chart(selected_etudiant, selected_ue):
         go.Bar(name='Non terminés', y=df_pourcentage['Statut'], x=df_pourcentage[df_pourcentage['Statut'] == 'Non terminés']['Pourcentage'], orientation='h', marker_color='red')
     ])
 
-    # Modifier la disposition pour les barres empilées
-    fig.update_layout(barmode='stack', title=f'Pourcentage de rendus terminés pour {selected_etudiant} ({selected_ue})')
+    # Modifier la disposition pour les barres empilées et enlever le fond du graphique
+    fig.update_layout(
+        barmode='stack',
+        title=f'Pourcentage de rendus terminés pour {selected_etudiant} ({selected_ue})',
+        plot_bgcolor='rgba(0,0,0,0)',  # Enlever le fond du graphique
+        paper_bgcolor='rgba(0,0,0,0)'  # Enlever le fond du graphique
+    )
 
     return fig
 
