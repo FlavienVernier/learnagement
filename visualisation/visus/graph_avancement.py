@@ -76,7 +76,8 @@ app.layout = html.Div([
             ),
     
     # Premier menu déroulant (niveau d'agrégation)
-    html.Label("Sélectionnez :"),
+    html.Label("Sélectionnez :",
+               style={'margin-left': '5px'}),
     dcc.Dropdown(
         id='level-dropdown',
         options=[{"label": key, "value": key} for key in levels.keys()],
@@ -88,7 +89,8 @@ app.layout = html.Div([
     ),
     
     # Deuxième menu déroulant (catégorie)
-    html.Label("Sélectionnez les détails :"),
+    html.Label("Sélectionnez les détails :",
+               style={'margin-left': '5px'}),
     dcc.Dropdown(
         id='category-dropdown',
         style ={
@@ -158,6 +160,7 @@ def update_graph(selected_level, selected_category):
         yaxis=dict(title='', showticklabels=False),
         barmode='overlay',  # Superposer les barres
         showlegend = False,
+        plot_bgcolor='rgba(0,0,0,0)',
     )
     return fig
 
