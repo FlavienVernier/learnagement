@@ -1,6 +1,6 @@
 import dash
 import dash_core_components as dcc
-import dash_html_components as html
+from dash import html
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
 import pandas as pd
@@ -68,8 +68,28 @@ def register_callbacks(app):
 
         # Créer le bar chart empilé horizontal
         fig = go.Figure(data=[
-            go.Bar(name='Terminés', y=df_pourcentage['Statut'], x=df_pourcentage[df_pourcentage['Statut'] == 'Terminés']['Pourcentage'], orientation='h', marker_color='green'),
-            go.Bar(name='Non terminés', y=df_pourcentage['Statut'], x=df_pourcentage[df_pourcentage['Statut'] == 'Non terminés']['Pourcentage'], orientation='h', marker_color='red')
+            go.Bar(
+                name='Terminés', 
+                y=df_pourcentage['Statut'], 
+                x=df_pourcentage[df_pourcentage['Statut'] == 'Terminés']['Pourcentage'], 
+                text=df_pourcentage[df_pourcentage['Statut'] == 'Terminés']['Pourcentage'].round().astype(int).astype(str) + '%',
+                textposition='inside',
+                orientation='h', 
+                marker=dict(
+                color='rgba(36, 213, 20, 0.6)',
+                line=dict(color='rgba(19, 141, 8, 1)', width=3)
+            ),
+                hoverinfo='none'),
+            go.Bar(
+                name='Non terminés', 
+                y=df_pourcentage['Statut'], 
+                x=df_pourcentage[df_pourcentage['Statut'] == 'Non terminés']['Pourcentage'], 
+                orientation='h', 
+                marker=dict(
+                color='rgba(237, 19, 27, 0.6)',
+                line=dict(color='rgba(229, 7, 15, 1)', width=3)
+            ),
+                hoverinfo='none')
         ])
 
         # Modifier la disposition pour les barres empilées et enlever le fond du graphique

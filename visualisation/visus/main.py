@@ -25,7 +25,7 @@ app.layout = html.Div([
     html.H1("Tableau de Bord - Learnagement", style={"textAlign": "center"}),
     dcc.Tabs([
         dcc.Tab(label="Carte des Universités", children=app1_layout),
-        dcc.Tab(label="Spyder Charts des Compétences", children=app2_layout),
+        dcc.Tab(label="Analyse des Compétences", children=app2_layout),
         dcc.Tab(label="Analyse des Absences", children=app3_layout),
         dcc.Tab(label="Visualisation des notes élèves", children=app4_layout),
         dcc.Tab(label="Visualisation des notes professeurs", children=app5_layout),
@@ -33,7 +33,7 @@ app.layout = html.Div([
         dcc.Tab(label="Charge de travail (enseignant)", children=app7_layout),
         dcc.Tab(label="Charge de travail (étudiant)", children=app8_layout),
         dcc.Tab(label="Avancement rendus", children=app9_layout),
-        dcc.Tab(label="Proportion stages", children=app10_layout)
+        dcc.Tab(label="Proportion stages", children=app10_layout),
         dcc.Tab(label="Dépendance des cours", children=app11_layout),
     ])
 ])

@@ -36,7 +36,6 @@ def get_eleves_sans():
     for i in range (0, len(noms)):
         if (stages[i] == 0):
             eleves_sans.append(noms[i])
-    print(eleves_sans)
     return eleves_sans
 
 """# Initialisation de l'application Dash
