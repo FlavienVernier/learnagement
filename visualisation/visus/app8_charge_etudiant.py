@@ -21,10 +21,10 @@ semaine_options = [{'label': f"Semaine {semaine} - {annee}", 'value': f"{annee}-
                    for annee, semaine in df[['annee', 'semaine']].drop_duplicates().sort_values(['annee', 'semaine']).values]
 
 # Créer l'application Dash
-app = Dash(__name__)
+# app = Dash(__name__)
 
 # Layout de l'application
-app.layout = html.Div([
+app8_layout = html.Div([
     html.H1("Visualisation de la charge de travail d'un élève semaine par semaine"),
 
     # Dropdown pour sélectionner un élève
@@ -44,53 +44,54 @@ app.layout = html.Div([
     ),
 
     # Graphique
-    dcc.Graph(id='graphique-charge')
+    dcc.Graph(id='graphique-charge_etudiant')
 ])
 
-# Callback pour mettre à jour le graphique
-@app.callback(
-    Output('graphique-charge', 'figure'),
-    [Input('filtre-eleve', 'value'),
-     Input('filtre-semaine', 'value')]
-)
-def update_graph(filtre_eleve, filtre_semaine):
-    # Décomposer la valeur de la semaine en année et numéro de semaine
-    annee, semaine = map(int, filtre_semaine.split('-'))
+def register_callbacks(app):
+    # Callback pour mettre à jour le graphique
+    @app.callback(
+        Output('graphique-charge_etudiant', 'figure'),
+        [Input('filtre-eleve', 'value'),
+        Input('filtre-semaine', 'value')]
+    )
+    def update_graph(filtre_eleve, filtre_semaine):
+        # Décomposer la valeur de la semaine en année et numéro de semaine
+        annee, semaine = map(int, filtre_semaine.split('-'))
 
-    # Filtrer les données pour l'élève sélectionné et la semaine
-    df_filtered = df[(df['nom'] == filtre_eleve) & (df['semaine'] == semaine) & (df['annee'] == annee)]
+        # Filtrer les données pour l'élève sélectionné et la semaine
+        df_filtered = df[(df['nom'] == filtre_eleve) & (df['semaine'] == semaine) & (df['annee'] == annee)]
 
-    # Vérifier si des données sont disponibles pour cette semaine
-    if df_filtered.empty:
-        # Si aucune donnée n'est disponible, retourner un graphique vide
+        # Vérifier si des données sont disponibles pour cette semaine
+        if df_filtered.empty:
+            # Si aucune donnée n'est disponible, retourner un graphique vide
+            fig = px.bar(
+                title=f"Aucune donnée disponible pour l'élève {filtre_eleve} (Semaine {semaine}, {annee})",
+                labels={'date': 'Date', 'nb_heur': 'Nombre d\'heures', 'matiere': 'Matière'}
+            )
+            return fig
+
+        # Créer le graphique
         fig = px.bar(
-            title=f"Aucune donnée disponible pour l'élève {filtre_eleve} (Semaine {semaine}, {annee})",
-            labels={'date': 'Date', 'nb_heur': 'Nombre d\'heures', 'matiere': 'Matière'}
+            df_filtered,
+            x='date',  # Axe X : jours de la semaine
+            y='nb_heur',  # Axe Y : nombre d'heures
+            color='matiere',  # Couleur par matière
+            title=f"Charge de travail de l'élève {filtre_eleve} - Semaine {semaine}, {annee}",
+            labels={'date': 'Date', 'nb_heur': 'Nombre d\'heures', 'matiere': 'Matière'},
+            text='type'  # Afficher le type de cours sur les barres
         )
+
+        fig.update_traces(
+            textposition='outside'  # Positionner les étiquettes à l'extérieur
+        )
+
+        fig.update_xaxes(
+            title_text="Jour"
+        )
+        fig.update_yaxes(title_text="Nombre d'heures")
+
         return fig
 
-    # Créer le graphique
-    fig = px.bar(
-        df_filtered,
-        x='date',  # Axe X : jours de la semaine
-        y='nb_heur',  # Axe Y : nombre d'heures
-        color='matiere',  # Couleur par matière
-        title=f"Charge de travail de l'élève {filtre_eleve} - Semaine {semaine}, {annee}",
-        labels={'date': 'Date', 'nb_heur': 'Nombre d\'heures', 'matiere': 'Matière'},
-        text='type'  # Afficher le type de cours sur les barres
-    )
-
-    fig.update_traces(
-        textposition='outside'  # Positionner les étiquettes à l'extérieur
-    )
-
-    fig.update_xaxes(
-        title_text="Jour"
-    )
-    fig.update_yaxes(title_text="Nombre d'heures")
-
-    return fig
-
 # Lancer l'application
-if __name__ == '__main__':
-    app.run_server(debug=True)
+# if __name__ == '__main__':
+#     app.run_server(debug=True)
