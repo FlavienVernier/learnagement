@@ -15,6 +15,7 @@ from app8_charge_etudiant import app8_layout, register_callbacks as register_cal
 from app9_avancement_rendus import app9_layout, register_callbacks as register_callbacks_app9
 from app10_proportion_stages  import app10_layout
 from app11_dag_dependance import app11_layout, register_callbacks as register_callbacks_app11
+from app12_dag_dependances_modules import app12_layout, register_callbacks as register_callbacks_app12
 
 # Initialiser l'application Dash principale
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -34,7 +35,7 @@ app.layout = html.Div([
         dcc.Tab(label="Charge de travail (étudiant)", children=app8_layout),
         dcc.Tab(label="Avancement rendus", children=app9_layout),
         dcc.Tab(label="Proportion stages", children=app10_layout),
-        dcc.Tab(label="Dépendance des cours", children=app11_layout),
+        dcc.Tab(label="Dépendance des cours", children=[app11_layout,app12_layout]),
     ])
 ])
 
@@ -49,6 +50,7 @@ register_callbacks_app7(app)
 register_callbacks_app8(app)
 register_callbacks_app9(app)
 register_callbacks_app11(app)
+register_callbacks_app12(app)
 
 
 if __name__ == "__main__":

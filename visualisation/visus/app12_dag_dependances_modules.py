@@ -4,6 +4,8 @@ import networkx as nx
 import colorsys
 import matplotlib.colors as mcolors
 import mysql.connector
+from dash import dcc, html
+from dash.dependencies import Input, Output
 
 # variables de configuration
 color_mode = "module"  # "groupe" ou "module"
@@ -145,33 +147,48 @@ def darken_color(color, factor=0.3):
     darkened_rgb = colorsys.hls_to_rgb(*darkened_hls) # Et on repasse en RGB
     return mcolors.to_hex(darkened_rgb)
 
-# Assombrir les couleurs des nœuds pour les bordures
-node_border_colors = [darken_color(color) for color in node_color_values]
+app12_layout = html.Div([
+    html.H1("Dépendance des modules",
+            style={'font-family': 'verdana'}
+            ),
+    dcc.Graph(id='dag_module', style={'marginTop': '30px'})
+])
 
-# Tracés des nœuds
-node_trace = go.Scatter(
-    x=node_x,
-    y=node_y,
-    mode='markers+text',
-    text=node_text,
-    textposition='top center',
-    hoverinfo='text',
-    hovertext=node_hovertext,
-    marker=dict(
-        color=node_color_values,
-        size=[(10 + node_info[node]['nbDependance']) * node_radius * 50 for node in nodes],
-        line=dict(width=0.5, color=node_border_colors)
-    )
-)
+def register_callbacks(app):
 
-fig = go.Figure(data=[edge_trace, node_trace],
-                layout=go.Layout(
-                    showlegend=False,
-                    hovermode='closest',
-                    margin=dict(b=20, l=5, r=5, t=40),
-                    annotations=annotations,
-                    xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                    yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
-                ))
+    @app.callback(
+            Output('dag_module', 'figure'),
+            Input('dag_module', 'id') 
+        )
+    
+    def update_graph(_):
+        # Assombrir les couleurs des nœuds pour les bordures
+        node_border_colors = [darken_color(color) for color in node_color_values]
 
-fig.show()
+        # Tracés des nœuds
+        node_trace = go.Scatter(
+            x=node_x,
+            y=node_y,
+            mode='markers+text',
+            text=node_text,
+            textposition='top center',
+            hoverinfo='text',
+            hovertext=node_hovertext,
+            marker=dict(
+                color=node_color_values,
+                size=[(10 + node_info[node]['nbDependance']) * node_radius * 50 for node in nodes],
+                line=dict(width=0.5, color=node_border_colors)
+            )
+        )
+
+        fig = go.Figure(data=[edge_trace, node_trace],
+                        layout=go.Layout(
+                            showlegend=False,
+                            hovermode='closest',
+                            margin=dict(b=20, l=5, r=5, t=40),
+                            annotations=annotations,
+                            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
+                        ))
+
+        return fig
