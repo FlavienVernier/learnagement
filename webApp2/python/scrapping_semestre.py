@@ -8,6 +8,8 @@ import csv
 
 import lien_db
 
+# CE CODE N'A PAS ETE TESTER CAR LA BDD EST DEJA REMPLIE, tout de même mis à jour
+
 url='https://www.polytech.univ-smb.fr/intranet/accueil.html'
 
 #Ouverture de la page web
@@ -26,12 +28,14 @@ soup= bs(html, 'html.parser')
 username=driver.find_element(By.ID,'user')
 password=driver.find_element(By.NAME,'pass')
 
-#Récuperation information 
-file=open("logs.txt", "r")
-lines=file.readlines()
+# partie où on demande de rentrer son identifiant et son mot de passe
+id=input("Entrez votre identifiant :")
+mdp=getpass.getpass("Entrez votre mot de passe (l'affichage est caché): ")
 
-username.send_keys(lines[0])
-password.send_keys(lines[1])
+# on envoie les identifiants et mots de passe dans la page
+username.send_keys(id)
+password.send_keys(mdp)
+
 
 try:
     driver.find_element(By.NAME,"submit").submit()
@@ -67,9 +71,9 @@ driver.close()
 #Sauvegarde des données dans la bd
 bd=lien_db.get_db("logs_db.txt")
 for elt in (semestres):
-    query= f"INSERT INTO INFO_semestre (id_semestre) VALUES ('{elt}')"
+    query= f"INSERT INTO LNM_semestre (id_semestre) VALUES ('{elt}')"
     lien_db.execute_query(bd,query)
 
-print(lien_db.get_data(bd,"INFO_semestre"))
+print(lien_db.get_data(bd,"LNM_semestre"))
 lien_db.close_db(bd)
             

@@ -5,7 +5,9 @@ import csv
 query ="CREATE TABLE IF NOT EXISTS TEST_etudiant(id_etudiant INT NOT NULL AUTO_INCREMENT,nom VARCHAR(255),prenom VARCHAR(255),annee VARCHAR(255),filiere VARCHAR(12),PRIMARY KEY (id_etudiant))"
 #voir avec les contraintes pour la suite
 
-db = lien_db.db
+#TODO : code à reprendre entièrement => ne fonctionne pas avec la BDD
+
+db = lien_db.get_db()
 print(lien_db.execute_query(db,query))
 
 # Ouvrir le fichier CSV en mode lecture
@@ -16,13 +18,27 @@ with open('liste_etudiants.csv', 'r') as fichier:
     # Parcourir toutes les lignes du fichier CSV
     for ligne in lecteur:
         # Récupérer le nom et le prénom à partir de la ligne courante
-        annee = ligne[0]
-        filiere = ligne[1]
+        if ligne[0]=='FI1':
+            annee = 1
+        elif ligne[0]=='FI2':
+            annee = 2
+        elif ligne[0]=='FI3':
+            annee = 3
+        elif ligne[0]=='FI4' or ligne[0]=='M1':
+            annee = 4
+        elif ligne[0]=='FI5' or ligne[0]=='M2':
+            annee = 5
+        if ligne[1]=='PEIP-A2' or ligne[1]=='PEIP-A1':
+            filiere = 'PEIP-A'
+        elif ligne[1]=='MECA':
+            filiere='MM'
+        else : 
+            filiere = ligne[1]
         nom = ligne[2]
         prenom = ligne[3]
         # Afficher le nom et le prénom
-        #print("annee :", annee)
-        #print("filiere :", filiere)
+        print("annee :", annee)
+        print("filiere :", filiere)
         #print("nom :", nom)
         #print("Prénom :", prenom)
 
@@ -32,14 +48,15 @@ with open('liste_etudiants.csv', 'r') as fichier:
         # il manque id_promo : id_filiere = SELECT id_filiere FROM LNM_filiere WHERE nom_filiere=filiere
         # puis SELECT id_promo FROM LNM_promo WHERE LNM_promo.id_filiere=id_filiere AND LNM_promo.annee=annee
         
-        id_promo = f"SELECT id_promo FROM LNM_promo WHERE LNM_promo.id_filiere=(
-            SELECT id_filiere FROM LNM_filiere WHERE nom_filiere='{filiere}'
-            AND LNM_promo.annee='{annee}'"
-        print(lien_db.execute_query(db,id_promo))
+        id_promo = f"SELECT id_promo FROM LNM_promo WHERE LNM_promo.id_filiere=(SELECT id_filiere FROM LNM_filiere WHERE nom_filiere='{filiere}') AND LNM_promo.annee='{annee}'"
+        promo=lien_db.get_data(db,id_promo, "LNM_promo")
+        print(promo)
         
-        email=nom+"."+prenom+"@etu.univ-smb.fr"
-        query = f"INSERT INTO LNM_etudiant(`nom`, `prenom`, `mail`, `password`, `password_updated`, `id_promo`) VALUES ('{nom}','{prenom}', '{email}', null, null, '{id_promo}' )"
+        '''
+        email=prenom+"."+nom+"@etu.univ-smb.fr"
+        query = f"INSERT INTO LNM_etudiant(`nom`, `prenom`, `mail`, `password` , `id_promo`) VALUES ('{nom}','{prenom}', '{email}', null, '{promo}')"
         
-        print(lien_db.execute_query(db,query))
+        lien_db.execute_query(db,query)'''
+        #print(lien_db.execute_query(db,query))
         
     print("fini")

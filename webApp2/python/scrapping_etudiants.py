@@ -4,6 +4,7 @@ Created on Fri Feb 16 15:37:29 2024
 
 @author: pulci
 """
+import getpass
 import re
 import csv
 import json
@@ -44,14 +45,14 @@ except:
 username = driver.find_element(By.NAME,"user")
 password = driver.find_element(By.NAME,"pass")
 
-#Récup des données de connexion
-with open("meme.txt", "r") as file:
-    # Lire les deux premières lignes du fichier
-    mot1 = file.readline().strip()  # Lire et supprimer les espaces blancs
-    mot2 = file.readline().strip()  # Lire et supprimer les espaces blancs
-    
-username.send_keys(mot1)
-password.send_keys(mot2)
+# partie où on demande de rentrer son identifiant et son mot de passe
+id=input("Entrez votre identifiant :")
+mdp=getpass.getpass("Entrez votre mot de passe (l'affichage est caché): ")
+
+# on envoie les identifiants et mots de passe dans la page
+username.send_keys(id)
+password.send_keys(mdp)
+
 
 # Soumettre le formulaire de connexion
 password.send_keys(Keys.RETURN)
@@ -130,4 +131,4 @@ with open("liste_etudiants.csv", "w", encoding="utf-8", newline="") as f:
 # save data as JSON
 with open("liste_etudiants.json", "w", encoding="utf-8") as json_file:
     json.dump(data_json, json_file, ensure_ascii=False, indent=2)
-        
+    

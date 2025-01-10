@@ -1,9 +1,11 @@
+import getpass
 import re
 import chromedriver_autoinstaller
 from selenium import webdriver
 from bs4 import BeautifulSoup as bs
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.common.keys import Keys
 import time
 from lien_db import get_db, execute_query, get_data, close_db
 
@@ -19,21 +21,19 @@ driver = webdriver.Chrome()
 # Accéder à la page de connexion
 driver.get(url)
 
-# Remplir le formulaire de connexion
-username = driver.find_element(By.NAME,"user")
-password = driver.find_element(By.NAME,"pass")
+username=driver.find_element(By.ID, "user")
+password=driver.find_element(By.NAME, "pass")
+# partie où on demande de rentrer son identifiant et son mot de passe
+id=input("Entrez votre identifiant :")
+mdp=getpass.getpass("Entrez votre mot de passe (l'affichage est caché): ")
 
-#Récup des données de connexion
-with open("logs.txt", "r") as file:
-    # Lire les deux premières lignes du fichier
-    logs = file.readlines()
-    
-username.send_keys(logs[0])
-password.send_keys(logs[1])
-# Soumettre le formulaire de connexion
+# on envoie les identifiants et mots de passe dans la page
+username.send_keys(id)
+password.send_keys(mdp)
 
-driver.find_element(By.NAME, "submit").submit()
-
+# on valide les informations rentrées
+password.send_keys(Keys.RETURN)
+time.sleep(2)
 # Attendre un court instant pour permettre à la page de se charger
 time.sleep(2)
 
@@ -65,19 +65,29 @@ while not finished :
         
         for personne in data:
             # Récupérer les informations de chaque personne
-            nom_prenom = personne.find(class_="name").text
+            nom_prenom = personne.find(class_="name").text         
             telephones = personne.find(class_="telephones").text
             bureaux = personne.find(class_="bureaux").text
             email = personne.find(class_="email").text
 
             nom = nom_prenom.split(" ")[0]
             prenom = nom_prenom.split(" ")[1]
-            liste_telephones = telephones[6:].split("\n")
             liste_bureaux = bureaux[6:].split("\n")
             email = email[6:]
+            password='null'
+            password_updated='null'
+            statut='null'
+            id_discipline='null'
+            composante='null'
+            service_statutaire='null'
+            décharge='null'
+            service_effectif='null'
+            HCAutorisées='null'
+            fullName='null'
+            commentaire='null'
 
             # Ajouter les informations à la requête sql
-            query += f"INSERT INTO INFO_enseignant (nom, prenom, mail) VALUES ('{nom}', '{prenom}','{email}');\n"
+            query += f"INSERT INTO LNM_enseignants (prenom, nom, mail, password, password_updated, statut, id_discipline, composante, service statutaire, décharge, service effectif, HCAutorisées, fullName, commentaire) VALUES ('{nom}', '{prenom}','{email}', '{password}', '{password_updated}', '{statut, id_discipline}', '{composante}', '{service_statutaire}', '{décharge}', '{service_effectif}', '{HCAutorisées}', '{fullName}', '{commentaire}');\n"
 
     except Exception as e:
         print(f"Une exception s'est produite : {e}")

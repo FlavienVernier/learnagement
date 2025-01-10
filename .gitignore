@@ -9,5 +9,6 @@ __pycache__
 webApp/config.php
 docker/docker-compose.yml
 
+webApp2/**/*.txt
 webApp2/config.php
 *.txt

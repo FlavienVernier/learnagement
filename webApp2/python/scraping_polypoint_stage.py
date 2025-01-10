@@ -13,8 +13,8 @@ from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup as bs
 from selenium.webdriver.common.by import By
 import time
-
 import lien_db
+import re
 
 chromedriver_autoinstaller.install()
 driver=webdriver.Chrome()
@@ -41,6 +41,7 @@ with open(login, 'r') as fichier :
 # partie où on demande de rentrer son identifiant et son mot de passe
 id=input("Entrez votre identifiant :")
 mdp=getpass.getpass("Entrez votre mot de passe (l'affichage est caché): ")
+email=input("Entrez votre email :")
 
 # on envoie les identifiants et mots de passe dans la page
 username.send_keys(id)
@@ -67,8 +68,7 @@ for point in valeurs :
         tache=point.find('li', class_='intitule_tache').text
         nb_points=point.find('li', class_='nb_points').text
         annee=point.find('li', class_='annee').text
-        informations_polypoint.append([intitule, tache,  nb_points, annee])
-
+        informations_polypoint.append([intitule, tache,  nb_points, annee, email])
     except:
         # quand on a pas les informations liées aux polypoints, on ne fait rien
         pass
@@ -79,41 +79,65 @@ for point in valeurs :
 # grâce au print, on a vu que la class "value" contenait les polypoints et les stages effectués. 
 # il faut donc générer une exception quand on a pas les intitulés de classes qu'on recherche 
     try :
-        annee=point.find('li', class_='annee_convention').text
-        ville=
-        entreprise=point.find('li', class_='entreprise').text
+        #Le scrapping des stages ne fonctionne pas
+        entreprise_temp=point.find('li', class_='entreprise').text
+        entreprise=entreprise_temp.split(' - ')[0]
+        ville=entreprise_temp.split(' - ')[1]
         date=point.find('li', class_='date').text
-        informations_stage.append([annee, entreprise, date])
+        # Expression régulière pour trouver les dates au format jj/mm/aaaa
+        pattern = r'\d{2}/\d{2}/\d{4}'
 
+        # Utilisation de findall pour extraire toutes les dates correspondant au pattern
+        dates = re.findall(pattern, date)
+        annee=dates[0].split('/')[2]
+        mois=dates[0].split('/')[1]
+        jour=dates[0].split('/')[0]
+        date_debut=""+annee+"-"+mois+"-"+jour
+        annee=dates[1].split('/')[2]
+        mois=dates[1].split('/')[1]
+        jour=dates[1].split('/')[0]
+        date_fin=""+annee+"-"+mois+"-"+jour
+        nature='null'
+        mail=email
+        id_enseignant=6   #id random (présent dans la liste)
+        informations_stage.append([entreprise, ville, date_debut, date_fin, nature, mail, id_enseignant])
     except:
         # quand on a pas les informations liées aux polypoints, on ne fait rien
         pass
-
-
-
+    
+print(informations_stage)
+    
 driver.close()
 # enregistrement des informations dans la base de donnée
-bd=lien_db.get_db("logs_db.txt")
+
+bd=lien_db.get_db()
 #enregistrement des polypoints
-for info in informations_polypoint:
+'''for info in informations_polypoint:
     intitule=info[0]
     tache=info[1]
     nb_points=info[2]
     annee=info[3]
-    query= f"INSERT INTO ETU_polypoint (intitule, tache, nb_points, annee, id_etudiant) SELECT '{intitule}', '{tache}', '{nb_points}', '{annee}', '{id}' WHERE NOT EXISTS( SELECT 1 FROM ETU_polypoint WHERE intitule='{intitule}' AND tache='{tache}' AND nb_points='{nb_points}' AND annee='{annee}' AND id_etudiant='{id}' );"
+    email=info[4]
+    query= f"INSERT INTO ETU_polypoint (intitule, tache, nb_point, annee_universitaire, id_etudiant) SELECT '{intitule}', '{tache}', '{nb_points}', '{annee}', (SELECT id_etudiant FROM LNM_etudiant WHERE mail='{email}');"
+    print(query)
     lien_db.execute_query(bd,query)
 
-print(lien_db.get_data(bd,"ETU_polypoint"))
+print(lien_db.get_data(bd,"ETU_polypoint"))'''
 
 #enregistrement des stages
 for info in informations_stage:
-    annee=info[0]
-    entreprise=info[1]
-    date=info[2]
-    query= f"INSERT INTO INFO_stage (annee, entreprise, date, id_etudiant) SELECT '{annee}', '{entreprise}', '{date}', '{id}' WHERE NOT EXISTS( SELECT 1 FROM INFO_stage WHERE annee='{annee}' AND entreprise='{entreprise}' AND date='{date}' AND id_etudiant='{id}');"
-    #print(query)
-    #print(lien_db.execute_query(bd,query))
+    entreprise=info[0]
+    ville=info[1]
+    date_debut=info[2]
+    date_fin=info[3]
+    nature=info[4]
+    email=info[5]
+    id_enseignant=info[6]
 
-print(lien_db.get_data(bd,"INFO_stage"))
+    query= f"INSERT INTO LNM_stage (entreprise, ville, date_debut, date_fin, nature, id_etudiant, id_enseignant) SELECT '{entreprise}', '{ville}', '{date_debut}', '{date_fin}', '{nature}', (SELECT id_etudiant FROM LNM_etudiant WHERE mail='{email}'), '{id_enseignant}';"
+    print(query)
+    print(lien_db.execute_query(bd,query))
+
+print(lien_db.get_data(bd,"LNM_stage"))
 
 lien_db.close_db(bd)

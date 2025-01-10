@@ -1,3 +1,4 @@
+import getpass
 from bs4 import BeautifulSoup as bs
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -27,12 +28,13 @@ soup= bs(html, 'html.parser')
 username=driver.find_element(By.ID,'user')
 password=driver.find_element(By.NAME,'pass')
 
-#Récuperation information 
-file=open('logs.txt', "r")
-lines=file.readlines()
+# partie où on demande de rentrer son identifiant et son mot de passe
+id=input("Entrez votre identifiant :")
+mdp=getpass.getpass("Entrez votre mot de passe (l'affichage est caché): ")
 
-username.send_keys(lines[0])
-password.send_keys(lines[1])
+# on envoie les identifiants et mots de passe dans la page
+username.send_keys(id)
+password.send_keys(mdp)
 
 try:
     driver.find_element(By.NAME,"submit").submit()
@@ -95,32 +97,33 @@ for i in range (len(liens_module)):
 driver.close()
 
 # Sauvegarde des données en csv
-with open("../data/modules.csv", "wt+", newline="") as f:
+with open("modules.csv", "wt+", newline="", encoding='utf8') as f:
     writer = csv.writer(f,delimiter=';')
     for row in data_csv:
         writer.writerow(row)
         
 #Sauvegarde des données en json
-with open("../data/modules.json", "w",encoding='utf8') as f:
+with open("modules.json", "w",encoding='utf8') as f:
     json.dump(data, f,indent=4,ensure_ascii=False)
    
 #Sauvegarde des données dans la bd
-bd=lien_db.get_db("logs_db.txt")
+bd=lien_db.get_db()
 for i in range (len(data)):
     key = f"'{i}'"
     print(data[key].keys())
-    query= f"INSERT INTO INFO_module (code_module,nom,id_semestre,id_discipline) VALUES ('{data[key]['Code']}','{data[key]['Matiere']}','{data[key]['Semestre'][1:]}',(SELECT id_discipline FROM INFO_discipline WHERE nom LIKE '{data[key]['Code'][:-3]}%'))"
-    print(lien_db.execute_query(bd,query))
+    # Mise en commentaire car BdD déjà remplie à ce niveau là, query incorrecte
+    #query= f"INSERT INTO MAQUETTE_module (code_module,nom,id_semestre,id_discipline) VALUES ('{data[key]['Code']}','{data[key]['Matiere']}','{data[key]['Semestre'][1:]}',(SELECT id_discipline FROM INFO_discipline WHERE nom LIKE '{data[key]['Code'][:-3]}%'))"
+    #print(lien_db.execute_query(bd,query))
     if "Nb heures Cours" in (data[key].keys()):
-        query=f"UPDATE INFO_module SET hCM={data[key]['Nb heures Cours']} WHERE code_module LIKE '{data[key]['Code']}'"
+        query=f"UPDATE MAQUETTE_module SET hCM={data[key]['Nb heures Cours']} WHERE code_module LIKE '{data[key]['Code']}'"
         lien_db.execute_query(bd,query)
     if "Nb heures TD" in (data[key].keys()):
-        query=f"UPDATE INFO_module SET hTD={data[key]['Nb heures TD']} WHERE code_module LIKE '{data[key]['Code']}'"
+        query=f"UPDATE MAQUETTE_module SET hTD={data[key]['Nb heures TD']} WHERE code_module LIKE '{data[key]['Code']}'"
         lien_db.execute_query(bd,query)
     if "Nb heures TP" in (data[key].keys()):
-        query=f"UPDATE INFO_module SET hTP={data[key]['Nb heures TP']} WHERE code_module LIKE '{data[key]['Code']}'"
+        query=f"UPDATE MAQUETTE_module SET hTP={data[key]['Nb heures TP']} WHERE code_module LIKE '{data[key]['Code']}'"
         lien_db.execute_query(bd,query)
     
-print(lien_db.get_data(bd,"INFO_module"))
+print(lien_db.get_data(bd,"MAQUETTE_module"))
 lien_db.close_db(bd)
 
