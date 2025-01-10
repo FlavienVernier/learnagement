@@ -12,6 +12,8 @@ from app5_prof_visu_notes import app5_layout, register_callbacks as register_cal
 from app6_graph_avancement import app6_layout, register_callbacks as register_callbacks_app6
 from app7_charge_enseignant import app7_layout, register_callbacks as register_callbacks_app7
 from app8_charge_etudiant import app8_layout, register_callbacks as register_callbacks_app8
+from app9_avancement_rendus import app9_layout, register_callbacks as register_callbacks_app9
+from app10_proportion_stages  import app10_layout
 from app11_dag_dependance import app11_layout, register_callbacks as register_callbacks_app11
 
 # Initialiser l'application Dash principale
@@ -30,6 +32,8 @@ app.layout = html.Div([
         dcc.Tab(label="Avancement des cours", children=app6_layout),
         dcc.Tab(label="Charge de travail (enseignant)", children=app7_layout),
         dcc.Tab(label="Charge de travail (étudiant)", children=app8_layout),
+        dcc.Tab(label="Avancement rendus", children=app9_layout),
+        dcc.Tab(label="Proportion stages", children=app10_layout)
         dcc.Tab(label="Dépendance des cours", children=app11_layout),
     ])
 ])
@@ -43,6 +47,7 @@ register_callbacks_app5(app)
 register_callbacks_app6(app)
 register_callbacks_app7(app)
 register_callbacks_app8(app)
+register_callbacks_app9(app)
 register_callbacks_app11(app)
 
 
