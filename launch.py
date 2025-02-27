@@ -19,10 +19,11 @@ def main():
     os.chdir("webApp")
     if not os.path.exists("config.php"):
         shutil.copy("config.php.example", "config.php")
-        print(f"{GREEN}Update docker/docker-compose.yml and webApp/config.php files with new password.{NC}")
+        print(f"{GREEN}Update webApp/config.php files with new password.{NC}")
         input("Then press any key to continue... ")
     
     if os.path.exists("config.php.example") and os.path.exists("config.php"):
+        #ToDo implement a real ceck password
         if filecmp("config.php.example", "config.php"):
             print(f"{RED}WARNING default password seems to be used !!!{NC}")
     
@@ -71,17 +72,18 @@ def main():
     os.chdir("..")
 
     ##########
-    # Lancement de Docker
+    # Run Docker
     print("##########")
     print("Lancement de Docker")
     
     os.chdir("docker")
     if not os.path.exists("docker-compose.yml"):
-        shutil.copy("docker-compose.yml.example", "docker-compose.yml")
-        print(f"{GREEN}Update docker/docker-compose.yml and webApp/config.php files with new password.{NC}")
+        shutil.copy("docker-compose.yml.example", "docker-compose-dev.yml")
+        print(f"{GREEN}Update docker/docker-compose.yml files with new password.{NC}")
         input("Then press any key to continue... ")
 
     if os.path.exists("docker-compose.yml.example") and os.path.exists("docker-compose.yml"):
+        #ToDo implement a real ceck password
         if filecmp("docker-compose.yml.example", "docker-compose.yml"):
             print(f"{RED}WARNING default password seems to be used !!!{NC}")
 

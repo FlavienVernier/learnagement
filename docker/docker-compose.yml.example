@@ -1,7 +1,8 @@
 version: "3.6"
 services:
     php:
-        build: .
+	container_name: learnagement_php_dev
+        build: ./php/
         restart: always
         ports:
             - "40080:80"
@@ -9,6 +10,7 @@ services:
             - ../webApp:/var/www/html
             - ./log:/var/log/apache2
     mysql:
+	container_name: learnagement_mysql_dev
         image: mysql:8.0
         restart: always
         ports:
@@ -19,14 +21,13 @@ services:
             - MYSQL_USER=learnagement
             - MYSQL_PASSWORD=LMent2Change
             - MYSQL_ROOT_PASSWORD=Root2Change
-            - MYSQL_ROOT_HOST=%
-
         volumes:
             - ../db/sql:/docker-entrypoint-initdb.d
             - ../db/data:/data
-            - ./conf:/etc/mysql/conf.d
+            - ./mysql/conf.d:/etc/mysql/conf.d
             - learnagement_persistent_db:/var/lib/mysql
     phpmyadmin:
+	container_name: learnagement_phpmyadmin_dev
         image: phpmyadmin
         restart: always
         ports:
