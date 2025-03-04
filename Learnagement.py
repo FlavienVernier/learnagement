@@ -127,7 +127,6 @@ def dockerRun(configurationSettings):
         prog = subprocess.Popen(['docker-compose', 'up'])
         prog.communicate()
     else:    
-        #subprocess.run(["sudo", "docker-compose", "up", "--scale SERVICE="+str(configurationSettings["INSTANCE_NUMBER"])], check=True)
         subprocess.run(["sudo", "docker-compose", "up"], check=True)
 
     # Pause pour laisser Docker démarrer
@@ -146,7 +145,7 @@ def dockerRun(configurationSettings):
 
     
 
-def main():
+def run():
     mainConfiguration()
     from config import configurationSettings
     
@@ -177,6 +176,74 @@ def searchReplaceInFile(fileName, patern, value):
     # Write the file out again
     with open(fileName, 'w') as file:
         file.write(filedata)
+        
+def stop():
+    ##########
+    # Stop App
+    print("##########")
+    print(f"{GREEN}Stop App{NC}")
+    
+    os.chdir("docker")
+    
+    if os.name == 'nt':
+        #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose up'],stdin=subprocess.PIPE)
+        #prog.stdin.write(b'password')
+        prog = subprocess.Popen(['docker-compose', 'down'])
+        prog.communicate()
+    else:    
+        subprocess.run(["sudo", "docker-compose", "down"], check=True)
+
+    # sudo docker-compose down
+    
+    os.chdir("..")
+    
+def destroy():
+    from config import configurationSettings 
+    
+    ##########
+    # Destroy App
+    print("##########")
+    print(f"{RED}Destroy App{NC}")
+    
+
+    if "YES" == input("Are you sure (YES/NO)? NO DATA CAN BE RECOVERED! ") and "YES" == input("Are you realy sure(YES/NO)? don't cry if you've lost your data! "):
+    
+        #stop()
+
+        os.chdir("docker")
+
+        try:
+    
+            if os.name == 'nt':
+                #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose up'],stdin=subprocess.PIPE)
+                #prog.stdin.write(b'password')
+                prog = subprocess.Popen(['docker', 'volume', 'rm', 'docker_learnagement_persistent_db_'+configurationSettings["INSTANCE_NAME"]])
+                prog.communicate()
+            else:    
+                subprocess.run(["sudo", "docker", "volume", "rm", "docker_learnagement_persistent_db_"+configurationSettings["INSTANCE_NAME"]], check=True)
+            print(f"{RED}App destroyed{NC}")
+            
+        except subprocess.CalledProcessError as e:
+            print(e.output)
+            print(f"{GREEN}App not destroyed{NC}")
+              
+        os.chdir("..")
+    else:
+        print(f"{GREEN}App not destroyed{NC}")
+
+def help(argv):
+    print("Usage: " + argv[0] + " [-stop|-destroy|-help]")
+            
+def main(argv):
+    # if script parameter is destroy
+    if len(argv)==1:
+        run()
+    elif len(argv)==2 and argv[1] == "-stop":
+        stop()
+    elif len(argv)==2 and argv[1] == "-destroy":
+        destroy()
+    else:
+        help(argv)
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
