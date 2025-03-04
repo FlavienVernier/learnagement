@@ -6,6 +6,8 @@ import subprocess
 import time
 
 def main():
+    print(f"{RED}WARNING obsolete launcher, use Learnagement.py instead!!!{NC}")
+            
     # Couleurs pour les messages (non directement nécessaires dans Python mais émulation via ANSI codes)
     RED = "\033[0;31m"
     GREEN = "\033[0;32m"

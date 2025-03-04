@@ -1,0 +1,53 @@
+version: "3.6"
+
+services:
+    php_INSTANCE_NAME:
+        container_name: learnagement_php_INSTANCE_NAME
+        build: ./php/
+        restart: always
+        networks:
+              - learnagement_INSTANCE_NAME
+        ports:
+            - "INSTANCE_NUMBER0080:80"
+        volumes:
+            - ../webApp:/var/www/html
+            - ./log:/var/log/apache2
+    mysql_INSTANCE_NAME:
+        container_name: learnagement_mysql_INSTANCE_NAME
+        image: mysql:8.0
+        restart: always
+        networks:
+            - learnagement_INSTANCE_NAME
+        ports:
+            - "INSTANCE_NUMBER3306:3306"
+        command: --default-authentication-plugin=mysql_native_password
+        environment:
+            - MYSQL_DATABASE=learnagement
+            - MYSQL_USER=learnagement
+            - MYSQL_PASSWORD=LMent2Change
+            - MYSQL_ROOT_PASSWORD=INSTANCE_MYSQL_ROOT_PASSWORD
+        volumes:
+            - ../db/sql:/docker-entrypoint-initdb.d
+            - ../db/data:/data
+            - ./mysql/conf.d:/etc/mysql/conf.d
+            - learnagement_persistent_db_INSTANCE_NAME:/var/lib/mysql
+    phpmyadmin_INSTANCE_NAME:
+        container_name: learnagement_phpmyadmin_INSTANCE_NAME
+        image: phpmyadmin
+        restart: always
+        networks:
+            - learnagement_INSTANCE_NAME
+        ports:
+            - INSTANCE_NUMBER8080:80
+        environment:
+            - PMA_HOST=mysql_INSTANCE_NAME
+            - RELATIONA_DISPLAY=D
+        volumes:
+            - ./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
+volumes:
+    learnagement_persistent_db_INSTANCE_NAME:
+networks:
+    learnagement_INSTANCE_NAME:
+        name: learnagement_INSTANCE_NAME
+        driver: bridge
+    

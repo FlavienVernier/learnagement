@@ -1,0 +1,182 @@
+# coding=utf-8
+
+import os
+import sys
+import shutil
+import subprocess
+import time
+from getpass import getpass
+
+# Couleurs pour les messages (non directement nécessaires dans Python mais émulation via ANSI codes)
+RED = "\033[0;31m"
+GREEN = "\033[0;32m"
+NC = "\033[0m"  # No color
+
+INSTANCE_NAME=None
+INSTANCE_NUMBER=None
+
+def mainConfiguration():
+    """
+    Ask the system administrator for configuration information if the configuration file does not exist and store these information into "config.py"
+    """
+    
+    if not os.path.exists("config.py"):
+        configurationSettings={}
+        configurationSettings["INSTANCE_NAME"]=input("Give the intance name: ")
+        configurationSettings["INSTANCE_NUMBER"]=int(input("Give the instance number (1..4): "))
+        configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"]=getpass("Give the MySQL Root password: ")
+        configurationSettings["INSTANCE_MYSQL_USER_PASSWORD"]=getpass("Give the MySQL User password: ")
+        with open("config.py", 'w') as file:
+            file.write("configurationSettings=" + repr(configurationSettings))
+
+
+
+    
+def webAppConfiguration(configurationSettings):
+
+    ##########
+    # Initialisation de la configuration de l'application web
+    print("##########")
+    print("Initialisation de la configuration de l'application web")
+    
+    os.chdir("webApp")
+    
+    if not os.path.exists("config.php"):
+        shutil.copy("config.php.skeleton", "config.php")
+        searchReplaceInFile("config.php", "INSTANCE_NAME", configurationSettings["INSTANCE_NAME"])
+        searchReplaceInFile("config.php", "INSTANCE_MYSQL_ROOT_PASSWORD", configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"])
+        searchReplaceInFile("config.php", "INSTANCE_MYSQL_USER_PASSWORD", configurationSettings["INSTANCE_MYSQL_USER_PASSWORD"])
+    
+    os.chdir("..")
+
+def dbDataConfiguration():
+
+    ##########
+    # Création du répertoire de données initiales
+    print("##########")
+    print("Configure the initial data folder")
+    
+    # Création du répertoire de données initiales s'il n'existe pas
+    data_folder = "db/data"
+    try:
+        os.makedirs(data_folder, exist_ok=False) # if it exists, an exception is thrown
+        # Dossiers source et cible
+        free_data_folder = "db/freeData"
+
+        # Vérifie si le dossier cible existe, sinon le crée
+        os.makedirs(data_folder, exist_ok=True)
+
+        # Parcourt tous les fichiers dans le dossier source
+        for filename in os.listdir(free_data_folder):
+            source_path = os.path.join(free_data_folder, filename)
+            target_path = os.path.join(data_folder, filename)
+
+            # Vérifie si l'élément est un fichier (et non un dossier)
+            if os.path.isfile(source_path):
+                # Copie le fichier
+                shutil.copy(source_path, target_path)
+                print(f"Copied: {source_path} -> {target_path}")
+            
+    except OSError as error:
+        print(f"{GREEN}Data already exist!{NC}")
+        
+    # Chemin vers le fichier db/data/README
+    readme_path = os.path.join(data_folder, "README")
+    # Texte à ajouter
+    text_to_append = "This folder contains data inserted into DB when the system is launch at the first time.  If it doesn't exist it will contans free data"
+    # Ouvrir le fichier en mode ajout et écrire le texte
+    with open(readme_path, "a") as file:
+        file.write(text_to_append)
+        file.write("\n")  # Ajoute une nouvelle ligne, comme `echo` le ferait
+
+    os.chdir("db")
+    subprocess.run([sys.executable, "insertPrivateData.py"], check=True)
+    os.chdir("..")
+
+def dockerConfiguration(configurationSettings):
+    
+    ##########
+    # Docker configuration
+    print("##########")
+    print("Docker configuration")
+    
+    os.chdir("docker")
+    
+    if not os.path.exists("docker-compose.yml"):
+        shutil.copy("docker-compose.yml.skeleton", "docker-compose.yml")
+        searchReplaceInFile("docker-compose.yml", "INSTANCE_NAME", configurationSettings["INSTANCE_NAME"])
+        searchReplaceInFile("docker-compose.yml", "INSTANCE_NUMBER", str(configurationSettings["INSTANCE_NUMBER"]))
+        searchReplaceInFile("docker-compose.yml", "INSTANCE_MYSQL_ROOT_PASSWORD", configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"])
+    
+    os.chdir("..")
+
+
+
+def dockerRun(configurationSettings):  
+    
+    ##########
+    # Run Docker
+    print("##########")
+    print("Run Docker")
+    
+    os.chdir("docker")
+    
+    if os.name == 'nt':
+        #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose up'],stdin=subprocess.PIPE)
+        #prog.stdin.write(b'password')
+        prog = subprocess.Popen(['docker-compose', 'up'])
+        prog.communicate()
+    else:    
+        #subprocess.run(["sudo", "docker-compose", "up", "--scale SERVICE="+str(configurationSettings["INSTANCE_NUMBER"])], check=True)
+        subprocess.run(["sudo", "docker-compose", "up"], check=True)
+
+    # Pause pour laisser Docker démarrer
+    time.sleep(5)
+
+    if os.name == 'nt':
+        #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose ps'],stdin=subprocess.PIPE)
+        #prog.stdin.write(b'password')
+        prog = subprocess.Popen(['docker-compose', 'ps'])
+        #prog.stdin.write(b'password')
+        prog.communicate()
+    else:            
+        subprocess.run(["sudo", "docker-compose", "ps"], check=True)
+        
+    os.chdir("..")
+
+    
+
+def main():
+    mainConfiguration()
+    from config import configurationSettings
+    
+    webAppConfiguration(configurationSettings)
+    dbDataConfiguration()
+    dockerConfiguration(configurationSettings)
+    dockerRun(configurationSettings)
+    
+    # Population avec des données libres
+    # subprocess.run(["sh", "populationScript.sh"], check=True)
+
+    # Population via ADE
+    # subprocess.run([sys.executable, "ade2sql.py"], check=True)
+
+def filecmp(file1, file2):
+    """Compare deux fichiers pour vérifier s'ils sont identiques."""
+    with open(file1, "r") as f1, open(file2, "r") as f2:
+        return f1.read() == f2.read()
+
+def searchReplaceInFile(fileName, patern, value):
+    # Read in the file
+    with open(fileName, 'r') as file:
+        filedata = file.read()
+
+    # Replace the target string
+    filedata = filedata.replace(patern, value)
+    
+    # Write the file out again
+    with open(fileName, 'w') as file:
+        file.write(filedata)
+
+if __name__ == "__main__":
+    main()

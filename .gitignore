@@ -8,3 +8,4 @@ __pycache__
 *#
 webApp/config.php
 docker/docker-compose.yml
+config.py
