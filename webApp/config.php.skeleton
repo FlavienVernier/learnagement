@@ -5,7 +5,7 @@
   $session_timeout = 900;
 
 $learnagement_instance = "INSTANCE_NAME";
-$mysql_server = "mysql";
+$mysql_server = "mysql_INSTANCE_NAME";
 //$mysql_user = "learnagement";
 $mysql_user = "root";
 //$mysql_passwd = "INSTANCE_MYSQL_USER_PASSWORD";
