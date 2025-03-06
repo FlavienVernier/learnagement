@@ -1,7 +1,7 @@
 *.log
 *~
 **/logs
-**/data
+#**/data
 __pycache__
 .*
 #*
@@ -9,3 +9,8 @@ __pycache__
 webApp/config.php
 docker/docker-compose.yml
 config.py
+webApp2/**/*.txt
+webApp2/config.php
+*.txt
+logs_db.txt
+

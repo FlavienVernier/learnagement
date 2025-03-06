@@ -1,0 +1,557 @@
+[{"matiere": "LANG701",
+    "controles": [
+    {"type": "CC",
+        "coef": 1,
+        "notes": [
+        {"num_etu": 223, "note": 12.5},
+          {"num_etu": 356, "note": 13.5},
+          {"num_etu": 441, "note": 14},
+          {"num_etu": 528, "note": 15.5},
+          {"num_etu": 611, "note": 10.5},
+          {"num_etu": 734, "note": 11},
+          {"num_etu": 849, "note": 12},
+          {"num_etu": 912, "note": 16},
+          {"num_etu": 867, "note": 14.5},
+          {"num_etu": 783, "note": 13.25},
+          {"num_etu": 699, "note": 12}
+        ]
+    }]},
+{"matiere": "SHES703",
+    "controles": [
+        {"type": "stage",
+          "coef": 2,
+          "notes": [
+          {"num_etu": 223, "note": 16},
+            {"num_etu": 356, "note": 15},
+            {"num_etu": 441, "note": 14.5},
+            {"num_etu": 528, "note": 17},
+            {"num_etu": 611, "note": 18},
+            {"num_etu": 734, "note": 19},
+            {"num_etu": 849, "note": 16},
+            {"num_etu": 912, "note": 17.5},
+            {"num_etu": 867, "note": 15.5},
+            {"num_etu": 783, "note": 18},
+            {"num_etu": 699, "note": 17}
+          ]
+        },
+        {"type": "entretien",
+          "coef": 1,
+          "notes": [
+          {"num_etu": 223, "note": 14},
+            {"num_etu": 356, "note": 13},
+            {"num_etu": 441, "note": 12},
+            {"num_etu": 528, "note": 16},
+            {"num_etu": 611, "note": 15},
+            {"num_etu": 734, "note": 14.5},
+            {"num_etu": 849, "note": 13.5},
+            {"num_etu": 912, "note": 14},
+            {"num_etu": 867, "note": 16},
+            {"num_etu": 783, "note": 17},
+            {"num_etu": 699, "note": 15}
+          ]
+          
+        }]},
+{"matiere": "SHES704",
+    "controles": [
+        {"type": "CC",
+          "coef": 1,
+          "notes": [
+          {"num_etu": 223, "note": 14},
+            {"num_etu": 356, "note": 15},
+            {"num_etu": 441, "note": 16},
+            {"num_etu": 528, "note": 13},
+            {"num_etu": 611, "note": 12},
+            {"num_etu": 734, "note": 14.5},
+            {"num_etu": 849, "note": 15.5},
+            {"num_etu": 912, "note": 16.5},
+            {"num_etu": 867, "note": 17},
+            {"num_etu": 783, "note": 16.5},
+            {"num_etu": 699, "note": 14.5}
+          ]
+        }]},
+{"matiere": "DATA731",
+    "controles": [
+        { "type": "CC",
+          "coef": 1,
+          "notes": [
+            {"num_etu": 223, "note": 15.5},
+            {"num_etu": 356, "note": 12},
+            {"num_etu": 441, "note": 13},
+            {"num_etu": 528, "note": 14},
+            {"num_etu": 611, "note": 11},
+            {"num_etu": 734, "note": 13.5},
+            {"num_etu": 849, "note": 12.5},
+            {"num_etu": 912, "note": 14.5},
+            {"num_etu": 867, "note": 12},
+            {"num_etu": 783, "note": 15},
+            {"num_etu": 699, "note": 14.5}
+          ]          
+        }]},
+{"matiere": "INFO731",
+    "controles": [
+        {"type": "articles",
+          "coef": 1,
+          "notes": [
+            {"num_etu": 223, "note": 16},
+            {"num_etu": 356, "note": 18},
+            {"num_etu": 441, "note": 14},
+            {"num_etu": 528, "note": 17},
+            {"num_etu": 611, "note": 19},
+            {"num_etu": 734, "note": 15.5},
+            {"num_etu": 849, "note": 13},
+            {"num_etu": 912, "note": 12},
+            {"num_etu": 867, "note": 16},
+            {"num_etu": 783, "note": 17},
+            {"num_etu": 699, "note": 15}
+          ]
+          
+        },
+        {"type": "projet",
+          "coef": 2,
+          "notes": [
+            {"num_etu": 223, "note": 18},
+            {"num_etu": 356, "note": 17},
+            {"num_etu": 441, "note": 16},
+            {"num_etu": 528, "note": 19},
+            {"num_etu": 611, "note": 14},
+            {"num_etu": 734, "note": 15},
+            {"num_etu": 849, "note": 18.5},
+            {"num_etu": 912, "note": 17},
+            {"num_etu": 867, "note": 14.5},
+            {"num_etu": 783, "note": 16},
+            {"num_etu": 699, "note": 19}
+          ]
+          
+        }]},
+{"matiere": "MATH741",
+    "controles": [
+        { "type": "CT",
+          "coef": 2,
+          "notes": [
+            {"num_etu": 223, "note": 3},
+            {"num_etu": 356, "note": 5},
+            {"num_etu": 441, "note": 13.5},
+            {"num_etu": 528, "note": 9.5},
+            {"num_etu": 611, "note": 6},
+            {"num_etu": 734, "note": 15},
+            {"num_etu": 849, "note": 4},
+            {"num_etu": 912, "note": 12},
+            {"num_etu": 867, "note": 9},
+            {"num_etu": 783, "note": 14},
+            {"num_etu": 699, "note": 2}
+          ]
+          
+        },
+        {"type": "CC1",
+          "coef": 1,
+          "notes": [
+            {"num_etu": 223, "note": 12},
+            {"num_etu": 356, "note": 13},
+            {"num_etu": 441, "note": 7.5},
+            {"num_etu": 528, "note": 11},
+            {"num_etu": 611, "note": 10},
+            {"num_etu": 734, "note": 12.5},
+            {"num_etu": 849, "note": 15},
+            {"num_etu": 912, "note": 3.5},
+            {"num_etu": 867, "note": 13},
+            {"num_etu": 783, "note": 11},
+            {"num_etu": 699, "note": 7}
+          ]
+          
+        },
+        {"type": "CC2",
+          "coef": 1,
+          "notes": [
+            {"num_etu": 223, "note": 14.5},
+            {"num_etu": 356, "note": 16},
+            {"num_etu": 441, "note": 12},
+            {"num_etu": 528, "note": 13},
+            {"num_etu": 611, "note": 8.5},
+            {"num_etu": 734, "note": 17},
+            {"num_etu": 849, "note": 14},
+            {"num_etu": 912, "note": 9},
+            {"num_etu": 867, "note": 13},
+            {"num_etu": 783, "note": 12},
+            {"num_etu": 699, "note": 16}
+          ]
+          
+        },
+        {"type": "CC3",
+          "coef": 2,
+          "notes": [
+            {"num_etu": 223, "note": 17},
+            {"num_etu": 356, "note": 10},
+            {"num_etu": 441, "note": 4.5},
+            {"num_etu": 528, "note": 5.5},
+            {"num_etu": 611, "note": 16.5},
+            {"num_etu": 734, "note": 18},
+            {"num_etu": 849, "note": 13},
+            {"num_etu": 912, "note": 15.5},
+            {"num_etu": 867, "note": 16},
+            {"num_etu": 783, "note": 17.5},
+            {"num_etu": 699, "note": 14}
+          ]
+          
+        }]},
+{"matiere": "INFO732",
+    "controles": [
+        {"type": "CC",
+          "coef": 1,
+          "notes": [
+            {"num_etu": 223, "note": 13},
+            {"num_etu": 356, "note": 12.5},
+            {"num_etu": 441, "note": 14},
+            {"num_etu": 528, "note": 15},
+            {"num_etu": 611, "note": 13.5},
+            {"num_etu": 734, "note": 11.5},
+            {"num_etu": 849, "note": 14.5},
+            {"num_etu": 912, "note": 12},
+            {"num_etu": 867, "note": 16},
+            {"num_etu": 783, "note": 17},
+            {"num_etu": 699, "note": 13}
+          ]
+          
+        },
+        {"type": "TP",
+          "coef": 1,
+          "notes": [
+            {"num_etu": 223, "note": 16},
+            {"num_etu": 356, "note": 15},
+            {"num_etu": 441, "note": 14.5},
+            {"num_etu": 528, "note": 16},
+            {"num_etu": 611, "note": 17},
+            {"num_etu": 734, "note": 18},
+            {"num_etu": 849, "note": 14},
+            {"num_etu": 912, "note": 15.5},
+            {"num_etu": 867, "note": 13.5},
+            {"num_etu": 783, "note": 14},
+            {"num_etu": 699, "note": 16}
+          ]
+          
+        }]},
+{"matiere": "INFO743",
+    "controles": [
+        {"type": "CC",
+          "coef": 1,
+          "notes": [
+            {"num_etu": 223, "note": 12},
+            {"num_etu": 356, "note": 11.5},
+            {"num_etu": 441, "note": 13},
+            {"num_etu": 528, "note": 4.5},
+            {"num_etu": 611, "note": 12},
+            {"num_etu": 734, "note": 13.5},
+            {"num_etu": 849, "note": 14.5},
+            {"num_etu": 912, "note": 15},
+            {"num_etu": 867, "note": 13},
+            {"num_etu": 783, "note": 16},
+            {"num_etu": 699, "note": 14}
+          ]
+          
+        },
+        {"type": "TP",
+          "coef": 1,
+          "notes": [
+            {"num_etu": 223, "note": 15},
+            {"num_etu": 356, "note": 14},
+            {"num_etu": 441, "note": 16},
+            {"num_etu": 528, "note": 13.5},
+            {"num_etu": 611, "note": 17},
+            {"num_etu": 734, "note": 18},
+            {"num_etu": 849, "note": 16.5},
+            {"num_etu": 912, "note": 15},
+            {"num_etu": 867, "note": 14},
+            {"num_etu": 783, "note": 15},
+            {"num_etu": 699, "note": 16}
+          ]
+          
+        }]},
+{"matiere": "PROJ731",
+    "controles": [
+        { "type": "CC",
+          "coef": 1,
+          "notes": [
+            {"num_etu": 223, "note": 16},
+            {"num_etu": 356, "note": 14.5},
+            {"num_etu": 441, "note": 18},
+            {"num_etu": 528, "note": 17},
+            {"num_etu": 611, "note": 15},
+            {"num_etu": 734, "note": 16.5},
+            {"num_etu": 849, "note": 14},
+            {"num_etu": 912, "note": 15},
+            {"num_etu": 867, "note": 16.5},
+            {"num_etu": 783, "note": 17},
+            {"num_etu": 699, "note": 18}
+          ]
+          
+        },
+        {"type": "TP",
+          "coef": 2,
+          "notes": [
+            {"num_etu": 223, "note": 19},
+            {"num_etu": 356, "note": 17.5},
+            {"num_etu": 441, "note": 18},
+            {"num_etu": 528, "note": 16.5},
+            {"num_etu": 611, "note": 15},
+            {"num_etu": 734, "note": 19},
+            {"num_etu": 849, "note": 18},
+            {"num_etu": 912, "note": 17.5},
+            {"num_etu": 867, "note": 16},
+            {"num_etu": 783, "note": 18},
+            {"num_etu": 699, "note": 17}
+          ]
+          
+        }]},
+{
+"matiere": "DATA732",
+      "controles": [
+        {"type": "CC",
+          "coef": 1,
+          "notes": [
+            {"num_etu": 223, "note": 14},
+            {"num_etu": 356, "note": 12},
+            {"num_etu": 441, "note": 13},
+            {"num_etu": 528, "note": 15},
+            {"num_etu": 611, "note": 14},
+            {"num_etu": 734, "note": 16},
+            {"num_etu": 849, "note": 13.5},
+            {"num_etu": 912, "note": 14.5},
+            {"num_etu": 867, "note": 15},
+            {"num_etu": 783, "note": 16},
+            {"num_etu": 699, "note": 14.5}
+          ]
+          
+        },
+        {"type": "TP",
+          "coef": 1,
+          "notes": [
+            {"num_etu": 223, "note": 18},
+            {"num_etu": 356, "note": 17},
+            {"num_etu": 441, "note": 16},
+            {"num_etu": 528, "note": 15},
+            {"num_etu": 611, "note": 14.5},
+            {"num_etu": 734, "note": 19},
+            {"num_etu": 849, "note": 18},
+            {"num_etu": 912, "note": 17.5},
+            {"num_etu": 867, "note": 16},
+            {"num_etu": 783, "note": 17},
+            {"num_etu": 699, "note": 19}
+          ]
+          
+        },
+        {"type": "projet",
+          "coef": 2,
+          "notes": [
+            {"num_etu": 223, "note": 16},
+            {"num_etu": 356, "note": 18},
+            {"num_etu": 441, "note": 17},
+            {"num_etu": 528, "note": 15.5},
+            {"num_etu": 611, "note": 14},
+            {"num_etu": 734, "note": 17},
+            {"num_etu": 849, "note": 16},
+            {"num_etu": 912, "note": 14.5},
+            {"num_etu": 867, "note": 18},
+            {"num_etu": 783, "note": 17},
+            {"num_etu": 699, "note": 15}
+          ]
+          
+        }]},
+{"matiere": "INFO732",
+    "controles": [
+        {"type": "CC",
+          "coef": 1,
+          "notes": [
+            {"num_etu": 223, "note": 14},
+            {"num_etu": 356, "note": 13.5},
+            {"num_etu": 441, "note": 15},
+            {"num_etu": 528, "note": 16},
+            {"num_etu": 611, "note": 14.5},
+            {"num_etu": 734, "note": 13},
+            {"num_etu": 849, "note": 14},
+            {"num_etu": 912, "note": 15},
+            {"num_etu": 867, "note": 12},
+            {"num_etu": 783, "note": 16},
+            {"num_etu": 699, "note": 14}
+          ]
+          
+        }]},
+{"matiere": "ISOC731",
+    "controles": [
+        {"type": "articles",
+          "coef": 1,
+          "notes": [
+            {"num_etu": 223, "note": 17},
+            {"num_etu": 356, "note": 18},
+            {"num_etu": 441, "note": 19},
+            {"num_etu": 528, "note": 14},
+            {"num_etu": 611, "note": 15},
+            {"num_etu": 734, "note": 16},
+            {"num_etu": 849, "note": 18.5},
+            {"num_etu": 912, "note": 17},
+            {"num_etu": 867, "note": 16.5},
+            {"num_etu": 783, "note": 14},
+            {"num_etu": 699, "note": 15}
+          ]
+          
+        },
+        {"type": "projet",
+          "coef": 2,
+          "notes": [
+            {"num_etu": 223, "note": 18},
+            {"num_etu": 356, "note": 17},
+            {"num_etu": 441, "note": 16},
+            {"num_etu": 528, "note": 19},
+            {"num_etu": 611, "note": 14.5},
+            {"num_etu": 734, "note": 18},
+            {"num_etu": 849, "note": 17.5},
+            {"num_etu": 912, "note": 16},
+            {"num_etu": 867, "note": 15},
+            {"num_etu": 783, "note": 14},
+            {"num_etu": 699, "note": 18}
+          ]          
+        }]},
+{
+  "matiere": "LANG501",
+  "controles": [
+    {
+      "type": "CC",
+      "coef": 1,
+      "notes": [
+        {"num_etu": 146, "note": 14.5},
+        {"num_etu": 624, "note": 13.0},
+        {"num_etu": 111, "note": 12.5},
+        {"num_etu": 863, "note": 15.0},
+        {"num_etu": 328, "note": 14.0}
+      ]
+    }]},
+{
+  "matiere": "SHES501",
+  "controles": [
+    {
+      "type": "CC",
+      "coef": 1,
+      "notes": [
+        {"num_etu": 146, "note": 13.5},
+        {"num_etu": 624, "note": 12.0},
+        {"num_etu": 111, "note": 14.0},
+        {"num_etu": 863, "note": 13.5},
+        {"num_etu": 328, "note": 15.5}
+      ]
+    }]},
+{
+  "matiere": "SHES505",
+  "controles": [
+    {
+      "type": "CC",
+      "coef": 1,
+      "notes": [
+        {"num_etu": 146, "note": 14.0},
+        {"num_etu": 624, "note": 12.5},
+        {"num_etu": 111, "note": 13.0},
+        {"num_etu": 863, "note": 14.5},
+        {"num_etu": 328, "note": 15.0}
+      ]
+    }]},
+{
+  "matiere": "DDRS501",
+  "controles": [
+    {
+      "type": "CC",
+      "coef": 1,
+      "notes": [
+        {"num_etu": 146, "note": 13.0},
+        {"num_etu": 624, "note": 15.0},
+        {"num_etu": 111, "note": 12.0},
+        {"num_etu": 863, "note": 14.0},
+        {"num_etu": 328, "note": 13.5}
+      ]
+    }]},
+{
+  "matiere": "EASI501",
+  "controles": [
+    {
+      "type": "CC",
+      "coef": 1,
+      "notes": [
+        {"num_etu": 146, "note": 14.0},
+        {"num_etu": 624, "note": 13.5},
+        {"num_etu": 111, "note": 12.5},
+        {"num_etu": 863, "note": 15.0},
+        {"num_etu": 328, "note": 14.5}
+      ]
+    },
+    {
+      "type": "TP",
+      "coef": 2,
+      "notes": [
+        {"num_etu": 146, "note": 16.0},
+        {"num_etu": 624, "note": 15.5},
+        {"num_etu": 111, "note": 14.0},
+        {"num_etu": 863, "note": 15.5},
+        {"num_etu": 328, "note": 16.5}
+      ]
+    }]},
+{
+  "matiere": "INFO501",
+  "controles": [
+    {
+      "type": "CC",
+      "coef": 1,
+      "notes": [
+        {"num_etu": 146, "note": 13.5},
+        {"num_etu": 624, "note": 12.0},
+        {"num_etu": 111, "note": 14.0},
+        {"num_etu": 863, "note": 13.0},
+        {"num_etu": 328, "note": 14.5}
+      ]
+    },
+    {
+      "type": "TP",
+      "coef": 2,
+      "notes": [
+        {"num_etu": 146, "note": 16.0},
+        {"num_etu": 624, "note": 15.0},
+        {"num_etu": 111, "note": 14.0},
+        {"num_etu": 863, "note": 16.5},
+        {"num_etu": 328, "note": 17.0}
+      ]
+    }]},
+{
+  "matiere": "INFO502",
+  "controles": [
+    {
+      "type": "CC",
+      "coef": 1,
+      "notes": [
+        {"num_etu": 146, "note": 12.5},
+        {"num_etu": 624, "note": 13.0},
+        {"num_etu": 111, "note": 14.5},
+        {"num_etu": 863, "note": 15.0},
+        {"num_etu": 328, "note": 13.5}
+      ]
+    },
+    {
+      "type": "TP",
+      "coef": 2,
+      "notes": [
+        {"num_etu": 146, "note": 15.0},
+        {"num_etu": 624, "note": 14.5},
+        {"num_etu": 111, "note": 16.0},
+        {"num_etu": 863, "note": 15.5},
+        {"num_etu": 328, "note": 16.0}
+      ]
+    }]},
+{
+  "matiere": "MATH501",
+  "controles": [
+    {
+      "type": "CC",
+      "coef": 1,
+      "notes": [
+        {"num_etu": 146, "note": 14.0},
+        {"num_etu": 624, "note": 13.5},
+        {"num_etu": 111, "note": 13.0},
+        {"num_etu": 863, "note": 14.5},
+        {"num_etu": 328, "note": 15.0}
+      ]
+    }]}
+]
