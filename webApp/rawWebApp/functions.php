@@ -1,5 +1,5 @@
 <?php
-    require_once("config.php");
+    require_once("../config.php");
 
  /**
   * get the table primary K fields. Only 1 for base table, 2 for linking table
