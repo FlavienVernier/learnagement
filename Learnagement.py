@@ -10,6 +10,11 @@ from getpass import getpass
 # Couleurs pour les messages (non directement nécessaires dans Python mais émulation via ANSI codes)
 RED = "\033[0;31m"
 GREEN = "\033[0;32m"
+YELLOW='\033[0;33m'
+#Blue='\033[0;34m'
+#Purple='\033[0;35m'
+#Cyan='\033[0;36m'
+#White='\033[0;37m'
 NC = "\033[0m"  # No color
 
 INSTANCE_NAME=None
@@ -30,7 +35,6 @@ def mainConfiguration():
             file.write("configurationSettings=" + repr(configurationSettings))
 
 
-
     
 def webAppConfiguration(configurationSettings):
 
@@ -46,6 +50,8 @@ def webAppConfiguration(configurationSettings):
         searchReplaceInFile("config.php", "INSTANCE_NAME", configurationSettings["INSTANCE_NAME"])
         searchReplaceInFile("config.php", "INSTANCE_MYSQL_ROOT_PASSWORD", configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"])
         searchReplaceInFile("config.php", "INSTANCE_MYSQL_USER_PASSWORD", configurationSettings["INSTANCE_MYSQL_USER_PASSWORD"])
+    elif(os.path.getmtime("config.php.skeleton") > os.path.getmtime("config.php")):
+        print(f"{YELLOW}WARNING: config.php.skeleton has been updated, your confing.php can be deprecated{NC}")
     
     os.chdir("..")
 
@@ -107,6 +113,8 @@ def dockerConfiguration(configurationSettings):
         searchReplaceInFile("docker-compose.yml", "INSTANCE_NAME", configurationSettings["INSTANCE_NAME"])
         searchReplaceInFile("docker-compose.yml", "INSTANCE_NUMBER", str(configurationSettings["INSTANCE_NUMBER"]))
         searchReplaceInFile("docker-compose.yml", "INSTANCE_MYSQL_ROOT_PASSWORD", configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"])
+    elif(os.path.getmtime("docker-compose.yml.skeleton") > os.path.getmtime("docker-compose.yml")):
+        print(f"{YELLOW}WARNING: docker-compose.yml.skeleton has been updated, your docker-compose.yml can be deprecated{NC}")
     
     os.chdir("..")
 

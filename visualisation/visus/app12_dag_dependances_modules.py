@@ -3,6 +3,7 @@ import plotly.express as px
 import networkx as nx
 import colorsys
 import matplotlib.colors as mcolors
+import mysql
 import mysql.connector
 from dash import dcc, html
 from dash.dependencies import Input, Output

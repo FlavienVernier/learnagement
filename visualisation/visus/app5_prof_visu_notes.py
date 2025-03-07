@@ -7,7 +7,7 @@ import json
 import math
 
 # données à récupérer dans la bdd (fichier json)
-with open('visualisation/data/INFO_notes.json', 'r') as fichier:
+with open('../data/INFO_notes.json', 'r') as fichier:
     data=json.load(fichier)
 
 # pour avoir les notes par promotion, 

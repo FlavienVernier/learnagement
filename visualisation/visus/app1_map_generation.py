@@ -7,7 +7,7 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 
 # Chemin du fichier csv
-csv_file_path = "visualisation/data/partner_universities.csv"
+csv_file_path = "../data/partner_universities.csv"
 
 # Charger le fichier CSV en utilisant l'encodage ISO-8859-1 et le point-virgule comme délimiteur
 df = pd.read_csv(csv_file_path)

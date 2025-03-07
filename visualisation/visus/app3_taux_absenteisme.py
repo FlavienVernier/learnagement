@@ -3,7 +3,7 @@ import plotly.express as px
 from dash import Dash, dcc, html, Input, Output
 
 # Chemin du fichier csv
-absences_chemin = "visualisation/data/absences.csv"
+absences_chemin = "../data/absences.csv"
 
 # Charger le fichier CSV en utilisant l'encodage ISO-8859-1 et le point-virgule comme délimiteur
 data = pd.read_csv(absences_chemin)

@@ -4,7 +4,7 @@ from dash import Dash, html, dcc, Input, Output
 from datetime import datetime
 
 # Nom du fichier
-file = 'visualisation/data/charge_ensegnants.csv'
+file = '../data/charge_ensegnants.csv'
 
 # Charger le fichier CSV
 df = pd.read_csv(file, encoding='ISO-8859-1', delimiter=',')

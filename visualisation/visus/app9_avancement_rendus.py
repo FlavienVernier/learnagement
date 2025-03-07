@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 import pandas as pd
 
 # Lire le fichier CSV
-df = pd.read_csv('visualisation/data/avancement_rendus.csv')
+df = pd.read_csv('../data/avancement_rendus.csv')
 
 # Supprimer les espaces en tête et en queue des noms de colonnes
 df.columns = df.columns.str.strip()
