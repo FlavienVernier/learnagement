@@ -13,14 +13,14 @@ from app6_graph_avancement import app6_layout, register_callbacks as register_ca
 from app7_charge_enseignant import app7_layout, register_callbacks as register_callbacks_app7
 from app8_charge_etudiant import app8_layout, register_callbacks as register_callbacks_app8
 
-# app9 app10 app11 app12 ERRORS:
+# app9 app10 ERRORS:
 # mysql.connector.errors.ProgrammingError: 1146 (42S02): Table 'learnagement.VIEW_graphe_dependances' doesn't exist
 # mysql.connector.errors.ProgrammingError: 1146 (42S02): Table 'learnagement.VIEW_graphe_dependances_modules' doesn't exist
 
-#from app9_avancement_rendus import app9_layout, register_callbacks as register_callbacks_app9
-#from app10_proportion_stages  import app10_layout
-#from app11_dag_dependance import app11_layout, register_callbacks as register_callbacks_app11
-#from app12_dag_dependances_modules import app12_layout, register_callbacks as register_callbacks_app12
+from app9_avancement_rendus import app9_layout, register_callbacks as register_callbacks_app9
+from app10_proportion_stages  import app10_layout
+from app11_dag_dependance import app11_layout, register_callbacks as register_callbacks_app11
+from app12_dag_dependances_modules import app12_layout, register_callbacks as register_callbacks_app12
 
 # Initialiser l'application Dash principale
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -38,9 +38,9 @@ app.layout = html.Div([
         dcc.Tab(label="Avancement des cours", children=app6_layout),
         dcc.Tab(label="Charge de travail (enseignant)", children=app7_layout),
         dcc.Tab(label="Charge de travail (étudiant)", children=app8_layout),
-        #dcc.Tab(label="Avancement rendus", children=app9_layout),
-        #dcc.Tab(label="Proportion stages", children=app10_layout),
-        #dcc.Tab(label="Dépendance des cours", children=[app11_layout,app12_layout]),
+        dcc.Tab(label="Avancement rendus", children=app9_layout),
+        dcc.Tab(label="Proportion stages", children=app10_layout),
+        dcc.Tab(label="Dépendance des cours", children=[app11_layout,app12_layout]),
     ])
 ])
 
@@ -53,9 +53,9 @@ register_callbacks_app5(app)
 register_callbacks_app6(app)
 register_callbacks_app7(app)
 register_callbacks_app8(app)
-#register_callbacks_app9(app)
-#register_callbacks_app11(app)
-#register_callbacks_app12(app)
+register_callbacks_app9(app)
+register_callbacks_app11(app)
+register_callbacks_app12(app)
 
 
 if __name__ == "__main__":

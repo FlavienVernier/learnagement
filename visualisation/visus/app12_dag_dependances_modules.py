@@ -33,7 +33,18 @@ conn = mysql.connector.connect(
 
 # Exécuter la requête pour récupérer les dépendances
 cur = conn.cursor()
-cur.execute("SELECT * FROM VIEW_graphe_dependances_modules")
+#cur.execute("SELECT * FROM VIEW_graphe_dependances_modules")
+# ToDo last value "nbDependance" is undefined
+cur.execute("SELECT DISTINCT `id_sequence_prev`, `id_sequence_next`, module_prev.code_module, 0 \
+FROM `MAQUETTE_dependance_sequence` \
+JOIN MAQUETTE_module_sequence as sequence_prev on sequence_prev.id_module_sequence = MAQUETTE_dependance_sequence.id_sequence_prev \
+JOIN MAQUETTE_module_sequencage as sequencage_prev ON sequencage_prev.id_module_sequencage = sequence_prev.id_module_sequencage \
+JOIN MAQUETTE_module as module_prev ON module_prev.id_module = sequencage_prev.id_module \
+JOIN MAQUETTE_module_sequence as sequence_next on sequence_next.id_module_sequence = MAQUETTE_dependance_sequence.id_sequence_next \
+JOIN MAQUETTE_module_sequencage as sequencage_next ON sequencage_next.id_module_sequencage = sequence_next.id_module_sequencage \
+JOIN MAQUETTE_module as module_next ON module_next.id_module = sequencage_next.id_module \
+WHERE module_prev.id_module != module_next.id_module;")
+
 
 rows = cur.fetchall()
 

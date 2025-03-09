@@ -33,7 +33,15 @@ conn = mysql.connector.connect(
 
 # Exécuter la requête pour récupérer les dépendances
 cur = conn.cursor()
-cur.execute("SELECT * FROM VIEW_graphe_dependances")
+#cur.execute("SELECT * FROM VIEW_graphe_dependances")
+cur.execute("SELECT `id_sequence_prev`, `id_sequence_next`, LNM_seanceType.type, MAQUETTE_module.code_module, MAQUETTE_module.nom, MAQUETTE_module_sequence.commentaire \
+FROM `MAQUETTE_dependance_sequence` \
+JOIN MAQUETTE_module_sequence on MAQUETTE_module_sequence.id_module_sequence = MAQUETTE_dependance_sequence.id_sequence_prev \
+JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage \
+JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module \
+JOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type \
+WHERE 1;")
+
 
 rows = cur.fetchall()
 
