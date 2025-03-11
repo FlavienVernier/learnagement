@@ -3,11 +3,10 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : mysql_dev
--- Généré le : jeu. 06 mars 2025 à 17:53
+-- Généré le : mar. 11 mars 2025 à 10:41
 -- Version du serveur : 8.0.33
 -- Version de PHP : 8.2.8
 
-SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -111,6 +110,17 @@ CREATE TABLE `APC_situation_professionnelle` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `CLASS_absence`
+--
+
+CREATE TABLE `CLASS_absence` (
+  `id_seance_to_be_affected_as_enseignant` int NOT NULL,
+  `id_etudiant` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `CLASS_session_to_be_affected`
 --
 
@@ -130,6 +140,7 @@ CREATE TABLE `CLASS_session_to_be_affected_as_enseignant` (
   `id_seance_to_be_affected_as_enseignant` int NOT NULL,
   `id_seance_to_be_affected` int NOT NULL,
   `id_enseignant` int DEFAULT NULL,
+  `schedule` date DEFAULT NULL,
   `id_responsable` int NOT NULL,
   `modifiable` int NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -241,6 +252,17 @@ CREATE TABLE `LNM_etudiant` (
   `password` varchar(100) NOT NULL,
   `password_updated` int NOT NULL,
   `id_promo` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `LNM_etudiant_as_groupe`
+--
+
+CREATE TABLE `LNM_etudiant_as_groupe` (
+  `id_etudiant` int NOT NULL,
+  `id_groupe` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -588,6 +610,7 @@ ALTER TABLE `APC_apprentissage_critique`
 --
 ALTER TABLE `APC_apprentissage_critique_as_module`
   ADD PRIMARY KEY (`id_apprentissage_critique`,`id_module`),
+  ADD UNIQUE KEY `SECONDARY` (`id_apprentissage_critique`,`id_module`) USING BTREE,
   ADD KEY `FK_apprentissage_critique_as_module_as_module` (`id_module`);
 
 --
@@ -624,6 +647,14 @@ ALTER TABLE `APC_niveau`
 ALTER TABLE `APC_situation_professionnelle`
   ADD PRIMARY KEY (`id_situation_professionnelle`),
   ADD KEY `FK_situation_professionnelle_as_competence` (`id_competence`);
+
+--
+-- Index pour la table `CLASS_absence`
+--
+ALTER TABLE `CLASS_absence`
+  ADD PRIMARY KEY (`id_seance_to_be_affected_as_enseignant`,`id_etudiant`),
+  ADD UNIQUE KEY `SECONDARY` (`id_seance_to_be_affected_as_enseignant`,`id_etudiant`) USING BTREE,
+  ADD KEY `FK_absence_as_etudiant` (`id_etudiant`);
 
 --
 -- Index pour la table `CLASS_session_to_be_affected`
@@ -696,7 +727,17 @@ ALTER TABLE `LNM_enseignant`
 --
 ALTER TABLE `LNM_etudiant`
   ADD PRIMARY KEY (`id_etudiant`),
+  ADD UNIQUE KEY `SECONDARY` (`nom`,`prenom`) USING BTREE,
+  ADD UNIQUE KEY `mail` (`mail`),
   ADD KEY `FK_etudiant_as_promo` (`id_promo`);
+
+--
+-- Index pour la table `LNM_etudiant_as_groupe`
+--
+ALTER TABLE `LNM_etudiant_as_groupe`
+  ADD PRIMARY KEY (`id_etudiant`,`id_groupe`),
+  ADD UNIQUE KEY `SECONDARY` (`id_etudiant`,`id_groupe`),
+  ADD KEY `FK_etudiant_as_groupe_as_groupe` (`id_groupe`);
 
 --
 -- Index pour la table `LNM_filiere`
@@ -1097,6 +1138,13 @@ ALTER TABLE `APC_situation_professionnelle`
   ADD CONSTRAINT `FK_situation_professionnelle_as_competence` FOREIGN KEY (`id_competence`) REFERENCES `APC_competence` (`id_competence`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
+-- Contraintes pour la table `CLASS_absence`
+--
+ALTER TABLE `CLASS_absence`
+  ADD CONSTRAINT `FK_absence_as_etudiant` FOREIGN KEY (`id_etudiant`) REFERENCES `LNM_etudiant` (`id_etudiant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `FK_absence_as_session_to_be_affected_as_enseignant` FOREIGN KEY (`id_seance_to_be_affected_as_enseignant`) REFERENCES `CLASS_session_to_be_affected_as_enseignant` (`id_seance_to_be_affected_as_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
 -- Contraintes pour la table `CLASS_session_to_be_affected`
 --
 ALTER TABLE `CLASS_session_to_be_affected`
@@ -1155,6 +1203,13 @@ ALTER TABLE `LNM_enseignant`
 --
 ALTER TABLE `LNM_etudiant`
   ADD CONSTRAINT `FK_etudiant_as_promo` FOREIGN KEY (`id_promo`) REFERENCES `LNM_promo` (`id_promo`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
+-- Contraintes pour la table `LNM_etudiant_as_groupe`
+--
+ALTER TABLE `LNM_etudiant_as_groupe`
+  ADD CONSTRAINT `FK_etudiant_as_groupe_as_etudiant` FOREIGN KEY (`id_etudiant`) REFERENCES `LNM_etudiant` (`id_etudiant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `FK_etudiant_as_groupe_as_groupe` FOREIGN KEY (`id_groupe`) REFERENCES `LNM_groupe` (`id_groupe`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Contraintes pour la table `LNM_filiere`
@@ -1256,7 +1311,6 @@ ALTER TABLE `VIEW_parameters_of_views`
   ADD CONSTRAINT `FK_parameters_of_views_as_module` FOREIGN KEY (`id_module`) REFERENCES `MAQUETTE_module` (`id_module`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `FK_parameters_of_views_as_semestre` FOREIGN KEY (`id_semestre`) REFERENCES `LNM_semestre` (`id_semestre`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `FK_parameters_of_views_as_status` FOREIGN KEY (`id_statut`) REFERENCES `LNM_statut` (`id_statut`) ON DELETE RESTRICT ON UPDATE RESTRICT;
-SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

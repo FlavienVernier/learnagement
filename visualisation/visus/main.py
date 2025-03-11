@@ -13,10 +13,6 @@ from app6_graph_avancement import app6_layout, register_callbacks as register_ca
 from app7_charge_enseignant import app7_layout, register_callbacks as register_callbacks_app7
 from app8_charge_etudiant import app8_layout, register_callbacks as register_callbacks_app8
 
-# app9 app10 ERRORS:
-# mysql.connector.errors.ProgrammingError: 1146 (42S02): Table 'learnagement.VIEW_graphe_dependances' doesn't exist
-# mysql.connector.errors.ProgrammingError: 1146 (42S02): Table 'learnagement.VIEW_graphe_dependances_modules' doesn't exist
-
 from app9_avancement_rendus import app9_layout, register_callbacks as register_callbacks_app9
 from app10_proportion_stages  import app10_layout
 from app11_dag_dependance import app11_layout, register_callbacks as register_callbacks_app11
