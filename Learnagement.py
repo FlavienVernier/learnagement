@@ -72,16 +72,17 @@ def dbDataConfiguration():
         # Vérifie si le dossier cible existe, sinon le crée
         os.makedirs(data_folder, exist_ok=True)
 
-        # Parcourt tous les fichiers dans le dossier source
-        for filename in os.listdir(free_data_folder):
-            source_path = os.path.join(free_data_folder, filename)
-            target_path = os.path.join(data_folder, filename)
+        if "y" == input("Do you want to start with free data (y/n)? "):
+            # Parcourt tous les fichiers dans le dossier source
+            for filename in os.listdir(free_data_folder):
+                source_path = os.path.join(free_data_folder, filename)
+                target_path = os.path.join(data_folder, filename)
 
-            # Vérifie si l'élément est un fichier (et non un dossier)
-            if os.path.isfile(source_path):
-                # Copie le fichier
-                shutil.copy(source_path, target_path)
-                print(f"Copied: {source_path} -> {target_path}")
+                # Vérifie si l'élément est un fichier (et non un dossier)
+                if os.path.isfile(source_path):
+                    # Copie le fichier
+                    shutil.copy(source_path, target_path)
+                    print(f"Copied: {source_path} -> {target_path}")
             
     except OSError as error:
         print(f"{GREEN}Data already exist!{NC}")
