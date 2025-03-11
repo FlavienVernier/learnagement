@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : mysql_dev
--- Généré le : mar. 11 mars 2025 à 10:41
+-- Généré le : mar. 11 mars 2025 à 21:23
 -- Version du serveur : 8.0.33
 -- Version de PHP : 8.2.8
 
@@ -140,7 +140,7 @@ CREATE TABLE `CLASS_session_to_be_affected_as_enseignant` (
   `id_seance_to_be_affected_as_enseignant` int NOT NULL,
   `id_seance_to_be_affected` int NOT NULL,
   `id_enseignant` int DEFAULT NULL,
-  `schedule` date DEFAULT NULL,
+  `schedule` datetime DEFAULT NULL,
   `id_responsable` int NOT NULL,
   `modifiable` int NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -390,6 +390,8 @@ CREATE TABLE `LNM_semestre` (
 CREATE TABLE `LNM_stage` (
   `id_stage` int NOT NULL,
   `entreprise` varchar(100) NOT NULL,
+  `intitulé` varchar(50) NOT NULL,
+  `description` text NOT NULL,
   `ville` varchar(50) NOT NULL,
   `date_debut` date NOT NULL,
   `date_fin` date NOT NULL,
@@ -811,6 +813,7 @@ ALTER TABLE `LNM_semestre`
 --
 ALTER TABLE `LNM_stage`
   ADD PRIMARY KEY (`id_stage`),
+  ADD UNIQUE KEY `SECONDARY` (`entreprise`,`intitulé`),
   ADD KEY `FK_stage_as_etudiant` (`id_etudiant`),
   ADD KEY `FK_stage_as_enseignant` (`id_enseignant`);
 
