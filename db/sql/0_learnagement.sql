@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : mysql_dev
--- Généré le : mar. 11 mars 2025 à 21:23
+-- Généré le : mer. 12 mars 2025 à 13:12
 -- Version du serveur : 8.0.33
 -- Version de PHP : 8.2.8
 
@@ -174,6 +174,21 @@ CREATE TABLE `CLASS_session_type_to_be_affected_as_enseignant` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `ETU_competence_evaluation`
+--
+
+CREATE TABLE `ETU_competence_evaluation` (
+  `id_competence_evaluation` int NOT NULL,
+  `id_etudiant` int NOT NULL,
+  `id_apprentissage_critique` int NOT NULL,
+  `id_evaluation_type` int NOT NULL,
+  `evaluation` varchar(15) NOT NULL,
+  `date` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `ETU_polypoint`
 --
 
@@ -263,6 +278,22 @@ CREATE TABLE `LNM_etudiant` (
 CREATE TABLE `LNM_etudiant_as_groupe` (
   `id_etudiant` int NOT NULL,
   `id_groupe` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `LNM_evaluation_type`
+--
+
+CREATE TABLE `LNM_evaluation_type` (
+  `id_evaluation_type` int NOT NULL,
+  `evaluation_name` varchar(50) NOT NULL,
+  `heighest_value` varchar(15) NOT NULL,
+  `lowest_value` varchar(15) NOT NULL,
+  `valudation_value` varchar(15) NOT NULL,
+  `ordered_allowed_values` text,
+  `ordered_value_descriptions` text
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -693,6 +724,15 @@ ALTER TABLE `CLASS_session_type_to_be_affected_as_enseignant`
   ADD KEY `FK_type_seance_to_be_affected_as_enseignant_as_responsable` (`id_responsable`);
 
 --
+-- Index pour la table `ETU_competence_evaluation`
+--
+ALTER TABLE `ETU_competence_evaluation`
+  ADD PRIMARY KEY (`id_competence_evaluation`),
+  ADD UNIQUE KEY `SECONDARY` (`id_etudiant`,`id_apprentissage_critique`,`date`),
+  ADD KEY `FK_competence_evaluation_as_apprentissage_critique` (`id_apprentissage_critique`),
+  ADD KEY `FK_competence_evaluation_as_evaluation_type` (`id_evaluation_type`);
+
+--
 -- Index pour la table `ETU_polypoint`
 --
 ALTER TABLE `ETU_polypoint`
@@ -740,6 +780,13 @@ ALTER TABLE `LNM_etudiant_as_groupe`
   ADD PRIMARY KEY (`id_etudiant`,`id_groupe`),
   ADD UNIQUE KEY `SECONDARY` (`id_etudiant`,`id_groupe`),
   ADD KEY `FK_etudiant_as_groupe_as_groupe` (`id_groupe`);
+
+--
+-- Index pour la table `LNM_evaluation_type`
+--
+ALTER TABLE `LNM_evaluation_type`
+  ADD PRIMARY KEY (`id_evaluation_type`),
+  ADD UNIQUE KEY `SECONDARY` (`evaluation_name`);
 
 --
 -- Index pour la table `LNM_filiere`
@@ -986,6 +1033,12 @@ ALTER TABLE `CLASS_session_type_to_be_affected_as_enseignant`
   MODIFY `id_type_seance_to_be_affected_as_enseignant` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT pour la table `ETU_competence_evaluation`
+--
+ALTER TABLE `ETU_competence_evaluation`
+  MODIFY `id_competence_evaluation` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT pour la table `ETU_polypoint`
 --
 ALTER TABLE `ETU_polypoint`
@@ -1014,6 +1067,12 @@ ALTER TABLE `LNM_enseignant`
 --
 ALTER TABLE `LNM_etudiant`
   MODIFY `id_etudiant` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `LNM_evaluation_type`
+--
+ALTER TABLE `LNM_evaluation_type`
+  MODIFY `id_evaluation_type` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `LNM_groupe`
@@ -1176,6 +1235,14 @@ ALTER TABLE `CLASS_session_type_to_be_affected_as_enseignant`
   ADD CONSTRAINT `FK_tseance_to_be_affected_as_enseignant_as_seance_to_be_affected` FOREIGN KEY (`id_type_seance_to_be_affected`) REFERENCES `CLASS_session_type_to_be_affected` (`id_type_seance_to_be_affected`) ON DELETE RESTRICT ON UPDATE CASCADE,
   ADD CONSTRAINT `FK_type_seance_to_be_affected_as_enseignant_as_enseignant` FOREIGN KEY (`id_enseignant`) REFERENCES `LNM_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `FK_type_seance_to_be_affected_as_enseignant_as_responsable` FOREIGN KEY (`id_responsable`) REFERENCES `LNM_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
+-- Contraintes pour la table `ETU_competence_evaluation`
+--
+ALTER TABLE `ETU_competence_evaluation`
+  ADD CONSTRAINT `FK_competence_evaluation_as_apprentissage_critique` FOREIGN KEY (`id_apprentissage_critique`) REFERENCES `APC_apprentissage_critique` (`id_apprentissage_critique`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `FK_competence_evaluation_as_etudiant` FOREIGN KEY (`id_etudiant`) REFERENCES `LNM_etudiant` (`id_etudiant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `FK_competence_evaluation_as_evaluation_type` FOREIGN KEY (`id_evaluation_type`) REFERENCES `LNM_evaluation_type` (`id_evaluation_type`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Contraintes pour la table `ETU_polypoint`
