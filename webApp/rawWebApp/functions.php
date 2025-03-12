@@ -225,28 +225,6 @@ function getFields($conn, $table_name){
   return $fields;
 }
 
-/*
- * retrun dictionary paramField => paramValue
- */
-function getParameters($conn){
-  $sessionId = session_id();
-  
-  $param_req = "SELECT * FROM `VIEW_parameters_of_views` WHERE `sessionId` =  \"$sessionId\"";
-  
-  /*
-   * get parameters fields
-   */
-  $result = mysqli_query($conn, $param_req);
-  
-  if (!$result) {
-    echo 'Impossible d\'exécuter la requête : ' . $req;
-    echo 'error ' . mysqli_error($conn);
-    exit;
-  }
-  $parameters = mysqli_fetch_all($result, MYSQLI_ASSOC);
-
-  return $parameters[0];
-}
 
 /*
  * WORK IN PROGRESS

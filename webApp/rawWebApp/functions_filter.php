@@ -43,4 +43,48 @@ function __addFiltersInRequest($conn, $request){
 
   return $filteredRequest;
 }
+
+/**
+ * @return array of parameter field names
+ */
+function getParameterFields($conn){
+  $fields = getFields($conn, "VIEW_parameters_of_views");
+
+  // remove system parameter fields
+  if (($key = array_search("id_parameters_of_views", $fields)) !== false) {
+    unset($fields[$key]);
+  }
+  if (($key = array_search("userId", $fields)) !== false) {
+    unset($fields[$key]);
+  }
+  if (($key = array_search("sessionId", $fields)) !== false) {
+    unset($fields[$key]);
+  }
+
+  // return only parameter field names
+  return fields;
+}
+
+/*
+ * retrun dictionary paramField => paramValue
+ */
+function getParameters($conn){
+  $sessionId = session_id();
+  
+  $param_req = "SELECT * FROM `VIEW_parameters_of_views` WHERE `sessionId` =  \"$sessionId\"";
+  
+  /*
+   * get parameters fields
+   */
+  $result = mysqli_query($conn, $param_req);
+  
+  if (!$result) {
+    echo 'Impossible d\'exécuter la requête : ' . $req;
+    echo 'error ' . mysqli_error($conn);
+    exit;
+  }
+  $parameters = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+  return $parameters[0];
+}
 ?>
