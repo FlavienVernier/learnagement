@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : mysql_dev
--- Généré le : mer. 12 mars 2025 à 13:13
+-- Généré le : jeu. 13 mars 2025 à 20:29
 -- Version du serveur : 8.0.33
 -- Version de PHP : 8.2.8
 
@@ -11886,6 +11886,18 @@ INSERT INTO `MAQUETTE_module_sequence` (`id_module_sequence`, `id_module_sequenc
 (769, 113, 3, NULL),
 (770, 113, 2, NULL),
 (771, 113, 1, NULL);
+
+--
+-- Déchargement des données de la table `MRDBF_system_request`
+--
+
+INSERT INTO `MRDBF_system_request` (`id_system_request`, `groupe_of_system_request`, `nom`, `request`) VALUES
+(1, 'Structure', 'link_table', 'SELECT `TABLE_NAME` AS `TABLE_NAME`\r\nFROM `information_schema`.`KEY_COLUMN_USAGE`\r\nWHERE `TABLE_SCHEMA` = \'learnagement\'\r\n    AND `CONSTRAINT_NAME` = \'PRIMARY\'\r\nGROUP BY `TABLE_NAME`\r\nHAVING count(0) = 2;'),
+(2, 'Structure', 'linked_table', 'SELECT DISTINCT `TABLE_NAME`\r\nFROM `information_schema`.`KEY_COLUMN_USAGE`\r\nWHERE `TABLE_SCHEMA` = \'learnagement\'\r\nAND `CONSTRAINT_NAME` LIKE \"FK%\"\r\nAND `TABLE_NAME` NOT IN\r\n(SELECT `TABLE_NAME` AS `TABLE_NAME`\r\nFROM `information_schema`.`KEY_COLUMN_USAGE`\r\nWHERE `TABLE_SCHEMA` = \'learnagement\'\r\n    AND `CONSTRAINT_NAME` = \'PRIMARY\'\r\nGROUP BY `TABLE_NAME`\r\nHAVING count(0) = 2);'),
+(3, 'Structure', 'leaf_table', 'SELECT DISTINCT `TABLE_NAME` AS `TABLE_NAME`\r\nFROM `information_schema`.`KEY_COLUMN_USAGE`\r\nWHERE `TABLE_SCHEMA` = \'learnagement\'\r\nAND `TABLE_NAME` NOT IN\r\n(SELECT `TABLE_NAME`\r\nFROM `information_schema`.`KEY_COLUMN_USAGE`\r\nWHERE `TABLE_SCHEMA` = \'learnagement\'\r\nAND `CONSTRAINT_NAME` LIKE \"FK%\")'),
+(4, 'Check', 'table_without_secondary_K', 'SELECT DISTINCT `TABLE_NAME`\r\nFROM `information_schema`.`KEY_COLUMN_USAGE`\r\nWHERE `TABLE_SCHEMA` = \'learnagement\'\r\nand `TABLE_NAME` not in (\r\nSELECT `TABLE_NAME` AS `TABLE_NAME`\r\nFROM `information_schema`.`KEY_COLUMN_USAGE`\r\nWHERE `TABLE_SCHEMA` = \'learnagement\'\r\n    AND `CONSTRAINT_NAME` = \'SECONDARY\');'),
+(5, 'Structure', 'link', 'SELECT DISTINCT TABLE_NAME, REFERENCED_TABLE_NAME\r\nFROM `information_schema`.`KEY_COLUMN_USAGE`\r\nWHERE `TABLE_SCHEMA` = \'learnagement\'\r\nAND `CONSTRAINT_NAME` LIKE \"FK%\";'),
+(6, 'Check', 'primaryK_namming_error', 'SELECT DISTINCT TABLE_NAME, COLUMN_NAME, TRIM( SUBSTR(TABLE_NAME, LOCATE(\'_\', TABLE_NAME)) ), TRIM( SUBSTR(COLUMN_NAME, LOCATE(\'_\', COLUMN_NAME)) )\r\nFROM `information_schema`.`KEY_COLUMN_USAGE`\r\nWHERE `TABLE_SCHEMA` = \'learnagement\'\r\nAND `CONSTRAINT_NAME` LIKE \"PRIMARY\"\r\nAND TABLE_NAME IN \r\n(SELECT DISTINCT TABLE_NAME\r\nFROM `information_schema`.`KEY_COLUMN_USAGE`\r\nWHERE `TABLE_SCHEMA` = \'learnagement\'\r\nAND `CONSTRAINT_NAME` LIKE \"PRIMARY\"\r\nGROUP BY TABLE_NAME\r\nHAVING COUNT(*)=1)\r\nAND TRIM( SUBSTR(TABLE_NAME, LOCATE(\'_\', TABLE_NAME)) ) != TRIM( SUBSTR(COLUMN_NAME, LOCATE(\'_\', COLUMN_NAME)) );');
 
 --
 -- Déchargement des données de la table `VIEW_check`

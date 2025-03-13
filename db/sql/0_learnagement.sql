@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : mysql_dev
--- Généré le : mer. 12 mars 2025 à 13:12
+-- Généré le : jeu. 13 mars 2025 à 20:28
 -- Version du serveur : 8.0.33
 -- Version de PHP : 8.2.8
 
@@ -66,7 +66,7 @@ CREATE TABLE `APC_competence` (
 
 CREATE TABLE `APC_competence_as_filiere_as_statut` (
   `id_competence` int NOT NULL,
-  `is_filiere` int NOT NULL,
+  `id_filiere` int NOT NULL,
   `id_status` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
@@ -566,6 +566,19 @@ CREATE TABLE `MAQUETTE_module_sequence` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `MRDBF_system_request`
+--
+
+CREATE TABLE `MRDBF_system_request` (
+  `id_system_request` int NOT NULL,
+  `groupe_of_system_request` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `nom` varchar(50) NOT NULL,
+  `request` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `VIEW_check`
 --
 
@@ -657,7 +670,7 @@ ALTER TABLE `APC_competence`
 -- Index pour la table `APC_competence_as_filiere_as_statut`
 --
 ALTER TABLE `APC_competence_as_filiere_as_statut`
-  ADD PRIMARY KEY (`id_competence`,`is_filiere`,`id_status`);
+  ADD PRIMARY KEY (`id_competence`,`id_filiere`,`id_status`);
 
 --
 -- Index pour la table `APC_composante_essentielle`
@@ -918,6 +931,7 @@ ALTER TABLE `MAQUETTE_module`
 --
 ALTER TABLE `MAQUETTE_module_as_learning_unit`
   ADD PRIMARY KEY (`id_module`,`id_learning_unit`),
+  ADD UNIQUE KEY `SECONDARY` (`id_module`,`id_learning_unit`),
   ADD KEY `FK_module_as_learning_unit_as_learning_unit` (`id_learning_unit`),
   ADD KEY `FK_module_sequencage_as_responsable` (`id_responsable`);
 
@@ -938,6 +952,13 @@ ALTER TABLE `MAQUETTE_module_sequencage`
 ALTER TABLE `MAQUETTE_module_sequence`
   ADD PRIMARY KEY (`id_module_sequence`),
   ADD UNIQUE KEY `SECONDARY` (`id_module_sequencage`,`numero_ordre`) USING BTREE;
+
+--
+-- Index pour la table `MRDBF_system_request`
+--
+ALTER TABLE `MRDBF_system_request`
+  ADD PRIMARY KEY (`id_system_request`),
+  ADD UNIQUE KEY `SECONDARY` (`nom`);
 
 --
 -- Index pour la table `VIEW_check`
@@ -1139,6 +1160,12 @@ ALTER TABLE `MAQUETTE_module_sequencage`
 --
 ALTER TABLE `MAQUETTE_module_sequence`
   MODIFY `id_module_sequence` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `MRDBF_system_request`
+--
+ALTER TABLE `MRDBF_system_request`
+  MODIFY `id_system_request` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `VIEW_check`
