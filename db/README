@@ -1,0 +1,6 @@
+
+The freeData directory contains free data used as examples or to texture the application. This directory is provided by git
+
+The data directory contains the data used to start the application. This directory is private and must never be published.
+
+The sql directory contains all sql scripts used to start the application, including links to data.

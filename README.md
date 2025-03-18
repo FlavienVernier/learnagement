@@ -16,8 +16,11 @@ Python nécessaire pour windows
 
 L'app s'arrête, sans perte de donnée, vie la commande : "sudo docker-compose down"
 
-## Netoyage de l'app
+## Stop or Clean up (destroy) the app
 
-Dans le sous-répertoire docker, le script "destroy.sh" ou "destroy.py", efface toutes les données de l'app et l'arrête. Attention il n'y a pas de moyen de récupération si vous n'avez pas fait de sauvegarde.
+To stop:
+python Learnagement -stop
 
+To destroy, remove all data and restart from scratch, the app must be stoped
+python Learnagement -destroy
 

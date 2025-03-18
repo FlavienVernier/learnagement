@@ -7,7 +7,7 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 
 # Chemin du fichier csv
-csv_file_path = "visualisation/data/partner_universities.csv"
+csv_file_path = "../data/partner_universities.csv"
 
 # Charger le fichier CSV en utilisant l'encodage ISO-8859-1 et le point-virgule comme délimiteur
 df = pd.read_csv(csv_file_path)
@@ -35,69 +35,69 @@ df_grouped[['Latitude', 'Longitude']] = df_grouped.apply(get_coordinates, axis=1
 # Supprimer les lignes avec des coordonnées manquantes
 df_grouped = df_grouped.dropna(subset=['Latitude', 'Longitude'])
 
-# Initialisation de la figure
-fig = go.Figure()
+# app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-# Ajouter des traces pour chaque pays
-countries = df_grouped['Country'].unique()
-for country in countries:
-    country_data = df_grouped[df_grouped['Country'] == country]
-    fig.add_trace(go.Scattermapbox(
-        lat=country_data['Latitude'],
-        lon=country_data['Longitude'],
-        mode='markers',
-        marker=dict(size=12, opacity=0.8),
-        name=country,  # Nom du pays pour le dropdown
-        hoverinfo='text',
-        hovertext=country_data.apply(lambda row: f"Université(s): {row['Universities']}<br>Ville: {row['City']}<br>Pays: {row['Country']}", axis=1)
-    ))
-
-# Configuration de la carte
-fig.update_layout(
-    mapbox=dict(
-        style="carto-positron",
-        zoom=3,
-        center=dict(lat=0, lon=0)
-    ),
-    updatemenus=[dict(
-        buttons=[dict(
-            args=[{'visible': [country == selected_country for selected_country in countries]}],
-            label=country,
-            method='update'
-        ) for country in countries
-        ] + [
-            dict(
-                args=[{'visible': [True] * len(countries)}],
-                label="Tous",
-                method='update'
-            )
-        ],
-        direction="down",
-        showactive=True,
-        x=0.1,
-        xanchor="left",
-        y=1.15,
-        yanchor="top"
-    )],
-    title="Carte des Universités",
-    margin=dict(l=0, r=0, t=30, b=0)
-)
-
-"""# Initialiser l'application Dash
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-"""
-# Définir la mise en page de l'application Dash
 app1_layout = html.Div(
     children=[
         html.H1("Carte des Universités Partenaires", style={"textAlign": "center"}),
+        dcc.Dropdown(
+            id="country-dropdown",
+            options=[{"label": "Tous", "value": "Tous"}] + [{"label": country, "value": country} for country in df_grouped['Country'].unique()],
+            value="Tous",
+            clearable=False,
+            style={"width": "50%", "margin": "auto"}
+        ),
         dcc.Graph(
-            id="university-map",
-            figure=fig
+            id="university-map"
         )
     ]
 )
-"""
-# Lancer l'application Dash
-if __name__ == "__main__":
-    app.run_server(debug=True)
-"""
+
+def register_callbacks(app):
+    # Callback pour mettre à jour la carte en fonction du pays sélectionné
+    @app.callback(
+        Output("university-map", "figure"),
+        [Input("country-dropdown", "value")]
+    )
+    def update_map(selected_country):
+        if selected_country == "Tous":
+            filtered_data = df_grouped
+        else:
+            filtered_data = df_grouped[df_grouped["Country"] == selected_country]
+        
+        # Calculer le centre de la carte
+        center_lat = filtered_data['Latitude'].mean()
+        center_lon = filtered_data['Longitude'].mean()
+        
+        # Initialisation de la figure
+        fig = go.Figure()
+
+        # Ajouter des traces pour chaque pays (ou toutes les données si "Tous" est sélectionné)
+        countries = filtered_data['Country'].unique()
+        for country in countries:
+            country_data = filtered_data[filtered_data['Country'] == country]
+            fig.add_trace(go.Scattermapbox(
+                lat=country_data['Latitude'],
+                lon=country_data['Longitude'],
+                mode='markers',
+                marker=dict(size=12, opacity=0.8),
+                name=country,
+                hoverinfo='text',
+                hovertext=country_data.apply(lambda row: f"Université(s): {row['Universities']}<br>Ville: {row['City']}<br>Pays: {row['Country']}", axis=1)
+            ))
+
+        # Configuration de la carte
+        fig.update_layout(
+            mapbox=dict(
+                style="carto-positron",
+                zoom=3,
+                center=dict(lat=center_lat, lon=center_lon)
+            ),
+            title="Carte des Universités",
+            margin=dict(l=0, r=0, t=30, b=0)
+        )
+
+        return fig
+
+# if __name__ == "__main__":
+#     app.run_server(debug=True)

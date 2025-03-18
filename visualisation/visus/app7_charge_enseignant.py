@@ -4,7 +4,7 @@ from dash import Dash, html, dcc, Input, Output
 from datetime import datetime
 
 # Nom du fichier
-file = 'visualisation/data/charge_ensegnants.csv'
+file = '../data/charge_ensegnants.csv'
 
 # Charger le fichier CSV
 df = pd.read_csv(file, encoding='ISO-8859-1', delimiter=',')
@@ -37,10 +37,10 @@ df_calcule = df.groupby(['nom', 'type'], as_index=False).agg({
 })
 
 # Créer l'application Dash
-app = Dash(__name__)
+# app = Dash(__name__)
 
 # Layout de l'application
-app.layout = html.Div([
+app7_layout = html.Div([
     html.H1("Visualisation de la charge de travail des enseignants"),
     
     # Dropdown pour sélectionner le filtre de période
@@ -56,43 +56,44 @@ app.layout = html.Div([
     ),
     
     # Graphique
-    dcc.Graph(id='graphique-charge')
+    dcc.Graph(id='graphique-charge_enseignant')
 ])
 
-# Callback pour mettre à jour le graphique
-@app.callback(
-    Output('graphique-charge', 'figure'),
-    [Input('filtre-periode', 'value')]
-)
-def update_graph(filtre_periode):
-    today = datetime.today().date()  # Date d'aujourd'hui
-    current_month = datetime.today().strftime('%B')  # Mois courant, par exemple "January"
-
-    # Filtrer les données selon la sélection
-    if filtre_periode == 'all':
-        df_filtered = df_calcule
-    elif filtre_periode == 'today':
-        df_filtered = df_calcule[df_calcule['jour'] == today]  # Filtre pour le jour d'aujourd'hui
-    elif filtre_periode == 'this_month':
-        df_filtered = df_calcule[df_calcule['mois'] == current_month]  # Filtre pour le mois en cours
-    else:
-        df_filtered = df_calcule  # Par défaut, toutes les données
-
-    # Créer le graphique
-    fig = px.bar(
-        df_filtered,
-        x='nom',  # Axe X : noms des enseignants
-        y='nb_heur',  # Axe Y : nombre d'heures
-        color='matiere',  # Couleur par matière
-        title=f"Charge de travail des enseignants ({filtre_periode})",
-        labels={'nom': 'Enseignant', 'nb_heur': 'Nombre d\'heures', 'matiere': 'Matière'},
-        text='type'  # Afficher le type de cours sur les barres
+def register_callbacks(app):
+    # Callback pour mettre à jour le graphique
+    @app.callback(
+        Output('graphique-charge_enseignant', 'figure'),
+        [Input('filtre-periode', 'value')]
     )
+    def update_graph(filtre_periode):
+        today = datetime.today().date()  # Date d'aujourd'hui
+        current_month = datetime.today().strftime('%B')  # Mois courant, par exemple "January"
 
-    fig.update_traces(textposition='outside')  # Placer les labels à l'extérieur des barres
-    return fig
+        # Filtrer les données selon la sélection
+        if filtre_periode == 'all':
+            df_filtered = df_calcule
+        elif filtre_periode == 'today':
+            df_filtered = df_calcule[df_calcule['jour'] == today]  # Filtre pour le jour d'aujourd'hui
+        elif filtre_periode == 'this_month':
+            df_filtered = df_calcule[df_calcule['mois'] == current_month]  # Filtre pour le mois en cours
+        else:
+            df_filtered = df_calcule  # Par défaut, toutes les données
+
+        # Créer le graphique
+        fig = px.bar(
+            df_filtered,
+            x='nom',  # Axe X : noms des enseignants
+            y='nb_heur',  # Axe Y : nombre d'heures
+            color='matiere',  # Couleur par matière
+            title=f"Charge de travail des enseignants ({filtre_periode})",
+            labels={'nom': 'Enseignant', 'nb_heur': 'Nombre d\'heures', 'matiere': 'Matière'},
+            text='type'  # Afficher le type de cours sur les barres
+        )
+
+        fig.update_traces(textposition='outside')  # Placer les labels à l'extérieur des barres
+        return fig
 
 # Lancer l'application
-if __name__ == '__main__':
-    app.run_server(debug=True)
+# if __name__ == '__main__':
+#     app.run_server(debug=True)
 

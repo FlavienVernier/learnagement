@@ -1,14 +1,23 @@
 *.log
 *~
 **/logs
-#**/data
+
+# data directories store private data, NEVER PUT IN ON GIT 
+**/data
+
+
 __pycache__
 .*
 #*
 *#
+
+# private files that contain password, NEVER PUT IN ON GIT
 webApp/config.php
 docker/docker-compose.yml
+config.py
+visualisation/visus/logs_db.txt
 
-webApp2/**/*.txt
-webApp2/config.php
+webApp/**/*.txt
 *.txt
+
+

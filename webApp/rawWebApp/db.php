@@ -1,6 +1,6 @@
 <?php
 
-    require_once("config.php");
+    require_once("../config.php");
     require_once("functions.php");
 
 
@@ -37,6 +37,7 @@ function __getTableFromRequest($conn, $request){
 }
 
 // return request splitted in a dictionnary
+// ToDo give the dictionnary structure
 function __buidSecondaryKeyRequest($conn, $table){
 
   global $mysql_db;
@@ -86,6 +87,7 @@ function __buidSecondaryKeyRequest($conn, $table){
   return $requestAsDict;
 }
 
+// Create views of explicit secondary K : (primaryK, explicitSecondaryK, primariK, 1stForeignKofPrimaryK, 2ndForeignKofPrimaryK, 3rd...) foreign K are the foreign Ks than can compose the secondary K, the number ok foreign K can be 0
 function buidSecondaryKeyRequest($conn, $table){
   //print("</br>TABLE: " . $table . "</br>");
 
@@ -133,11 +135,27 @@ function initViewOfExplicitFKOfUpdatable($conn){
       buidSecondaryKeyRequest($conn, $foreignTable);
     }
   }
-
-  
-
-  
 }
 
+function __buildLinkTableViews4CrossMatrices($conn, $table){
+
+    //get foreign Ks fields
+    $foreignKeysFields = getForeignKeys($conn, $table);
+
+    
+}
+
+function buildLinkTableViews4CrossMatrices($conn){
+  
+  $request = "SELECT table_name, request FROM MRDBF_link_table";
+
+  $result = query($conn, $request);
+  
+  while ($row = mysqli_fetch_assoc($result)) {
+    $table = $row["table_name"];
+    
+    __buildLinkTableViews4CrossMatrices($conn, $table);
+  }
+}
 
 ?>

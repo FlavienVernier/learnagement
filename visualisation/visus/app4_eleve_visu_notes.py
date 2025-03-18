@@ -6,7 +6,7 @@ import json
 import math
 
 # données à récupérer dans la bdd (fichier json)
-with open('visualisation/data/INFO_notes.json', 'r') as fichier:
+with open('../data/INFO_notes.json', 'r') as fichier:
     data=json.load(fichier)
 
 num_etu=528
@@ -18,14 +18,14 @@ def get_note_eleve(notes_promo, num_etu):
     return None  # dans le cas où l'étudiant n'est pas dans la promo
 
 def calcul_informations(notes_promo, note_eleve):
-    print("notes promo", notes_promo)
-    print("note eleve", note_eleve)
+    # print("notes promo", notes_promo)
+    # print("note eleve", note_eleve)
     # calcul des informations
     # on récupère seulement les notes :
     notes_promo=[eleve['note'] for eleve in notes_promo]
     # on trie les notes par ordre croissant
     notes_promo=sorted(notes_promo)  
-    print("notes promo", notes_promo)
+    # print("notes promo", notes_promo)
     moyenne=sum(notes_promo)/len(notes_promo)
     ordre_notes=sorted(notes_promo, reverse=True)
     classement=ordre_notes.index(note_eleve)+1
@@ -40,10 +40,10 @@ def calcul_informations(notes_promo, note_eleve):
     X_notes=list(range(21)) #liste qui va de 0 à 20 
     Y_notes=[0]*len(X_notes) # initialisation de la liste
     for note in notes_promo :
-        print("note", note)
+        # print("note", note)
         note_arrondie=math.floor(note)
-        print("note arrondie", note_arrondie)
-        print("Y_notes", Y_notes)
+        # print("note arrondie", note_arrondie)
+        # print("Y_notes", Y_notes)
         Y_notes[note_arrondie]+=1
 
     couleur=['#bddcf3' if math.floor(i)!=math.floor(note_eleve) else '#b14bd5' if i<10 else '#13a999' for i in X_notes]
@@ -57,7 +57,7 @@ def calcul_moyenne(matiere_selectionnee):
     notes_promo=[]
     # pour chaque élève, on calcule sa note moyenne en fonction des coefs
     for etudiant in range(len(data_matiere['controles'][0]['notes'])):
-        print("etudiant", etudiant)
+        # print("etudiant", etudiant)
         somme_notes_ponderees=0
         somme_coef=0
         for controle in data_matiere['controles']:
@@ -69,6 +69,18 @@ def calcul_moyenne(matiere_selectionnee):
         num_etu=controle['notes'][etudiant]['num_etu']
         notes_promo.append({'num_etu':num_etu, 'note':note_etu})
     return notes_promo
+
+def matieres_pour_etudiant(data, num_etu):
+    """Permet de récupérer les matières pour lesquelles un étudiant a des notes"""
+    matieres_disponibles=[]
+    for matiere in data:
+        for controle in matiere['controles']:
+            # on regarde si le num_etudiant est dans les notes des contrôles des matières
+            if any(note['num_etu']==num_etu for note in controle['notes']):
+                matieres_disponibles.append(matiere)
+                break  # si o a trouvé l'étudiant dans une matière, on passe à la suivante
+    return matieres_disponibles
+
 """
 # lancement de Dash
 app=dash.Dash(__name__)
@@ -80,15 +92,15 @@ app4_layout=html.Div([
     children=[
         # choix de la matière
         dcc.Dropdown(
-            id='choix_matiere',
-            options=[{'label' : matiere['matiere'], 'value':matiere['matiere']} for matiere in data],
-            value=data[0]['matiere'],
+            id='choix_matiere_eleve',
+            options=[{'label' : matiere['matiere'], 'value':matiere['matiere']} for matiere in matieres_pour_etudiant(data, num_etu)],
+            value=matieres_pour_etudiant(data, num_etu)[0]['matiere'],
             style={'width': '48%'}
         ),
 
         # choix du contrôle
         dcc.Dropdown(
-            id='choix_controle',
+            id='choix_controle_eleve',
             style={'width': '48%', 'margin':'auto'}
         ),],
 
@@ -98,15 +110,14 @@ app4_layout=html.Div([
 
     # affichage des notes
     dcc.Graph(
-        id='bar-chart',
+        id='affichage_note_eleve',
         config={'displayModeBar': False},
         style={'margin': '10px auto', 'marginTop':'5px', 'marginBottom':'3px'}
     ),
 
     # affichage du classement
     html.Div(
-        id='affichage_classement',
-        #f"Classement : {classement}e/{len(notes_promo)} ", #- Moyenne : {moyenne:.2f}/20 - Médiane : {mediane:.2f}/20",
+        id='affichage_classement_eleve',
         style={'textAlign': 'center', 'fontSize': 18, 'marginTop': 5}
     )
 ])
@@ -114,8 +125,8 @@ app4_layout=html.Div([
 def register_callbacks(app):
     # Callback en fonction de la matière sélectionnée
     @app.callback(
-        [Output('choix_controle', 'options'), Output('choix_controle', 'value')],
-        [Input('choix_matiere', 'value')]
+        [Output('choix_controle_eleve', 'options'), Output('choix_controle_eleve', 'value')],
+        [Input('choix_matiere_eleve', 'value')]
     )
     def update_controles(matiere_selectionnee):
 
@@ -135,16 +146,16 @@ def register_callbacks(app):
 
     # Callback en fonction du controle sélectionné
     @app.callback(
-        [Output('bar-chart', 'figure'), Output('affichage_classement', 'children')],
-        [Input('choix_matiere', 'value'), Input('choix_controle', 'value')]
+        [Output('affichage_note_eleve', 'figure'), Output('affichage_classement_eleve', 'children')],
+        [Input('choix_matiere_eleve', 'value'), Input('choix_controle_eleve', 'value')]
     )
 
     def update_graphique(matiere_selectionnee, controle_selectionne):
-        print(matiere_selectionnee, controle_selectionne)
+        # print(matiere_selectionnee, controle_selectionne)
         # le calcul des notes de la promo est différent si on veut la moyenne de tous les contrôles ou seulement un cc
         if controle_selectionne=='moyenne' :
             notes_promo=calcul_moyenne(matiere_selectionnee)
-            print("moyenne", notes_promo)
+            # print("moyenne", notes_promo)
 
         else :
             # on récupère les données correspondant à la matière et au contrôle
@@ -153,7 +164,7 @@ def register_callbacks(app):
 
             # on récupère les notes des contrôles
             notes_promo = [{'num_etu': note['num_etu'], 'note': note['note']} for note in data_controle['notes']]
-            print("notes controle", notes_promo)
+            # print("notes controle", notes_promo)
 
         note_eleve=get_note_eleve(notes_promo, num_etu)
 
