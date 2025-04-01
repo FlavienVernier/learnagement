@@ -225,18 +225,25 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
         prog = subprocess.Popen(['docker-compose', 'down'])
         prog.communicate()
     else:
-        cmd = ["sudo"] + cmd
+        #cmd = ["sudo"] + cmd
         #print(" ".join(cmd))
-        print("Enter MySQL password:")
-        tables=os.popen(" ".join(cmd)).read().replace("-", "").replace("+", "").replace("|", "").replace("\n", "")
-        tables=tables[tables.find("TABLE_NAME"):].replace("TABLE_NAME", "").split()
-        print(" ".join(tables))
+        #print("Enter MySQL password:")
+        #tables=os.popen(" ".join(cmd)).read().replace("-", "").replace("+", "").replace("|", "").replace("\n", "")
+        #tables=tables[tables.find("TABLE_NAME"):].replace("TABLE_NAME", "").split()
+        #print(" ".join(tables))
         
         structureFile = "db/backup/struct"
         cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p", "--no-data", "--ignore-views", "--skip-triggers", "learnagement", ">", structureFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
+
+        dataFile = "db/backup/data"
+        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p", "--no-create-info", "--ignore-views", "--skip-triggers", "learnagement", ">", dataFile]
+        print(" ".join(cmd))
+        print("Enter MySQL password:")
+        os.system(" ".join(cmd))
+        
     
 def stop():
     ##########
