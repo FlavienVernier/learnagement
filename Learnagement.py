@@ -24,7 +24,7 @@ def mainConfiguration():
     """
     Ask the system administrator for configuration information if the configuration file does not exist and store these information into "config.py"
     """
-    
+
     if not os.path.exists("config.py"):
         configurationSettings={}
         configurationSettings["INSTANCE_NAME"]=input("Give the intance name: ")
@@ -33,6 +33,7 @@ def mainConfiguration():
         configurationSettings["INSTANCE_MYSQL_USER_PASSWORD"]=getpass("Give the MySQL User password: ")
         with open("config.py", 'w') as file:
             file.write("configurationSettings=" + repr(configurationSettings))
+   
 
 
     
@@ -133,10 +134,10 @@ def dockerRun(configurationSettings):
     if os.name == 'nt':
         #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose up'],stdin=subprocess.PIPE)
         #prog.stdin.write(b'password')
-        prog = subprocess.Popen(['docker-compose', 'up'])
+        prog = subprocess.Popen(['docker-compose', 'up', '--remove-orphans'])
         prog.communicate()
     else:    
-        subprocess.run(["sudo", "docker-compose", "up"], check=True)
+        subprocess.run(["sudo", "docker-compose", "up", "--remove-orphans"], check=True)
 
     # Pause pour laisser Docker démarrer
     time.sleep(5)
@@ -162,6 +163,10 @@ def run():
     dbDataConfiguration()
     dockerConfiguration(configurationSettings)
     dockerRun(configurationSettings)
+
+    
+    print(f"{YELLOW}WWeb Apps will run on: http://127.0.0.1:{configurationSettings["INSTANCE_NUMBER"]}0080{NC}")
+    print(f"{YELLOW}WPHPMyAdmin will run on: http://127.0.0.1:{configurationSettings["INSTANCE_NUMBER"]}8080{NC}")
     
     # Population avec des données libres
     # subprocess.run(["sh", "populationScript.sh"], check=True)
@@ -185,7 +190,41 @@ def searchReplaceInFile(fileName, patern, value):
     # Write the file out again
     with open(fileName, 'w') as file:
         file.write(filedata)
+
+def backup():
+    from config import configurationSettings
+
+    """
+SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagement" AND TABLE_TYPE = "BASE TABLE"
+    """
+    
+    ##########
+    # Backup DB
+    print("##########")
+    print(f"{GREEN}BackUp DB{NC}")
+
+    f="listOfTable.txt"
+    cmd=["docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysql",  "-u",  "root", "-p"+configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"], "-e", "'SELECT", "table_name", "FROM", "information_schema.tables", "WHERE", "TABLE_SCHEMA", "=", "\"learnagement\"", "AND", "TABLE_TYPE", "=", "\"BASE TABLE\"'", "> db/backup/"+f]
+    cmd=["docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysql",  "-u",  "root", "-p"+configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"], "-e", "'SELECT", "table_name", "FROM", "information_schema.tables", "WHERE", "TABLE_SCHEMA", "=", "\"learnagement\"", "AND", "TABLE_TYPE", "=", "\"BASE TABLE\"'"]
+    cmd=["docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysql",  "-u",  "root", "-p", "-e", "'SELECT", "table_name", "FROM", "information_schema.tables", "WHERE", "TABLE_SCHEMA", "=", "\"learnagement\"", "AND", "TABLE_TYPE", "=", "\"BASE TABLE\"'"]
+    
+    if os.name == 'nt':
+        prog = subprocess.Popen(['docker-compose', 'down'])
+        prog.communicate()
+    else:
+        cmd = ["sudo"] + cmd
+        #print(" ".join(cmd))
+        print("Enter MySQL password:")
+        tables=os.popen(" ".join(cmd)).read().replace("-", "").replace("+", "").replace("|", "").replace("\n", "")
+        tables=tables[tables.find("TABLE_NAME"):].replace("TABLE_NAME", "").split()
+        print(" ".join(tables))
         
+        structureFile = "db/backup/struct"
+        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p", "--no-data", "--ignore-views", "--skip-triggers", "learnagement", ">", structureFile]
+        print(" ".join(cmd))
+        print("Enter MySQL password:")
+        os.system(" ".join(cmd))
+    
 def stop():
     ##########
     # Stop App
@@ -228,7 +267,7 @@ def destroy():
                 #prog.stdin.write(b'password')
                 prog = subprocess.Popen(['docker', 'volume', 'rm', 'docker_learnagement_persistent_db_'+configurationSettings["INSTANCE_NAME"]])
                 prog.communicate()
-            else:    
+            else:
                 subprocess.run(["sudo", "docker", "volume", "rm", "docker_learnagement_persistent_db_"+configurationSettings["INSTANCE_NAME"]], check=True)
             print(f"{RED}App destroyed{NC}")
             
@@ -241,12 +280,14 @@ def destroy():
         print(f"{GREEN}App not destroyed{NC}")
 
 def help(argv):
-    print("Usage: " + argv[0] + " [-stop|-destroy|-help]")
+    print("Usage: " + argv[0] + " [-backup|-stop|-destroy|-help]")
             
 def main(argv):
     # if script parameter is destroy
     if len(argv)==1:
         run()
+    elif len(argv)==2 and argv[1] == "-backup":
+        backup()
     elif len(argv)==2 and argv[1] == "-stop":
         stop()
     elif len(argv)==2 and argv[1] == "-destroy":

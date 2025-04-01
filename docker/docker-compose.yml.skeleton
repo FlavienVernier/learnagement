@@ -15,6 +15,7 @@ services:
     mysql_INSTANCE_NAME:
         container_name: learnagement_mysql_INSTANCE_NAME
         image: mysql:8.0
+        #build: ./mysql/
         restart: always
         networks:
             - learnagement_INSTANCE_NAME
@@ -30,11 +31,15 @@ services:
             - ../db/sql:/docker-entrypoint-initdb.d
             - ../db/data:/data
             - ./mysql/conf.d:/etc/mysql/conf.d
+            - ./log:/var/log/mysql
             - learnagement_persistent_db_INSTANCE_NAME:/var/lib/mysql
     phpmyadmin_INSTANCE_NAME:
         container_name: learnagement_phpmyadmin_INSTANCE_NAME
         image: phpmyadmin
+        #build: ./phpmyadmin/
         restart: always
+        depends_on:
+            - mysql_INSTANCE_NAME
         networks:
             - learnagement_INSTANCE_NAME
         ports:
