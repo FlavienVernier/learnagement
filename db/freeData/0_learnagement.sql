@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : mysql_dev
--- Généré le : jeu. 13 mars 2025 à 20:29
+-- Généré le : mar. 01 avr. 2025 à 19:16
 -- Version du serveur : 8.0.33
 -- Version de PHP : 8.2.8
 
@@ -9053,6 +9053,13 @@ INSERT INTO `INFO_etat_module` (`id_etat_module`, `etat`, `commentaire`, `id_res
 (3, 'PROJ-SNI-A', 'Projet SNI en alternance', 12);
 
 --
+-- Déchargement des données de la table `LNM_administratif`
+--
+
+INSERT INTO `LNM_administratif` (`id_administratif`, `nom`, `prenom`, `mail`, `password`, `password_updated`) VALUES
+(1, 'Tartampion', 'Pierre', 'pierre.tartampion@truc.com', '$2y$10$sr7kFLecwNzaaItZI0MWSu4oxVi.APy0hjaaXPL8zurGvAHaA5LnK', 0);
+
+--
 -- Déchargement des données de la table `LNM_enseignant`
 --
 
@@ -11931,10 +11938,6 @@ INSERT INTO `VIEW_display` (`id_view`, `sortIndex`, `name`, `group_of_views`, `r
 (22, 20, '0 Intervention : Charge', 'Enseignant', 'SELECT LNM_enseignant.prenom, LNM_enseignant.nom, \r\nSUM(\r\nCASE \r\nWHEN LNM_seanceType.type = \"CM\" THEN MAQUETTE_module_sequencage.duree_h \r\nWHEN LNM_seanceType.type = \"TD\" THEN MAQUETTE_module_sequencage.duree_h\r\nWHEN LNM_seanceType.type = \"TP\" THEN MAQUETTE_module_sequencage.duree_h \r\nEND) AS \"Charge\"\r\nFROM `MAQUETTE_module` \r\nJOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module = MAQUETTE_module.id_module\r\nJOIN MAQUETTE_module_sequence ON MAQUETTE_module_sequence.id_module_sequencage = MAQUETTE_module_sequencage.id_module_sequencage\r\nJOIN CLASS_session_to_be_affected ON CLASS_session_to_be_affected.id_module_sequence = MAQUETTE_module_sequence.id_module_sequence\r\nJOIN LNM_groupe ON LNM_groupe.id_groupe = CLASS_session_to_be_affected.id_groupe\r\nJOIN CLASS_session_to_be_affected_as_enseignant ON CLASS_session_to_be_affected_as_enseignant.id_seance_to_be_affected = CLASS_session_to_be_affected.id_seance_to_be_affected\r\nJOIN LNM_enseignant ON LNM_enseignant.id_enseignant = CLASS_session_to_be_affected_as_enseignant.id_enseignant\r\nJOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type\r\nWHERE 1\r\nGROUP BY LNM_enseignant.prenom, LNM_enseignant.nom\r\nORDER BY `LNM_enseignant`.`nom` DESC;'),
 (23, 10, 'Enseignant sans cours', 'Check', 'SELECT `LNM_enseignant`.* \r\nFROM `LNM_enseignant` \r\nLEFT JOIN CLASS_session_to_be_affected_as_enseignant ON CLASS_session_to_be_affected_as_enseignant.id_enseignant = LNM_enseignant.id_enseignant\r\nWHERE CLASS_session_to_be_affected_as_enseignant.id_enseignant IS NUll;'),
 (24, 10, 'Erreur de nombre de séquences', 'Check', 'SELECT MAQUETTE_module.code_module, LNM_seanceType.type, LNM_groupe_type.groupe_type, max(MAQUETTE_module_sequencage.nombre) - count(`MAQUETTE_module_sequence`.`numero_ordre`) \r\nFROM `MAQUETTE_module_sequence` \r\nJOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage\r\nJOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module\r\nJOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type\r\nJOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type\r\nWHERE 1\r\nGROUP BY MAQUETTE_module.code_module, LNM_seanceType.type, LNM_groupe_type.groupe_type  \r\nHAVING max(MAQUETTE_module_sequencage.nombre) - count(`MAQUETTE_module_sequence`.`numero_ordre`) != 0;');
-
---
--- Déchargement des données de la table `VIEW_parameters_of_views`
---
 
 --
 -- Déchargement des données de la table `VIEW_updatable`

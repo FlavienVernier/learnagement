@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : mysql_dev
--- Généré le : jeu. 13 mars 2025 à 20:28
+-- Généré le : mar. 01 avr. 2025 à 19:14
 -- Version du serveur : 8.0.33
 -- Version de PHP : 8.2.8
 
@@ -232,6 +232,21 @@ CREATE TABLE `INFO_etat_module` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `LNM_administratif`
+--
+
+CREATE TABLE `LNM_administratif` (
+  `id_administratif` int NOT NULL,
+  `nom` varchar(25) NOT NULL,
+  `prenom` varchar(25) NOT NULL,
+  `mail` varchar(50) NOT NULL,
+  `password` varchar(100) NOT NULL,
+  `password_updated` int NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `LNM_enseignant`
 --
 
@@ -241,7 +256,7 @@ CREATE TABLE `LNM_enseignant` (
   `nom` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `mail` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `password_updated` int NOT NULL,
+  `password_updated` int NOT NULL DEFAULT '0',
   `statut` enum('permanent','vacataire') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'permanent',
   `id_discipline` int DEFAULT NULL,
   `composante` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -265,7 +280,7 @@ CREATE TABLE `LNM_etudiant` (
   `prenom` varchar(25) NOT NULL,
   `mail` varchar(50) NOT NULL,
   `password` varchar(100) NOT NULL,
-  `password_updated` int NOT NULL,
+  `password_updated` int NOT NULL DEFAULT '0',
   `id_promo` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -769,6 +784,14 @@ ALTER TABLE `INFO_etat_module`
   ADD KEY `FK_etat_module_as_responsable` (`id_responsable`);
 
 --
+-- Index pour la table `LNM_administratif`
+--
+ALTER TABLE `LNM_administratif`
+  ADD PRIMARY KEY (`id_administratif`),
+  ADD UNIQUE KEY `mail` (`mail`),
+  ADD UNIQUE KEY `SECONDARY` (`nom`,`prenom`);
+
+--
 -- Index pour la table `LNM_enseignant`
 --
 ALTER TABLE `LNM_enseignant`
@@ -1076,6 +1099,12 @@ ALTER TABLE `EXT_seance_planned`
 --
 ALTER TABLE `INFO_etat_module`
   MODIFY `id_etat_module` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `LNM_administratif`
+--
+ALTER TABLE `LNM_administratif`
+  MODIFY `id_administratif` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `LNM_enseignant`
