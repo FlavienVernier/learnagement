@@ -222,15 +222,8 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
     cmd=["docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysql",  "-u",  "root", "-p", "-e", "'SELECT", "table_name", "FROM", "information_schema.tables", "WHERE", "TABLE_SCHEMA", "=", "\"learnagement\"", "AND", "TABLE_TYPE", "=", "\"BASE TABLE\"'"]
     
     if os.name == 'nt':
-        prog = subprocess.Popen(['docker-compose', 'down'])
-        prog.communicate()
+        print ("Not yet implemented for Windows.")
     else:
-        #cmd = ["sudo"] + cmd
-        #print(" ".join(cmd))
-        #print("Enter MySQL password:")
-        #tables=os.popen(" ".join(cmd)).read().replace("-", "").replace("+", "").replace("|", "").replace("\n", "")
-        #tables=tables[tables.find("TABLE_NAME"):].replace("TABLE_NAME", "").split()
-        #print(" ".join(tables))
         
         structureFile = "db/backup/struct"
         cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p", "--no-data", "--ignore-views", "--skip-triggers", "learnagement", ">", structureFile]
@@ -240,6 +233,12 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
 
         dataFile = "db/backup/data"
         cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p", "--no-create-info", "--ignore-views", "--skip-triggers", "learnagement", ">", dataFile]
+        print(" ".join(cmd))
+        print("Enter MySQL password:")
+        os.system(" ".join(cmd))
+
+        triggerFile = "db/backup/trigger"
+        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p", "--no-create-info", "--ignore-views", "--no-data", "learnagement", ">", triggerFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
