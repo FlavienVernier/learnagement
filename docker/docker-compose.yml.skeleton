@@ -14,14 +14,14 @@ services:
             - ./log:/var/log/apache2
     mysql_INSTANCE_NAME:
         container_name: learnagement_mysql_INSTANCE_NAME
-        image: mysql:8.0
+        image: mysql:8.4
         #build: ./mysql/
         restart: always
         networks:
             - learnagement_INSTANCE_NAME
         ports:
             - "INSTANCE_NUMBER3306:3306"
-        command: --default-authentication-plugin=mysql_native_password
+        command: --mysql-native-password=ON
         environment:
             - MYSQL_DATABASE=learnagement
             - MYSQL_USER=learnagement

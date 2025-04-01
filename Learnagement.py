@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import time
 from getpass import getpass
+import glob
 
 # Couleurs pour les messages (non directement nécessaires dans Python mais émulation via ANSI codes)
 RED = "\033[0;31m"
@@ -117,6 +118,18 @@ def dockerConfiguration(configurationSettings):
         searchReplaceInFile("docker-compose.yml", "INSTANCE_MYSQL_ROOT_PASSWORD", configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"])
     elif(os.path.getmtime("docker-compose.yml.skeleton") > os.path.getmtime("docker-compose.yml")):
         print(f"{YELLOW}WARNING: docker-compose.yml.skeleton has been updated, your docker-compose.yml can be deprecated{NC}")
+
+        
+    os.chdir("phpmyadmin")
+    
+    if not os.path.exists("config.inc.php"):
+        shutil.copy("config.inc.php.skeleton", "config.inc.php")
+        searchReplaceInFile("config.inc.php", "INSTANCE_NAME", configurationSettings["INSTANCE_NAME"])
+        searchReplaceInFile("config.inc.php", "INSTANCE_NUMBER", str(configurationSettings["INSTANCE_NUMBER"]))
+    elif(os.path.getmtime("config.inc.php.skeleton") > os.path.getmtime("config.inc.php")):
+        print(f"{YELLOW}WARNING: config.inc.php.skeleton has been updated, your config.inc.php can be deprecated{NC}")
+    
+    os.chdir("..")
     
     os.chdir("..")
 
@@ -279,6 +292,22 @@ def destroy():
     else:
         print(f"{GREEN}App not destroyed{NC}")
 
+def fromscratch():
+    
+    ##########
+    # Clean up App from scratch
+    print("##########")
+    print(f"{RED}Clean up App from scratch{NC}")
+    
+    if "YES" == input("Are you sure (YES/NO)? NO INITIAL DATA OR CUSTOMIZED CONFIGURATION CAN BE RECOVERED! ") and "YES" == input("Are you realy sure(YES/NO)? don't cry if you've lost anything! "):
+        shutil.rmtree("db/data", ignore_errors=True)
+        for f in glob.glob("db/sql/5*"):
+            os.remove(f)
+        os.remove("docker/docker-compose.yml")
+        os.remove("docker/phpmyadmin/config.inc.php")
+        os.remove("webApp/config.php")
+        os.remove("config.py")
+        
 def help(argv):
     print("Usage: " + argv[0] + " [-backup|-stop|-destroy|-help]")
             
@@ -292,6 +321,10 @@ def main(argv):
         stop()
     elif len(argv)==2 and argv[1] == "-destroy":
         destroy()
+    elif len(argv)==2 and argv[1] == "-fromscratch":
+        stop()
+        destroy()
+        fromscratch()
     else:
         help(argv)
 
