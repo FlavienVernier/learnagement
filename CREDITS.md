@@ -24,3 +24,5 @@
   Author of Learnagement and main dev manager
 
 [1]: https://www.univ-smb.fr/listic/presentation/membres/enseignants-chercheurs/flavien-vernier/
+
+[Back](../README.md)
