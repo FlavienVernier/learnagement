@@ -26,5 +26,4 @@ python Learnagement -stop
 To destroy, remove all data to restart from scratch, the app must be stoped:
 python Learnagement -destroy
 
-## [ToDo Lists](./ToDo/ToDo.md)
-
+[ToDo Lists](./ToDo/ToDo.md) - [Norm](./Norm/Norm.md) - [CRediT](./CREDITS.md)

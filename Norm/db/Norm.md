@@ -1,6 +1,8 @@
-# learnagement norm
+# [General Normalization and spécific Normalisations](../Norm.md)
 
-## db Naming
+## DB Normalization
+
+### db Naming
 
 * Table: Table names should be nouns, in mixed case with the first letter of each internal word capitalized. Try to keep your table names simple and descriptive. Use whole words-avoid acronyms and abbreviations. Do not use special character
 * Link Table: Whole 1st table name _as_ whole second table name (e.g., Foo_as_Bar)
@@ -12,7 +14,7 @@
 	* learnings manager view for manager GUI: CHECK_  explicit vue name
 
 
-## Contraintes BD
+### Contraintes BD
 
 Toutes les tables de données (hors table de liaisons) doivent avoir une clé primaire numérique composée d'un seul attribut et une clé secondaire composé d'un ensemble d'attributs humainement compréhensible.
 Cet ensemble doit être déclaré comme unique avec pour nom d'indexe "SECONDARY".
@@ -22,3 +24,6 @@ Nous avons donc 3 types de table:
 * les tables de base avec un seul attribut numérique clé primaire et une clé secondaire composée d'un ensemble d'attributs ne contemnant pas de clé étrangère 
 * les tables de intermédiaire avec un seul attribut numérique clé primaire et une clé secondaire composée d'un ensemble d'attributs contemnant au moins une clé étrangère  
 * les table de liaison avec 2 attributs formant la clé primaire et ne contenant pas de clé secondaire
+
+
+[Back](../Norm.md)
