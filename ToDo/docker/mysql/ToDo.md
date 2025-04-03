@@ -3,10 +3,10 @@
 ## MySQL ToDo List
 
 ### Implement Learnagement option to update MySQL
-Lock DB acces
-Backup DB
-Stop Learnagement
-Update MySQL Dockerfile
-Resart Learnagement
+1. Lock DB acces
+2. Backup DB
+3. Stop Learnagement
+4. Update MySQL Dockerfile
+5. Resart Learnagement
 
 [Back](../ToDo.md)
