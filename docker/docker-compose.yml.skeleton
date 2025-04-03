@@ -53,6 +53,8 @@ services:
         container_name: python_web_server_INSTANCE_NAME
         build: ./python_web_server/
         restart: always
+        depends_on:
+            - mysql_INSTANCE_NAME
         networks:
               - learnagement_INSTANCE_NAME
         ports:

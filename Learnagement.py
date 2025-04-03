@@ -222,6 +222,7 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
     #cmd=["docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysql",  "-u",  "root", "-p", "-e", "'SELECT", "table_name", "FROM", "information_schema.tables", "WHERE", "TABLE_SCHEMA", "=", "\"learnagement\"", "AND", "TABLE_TYPE", "=", "\"BASE TABLE\"'"]
 
     import datetime
+
     now = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S.%f')
     
     if os.name == 'nt':
@@ -230,7 +231,7 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
         # display MySQL server version (useful to request sudo passwd 1st)
         cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysqld", "--version"]
         os.system(" ".join(cmd))
-
+       
         # get Learnagement db schemas
         structureFile = "db/backup/struct_"+now
         cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p", "--no-data", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "learnagement", ">", structureFile]
@@ -251,7 +252,24 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
-        
+
+        # Bidouille
+        with open(structureFile, 'r') as fin:
+            data = fin.read().splitlines(True)
+        with open(structureFile, 'w') as fout:
+            fout.writelines(data[1:])
+
+        with open(dataFile, 'r') as fin:
+            data = fin.read().splitlines(True)
+        with open(dataFile, 'w') as fout:
+            fout.writelines(data[1:])
+
+        with open(triggerFile, 'r') as fin:
+            data = fin.read().splitlines(True)
+        with open(triggerFile, 'w') as fout:
+            fout.writelines(data[1:])
+
+            
     
 def stop():
     ##########
