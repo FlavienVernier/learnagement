@@ -1,12 +1,12 @@
-Credits
-=======
+# Credits
+
 <!--
 	- Learnangement V0
 	  - [Firs LastName](Perso Web Page)
 	  Status in the project
 -->
 	- Learnangement V0
-	  - [Flavien Vernier](https://www.univ-smb.fr/listic/presentation/membres/enseignants-chercheurs/flavien-vernier/)
+	  - [Flavien Vernier][1]
 	  Author of Learnagement and main dev manager
 	  - [Louna Camas]
 	  Student dev during IDU Project Base Learning (2023-2026)
@@ -25,5 +25,7 @@ Credits
 	  - [Ansame Gazouani]
 	  Junior dev of Web App IHM (2023)
 	- Original Project
-	  - [Flavien Vernier](https://www.univ-smb.fr/listic/presentation/membres/enseignants-chercheurs/flavien-vernier/)
+	  - [Flavien Vernier][1]
 	  Author of Learnagement and main dev manager
+
+[1]: https://www.univ-smb.fr/listic/presentation/membres/enseignants-chercheurs/flavien-vernier/
