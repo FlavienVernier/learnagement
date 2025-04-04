@@ -41,3 +41,21 @@ SELECT
   JOIN `learnagement`.`LNM_groupe` ON `learnagement`.`LNM_promo`.`id_promo` = `learnagement`.`LNM_groupe`.`id_promo`
   JOIN `learnagement`.`MAQUETTE_module_sequencage` ON (`learnagement`.`MAQUETTE_module`.`id_module` = `learnagement`.`MAQUETTE_module_sequencage`.`id_module`) AND (`learnagement`.`LNM_groupe`.`id_groupe_type` = `learnagement`.`MAQUETTE_module_sequencage`.`id_groupe_type`)
 )
+
+/*
+CREATE TRIGGER `check_student_group_inserted_into_absence` BEFORE INSERT ON CLASS_absence 
+FOR EACH ROW
+BEGIN 
+    SET @id_etudiant = (SELECT LNM_etudiant.id_etudiant
+	FROM CLASS_absence
+	JOIN CLASS_session_to_be_affected_as_enseignant ON  CLASS_session_to_be_affected_as_enseignant.id_seance_to_be_affected_as_enseignant = CLASS_absence.id_seance_to_be_affected_as_enseignant
+	JOIN CLASS_session_to_be_affected ON CLASS_session_to_be_affected.id_seance_to_be_affected = CLASS_session_to_be_affected_as_enseignant.id_seance_to_be_affected
+	JOIN LNM_groupe ON LNM_groupe.id_groupe = CLASS_session_to_be_affected.id_groupe
+	JOIN LNM_etudiant ON LNM_etudiant.id_groupe = LNM_groupe.id_groupe
+	WHERE CLASS_absence.id_seance_to_be_affected_as_enseignant = NEW.id_seance_to_be_affected_as_enseignant AND LNM_etudiant.id_etudiant=NEW.id_etudiant);
+    IF (NEW.id_etudiant != @id_etudiant)
+    THEN
+	SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Etudiant : `LNM_etudiant.nom` `LNM_etudiant.prenom` n appartient au groupe `LNM_groupe.nom_groupe`';
+    END IF;
+END;
+*/

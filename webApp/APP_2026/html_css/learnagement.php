@@ -7,7 +7,7 @@ if (!isset($_SESSION)){
     if (!isset($_SESSION["connecte"])){
         $_SESSION["connecte"] = false;
         $_SESSION["mail"] = "";
-        $_SESSION["type"]=""; //etudiant ou enseignant
+        $_SESSION["type"]=""; //etudiant ou enseignant ou administration
     }
 }
 ?>
