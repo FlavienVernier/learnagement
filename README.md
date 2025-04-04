@@ -6,21 +6,24 @@ L'App Web s'organise autour de différents objectifs enrichis par les axes de d�
 ## Pré-requis
 OS Unix ou windows
 Docker et docker-compose
-Python nécessaire pour windows
+Python 3
 
 ## Installation et lancement
 
-"launch.sh" ou "launch.py" lance l'app Web (LAMP) sous docker
+L'app se lance (LAMP) sous docker
+"learnagement.py"
 
 ## Arrêt de l'app
 
-L'app s'arrête, sans perte de donnée, vie la commande : "sudo docker-compose down"
+L'app s'arrête, sans perte de donnée, vie la commande:
+learnagement.py -stop
 
 ## Stop or Clean up (destroy) the app
 
 To stop:
 python Learnagement -stop
 
-To destroy, remove all data and restart from scratch, the app must be stoped
+To destroy, remove all data to restart from scratch, the app must be stoped:
 python Learnagement -destroy
 
+[ToDo Lists](./ToDo/ToDo.md) - [Norm](./Norm/Norm.md) - [CRediT](./CREDITS.md)
