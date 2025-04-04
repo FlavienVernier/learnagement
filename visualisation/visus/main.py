@@ -24,19 +24,19 @@ server = app.server  # Pour le déploiement
 
 # Layout principal avec des onglets
 app.layout = html.Div([
-    html.H1("Tableau de Bord - Learnagement", style={"textAlign": "center"}),
+    html.H1("Tableau de Bord - Learnagement", style={"textAlign": "center"}),  # Titre principal
     dcc.Tabs([
-        dcc.Tab(label="Carte des Universités", children=app1_layout),
-        dcc.Tab(label="Compétences", children=app2_layout),
-        dcc.Tab(label="Absences", children=app3_layout),
-        dcc.Tab(label="Notes (élèves)", children=app4_layout),
-        dcc.Tab(label="Visualisation des notes (professeurs)", children=app5_layout),
-        dcc.Tab(label="Avancement des cours", children=app6_layout),
-        dcc.Tab(label="Charge de travail (enseignant)", children=app7_layout),
-        dcc.Tab(label="Charge de travail (étudiant)", children=app8_layout),
-        dcc.Tab(label="Avancement rendus", children=app9_layout),
-        dcc.Tab(label="Proportion stages", children=app10_layout),
-        dcc.Tab(label="Dépendance des cours", children=[app11_layout,app12_layout]),
+        dcc.Tab(label="Carte des Universités", children=app1_layout, className="tab-style"),
+        dcc.Tab(label="Compétences", children=app2_layout, className="tab-style"),
+        dcc.Tab(label="Absences", children=app3_layout, className="tab-style"),
+        dcc.Tab(label="Notes (élèves)", children=app4_layout, className="tab-style"),
+        dcc.Tab(label="Visualisation des notes (professeurs)", children=app5_layout, className="tab-style"),
+        dcc.Tab(label="Avancement des cours", children=app6_layout, className="tab-style"),
+        dcc.Tab(label="Charge de travail (enseignant)", children=app7_layout, className="tab-style"),
+        dcc.Tab(label="Charge de travail (étudiant)", children=app8_layout, className="tab-style"),
+        dcc.Tab(label="Avancement rendus", children=app9_layout, className="tab-style"),
+        dcc.Tab(label="Proportion stages", children=app10_layout, className="tab-style"),
+        dcc.Tab(label="Dépendance des cours", children=[app11_layout, app12_layout], className="tab-style"),
     ])
 ])
 
@@ -52,7 +52,6 @@ register_callbacks_app8(app)
 register_callbacks_app9(app)
 register_callbacks_app11(app)
 register_callbacks_app12(app)
-
 
 if __name__ == "__main__":
     try:

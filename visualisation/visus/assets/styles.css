@@ -1,0 +1,33 @@
+/* styles.css */
+
+/* Style pour les onglets */
+.tab-style {
+    background-color: #f0f0f0;
+    font-size: 18px;
+    padding: 10px;
+    text-align: center;
+    border-radius: 5px;
+    margin: 10px;
+}
+
+/* Style pour les onglets sélectionnés */
+.tab-selected {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Style pour l'en-tête H1 */
+h1 {
+    font-size: 36px;
+    color: #333;
+    font-weight: bold;
+}
+
+/* Style pour les graphiques dans les onglets */
+.graph-style {
+    margin: 20px;
+    border: 2px solid #007bff;
+    border-radius: 10px;
+    padding: 15px;
+    background-color: #fafafa;
+}
