@@ -55,4 +55,8 @@ register_callbacks_app12(app)
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, host='0.0.0.0', port=8050)
+    try:
+        app.run(host= '0.0.0.0', debug=True)
+    except Exception as e:
+        print("COIN COIN")
+        print(e)
