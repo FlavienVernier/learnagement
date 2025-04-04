@@ -1,33 +1,44 @@
 /* styles.css */
 
-/* Style pour les onglets */
-.tab-style {
-    background-color: #f0f0f0;
+/* Style de la sidebar */
+.sidebar-container {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    padding-top: 20px;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    background-color: #343a40;
+    padding-top: 30px;
+}
+
+.menu-item {
     font-size: 18px;
     padding: 10px;
-    text-align: center;
-    border-radius: 5px;
-    margin: 10px;
 }
 
-/* Style pour les onglets sélectionnés */
-.tab-selected {
+.menu-item:hover {
     background-color: #007bff;
-    color: white;
+    text-decoration: none;
 }
 
-/* Style pour l'en-tête H1 */
-h1 {
-    font-size: 36px;
-    color: #333;
-    font-weight: bold;
+/* Style de la zone principale (graphique) */
+.main-content {
+    margin-left: 250px;  /* Décale le contenu vers la droite pour faire place à la sidebar */
+    padding: 20px;
+    height: 100vh;
+    background-color: #f0f0f0;
 }
 
-/* Style pour les graphiques dans les onglets */
-.graph-style {
-    margin: 20px;
+/* Style des graphiques dans les fenêtres widget */
+.graph-widget {
     border: 2px solid #007bff;
+    padding: 20px;
+    background-color: white;
     border-radius: 10px;
-    padding: 15px;
-    background-color: #fafafa;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
