@@ -14,8 +14,21 @@
                     $_SESSION["mail"]=$_POST["id"];
                 }
             }
-            else{
+            else if($_SESSION['type'] == 'enseignant'){
                 $sql = "UPDATE LNM_enseignant SET password = '".password_hash($_POST["mdp1"], PASSWORD_DEFAULT)."', password_updated = NOW() WHERE LNM_enseignant.mail = '".$_POST['id']."'";
+                $result = mysqli_query($conn, $sql);
+                if (!$result){
+                    $_SESSION['type'] = "";
+                    echo "<script>alert('Erreur liée à la base de données... :c')</script>";
+                    echo "<script>window.location.href='?page=connexion'</script>";
+                }
+                else{
+                    $_SESSION["connecte"]=true;
+                    $_SESSION["mail"]=$_POST["id"];
+                }
+            }
+            else{
+                $sql = "UPDATE LNM_administration SET password = '".password_hash($_POST["mdp1"], PASSWORD_DEFAULT)."', password_updated = NOW() WHERE LNM_administration.mail = '".$_POST['id']."'";
                 $result = mysqli_query($conn, $sql);
                 if (!$result){
                     $_SESSION['type'] = "";
