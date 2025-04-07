@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : mysql_dev
--- Généré le : lun. 07 avr. 2025 à 08:29
+-- Généré le : lun. 07 avr. 2025 à 08:56
 -- Version du serveur : 8.4.4
 -- Version de PHP : 8.2.8
 
@@ -392,7 +392,8 @@ CREATE TABLE `LNM_promo` (
 CREATE TABLE `LNM_rendu_module` (
   `id_rendu_module` int NOT NULL,
   `description` varchar(100) NOT NULL,
-  `date` date NOT NULL
+  `date` date NOT NULL,
+  `id_module` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -883,7 +884,8 @@ ALTER TABLE `LNM_promo`
 -- Index pour la table `LNM_rendu_module`
 --
 ALTER TABLE `LNM_rendu_module`
-  ADD PRIMARY KEY (`id_rendu_module`);
+  ADD PRIMARY KEY (`id_rendu_module`),
+  ADD KEY `FK_rendu_module_as_module` (`id_module`);
 
 --
 -- Index pour la table `LNM_rendu_module_as_enseignant`
@@ -1392,6 +1394,12 @@ ALTER TABLE `LNM_promo`
   ADD CONSTRAINT `FK_promo_as_filiere` FOREIGN KEY (`id_filiere`) REFERENCES `LNM_filiere` (`id_filiere`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `FK_promo_as_responsable` FOREIGN KEY (`id_responsable`) REFERENCES `LNM_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `FK_promo_as_statut` FOREIGN KEY (`id_statut`) REFERENCES `LNM_statut` (`id_statut`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
+-- Contraintes pour la table `LNM_rendu_module`
+--
+ALTER TABLE `LNM_rendu_module`
+  ADD CONSTRAINT `FK_rendu_module_as_module` FOREIGN KEY (`id_module`) REFERENCES `MAQUETTE_module` (`id_module`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Contraintes pour la table `LNM_rendu_module_as_enseignant`

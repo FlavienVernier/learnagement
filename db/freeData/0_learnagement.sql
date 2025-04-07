@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : mysql_dev
--- Généré le : lun. 07 avr. 2025 à 08:31
+-- Généré le : lun. 07 avr. 2025 à 08:57
 -- Version du serveur : 8.4.4
 -- Version de PHP : 8.2.8
 
@@ -10355,11 +10355,11 @@ INSERT INTO `LNM_promo` (`id_promo`, `id_filiere`, `id_statut`, `annee`, `parcou
 -- Déchargement des données de la table `LNM_rendu_module`
 --
 
-INSERT INTO `LNM_rendu_module` (`id_rendu_module`, `description`, `date`) VALUES
-(1, 'Rendu APP', '2025-05-15'),
-(2, 'Présentation d\'anglais', '2025-04-08'),
-(3, 'Rendu Projet Flux de données et accès concurrents', '2025-05-04'),
-(4, 'Rapport Projet de Machine Learning', '2025-04-07');
+INSERT INTO `LNM_rendu_module` (`id_rendu_module`, `description`, `date`, `id_module`) VALUES
+(1, 'Rendu APP', '2025-05-15', 64),
+(2, 'Présentation d\'anglais', '2025-04-08', 103),
+(3, 'Rendu Projet Flux de données et accès concurrents', '2025-05-04', 180),
+(4, 'Rapport Projet de Machine Learning', '2025-04-07', 58);
 
 --
 -- Déchargement des données de la table `LNM_rendu_module_as_enseignant`
