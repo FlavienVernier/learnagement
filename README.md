@@ -41,4 +41,4 @@ To destroy, remove all data to restart from scratch, the app must be stopped:
 python Learnagement -destroy
 ```
 
-[ToDo Lists](./ToDo/ToDo.md) - [Norm](./Norm/Norm.md) - [CRediT](./CREDITS.md)
+[Tuto](./TUTO.md) - [ToDo Lists](./ToDo/ToDo.md) - [Norm](./Norm/Norm.md) - [CRediT](./CREDITS.md)
