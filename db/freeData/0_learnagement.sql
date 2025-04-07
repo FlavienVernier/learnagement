@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : mysql_dev
--- Généré le : mar. 01 avr. 2025 à 19:16
--- Version du serveur : 8.0.33
+-- Généré le : lun. 07 avr. 2025 à 08:31
+-- Version du serveur : 8.4.4
 -- Version de PHP : 8.2.8
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -10352,6 +10352,36 @@ INSERT INTO `LNM_promo` (`id_promo`, `id_filiere`, `id_statut`, `annee`, `parcou
 (30, 11, 1, 1, NULL, 'Annecy', 1, 1, 1, 0, NULL);
 
 --
+-- Déchargement des données de la table `LNM_rendu_module`
+--
+
+INSERT INTO `LNM_rendu_module` (`id_rendu_module`, `description`, `date`) VALUES
+(1, 'Rendu APP', '2025-05-15'),
+(2, 'Présentation d\'anglais', '2025-04-08'),
+(3, 'Rendu Projet Flux de données et accès concurrents', '2025-05-04'),
+(4, 'Rapport Projet de Machine Learning', '2025-04-07');
+
+--
+-- Déchargement des données de la table `LNM_rendu_module_as_enseignant`
+--
+
+INSERT INTO `LNM_rendu_module_as_enseignant` (`id_rendu_module`, `id_enseignant`) VALUES
+(1, 6),
+(1, 33),
+(1, 44),
+(1, 62);
+
+--
+-- Déchargement des données de la table `LNM_rendu_module_as_etudiant`
+--
+
+INSERT INTO `LNM_rendu_module_as_etudiant` (`id_rendu_module`, `id_etudiant`, `date_depot`) VALUES
+(1, 499, '2025-05-10'),
+(2, 269, '2025-04-08'),
+(3, 88, '2025-04-26'),
+(4, 59, '2025-04-04');
+
+--
 -- Déchargement des données de la table `LNM_seanceType`
 --
 
@@ -10377,6 +10407,16 @@ INSERT INTO `LNM_semestre` (`id_semestre`, `semestre`) VALUES
 (7, 'S7'),
 (8, 'S8'),
 (9, 'S9');
+
+--
+-- Déchargement des données de la table `LNM_stage`
+--
+
+INSERT INTO `LNM_stage` (`id_stage`, `entreprise`, `intitulé`, `description`, `ville`, `date_debut`, `date_fin`, `nature`, `id_etudiant`, `id_enseignant`) VALUES
+(5, 'SOPRA STERIA', 'Développement de site web', 'Développement d\'un site web pour Sopra Steria afin de présenter les produits fournies par l’entreprise', 'Annecy', '2025-05-19', '2025-07-18', 'Création d\'un site web', 503, 65),
+(6, 'NTN-SNR', 'Processus de vérification des commandes', 'Création d\'un logiciel permettant la vérification que tout se trouve bien dans les commande', 'Argonay', '2025-05-28', '2025-06-30', 'Création d\'un logiciel', 237, 14),
+(7, 'Conseil départemental de la Savoie', 'Vérification et mise à jour des bases de données', 'Vérification de toutes les bases de données existantes et mises à jour de celles-ci si nécessaires', 'Chambéry', '2025-06-01', '2025-08-01', 'Bases de données', 399, 33),
+(8, 'Mairie de Lyon', 'Vérification et mise à jour des bases de données', 'Vérification de toutes les bases de données existantes et mises à jour de celles-ci si nécessaires', 'Lyon', '2025-05-19', '2025-08-18', 'Bases de données', 165, 47);
 
 --
 -- Déchargement des données de la table `LNM_statut`
