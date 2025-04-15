@@ -54,6 +54,7 @@ def webAppConfiguration(configurationSettings):
     if not os.path.exists("config.php"):
         shutil.copy("config.php.skeleton", "config.php")
         searchReplaceInFile("config.php", "INSTANCE_NAME", configurationSettings["INSTANCE_NAME"])
+        searchReplaceInFile("config.php", "INSTANCE_NUMBER", str(configurationSettings["INSTANCE_NUMBER"]))
         searchReplaceInFile("config.php", "INSTANCE_MYSQL_ROOT_PASSWORD", configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"])
         searchReplaceInFile("config.php", "INSTANCE_MYSQL_USER_PASSWORD", configurationSettings["INSTANCE_MYSQL_USER_PASSWORD"])
     elif(os.path.getmtime("config.php.skeleton") > os.path.getmtime("config.php")):

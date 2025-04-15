@@ -17,7 +17,6 @@ python learnagement.py
 
 Au 1e lancement, l'app vous demande le numéro d'instance 'I' compris entre 1 et 4. Trois services seront accessibles :  
 - L'app web : 127.0.0.1:I0080;
-- L'app web python : 127.0.0.1:I8050;
 - PhPMyAdmin : 127.0.0.1:I8080;
 
 en remplaçant 'I' par votre numéro d'instance.
