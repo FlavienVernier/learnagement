@@ -12,16 +12,12 @@ body {
     bottom:0;
 }
 
-#contenu{
-    display: grid;
-}
-
 #piedpage {
-    height: 10vh;
-    margin: 0;
     background-color: #f7f7f7;
     color: #666;
     border-top: 1px solid #112074;
-    text-align: center;
     line-height: 40px;
+    grid-area: footer;
+      padding: 1rem;
+      text-align: center;
 }
