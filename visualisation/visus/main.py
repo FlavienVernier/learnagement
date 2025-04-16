@@ -100,4 +100,8 @@ register_callbacks_app8(app)
 register_callbacks_app9(app)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    try:
+        app.run(host= '0.0.0.0', debug=True)
+    except Exception as e:
+        print("COIN COIN")
+        print(e)
