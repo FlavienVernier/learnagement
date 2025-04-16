@@ -46,7 +46,7 @@ def calcul_informations(notes_promo, note_eleve):
         # print("Y_notes", Y_notes)
         Y_notes[note_arrondie]+=1
 
-    couleur=['#bddcf3' if math.floor(i)!=math.floor(note_eleve) else '#b14bd5' if i<10 else '#13a999' for i in X_notes]
+    couleur=['#007bff' if math.floor(i)!=math.floor(note_eleve) else '#D10065' if i<10 else '#65D100' for i in X_notes]
 
     return classement, moyenne, mediane, X_notes, Y_notes, couleur
 
@@ -175,7 +175,7 @@ def register_callbacks(app):
         # ajout de la moyenne
         fig.add_vline(
             x=moyenne,
-            line=dict(color='#2e6f9f', dash='dash'),
+            line=dict(color='#FF0500', dash='dash'),
             annotation_text=f"Moyenne : {moyenne:.2f}",
             annotation_position="top right"
         )
@@ -184,7 +184,7 @@ def register_callbacks(app):
         # ajout de la médiane
         fig.add_vline(
             x=mediane,
-            line=dict(color='#167fb7', dash='dash'),
+            line=dict(color='#FF8400', dash='dash'),
             annotation_text=f"Médiane : {mediane:.2f}",
             annotation_position="top right",
             annotation_y=0.95 # décaller l'affichage pour que la médiane soit en dessous de la moyenne

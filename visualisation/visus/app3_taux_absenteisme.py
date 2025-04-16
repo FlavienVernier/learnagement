@@ -103,7 +103,8 @@ def register_callbacks(app):
             x='filiere',
             y='absence_moyenne',
             title=f"Répartition des absences par filière pour l'année {selected_annee}",
-            labels={"filiere": "Filière", "absence_moyenne": "Absence moyenne"}
+            labels={"filiere": "Filière", "absence_moyenne": "Absence moyenne"},
+            color_discrete_sequence=['#007bff']  # ← couleur personnalisée
         )
         return fig
 
@@ -120,7 +121,8 @@ def register_callbacks(app):
             x='annee',
             y='absence_moyenne',
             title=f"Répartition des absences pour la filière {selected_filiere} sur plusieurs années",
-            labels={"annee": "Année", "absence_moyenne": "Absence moyenne"}
+            labels={"annee": "Année", "absence_moyenne": "Absence moyenne"},
+            color_discrete_sequence=['#007bff']  # ← couleur personnalisée
         )
         
         # Forcer l'axe x à être catégoriel

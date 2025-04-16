@@ -9,6 +9,12 @@ file = '../data/charge_ensegnants.csv'
 # Charger le fichier CSV
 df = pd.read_csv(file, encoding='ISO-8859-1', delimiter=',')
 
+# Palette originale
+original_palette = px.colors.qualitative.Alphabet
+
+# Retirer une couleur (ex : '#FFB5E8')
+custom_palette = [c for c in original_palette if c.lower() != '#85660d']
+
 # Fonction pour calculer le numéro de la semaine
 def calculer_semaine(date_cours, format_date='%Y-%m-%d'):
     try:
@@ -87,7 +93,8 @@ def register_callbacks(app):
             color='matiere',  # Couleur par matière
             title=f"Charge de travail des enseignants ({filtre_periode})",
             labels={'nom': 'Enseignant', 'nb_heur': 'Nombre d\'heures', 'matiere': 'Matière'},
-            text='type'  # Afficher le type de cours sur les barres
+            text='type', # Afficher le type de cours sur les barres
+            color_discrete_sequence=custom_palette  # ou 'Bold', 'Dark2', etc. 
         )
 
         fig.update_traces(textposition='outside')  # Placer les labels à l'extérieur des barres

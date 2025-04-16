@@ -78,7 +78,8 @@ def register_callbacks(app):
             color='matiere',  # Couleur par matière
             title=f"Charge de travail de l'élève {filtre_eleve} - Semaine {semaine}, {annee}",
             labels={'date': 'Date', 'nb_heur': 'Nombre d\'heures', 'matiere': 'Matière'},
-            text='type'  # Afficher le type de cours sur les barres
+            text='type',  # Afficher le type de cours sur les barres
+            color_discrete_sequence=px.colors.qualitative.Alphabet
         )
 
         fig.update_traces(

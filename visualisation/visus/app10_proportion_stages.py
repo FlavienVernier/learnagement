@@ -27,7 +27,7 @@ values = [avec_stage, sans_stage]
 fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.3)])
 
 # Personnalisation du pie chart
-fig.update_traces(marker=dict(colors=['#ff9999', '#66b3ff']))
+fig.update_traces(marker=dict(colors=['#007BFF', '#FF8400']))
 fig.update_layout(title_text="Répartition des étudiants avec ou sans stage")
 
 def get_eleves_sans():
