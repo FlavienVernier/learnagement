@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : mysql_dev
--- Généré le : mar. 01 avr. 2025 à 19:14
--- Version du serveur : 8.0.33
+-- Généré le : lun. 07 avr. 2025 à 08:56
+-- Version du serveur : 8.4.4
 -- Version de PHP : 8.2.8
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -169,6 +169,20 @@ CREATE TABLE `CLASS_session_type_to_be_affected_as_enseignant` (
   `id_enseignant` int DEFAULT NULL,
   `id_responsable` int NOT NULL,
   `modifiable` int NOT NULL DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `ETU_classical_evaluation`
+--
+
+CREATE TABLE `ETU_classical_evaluation` (
+  `id_classical_evaluation` int NOT NULL,
+  `id_etudiant` int NOT NULL,
+  `id_evaluation_type` int NOT NULL,
+  `evaluation` int NOT NULL,
+  `date` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -378,7 +392,8 @@ CREATE TABLE `LNM_promo` (
 CREATE TABLE `LNM_rendu_module` (
   `id_rendu_module` int NOT NULL,
   `description` varchar(100) NOT NULL,
-  `date` date NOT NULL
+  `date` date NOT NULL,
+  `id_module` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -752,6 +767,14 @@ ALTER TABLE `CLASS_session_type_to_be_affected_as_enseignant`
   ADD KEY `FK_type_seance_to_be_affected_as_enseignant_as_responsable` (`id_responsable`);
 
 --
+-- Index pour la table `ETU_classical_evaluation`
+--
+ALTER TABLE `ETU_classical_evaluation`
+  ADD PRIMARY KEY (`id_classical_evaluation`),
+  ADD KEY `FK_id_etudiant` (`id_etudiant`),
+  ADD KEY `FK_evaluation_type` (`id_evaluation_type`);
+
+--
 -- Index pour la table `ETU_competence_evaluation`
 --
 ALTER TABLE `ETU_competence_evaluation`
@@ -861,7 +884,8 @@ ALTER TABLE `LNM_promo`
 -- Index pour la table `LNM_rendu_module`
 --
 ALTER TABLE `LNM_rendu_module`
-  ADD PRIMARY KEY (`id_rendu_module`);
+  ADD PRIMARY KEY (`id_rendu_module`),
+  ADD KEY `FK_rendu_module_as_module` (`id_module`);
 
 --
 -- Index pour la table `LNM_rendu_module_as_enseignant`
@@ -1075,6 +1099,12 @@ ALTER TABLE `CLASS_session_type_to_be_affected`
 --
 ALTER TABLE `CLASS_session_type_to_be_affected_as_enseignant`
   MODIFY `id_type_seance_to_be_affected_as_enseignant` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `ETU_classical_evaluation`
+--
+ALTER TABLE `ETU_classical_evaluation`
+  MODIFY `id_classical_evaluation` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `ETU_competence_evaluation`
@@ -1293,6 +1323,13 @@ ALTER TABLE `CLASS_session_type_to_be_affected_as_enseignant`
   ADD CONSTRAINT `FK_type_seance_to_be_affected_as_enseignant_as_responsable` FOREIGN KEY (`id_responsable`) REFERENCES `LNM_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
+-- Contraintes pour la table `ETU_classical_evaluation`
+--
+ALTER TABLE `ETU_classical_evaluation`
+  ADD CONSTRAINT `FK_evaluation_type` FOREIGN KEY (`id_evaluation_type`) REFERENCES `LNM_evaluation_type` (`id_evaluation_type`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `FK_id_etudiant` FOREIGN KEY (`id_etudiant`) REFERENCES `LNM_etudiant` (`id_etudiant`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
 -- Contraintes pour la table `ETU_competence_evaluation`
 --
 ALTER TABLE `ETU_competence_evaluation`
@@ -1357,6 +1394,12 @@ ALTER TABLE `LNM_promo`
   ADD CONSTRAINT `FK_promo_as_filiere` FOREIGN KEY (`id_filiere`) REFERENCES `LNM_filiere` (`id_filiere`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `FK_promo_as_responsable` FOREIGN KEY (`id_responsable`) REFERENCES `LNM_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `FK_promo_as_statut` FOREIGN KEY (`id_statut`) REFERENCES `LNM_statut` (`id_statut`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
+-- Contraintes pour la table `LNM_rendu_module`
+--
+ALTER TABLE `LNM_rendu_module`
+  ADD CONSTRAINT `FK_rendu_module_as_module` FOREIGN KEY (`id_module`) REFERENCES `MAQUETTE_module` (`id_module`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Contraintes pour la table `LNM_rendu_module_as_enseignant`

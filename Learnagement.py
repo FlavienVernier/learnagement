@@ -28,7 +28,13 @@ def mainConfiguration():
     if not os.path.exists("config.py"):
         configurationSettings={}
         configurationSettings["INSTANCE_NAME"]=input("Give the intance name: ")
-        configurationSettings["INSTANCE_NUMBER"]=int(input("Give the instance number (1..4): "))
+        instance_number = 0
+        while instance_number < 2 or instance_number > 4:
+            try:
+                instance_number = int(input("Give the instance number (2..4): "))
+            except:
+                instance_number = 0
+        configurationSettings["INSTANCE_NUMBER"]=instance_number
         configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"]=getpass("Give the MySQL Root password: ")
         configurationSettings["INSTANCE_MYSQL_USER_PASSWORD"]=getpass("Give the MySQL User password: ")
         with open("config.py", 'w') as file:
