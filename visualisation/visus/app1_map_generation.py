@@ -1,3 +1,5 @@
+import mysql
+import mysql.connector
 import pandas as pd
 import dash
 from dash import dcc, html
@@ -6,11 +8,33 @@ from geopy.geocoders import Nominatim
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 
-# Chemin du fichier csv
-csv_file_path = "../data/partner_universities.csv"
+# Lire les informations de connexion depuis logs_db.txt
+with open('logs_db.txt', 'r') as file:
+    lines = file.readlines()
+    user = lines[0].strip()
+    password = lines[1].strip()
+    host = lines[2].strip()
+    port = lines[3].strip()
+    database = lines[4].strip()
 
-# Charger le fichier CSV en utilisant l'encodage ISO-8859-1 et le point-virgule comme délimiteur
-df = pd.read_csv(csv_file_path)
+# Se connecter à la base de données MySQL
+conn = mysql.connector.connect(
+    user=user,
+    password=password,
+    host=host,
+    port=port,
+    database=database
+)
+
+# Exécuter la requête pour récupérer les dépendances
+cur = conn.cursor()
+
+#cur.execute("SELECT * FROM VIEW_graphe_dependances")
+cur.execute("SELECT nom, ville, pays FROM LNM_universite")
+
+rows = cur.fetchall()
+
+df = pd.DataFrame(rows, columns=["University", "City", "Country"])
 
 # Ajouter une colonne combinée pour afficher toutes les universités dans une ville
 df_grouped = df.groupby(["City", "Country"])['University'].apply(lambda x: ', '.join(x)).reset_index()
