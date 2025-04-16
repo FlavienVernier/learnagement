@@ -1,10 +1,16 @@
 /* styles.css */
 
-/* Style de la sidebar */
+.dash-bootstrap .row {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+/* Conteneur de la sidebar */
 .sidebar-container {
-    background-color: #f8f9fa;
+    background-color: #2c3e50;
     min-height: 100vh;
     padding-top: 20px;
+    color: white;
 }
 
 .sidebar {
@@ -16,9 +22,21 @@
     padding-top: 30px;
 }
 
+/* Liens dans le menu */
+.sidebar .nav-link {
+    color: white;
+    font-size: 16px;
+    padding: 10px;
+}
+
 .menu-item {
     font-size: 18px;
     padding: 10px;
+}
+
+.sidebar .nav-link.active {
+    background-color: #1abc9c;
+    font-weight: bold;
 }
 
 .menu-item:hover {
@@ -26,12 +44,11 @@
     text-decoration: none;
 }
 
-/* Style de la zone principale (graphique) */
+/* Contenu principal (main content) */
 .main-content {
-    margin-left: 250px;  /* Décale le contenu vers la droite pour faire place à la sidebar */
-    padding: 20px;
-    height: 100vh;
-    background-color: #f0f0f0;
+    background-color: #ecf0f1;
+    padding: 30px;
+    min-height: 100vh;
 }
 
 /* Style des graphiques dans les fenêtres widget */
