@@ -92,9 +92,9 @@ def register_callbacks(app):
                 lon=country_data['Longitude'],
                 mode='markers',
                 marker=dict(size=12, opacity=0.8),
-                name=country,
                 hoverinfo='text',
-                hovertext=country_data.apply(lambda row: f"Université(s): {row['Universities']}<br>Ville: {row['City']}<br>Pays: {row['Country']}", axis=1)
+                hovertext=country_data.apply(lambda row: f"Université(s): {row['Universities']}<br>Ville: {row['City']}<br>Pays: {row['Country']}", axis=1),
+                showlegend=False  # Désactive l'affichage des traces dans la légende
             ))
 
         # Configuration de la carte
