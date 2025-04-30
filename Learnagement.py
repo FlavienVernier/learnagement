@@ -37,6 +37,7 @@ def mainConfiguration():
         configurationSettings["INSTANCE_NUMBER"]=instance_number
         configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"]=getpass("Give the MySQL Root password: ")
         configurationSettings["INSTANCE_MYSQL_USER_PASSWORD"]=getpass("Give the MySQL User password: ")
+        configurationSettings["HF_TOKEN"]=input("Give your Hugging Face Token: ")
         with open("config.py", 'w') as file:
             file.write("configurationSettings=" + repr(configurationSettings))
 
@@ -121,6 +122,7 @@ def dockerConfiguration(configurationSettings):
         searchReplaceInFile("docker-compose.yml", "INSTANCE_NAME", configurationSettings["INSTANCE_NAME"])
         searchReplaceInFile("docker-compose.yml", "INSTANCE_NUMBER", str(configurationSettings["INSTANCE_NUMBER"]))
         searchReplaceInFile("docker-compose.yml", "INSTANCE_MYSQL_ROOT_PASSWORD", configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"])
+        searchReplaceInFile("docker-compose.yml", "HF_TOKEN", configurationSettings["HF_TOKEN"])
     elif(os.path.getmtime("docker-compose.yml.skeleton") > os.path.getmtime("docker-compose.yml")):
         print(f"{YELLOW}WARNING: docker-compose.yml.skeleton has been updated, your docker-compose.yml can be deprecated{NC}")
     
