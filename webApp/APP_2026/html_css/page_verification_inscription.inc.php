@@ -28,7 +28,7 @@
                 }
             }
             else{
-                $sql = "UPDATE LNM_administration SET password = '".password_hash($_POST["mdp1"], PASSWORD_DEFAULT)."', password_updated = NOW() WHERE LNM_administration.mail = '".$_POST['id']."'";
+                $sql = "UPDATE LNM_administratif SET password = '".password_hash($_POST["mdp1"], PASSWORD_DEFAULT)."', password_updated = NOW() WHERE LNM_administratif.mail = '".$_POST['id']."'";
                 $result = mysqli_query($conn, $sql);
                 if (!$result){
                     $_SESSION['type'] = "";

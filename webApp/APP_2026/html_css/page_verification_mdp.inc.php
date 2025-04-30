@@ -74,8 +74,8 @@ if( isset( $_POST["inscription_ok"])){
       }
     }
     else {
-      //Sinon c'est l'administration
-      $sql3="SELECT mail, password, password_updated FROM LNM_administration WHERE mail LIKE'".$_POST["id"]."'";
+      //Sinon c'est un administratif
+      $sql3="SELECT mail, password, password_updated FROM LNM_administratif WHERE mail LIKE'".$_POST["id"]."'";
       $result3 = mysqli_query($conn, $sql3) or die("Requête invalide: ". mysqli_error( $conn )."\n".$sql3);
       $val= mysqli_fetch_array($result3);
 
@@ -83,14 +83,14 @@ if( isset( $_POST["inscription_ok"])){
       if ($val['password_updated'] != NULL && password_verify($_POST['mdp'], $val['password'])){
         $_SESSION["connecte"]=true; 
         $_SESSION["mail"]=$_POST["id"];
-        $_SESSION["type"]="administration";
+        $_SESSION["type"]="administratif";
         //redirection
         echo "<script>window.location.href='?page=accueil'</script>";
       }
       //Mdp pas encore changé
       else if ($val['password_updated'] == NULL && $val['password'] == $_POST['mdp']){
         $mail = $_POST['id'];
-        $_SESSION["type"]="administration";
+        $_SESSION["type"]="administratif";
         echo"<div id= principal>";
         echo "<div id='requete'><h1 id= textprincipal>Initialisation du mot de passe</h1>";
         echo "<form action='?page=verification_inscription' method='post'>";
