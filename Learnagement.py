@@ -27,7 +27,7 @@ def mainConfiguration():
     
     if not os.path.exists("config.py"):
         configurationSettings={}
-        configurationSettings["INSTANCE_NAME"]=input("Give the intance name: ")
+        configurationSettings["INSTANCE_NAME"]=input("Give the intance name (lowercase): ").lower()
         instance_number = 0
         while instance_number < 2 or instance_number > 4:
             try:
@@ -248,11 +248,11 @@ def destroy():
         print(f"{GREEN}App not destroyed{NC}")
 
 def help(argv):
-    print("Usage: " + argv[0] + " [-stop|-destroy|-help]")
+    print("Usage: " + argv[0] + " [-start|-stop|-destroy|-help]")
             
 def main(argv):
     # if script parameter is destroy
-    if len(argv)==1:
+    if len(argv)==1 or (len(argv)==2 and argv[1] == "-start"):
         run()
     elif len(argv)==2 and argv[1] == "-stop":
         stop()

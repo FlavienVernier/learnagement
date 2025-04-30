@@ -18,8 +18,6 @@ services:
         restart: always
         networks:
             - learnagement_INSTANCE_NAME
-        ports:
-            - "INSTANCE_NUMBER3306:3306"
         command: --default-authentication-plugin=mysql_native_password
         environment:
             - MYSQL_DATABASE=learnagement
