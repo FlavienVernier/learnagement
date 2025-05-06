@@ -1,21 +1,63 @@
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
+import mysql
+import pandas as pd
 import plotly.graph_objs as go
 import json
 import math
 
-# données à récupérer dans la bdd (fichier json)
-with open('../data/INFO_notes.json', 'r') as fichier:
-    data=json.load(fichier)
+# Lire les informations de connexion depuis logs_db.txt
+with open('logs_db.txt', 'r') as file:
+    lines = file.readlines()
+    user = lines[0].strip()
+    password = lines[1].strip()
+    host = lines[2].strip()
+    port = lines[3].strip()
+    database = lines[4].strip()
 
-num_etu=528
+# Se connecter à la base de données MySQL
+conn = mysql.connector.connect(
+    user=user,
+    password=password,
+    host=host,
+    port=port,
+    database=database
+)
 
+# Exécuter la requête pour récupérer les dépendances
+cur = conn.cursor()
+
+def get_data_promo(id_matiere):
+    cur.execute(f"SELECT evaluation, id_etudiant, module.nom  FROM ETU_classical_evaluation as eval JOIN MAQUETTE_module as module ON eval.id_module=module.id_module WHERE eval.id_module={id_matiere}")
+    
+    rows = cur.fetchall()
+
+    # Récupération des données 
+    data = pd.DataFrame(rows, columns=["evaluation", "id_etudiant", "nom_module"])
+    return data
+    
+def get_data_etudiant(id_etudiant, id_matiere):
+    cur.execute(f"SELECT evaluation, id_etudiant, module.nom  FROM ETU_classical_evaluation as eval JOIN MAQUETTE_module as module ON eval.id_module=module.id_module WHERE eval.id_etudiant={num_etu} and eval.id_module={id_matiere}")
+
+    rows = cur.fetchall()
+
+    # Récupération des données 
+    data = pd.DataFrame(rows, columns=["evaluation", "id_etudiant", "nom_module"])
+    return data
+
+num_etu=259 # temporaire : numéro étudiant de l'étudiant connecté
+id_matiere = 56 # temporaire : id de la matière sélectionnée (à changer en fonction de l'étudiant connecté)
+
+notes_promo=get_data_promo(id_matiere)
+note_eleve=get_data_etudiant(num_etu, id_matiere)
+
+''' Plus nécessaire, récupérer à l'aide la requête
 def get_note_eleve(notes_promo, num_etu):
     for note in notes_promo:
         if note['num_etu']==num_etu:
             return note['note']
-    return None  # dans le cas où l'étudiant n'est pas dans la promo
+    return None  # dans le cas où l'étudiant n'est pas dans la promo'''
 
 def calcul_informations(notes_promo, note_eleve):
     # print("notes promo", notes_promo)
@@ -53,7 +95,8 @@ def calcul_informations(notes_promo, note_eleve):
 def calcul_moyenne(matiere_selectionnee):
     notes_promo=[]
     # on récupère les données de la matière
-    data_matiere=next(m for m in data if m['matiere']==matiere_selectionnee)
+    data_matiere = get_data_promo(matiere_selectionnee) # mettre matiere_selectionnee au format id
+    #data_matiere=next(m for m in data if m['matiere']==matiere_selectionnee)
     notes_promo=[]
     # pour chaque élève, on calcule sa note moyenne en fonction des coefs
     for etudiant in range(len(data_matiere['controles'][0]['notes'])):
@@ -70,6 +113,16 @@ def calcul_moyenne(matiere_selectionnee):
         notes_promo.append({'num_etu':num_etu, 'note':note_etu})
     return notes_promo
 
+def get_notes_eleves(id_etudiant):
+    cur.execute(f"SELECT evaluation, id_etudiant, module.nom  FROM ETU_classical_evaluation as eval JOIN MAQUETTE_module as module ON eval.id_module=module.id_module WHERE eval.id_etudiant={num_etu}")
+
+    rows = cur.fetchall()
+
+    # Récupération des données 
+    data = pd.DataFrame(rows, columns=["evaluation", "id_etudiant", "nom_module"])
+    return data
+
+''' MAJ POUR BDD - plus nécessaire
 def matieres_pour_etudiant(data, num_etu):
     """Permet de récupérer les matières pour lesquelles un étudiant a des notes"""
     matieres_disponibles=[]
@@ -79,7 +132,7 @@ def matieres_pour_etudiant(data, num_etu):
             if any(note['num_etu']==num_etu for note in controle['notes']):
                 matieres_disponibles.append(matiere)
                 break  # si o a trouvé l'étudiant dans une matière, on passe à la suivante
-    return matieres_disponibles
+    return matieres_disponibles'''
 
 """
 # lancement de Dash
@@ -93,8 +146,8 @@ app4_layout=html.Div([
         # choix de la matière
         dcc.Dropdown(
             id='choix_matiere_eleve',
-            options=[{'label' : matiere['matiere'], 'value':matiere['matiere']} for matiere in matieres_pour_etudiant(data, num_etu)],
-            value=matieres_pour_etudiant(data, num_etu)[0]['matiere'],
+            options=[{'label' : module[3], 'value': module[0]} for module in get_notes_eleves(num_etu)],
+            value=get_notes_eleves(num_etu)['evaluation'][0],
             style={'width': '48%'}
         ),
 
@@ -131,7 +184,7 @@ def register_callbacks(app):
     def update_controles(matiere_selectionnee):
 
         #on récupère les données de la matière sélectionnée
-        data_matiere=next(matiere for matiere in data if matiere['matiere']==matiere_selectionnee)
+        data_matiere=next(matiere for matiere in get_notes_eleves(num_etu)['nom_module'] if matiere['nom_module']==matiere_selectionnee)
 
         # contrôles disponibles pour cette matière :
         if (len(data_matiere['controles'])>1): # s'il y a qu'un seul controle, pas besoin de faire la moyenne
@@ -159,14 +212,14 @@ def register_callbacks(app):
 
         else :
             # on récupère les données correspondant à la matière et au contrôle
-            data_matiere=next(m for m in data if m['matiere']==matiere_selectionnee)
+            data_matiere=next(m for m in get_notes_eleves(num_etu)['nom_module'] if m['nom_module']==matiere_selectionnee)
             data_controle=next(c for c in data_matiere['controles'] if c['type']==controle_selectionne)
 
             # on récupère les notes des contrôles
             notes_promo = [{'num_etu': note['num_etu'], 'note': note['note']} for note in data_controle['notes']]
             # print("notes controle", notes_promo)
 
-        note_eleve=get_note_eleve(notes_promo, num_etu)
+        note_eleve=get_data_etudiant(num_etu, id_matiere) # on récupère les notes de l'étudiant
 
         classement, moyenne, mediane, X_notes, Y_notes, couleur=calcul_informations(notes_promo, note_eleve)
 
