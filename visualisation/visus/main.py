@@ -2,106 +2,129 @@ import dash
 import dash_bootstrap_components as dbc
 from dash import Input, Output, dcc, html
 
-# Importer les layouts des différentes applications (vous pouvez copier leurs layouts dans des fonctions ou fichiers séparés)
-from app1_map_generation import app1_layout, register_callbacks as register_callbacks_app1 
-from app2_spyder_plot_competences import app2_layout, register_callbacks as register_callbacks_app2
-from app3_taux_absenteisme import app3_layout, register_callbacks as register_callbacks_app3
-from app4_eleve_visu_notes import app4_layout, register_callbacks as register_callbacks_app4
-from app5_prof_visu_notes import app5_layout, register_callbacks as register_callbacks_app5
-from app6_graph_avancement import app6_layout, register_callbacks as register_callbacks_app6
-from app7_charge_enseignant import app7_layout, register_callbacks as register_callbacks_app7
-from app8_charge_etudiant import app8_layout, register_callbacks as register_callbacks_app8
-from app9_avancement_rendus import app9_layout, register_callbacks as register_callbacks_app9
-from app10_proportion_stages  import app10_layout
+registered_callbacks = set()
+
+# Importer les layouts des différentes applications
+def import_apps():
+    from app1_map_generation import app1_layout, register_callbacks as register_callbacks_app1
+    from app2_spyder_plot_competences import app2_layout, register_callbacks as register_callbacks_app2
+    from app3_taux_absenteisme import app3_layout, register_callbacks as register_callbacks_app3
+    from app4_eleve_visu_notes import app4_layout, register_callbacks as register_callbacks_app4
+    from app5_prof_visu_notes import app5_layout, register_callbacks as register_callbacks_app5
+    from app6_graph_avancement import app6_layout, register_callbacks as register_callbacks_app6
+    from app7_charge_enseignant import app7_layout, register_callbacks as register_callbacks_app7
+    from app8_charge_etudiant import app8_layout, register_callbacks as register_callbacks_app8
+    from app9_avancement_rendus import app9_layout, register_callbacks as register_callbacks_app9
+    from app10_proportion_stages import app10_layout
+    return {
+        'app1': (app1_layout, register_callbacks_app1),
+        'app2': (app2_layout, register_callbacks_app2),
+        'app3': (app3_layout, register_callbacks_app3),
+        'app4': (app4_layout, register_callbacks_app4),
+        'app5': (app5_layout, register_callbacks_app5),
+        'app6': (app6_layout, register_callbacks_app6),
+        'app7': (app7_layout, register_callbacks_app7),
+        'app8': (app8_layout, register_callbacks_app8),
+        'app9': (app9_layout, register_callbacks_app9),
+        'app10': (app10_layout, None)
+    }
 
 LOGO = "https://placehold.co/100x100"
+apps = import_apps()
 
-app = dash.Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME])
-server = app.server  # Pour le déploiement
+app = dash.Dash(__name__, suppress_callback_exceptions=True,
+                external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME])
+server = app.server
 
-sidebar = html.Div(
-    [
-        html.Div(
-            [
-                # width: 3rem ensures the logo is the exact width of the
-                # collapsed sidebar (accounting for padding)
-                html.Img(src=LOGO, style={"width": "3rem"}),
-                html.H2("Sidebar"),
-            ],
-            className="sidebar-header",
-        ),
-        html.Hr(),
-        dbc.Nav(
-            [
-                dbc.NavLink("Carte des Universités", href="/app1", id="link-app1", className="menu-item"),
-                dbc.NavLink("Compétences", href="/app2", id="link-app2", className="menu-item"),
-                dbc.NavLink("Absences", href="/app3", id="link-app3", className="menu-item"),
-                dbc.NavLink("Notes (élèves)", href="/app4", id="link-app4", className="menu-item"),
-                dbc.NavLink("Visualisation des notes (professeurs)", href="/app5", id="link-app5", className="menu-item"),
-                dbc.NavLink("Avancement des cours", href="/app6", id="link-app6", className="menu-item"),
-                dbc.NavLink("Charge de travail (enseignant)", href="/app7", id="link-app7", className="menu-item"),
-                dbc.NavLink("Charge de travail (étudiant)", href="/app8", id="link-app8", className="menu-item"),
-                dbc.NavLink("Avancement rendus", href="/app9", id="link-app9", className="menu-item"),
-                dbc.NavLink("Proportion stages", href="/app10", id="link-app10", className="menu-item")
-            ],
-            vertical=True,
-            pills=True,
-        ),
+# MENU DE LA SIDEBAR (EDITABLE)
+menu_items = {
+    'enseignant': [
+        ('Absences', 'app3'),
+        ('Notes (professeurs)', 'app5'),
+        ('Avancement des cours', 'app6'),
+        ('Charge de travail (enseignant)', 'app7'),
+        ('Proportion stages', 'app10')
     ],
-    className="sidebar",
+    'etudiant': [
+        ('Carte des Universités', 'app1'),
+        ('Compétences', 'app2'),
+        ('Notes (élèves)', 'app4'),
+        ('Avancement des cours', 'app6'),
+        ('Charge de travail (étudiant)', 'app8'),
+        ('Avancement rendus', 'app9'),
+    ]
+}
+
+def render_sidebar(section):
+    links = []
+    # Logo + titre
+    links.append(html.Div([
+        html.Img(src=LOGO, style={ 'width': '3rem' }),
+        html.H2(section.capitalize())
+    ], className='sidebar-header'))
+    links.append(html.Hr())
+    # Navigation
+    navs = []
+    for label, key in menu_items[section]:
+        href = f"/{section}/{key}"
+        navs.append(dbc.NavLink(label, href=href, id=f"link-{key}", className='menu-item'))
+    links.append(dbc.Nav(navs, vertical=True, pills=True))
+    return html.Div(links, className='sidebar')
+
+app.layout = html.Div([
+    dcc.Location(id='url', refresh=False),
+    html.Div(id='sidebar'),
+    html.Div(id='page-content', className='content')
+])
+
+# Callback pour mettre à jour la sidebar
+@app.callback(
+    Output('sidebar', 'children'),
+    Input('url', 'pathname')
 )
+def update_sidebar(pathname):
+    if pathname and pathname.startswith('/enseignant'):
+        return render_sidebar('enseignant')
+    elif pathname and pathname.startswith('/etudiant'):
+        return render_sidebar('etudiant')
+    else:
+        print("error: ", pathname)
+        return render_side
 
-content = html.Div(id="page-content", className="content")
-
-app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
-
-
-# set the content according to the current pathname
-@app.callback(Output("page-content", "children"), Input("url", "pathname"))
+# Callback pour rendre le bon contenu
+@app.callback(
+    Output('page-content', 'children'),
+    Input('url', 'pathname')
+)
 def render_page_content(pathname):
-    if pathname == '/app1':
-        return app1_layout  # Graphique de l'app1
-    elif pathname == '/app2':
-        return app2_layout  # Graphique de l'app2
-    elif pathname == '/app3':
-        return app3_layout  # Graphique de l'app3
-    elif pathname == '/app4':
-        return app4_layout  # Graphique de l'app4
-    elif pathname == '/app5':
-        return app5_layout  # Graphique de l'app5
-    elif pathname == '/app6':
-        return app6_layout  # Graphique de l'app6
-    elif pathname == '/app7':
-        return app7_layout  # Graphique de l'app7
-    elif pathname == '/app8':
-        return app8_layout  # Graphique de l'app8
-    elif pathname == '/app9':
-        return app9_layout  # Graphique de l'app9
-    elif pathname == '/app10':
-        return app10_layout  # Graphique de l'app10
-    # If the user tries to reach a different page, return a 404 message
-    return html.Div(
-        [
-            html.H1("404: Not found", className="text-danger"),
-            html.Hr(),
-            html.P(f"The pathname {pathname} was not recognised..."),
-        ],
-        className="p-3 bg-light rounded-3",
-    )
+    if not pathname or pathname == '/':
+        return html.Div()
+    parts = pathname.strip('/').split('/')  # ['enseignant', 'app1'] ou ['etudiant','app7'] ou ['enseignant'] etc.
+    if len(parts) == 1:
+        # page section landing
+        return html.Div([
+            html.H2(f"Section: {parts[0].capitalize()}"),
+            html.P('Sélectionnez une rubrique dans la barre latérale.')
+        ], className='p-3')
+    section, key = parts[0], parts[1]
+    if section in menu_items and key in apps:
+        layout, register_cb = apps[key]
+        if register_cb and key not in registered_callbacks:
+            register_cb(app)
+            registered_callbacks.add(key)
 
-register_callbacks_app1(app)
-register_callbacks_app2(app)
-register_callbacks_app3(app)
-register_callbacks_app4(app)
-register_callbacks_app5(app)
-register_callbacks_app6(app)
-register_callbacks_app7(app)
-register_callbacks_app8(app)
-register_callbacks_app9(app)
+        return layout
+    return html.Div([
+        html.H1('404: Not found', className='text-danger'),
+        html.Hr(),
+        html.P(f"La page {pathname} n'existe pas." )
+    ], className='p-3 bg-light rounded-3')
 
-if __name__ == "__main__":
-    try:
-        app.run(host= '0.0.0.0', debug=True)
-    except Exception as e:
-        print("COIN COIN")
-        print(e)
+for key, (_, register_cb) in apps.items():
+    if register_cb and key not in registered_callbacks:
+        register_cb(app)
+        registered_callbacks.add(key)
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', debug=True)
