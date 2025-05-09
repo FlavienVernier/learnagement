@@ -99,17 +99,17 @@ def calcul_moyenne(matiere_selectionnee):
     #data_matiere=next(m for m in data if m['matiere']==matiere_selectionnee)
     notes_promo=[]
     # pour chaque élève, on calcule sa note moyenne en fonction des coefs
-    for etudiant in range(len(data_matiere['controles'][0]['notes'])):
+    for etudiant in range(len(data_matiere['evaluation'])):
         # print("etudiant", etudiant)
         somme_notes_ponderees=0
         somme_coef=0
-        for controle in data_matiere['controles']:
-            coef=controle['coef']
-            note_etudiant=controle['notes'][etudiant]['note']
+        for controle in data_matiere:
+            coef=1
+            note_etudiant=controle['evaluation']
             somme_notes_ponderees+=note_etudiant*coef
             somme_coef+=coef    
         note_etu=somme_notes_ponderees/somme_coef
-        num_etu=controle['notes'][etudiant]['num_etu']
+        num_etu=controle['id_etudiant']
         notes_promo.append({'num_etu':num_etu, 'note':note_etu})
     return notes_promo
 
@@ -147,7 +147,7 @@ app4_layout=html.Div([
         dcc.Dropdown(
             id='choix_matiere_eleve',
             options=[{'label' : module[3], 'value': module[0]} for module in get_notes_eleves(num_etu)],
-            value=get_notes_eleves(num_etu)['evaluation'][0],
+            value=get_notes_eleves(num_etu)['evaluation'],
             style={'width': '48%'}
         ),
 
@@ -187,11 +187,11 @@ def register_callbacks(app):
         data_matiere=next(matiere for matiere in get_notes_eleves(num_etu)['nom_module'] if matiere['nom_module']==matiere_selectionnee)
 
         # contrôles disponibles pour cette matière :
-        if (len(data_matiere['controles'])>1): # s'il y a qu'un seul controle, pas besoin de faire la moyenne
+        if (len(data_matiere)>1): # s'il y a qu'un seul controle, pas besoin de faire la moyenne
             options_controles=[{'label': 'Moyenne', 'value': 'moyenne'}]
-            options_controles.extend({'label' : controle['type'], 'value':controle['type']} for controle in data_matiere['controles'])
+            options_controles.extend({'label' : controle['nom_module'], 'value':controle['evaluation']} for controle in data_matiere)
         else : # s'il y a qu'un seul contrôle :
-            options_controles=[{'label' : controle['type'], 'value':controle['type']} for controle in data_matiere['controles']]
+            options_controles=[{'label' : controle['nom_module'], 'value':controle['evaluation']} for controle in data_matiere]
             
         controle_par_defaut=options_controles[0]['value'] # on prend la moyenne ou le seul CC (en fonction de la matière sélectionnée)
 
@@ -213,10 +213,10 @@ def register_callbacks(app):
         else :
             # on récupère les données correspondant à la matière et au contrôle
             data_matiere=next(m for m in get_notes_eleves(num_etu)['nom_module'] if m['nom_module']==matiere_selectionnee)
-            data_controle=next(c for c in data_matiere['controles'] if c['type']==controle_selectionne)
+            #data_controle=next(c for c in data_matiere['controles'] if c['type']==controle_selectionne) : plus de type de controle 
 
             # on récupère les notes des contrôles
-            notes_promo = [{'num_etu': note['num_etu'], 'note': note['note']} for note in data_controle['notes']]
+            notes_promo = [{'num_etu': note['num_etu'], 'note': note['note']} for note in data_matiere]
             # print("notes controle", notes_promo)
 
         note_eleve=get_data_etudiant(num_etu, id_matiere) # on récupère les notes de l'étudiant
