@@ -33,25 +33,22 @@ conn = mysql.connector.connect(
 # Exécuter la requête pour récupérer les dépendances
 cur = conn.cursor()
 
-# pour avoir les notes par promotion, 
-# il faudra récupérer les numéros étudiants 
-# de tous ceux qui correspondent à la promotion voulue
 def get_data_done(id_etudiant) : 
-    cur.execute(f"SELECT nom, sessens.schedule as date_prevue, promo.annee FROM CLASS_session_to_be_affected as sess JOIN CLASS_session_to_be_affected_as_enseignant as sessens ON sessens.id_seance_to_be_affected=sess.id_seance_to_be_affected JOIN LNM_groupe as grp ON sess.id_groupe = grp.id_groupe JOIN LNM_promo as promo ON grp.id_promo = promo.id_promo JOIN LNM_etudiant as etu ON grp.id_promo = etu.id_promo WHERE sessens.schedule < CURRENT_DATE and etu.id_etudiant = {id_etudiant};")
+    cur.execute(f"SELECT etu.nom, sessens.schedule as date_prevue, promo.annee, sequencage.duree_h, module.nom FROM CLASS_session_to_be_affected as sess JOIN CLASS_session_to_be_affected_as_enseignant as sessens ON sessens.id_seance_to_be_affected=sess.id_seance_to_be_affected JOIN LNM_groupe as grp ON sess.id_groupe = grp.id_groupe JOIN LNM_promo as promo ON grp.id_promo = promo.id_promo JOIN LNM_etudiant as etu ON grp.id_promo = etu.id_promo JOIN MAQUETTE_module_sequence as sequence ON sess.id_module_sequence=sequence.id_module_sequence JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module WHERE sessens.schedule < CURRENT_DATE and etu.id_etudiant = {id_etudiant};")
     
     rows = cur.fetchall()
 
     # Récupération des données 
-    data = pd.DataFrame(rows, columns=["nom", "date_prevue", "annee"])
+    data = pd.DataFrame(rows, columns=["nom", "date_prevue", "annee", "nb_heure", "matiere"])
     return data
 
 def get_all_data(id_etudiant) : 
-    cur.execute(f"SELECT nom, sessens.schedule as date_prevue, promo.annee FROM CLASS_session_to_be_affected as sess JOIN CLASS_session_to_be_affected_as_enseignant as sessens ON sessens.id_seance_to_be_affected=sess.id_seance_to_be_affected JOIN LNM_groupe as grp ON sess.id_groupe = grp.id_groupe JOIN LNM_promo as promo ON grp.id_promo = promo.id_promo JOIN LNM_etudiant as etu ON grp.id_promo = etu.id_promo WHERE etu.id_etudiant = {id_etudiant};")
+    cur.execute(f"SELECT etu.nom, sessens.schedule as date_prevue, promo.annee, sequencage.duree_h, module.nom FROM CLASS_session_to_be_affected as sess JOIN CLASS_session_to_be_affected_as_enseignant as sessens ON sessens.id_seance_to_be_affected=sess.id_seance_to_be_affected JOIN LNM_groupe as grp ON sess.id_groupe = grp.id_groupe JOIN LNM_promo as promo ON grp.id_promo = promo.id_promo JOIN LNM_etudiant as etu ON grp.id_promo = etu.id_promo JOIN MAQUETTE_module_sequence as sequence ON sess.id_module_sequence=sequence.id_module_sequence JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module WHERE etu.id_etudiant = {id_etudiant};")
 
     rows = cur.fetchall()
 
     # Récupération des données 
-    data = pd.DataFrame(rows, columns=["nom", "date_prevue", "annee"])
+    data = pd.DataFrame(rows, columns=["nom", "date_prevue", "annee", "nb_heure", "matiere"])
     return data
 
 num_etudiant = 259
@@ -60,12 +57,9 @@ num_etudiant = 259
 def calcul_avancement(data_done, data_all):
     res = {'Année':0,
            'Année_total':0}
-    
-    # Calcul des sessions réalisées
-    res['Année'] = len(data_done)
 
-    # Calcul des sessions totales
-    res['Année_total'] = len(data_all)
+    res['Année'] = data_done['nb_heure'].sum()
+    res['Année_total'] = data_all['nb_heure'].sum()
     
     '''
     for _, row in data_all.iterrows():
