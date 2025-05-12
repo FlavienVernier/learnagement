@@ -35,10 +35,15 @@ def get_data (id_etudiant) :
 
     # Récupération des données 
     data = pd.DataFrame(rows, columns=["etudiant", "evaluation", "libelle_apprentissage", "libelle_niveau", "libelle_competence", "id_competence"])
+
+    # On trie la ligne des évaluations par ordre alphabétique : 
+    data = data.sort_values(by=["evaluation"], ascending=False)
+    
     return data
 
 # Temporaire : UPDATE A FAIRE = numéro étudiant de l'étudiant connecté
-data = get_data(2)
+id_etudiant = 2
+data = get_data(id_etudiant)
 
 # Charger les données pour le deuxième graphique
 '''data = pd.DataFrame({
@@ -81,6 +86,7 @@ def choix_apprentissage_critique(df, competence, niveau):
 # Créer l'application Dash
 app = dash.Dash(__name__)
 """
+
 app2_layout = html.Div([
     # Premier Spyder Chart
     dcc.Graph(
@@ -126,7 +132,7 @@ def register_callbacks(app):
         if click_data and "points" in click_data:
             # Extraire le libellé de la compétence (theta)
             points = click_data["points"][0]
-            clicked_theta = points.get("libelle_competence")  # Compétence cliquée
+            clicked_theta = points.get("theta")  # Compétence cliquée
 
             if not clicked_theta:
                 return go.Figure().update_layout(title="Aucune compétence détectée.")
@@ -140,10 +146,10 @@ def register_callbacks(app):
             # Créer le deuxième graphique
             fig = go.Figure()
             fig.add_trace(go.Scatterpolar(
-                r=filtered_df["Niveau"],
-                theta=filtered_df["Apprentissages_critiques"] + " - " + filtered_df["Matiere"],
+                r=filtered_df["evaluation"],
+                theta=filtered_df["libelle_apprentissage"], # + " - " + filtered_df["Matiere"],
                 mode="markers+text",
-                text=filtered_df["Niveau"],
+                text=filtered_df["evaluation"],
                 textposition="top center",
                 fill="toself",
                 name="Apprentissages Critiques"
