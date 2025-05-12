@@ -39,6 +39,8 @@ def get_data_as_enseignant(id_enseignant) :
 
     # Récupération des données 
     data = pd.DataFrame(rows, columns=["evaluation", "id_etudiant", "nom_module"])
+     # Structurer les données pour inclure des contrôles
+    data['controles'] = data.apply(lambda row: [{'type': 'CC', 'evaluation': row['evaluation'], 'id_etudiant': row['id_etudiant']}], axis=1) # Aucunes informations ne sont données sur les types de contrôles que ce sont donc on laisse CC 
     return data
 
 id_enseignant = 16 # Temporaire
@@ -72,13 +74,13 @@ def get_classement_podium(notes, liste_promo):
     output : classement (liste de dictionnaires), podium (liste de dictionnaires)
     """
     # on récupère les notes des étudiants de la promo selectionnée
-    notes_promo=[etudiant for etudiant in notes if etudiant['num_etu'] in liste_promo]
+    notes_promo=[etudiant for etudiant in notes if etudiant['id_etudiant'] in liste_promo]
     # on trie les notes par ordre décroissant
-    classement=sorted(notes_promo, key=lambda x: x['note'], reverse=True)
+    classement=sorted(notes_promo, key=lambda x: x['evaluation'], reverse=True)
     top=classement[:3]
     podium=[]
     for eleve in top :
-        podium.append(eleve['num_etu']) # on pourrait plus tard lier le numéro étudiant au nom/prénom de l'étudiant
+        podium.append(eleve['id_etudiant']) # on pourrait plus tard lier le numéro étudiant au nom/prénom de l'étudiant
     return classement, podium
     
     
@@ -89,7 +91,7 @@ def calcul_informations(notes_promo, liste_promo):
     output : moyenne (float), mediane (float), ecart_type (float)
     """
     # on récupère les notes des étudiants de la promo selectionnée
-    etudiants_promo=[etudiant['note'] for etudiant in notes_promo if etudiant['num_etu'] in liste_promo]
+    etudiants_promo=[etudiant['evaluation'] for etudiant in notes_promo if etudiant['id_etudiant'] in liste_promo]
     if not etudiants_promo:
         print("Il n'y a pas d'étudiants dans la promotion selectionnée")
 
@@ -116,10 +118,10 @@ def calcul_informations(notes_promo, liste_promo):
 def calcul_moyenne(matiere_selectionnee):
     notes_promo=[]
     # on récupère les données de la matière
-    data_matiere=next(m for m in data if m['module']==matiere_selectionnee)
+    data_matiere=next(m for m in data if m['nom_module']==matiere_selectionnee)
     notes_promo=[]
     # pour chaque élève, on calcule sa note moyenne en fonction des coefs
-    for etudiant in range(len(data_matiere['notes'])):
+    for etudiant in range(len(data_matiere)):
         somme_notes_ponderees=0
         somme_coef=0
         for controle in data_matiere['controles']:
@@ -128,8 +130,8 @@ def calcul_moyenne(matiere_selectionnee):
             somme_notes_ponderees+=note_etudiant*coef
             somme_coef+=coef    
         note_etu=somme_notes_ponderees/somme_coef
-        num_etu=controle['num_etudiant']
-        notes_promo.append({'num_etu':num_etu, 'note':note_etu})
+        num_etu=controle['id_etudiant']
+        notes_promo.append({'id_etudiant':num_etu, 'evaluation':note_etu})
     return notes_promo
 
 data = get_data_as_enseignant(id_enseignant).to_dict(orient='records')
@@ -206,15 +208,15 @@ def register_callbacks(app):
         for matiere in data :
             # on vérifie si la promo a des notes pour cette matière
             for controle in matiere['controles']:
-                for note in controle['notes']:
-                    if note['num_etu'] in promo_selectionnee:
+                #for note in controle['evaluation']:
+                    if controle['id_etudiant'] in promo_selectionnee:
                         matieres_promo.append(matiere)
                         break
-                else:
-                    continue
-                break
+                    else:
+                        continue
+                #break
         options_matiere=[
-            {'label': matiere['matiere'], 'value': matiere['matiere']}
+            {'label': matiere['nom_module'], 'value': matiere['nom_module']}
             for matiere in matieres_promo]
         matiere_selectionnee=(
             derniere_matiere_selectionnee
@@ -242,7 +244,7 @@ def register_callbacks(app):
             promo_selectionnee=list(map(int, promo_selectionnee.split(', ')))
 
         #on récupère les données de la matière sélectionnée
-        data_matiere=next(matiere for matiere in data if matiere['module']==matiere_selectionnee)
+        data_matiere=next(matiere for matiere in data if matiere['nom_module']==matiere_selectionnee)
 
         # contrôles disponibles pour cette matière :
         if len(data_matiere['controles'])>1: # s'il y a qu'un seul controle, pas besoin de faire la moyenne
@@ -286,11 +288,11 @@ def register_callbacks(app):
 
         else :
             # on récupère les données correspondant à la matière et au contrôle
-            data_matiere=next(m for m in data if m['matiere']==matiere_selectionnee)
+            data_matiere=next(m for m in data if m['nom_module']==matiere_selectionnee)
             data_controle=next(c for c in data_matiere['controles'] if c['type']==controle_selectionne)
 
             # on récupère les notes des contrôles
-            notes_promo=data_controle['notes']
+            notes_promo = [{'id_etudiant': data_controle['id_etudiant'], 'evaluation': data_controle['evaluation']}]
 
         moyenne, mediane, ecart_type, X_notes, Y_notes=calcul_informations(notes_promo, liste_promo)
         _, podium=get_classement_podium(notes_promo, liste_promo)
