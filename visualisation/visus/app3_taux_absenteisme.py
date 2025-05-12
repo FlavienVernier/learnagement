@@ -45,16 +45,16 @@ fusion = (
 fusion["absence_moyenne"] = fusion["total_heures_absence"] / fusion["taille_promo"]
 
 # Créer des figures par défaut
-default_annee = fusion['annee'].unique()[0]  # La première année par défaut
+default_annee = fusion['annee'][0]  # La première année par défaut
 default_figure_annee = px.bar(
     fusion[fusion['annee'] == default_annee],
     x='promo',
     y='absence_moyenne',
     title=f"Répartition des absences par filière pour l'année {default_annee}",
-    labels={"filiere": "Filière", "absence_moyenne": "Absence moyenne"}
+    labels={"promo": "Filière", "absence_moyenne": "Absence moyenne"}
 )
 
-default_filiere = fusion['promo'].unique()[0]  # La première filière par défaut
+default_filiere = fusion['promo'][0]  # La première filière par défaut
 default_figure_filiere = px.bar(
     fusion[fusion['promo'] == default_filiere],
     x='promo',
@@ -120,10 +120,10 @@ def register_callbacks(app):
         # Créer le bar chart avec l'absence moyenne
         fig = px.bar(
             filtered_df,
-            x='filiere',
+            x='promo',
             y='absence_moyenne',
             title=f"Répartition des absences par filière pour l'année {selected_annee}",
-            labels={"filiere": "Filière", "absence_moyenne": "Absence moyenne"}
+            labels={"promo": "Filière", "absence_moyenne": "Absence moyenne"}
         )
         return fig
 
