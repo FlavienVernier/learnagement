@@ -39,6 +39,7 @@ def get_data(id_rendu) :
 
     # Récupération des données 
     data = pd.DataFrame(rows, columns=["nom", "prenom", "description", "matiere", "ue"])
+    data["statut"] = 1
     return data
 
 id_rendu = 1
