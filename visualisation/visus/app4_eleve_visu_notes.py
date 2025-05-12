@@ -64,6 +64,8 @@ def calcul_informations(notes_promo, note_eleve):
     # print("note eleve", note_eleve)
     # calcul des informations
     # on récupère seulement les notes :
+    
+    
     notes_promo=[eleve['note'] for eleve in notes_promo]
     # on trie les notes par ordre croissant
     notes_promo=sorted(notes_promo)  
@@ -146,8 +148,8 @@ app4_layout=html.Div([
         # choix de la matière
         dcc.Dropdown(
             id='choix_matiere_eleve',
-            options=[{'label' : module[3], 'value': module[0]} for module in get_notes_eleves(num_etu)],
-            value=get_notes_eleves(num_etu)['evaluation'],
+            options = [{'label': row['nom_module'], 'value': row['nom_module']} for _, row in get_notes_eleves(num_etu).iterrows()],
+            value=get_notes_eleves(num_etu)['nom_module'].iloc[0] if not get_notes_eleves(num_etu).empty else None,
             style={'width': '48%'}
         ),
 
@@ -184,14 +186,16 @@ def register_callbacks(app):
     def update_controles(matiere_selectionnee):
 
         #on récupère les données de la matière sélectionnée
-        data_matiere=next(matiere for matiere in get_notes_eleves(num_etu)['nom_module'] if matiere['nom_module']==matiere_selectionnee)
+        data_matiere = get_notes_eleves(num_etu)
+        data_matiere = data_matiere[data_matiere['nom_module'] == matiere_selectionnee]
+
 
         # contrôles disponibles pour cette matière :
         if (len(data_matiere)>1): # s'il y a qu'un seul controle, pas besoin de faire la moyenne
             options_controles=[{'label': 'Moyenne', 'value': 'moyenne'}]
-            options_controles.extend({'label' : controle['nom_module'], 'value':controle['evaluation']} for controle in data_matiere)
+            options_controles.extend({'label': row['nom_module'], 'value': row['evaluation']} for _, row in data_matiere.iterrows())
         else : # s'il y a qu'un seul contrôle :
-            options_controles=[{'label' : controle['nom_module'], 'value':controle['evaluation']} for controle in data_matiere]
+            options_controles = [{'label': row['nom_module'], 'value': row['evaluation']} for _, row in data_matiere.iterrows()]
             
         controle_par_defaut=options_controles[0]['value'] # on prend la moyenne ou le seul CC (en fonction de la matière sélectionnée)
 
@@ -212,16 +216,27 @@ def register_callbacks(app):
 
         else :
             # on récupère les données correspondant à la matière et au contrôle
-            data_matiere=next(m for m in get_notes_eleves(num_etu)['nom_module'] if m['nom_module']==matiere_selectionnee)
+            data_matiere = get_notes_eleves(num_etu)
+            data_matiere = data_matiere[data_matiere['nom_module'] == matiere_selectionnee]
             #data_controle=next(c for c in data_matiere['controles'] if c['type']==controle_selectionne) : plus de type de controle 
 
             # on récupère les notes des contrôles
-            notes_promo = [{'num_etu': note['num_etu'], 'note': note['note']} for note in data_matiere]
+            notes_promo = [{'num_etu': row['id_etudiant'], 'note': row['evaluation']} for _, row in data_matiere.iterrows()]
             # print("notes controle", notes_promo)
 
-        note_eleve=get_data_etudiant(num_etu, id_matiere) # on récupère les notes de l'étudiant
+        note_eleve = get_data_etudiant(num_etu, id_matiere)
 
-        classement, moyenne, mediane, X_notes, Y_notes, couleur=calcul_informations(notes_promo, note_eleve)
+        # Filtrer pour obtenir la note de l'étudiant pour la matière sélectionnée
+        note_eleve = note_eleve[note_eleve['nom_module'] == matiere_selectionnee]
+
+        # Vérifiez si la note existe
+        if note_eleve.empty:
+            return go.Figure().update_layout(title="Aucune note disponible"), "Aucune note disponible"
+
+        # Extraire la valeur unique de la note
+        note_eleve = note_eleve['evaluation'].iloc[0]
+        # Calcul des informations
+        classement, moyenne, mediane, X_notes, Y_notes, couleur = calcul_informations(notes_promo, note_eleve)
 
         fig=go.Figure()
 
