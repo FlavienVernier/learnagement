@@ -10,7 +10,7 @@ icon_map = {
     'app3': 'fa-solid fa-user-minus',
     'app4': 'fa-solid fa-user-graduate',
     'app5': 'fa-solid fa-chalkboard-teacher',
-    'app6': 'fa-solid fa-progress-bar',  # exemple, à adapter
+    'app6': 'fa-solid fa-bars-progress', 
     'app7': 'fa-solid fa-briefcase',
     'app8': 'fa-solid fa-book',
     'app9': 'fa-solid fa-tasks',
