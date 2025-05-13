@@ -4,6 +4,19 @@ from dash import Input, Output, dcc, html
 
 registered_callbacks = set()
 
+icon_map = {
+    'app1': 'fa-solid fa-map',
+    'app2': 'fa-solid fa-chart-pie',
+    'app3': 'fa-solid fa-user-minus',
+    'app4': 'fa-solid fa-user-graduate',
+    'app5': 'fa-solid fa-chalkboard-teacher',
+    'app6': 'fa-solid fa-progress-bar',  # exemple, à adapter
+    'app7': 'fa-solid fa-briefcase',
+    'app8': 'fa-solid fa-book',
+    'app9': 'fa-solid fa-tasks',
+    'app10': 'fa-solid fa-percentage'
+}
+
 # Importer les layouts des différentes applications
 def import_apps():
     from app1_map_generation import app1_layout, register_callbacks as register_callbacks_app1
@@ -67,7 +80,14 @@ def render_sidebar(section):
     navs = []
     for label, key in menu_items[section]:
         href = f"/{section}/{key}"
-        navs.append(dbc.NavLink(label, href=href, id=f"link-{key}", className='menu-item'))
+        icon_class = icon_map.get(key, 'fa-solid fa-circle')  # icône par défaut si manquante
+        navs.append(
+            dbc.NavLink([
+                html.I(className=icon_class, style={'marginRight': '2rem'}),
+                label
+            ], href=href, id=f"link-{key}", className='menu-item')
+        )
+
     links.append(dbc.Nav(navs, vertical=True, pills=True))
     return html.Div(links, className='sidebar')
 
