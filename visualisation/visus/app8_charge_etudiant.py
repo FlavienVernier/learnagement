@@ -38,7 +38,7 @@ def get_data(id_etudiant) :
     rows = cur.fetchall()
 
     # Récupération des données 
-    data = pd.DataFrame(rows, columns=["nom", "prenom", "date", "nb_heure", "matiere"])
+    data = pd.DataFrame(rows, columns=["nom", "date", "annee", "nb_heure", "matiere"])
     return data
 
 id_etudiant = 259
@@ -46,7 +46,6 @@ df = get_data(id_etudiant)
 
 # Convertir la colonne "date" en format datetime
 df['date'] = pd.to_datetime(df['date'], errors='coerce')  # Gérer les erreurs éventuelles de conversion
-
 # Ajouter une colonne "semaine" pour le numéro de la semaine
 df['semaine'] = df['date'].dt.isocalendar().week  # Numéro de la semaine ISO
 df['annee'] = df['date'].dt.year  # Ajouter l'année pour gérer les années distinctes
@@ -101,19 +100,22 @@ def register_callbacks(app):
             # Si aucune donnée n'est disponible, retourner un graphique vide
             fig = px.bar(
                 title=f"Aucune donnée disponible pour l'élève {filtre_eleve} (Semaine {semaine}, {annee})",
-                labels={'date': 'Date', 'nb_heur': 'Nombre d\'heures', 'matiere': 'Matière'}
+                labels={'date': 'Date', 'nb_heure': 'Nombre d\'heures', 'matiere': 'Matière'}
             )
             return fig
+        # Regrouper les données par date et matière, et additionner les heures
+        df_grouped = df_filtered.groupby(['date', 'matiere'], as_index=False).agg({'nb_heure': 'sum'})
+
 
         # Créer le graphique
         fig = px.bar(
             df_filtered,
             x='date',  # Axe X : jours de la semaine
-            y='nb_heur',  # Axe Y : nombre d'heures
+            y='nb_heure',  # Axe Y : nombre d'heures
             color='matiere',  # Couleur par matière
             title=f"Charge de travail de l'élève {filtre_eleve} - Semaine {semaine}, {annee}",
-            labels={'date': 'Date', 'nb_heur': 'Nombre d\'heures', 'matiere': 'Matière'},
-            text='type'  # Afficher le type de cours sur les barres
+            labels={'date': 'Date', 'nb_heure': 'Nombre d\'heures', 'matiere': 'Matière'},
+            text='matiere'  # Afficher le type de cours sur les barres
         )
 
         fig.update_traces(

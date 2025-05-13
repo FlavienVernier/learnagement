@@ -121,7 +121,7 @@ def register_callbacks(app):
             color='matiere',  # Couleur par matière
             title=f"Charge de travail des enseignants ({filtre_periode})",
             labels={'nom': 'Enseignant', 'nb_heure': 'Nombre d\'heures', 'matiere': 'Matière'},
-            text='type'  # Afficher le type de cours sur les barres
+            text='matiere'  # Afficher la matière des cours sur les barres
         )
 
         fig.update_traces(textposition='outside')  # Placer les labels à l'extérieur des barres
