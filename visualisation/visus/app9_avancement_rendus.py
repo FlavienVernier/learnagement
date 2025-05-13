@@ -1,14 +1,50 @@
 import dash
 from dash import html, dcc
 from dash.dependencies import Input, Output
+import mysql
 import plotly.graph_objects as go
 import pandas as pd
 
+'''
 # Lire le fichier CSV
 df = pd.read_csv('../data/avancement_rendus.csv')
 
 # Supprimer les espaces en tête et en queue des noms de colonnes
-df.columns = df.columns.str.strip()
+df.columns = df.columns.str.strip()'''
+# Lire les informations de connexion depuis logs_db.txt
+with open('logs_db.txt', 'r') as file:
+    lines = file.readlines()
+    user = lines[0].strip()
+    password = lines[1].strip()
+    host = lines[2].strip()
+    port = lines[3].strip()
+    database = lines[4].strip()
+    
+# Se connecter à la base de données MySQL
+conn = mysql.connector.connect(
+    user=user,
+    password=password,
+    host=host,
+    port=port,
+    database=database
+)
+
+# Exécuter la requête pour récupérer les dépendances
+cur = conn.cursor()
+
+def get_data(id_rendu) : 
+    cur.execute(f"SELECT etu.nom, etu.prenom, rm.description, module.nom, ue.learning_unit_name FROM LNM_rendu_module as rm JOIN LNM_rendu_module_as_etudiant as rm_etu ON rm_etu.id_rendu_module=rm.id_rendu_module JOIN LNM_etudiant as etu ON etu.id_etudiant=rm_etu.id_etudiant JOIN MAQUETTE_module_as_learning_unit as mue ON rm.id_module=mue.id_module JOIN MAQUETTE_module as module ON mue.id_module=module.id_module JOIN MAQUETTE_learning_unit as ue ON mue.id_learning_unit=ue.id_learning_unit WHERE rm.id_rendu_module={id_rendu};")
+    
+    rows = cur.fetchall()
+
+    # Récupération des données 
+    data = pd.DataFrame(rows, columns=["nom", "prenom", "description", "matiere", "ue"])
+    data["statut"] = 1
+    return data
+
+id_rendu = 1
+df = get_data(id_rendu)
+
 
 # Obtenir la liste des noms d'étudiants
 etudiants = df['nom'].unique()
@@ -75,8 +111,8 @@ def register_callbacks(app):
                 textposition='inside',
                 orientation='h', 
                 marker=dict(
-                color='rgba(36, 213, 20, 0.6)',
-                line=dict(color='rgba(19, 141, 8, 1)', width=3)
+                color='rgba(0, 123, 255, 0.6)',
+                line=dict(color='rgba(0, 123, 255, 1)', width=3)
             ),
                 hoverinfo='none'),
             go.Bar(
@@ -85,8 +121,8 @@ def register_callbacks(app):
                 x=df_pourcentage[df_pourcentage['Statut'] == 'Non terminés']['Pourcentage'], 
                 orientation='h', 
                 marker=dict(
-                color='rgba(237, 19, 27, 0.6)',
-                line=dict(color='rgba(229, 7, 15, 1)', width=3)
+                color='rgba(255, 132, 0, 0.6)',
+                line=dict(color='rgba(255, 132, 0, 1)', width=3)
             ),
                 hoverinfo='none')
         ])

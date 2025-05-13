@@ -1,17 +1,57 @@
+import mysql
 import pandas as pd
 import plotly.express as px
 from dash import Dash, html, dcc, Input, Output
 from datetime import datetime
 
+'''
 # Nom du fichier
 file = '../data/charge_eleves.csv'
 
 # Charger le fichier CSV
-df = pd.read_csv(file, encoding='ISO-8859-1', delimiter=',')
+df = pd.read_csv(file, encoding='ISO-8859-1', delimiter=',')'''
+
+# Palette originale
+original_palette = px.colors.qualitative.Alphabet
+
+# Retirer une couleur (ex : '#FFB5E8')
+custom_palette = [c for c in original_palette if c.lower() != '#85660d']
+
+# Lire les informations de connexion depuis logs_db.txt
+with open('logs_db.txt', 'r') as file:
+    lines = file.readlines()
+    user = lines[0].strip()
+    password = lines[1].strip()
+    host = lines[2].strip()
+    port = lines[3].strip()
+    database = lines[4].strip()
+
+# Se connecter à la base de données MySQL
+conn = mysql.connector.connect(
+    user=user,
+    password=password,
+    host=host,
+    port=port,
+    database=database
+)
+
+# Exécuter la requête pour récupérer les dépendances
+cur = conn.cursor()
+
+def get_data(id_etudiant) : 
+    cur.execute(f"SELECT etu.nom, sessens.schedule as date_prevue, promo.annee, sequencage.duree_h, module.nom FROM CLASS_session_to_be_affected as sess JOIN CLASS_session_to_be_affected_as_enseignant as sessens ON sessens.id_seance_to_be_affected=sess.id_seance_to_be_affected JOIN LNM_groupe as grp ON sess.id_groupe = grp.id_groupe JOIN LNM_promo as promo ON grp.id_promo = promo.id_promo JOIN LNM_etudiant as etu ON grp.id_promo = etu.id_promo JOIN MAQUETTE_module_sequence as sequence ON sess.id_module_sequence=sequence.id_module_sequence JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module WHERE etu.id_etudiant = {id_etudiant};")
+    
+    rows = cur.fetchall()
+
+    # Récupération des données 
+    data = pd.DataFrame(rows, columns=["nom", "date", "annee", "nb_heure", "matiere"])
+    return data
+
+id_etudiant = 259
+df = get_data(id_etudiant)
 
 # Convertir la colonne "date" en format datetime
 df['date'] = pd.to_datetime(df['date'], errors='coerce')  # Gérer les erreurs éventuelles de conversion
-
 # Ajouter une colonne "semaine" pour le numéro de la semaine
 df['semaine'] = df['date'].dt.isocalendar().week  # Numéro de la semaine ISO
 df['annee'] = df['date'].dt.year  # Ajouter l'année pour gérer les années distinctes
@@ -66,19 +106,23 @@ def register_callbacks(app):
             # Si aucune donnée n'est disponible, retourner un graphique vide
             fig = px.bar(
                 title=f"Aucune donnée disponible pour l'élève {filtre_eleve} (Semaine {semaine}, {annee})",
-                labels={'date': 'Date', 'nb_heur': 'Nombre d\'heures', 'matiere': 'Matière'}
+                labels={'date': 'Date', 'nb_heure': 'Nombre d\'heures', 'matiere': 'Matière'}
             )
             return fig
+        # Regrouper les données par date et matière, et additionner les heures
+        df_grouped = df_filtered.groupby(['date', 'matiere'], as_index=False).agg({'nb_heure': 'sum'})
+
 
         # Créer le graphique
         fig = px.bar(
             df_filtered,
             x='date',  # Axe X : jours de la semaine
-            y='nb_heur',  # Axe Y : nombre d'heures
+            y='nb_heure',  # Axe Y : nombre d'heures
             color='matiere',  # Couleur par matière
             title=f"Charge de travail de l'élève {filtre_eleve} - Semaine {semaine}, {annee}",
-            labels={'date': 'Date', 'nb_heur': 'Nombre d\'heures', 'matiere': 'Matière'},
-            text='type'  # Afficher le type de cours sur les barres
+            labels={'date': 'Date', 'nb_heure': 'Nombre d\'heures', 'matiere': 'Matière'},
+            text='matiere',  # Afficher le type de cours sur les barres
+            color_discrete_sequence=custom_palette  # ou 'Bold', 'Dark2', etc. 
         )
 
         fig.update_traces(

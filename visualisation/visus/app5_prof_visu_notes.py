@@ -2,23 +2,66 @@ import statistics
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
+import mysql
+import pandas as pd
 import plotly.graph_objs as go
 import json
 import math
 
-# données à récupérer dans la bdd (fichier json)
-with open('../data/INFO_notes.json', 'r') as fichier:
-    data=json.load(fichier)
+# Lire les informations de connexion depuis logs_db.txt
+with open('logs_db.txt', 'r') as file:
+    lines = file.readlines()
+    user = lines[0].strip()
+    password = lines[1].strip()
+    host = lines[2].strip()
+    port = lines[3].strip()
+    database = lines[4].strip()
+
+# Se connecter à la base de données MySQL
+conn = mysql.connector.connect(
+    user=user,
+    password=password,
+    host=host,
+    port=port,
+    database=database
+)
+
+# Exécuter la requête pour récupérer les dépendances
+cur = conn.cursor()
 
 # pour avoir les notes par promotion, 
 # il faudra récupérer les numéros étudiants 
 # de tous ceux qui correspondent à la promotion voulue
+def get_data_as_enseignant(id_enseignant) : 
+    cur.execute(f"SELECT evaluation, id_etudiant, module.nom FROM ETU_classical_evaluation as eval JOIN MAQUETTE_module as module ON eval.id_module=module.id_module JOIN LNM_enseignant as enseignant ON module.id_responsable = enseignant.id_enseignant WHERE enseignant.id_enseignant={id_enseignant};")
+    
+    rows = cur.fetchall()
 
-promo_disponibles=[
-    {'nom': 'IDU4-A1', 'etudiants': [356, 734, 912, 783, 528, 699]},  # exemple pour la promo 1
-    {'nom': 'IDU4-A2', 'etudiants': [223, 441, 849, 867, 611]},  # exemple pour la promo 2
-    {'nom': 'IDU3', 'etudiants': [146, 624, 111, 863, 328]}  # exemple pour la promo 3
-]
+    # Récupération des données 
+    data = pd.DataFrame(rows, columns=["evaluation", "id_etudiant", "nom_module"])
+     # Structurer les données pour inclure des contrôles
+    data['controles'] = data.apply(lambda row: [{'type': 'CC', 'evaluation': row['evaluation'], 'id_etudiant': row['id_etudiant']}], axis=1) # Aucunes informations ne sont données sur les types de contrôles que ce sont donc on laisse CC 
+    return data
+
+id_enseignant = 16 # Temporaire
+data = get_data_as_enseignant(id_enseignant)
+
+def define_promo():
+    cur.execute(f"SELECT id_promo, GROUP_CONCAT(id_etudiant) AS etudiants FROM LNM_etudiant GROUP BY id_promo;")
+    
+    rows = cur.fetchall()
+
+    # Récupération des données 
+    # Le résultat est sous forme de liste de tuple  donc : 
+    data = []
+    for id_promo, etudiants in rows:
+        etudiants_list = list(map(int, etudiants.split(','))) if etudiants else []  # Convertir en liste d'entiers
+        data.append({'id_promo': id_promo, 'etudiants': etudiants_list})
+
+    data_final = pd.DataFrame(data, columns=["id_promo", "etudiants"])
+    return data
+
+promo_disponibles = define_promo()
 
 # variables globales pour garder en mémoire les choix de l'utilisateur
 dernier_controle_selectionne=None
@@ -31,13 +74,13 @@ def get_classement_podium(notes, liste_promo):
     output : classement (liste de dictionnaires), podium (liste de dictionnaires)
     """
     # on récupère les notes des étudiants de la promo selectionnée
-    notes_promo=[etudiant for etudiant in notes if etudiant['num_etu'] in liste_promo]
+    notes_promo=[etudiant for etudiant in notes if etudiant['id_etudiant'] in liste_promo]
     # on trie les notes par ordre décroissant
-    classement=sorted(notes_promo, key=lambda x: x['note'], reverse=True)
+    classement=sorted(notes_promo, key=lambda x: x['evaluation'], reverse=True)
     top=classement[:3]
     podium=[]
     for eleve in top :
-        podium.append(eleve['num_etu']) # on pourrait plus tard lier le numéro étudiant au nom/prénom de l'étudiant
+        podium.append(eleve['id_etudiant']) # on pourrait plus tard lier le numéro étudiant au nom/prénom de l'étudiant
     return classement, podium
     
     
@@ -48,7 +91,7 @@ def calcul_informations(notes_promo, liste_promo):
     output : moyenne (float), mediane (float), ecart_type (float)
     """
     # on récupère les notes des étudiants de la promo selectionnée
-    etudiants_promo=[etudiant['note'] for etudiant in notes_promo if etudiant['num_etu'] in liste_promo]
+    etudiants_promo=[etudiant['evaluation'] for etudiant in notes_promo if etudiant['id_etudiant'] in liste_promo]
     if not etudiants_promo:
         print("Il n'y a pas d'étudiants dans la promotion selectionnée")
 
@@ -75,22 +118,23 @@ def calcul_informations(notes_promo, liste_promo):
 def calcul_moyenne(matiere_selectionnee):
     notes_promo=[]
     # on récupère les données de la matière
-    data_matiere=next(m for m in data if m['matiere']==matiere_selectionnee)
+    data_matiere=next(m for m in data if m['nom_module']==matiere_selectionnee)
     notes_promo=[]
     # pour chaque élève, on calcule sa note moyenne en fonction des coefs
-    for etudiant in range(len(data_matiere['controles'][0]['notes'])):
+    for etudiant in range(len(data_matiere)):
         somme_notes_ponderees=0
         somme_coef=0
         for controle in data_matiere['controles']:
-            coef=controle['coef']
-            note_etudiant=controle['notes'][etudiant]['note']
+            coef=1
+            note_etudiant=controle['evaluation']
             somme_notes_ponderees+=note_etudiant*coef
             somme_coef+=coef    
         note_etu=somme_notes_ponderees/somme_coef
-        num_etu=controle['notes'][etudiant]['num_etu']
-        notes_promo.append({'num_etu':num_etu, 'note':note_etu})
+        num_etu=controle['id_etudiant']
+        notes_promo.append({'id_etudiant':num_etu, 'evaluation':note_etu})
     return notes_promo
 
+data = get_data_as_enseignant(id_enseignant).to_dict(orient='records')
 # # lancement de Dash
 # app=dash.Dash(__name__)
 
@@ -104,7 +148,7 @@ app5_layout = html.Div([
                 id='choix_promo_prof',
                 options=[
                         {'label': 'Toutes les promos', 'value': 'all'}]
-                    +[{'label': promo['nom'], 'value': ', '.join(map(str, promo['etudiants']))} for promo in promo_disponibles],
+                    +[{'label': promo['id_promo'], 'value': ', '.join(map(str, promo['etudiants']))} for promo in promo_disponibles],
                 # value=', '.join(map(str, promo_disponibles[0]['etudiants'])),
                 value='all',
                 style={'width': '48%'}
@@ -113,8 +157,8 @@ app5_layout = html.Div([
             # choix de la matière
             dcc.Dropdown(
                 id='choix_matiere_prof',
-                options=[{'label': matiere['matiere'], 'value': matiere['matiere']} for matiere in data],
-                value=data[0]['matiere'],
+                options=[{'label': matiere['nom_module'], 'value': matiere['nom_module']} for matiere in data],
+                value=data[0]['nom_module'],
                 style={'width': '48%'}
             ),
 
@@ -152,10 +196,10 @@ def register_callbacks(app):
     def update_matiere(promo_selectionnee):
         global derniere_matiere_selectionnee
 
-        if promo_selectionnee=='all':  # si on veut toutes les promos
-            promo_selectionnee=[etu for promo in promo_disponibles for etu in promo['etudiants']]
+        if promo_selectionnee == 'all':  # si on veut toutes les promos
+            promo_selectionnee = [etu for promo in promo_disponibles for etu in promo['etudiants']]
         else:
-            promo_selectionnee=list(map(int, promo_selectionnee.split(', ')))
+            promo_selectionnee = list(map(int, promo_selectionnee.split(', ')))
 
 
         # on récupère les matières disponibles pour la promo sélectionnée
@@ -164,15 +208,15 @@ def register_callbacks(app):
         for matiere in data :
             # on vérifie si la promo a des notes pour cette matière
             for controle in matiere['controles']:
-                for note in controle['notes']:
-                    if note['num_etu'] in promo_selectionnee:
+                #for note in controle['evaluation']:
+                    if controle['id_etudiant'] in promo_selectionnee:
                         matieres_promo.append(matiere)
                         break
-                else:
-                    continue
-                break
+                    else:
+                        continue
+                #break
         options_matiere=[
-            {'label': matiere['matiere'], 'value': matiere['matiere']}
+            {'label': matiere['nom_module'], 'value': matiere['nom_module']}
             for matiere in matieres_promo]
         matiere_selectionnee=(
             derniere_matiere_selectionnee
@@ -200,7 +244,7 @@ def register_callbacks(app):
             promo_selectionnee=list(map(int, promo_selectionnee.split(', ')))
 
         #on récupère les données de la matière sélectionnée
-        data_matiere=next(matiere for matiere in data if matiere['matiere']==matiere_selectionnee)
+        data_matiere=next(matiere for matiere in data if matiere['nom_module']==matiere_selectionnee)
 
         # contrôles disponibles pour cette matière :
         if len(data_matiere['controles'])>1: # s'il y a qu'un seul controle, pas besoin de faire la moyenne
@@ -244,11 +288,11 @@ def register_callbacks(app):
 
         else :
             # on récupère les données correspondant à la matière et au contrôle
-            data_matiere=next(m for m in data if m['matiere']==matiere_selectionnee)
+            data_matiere=next(m for m in data if m['nom_module']==matiere_selectionnee)
             data_controle=next(c for c in data_matiere['controles'] if c['type']==controle_selectionne)
 
             # on récupère les notes des contrôles
-            notes_promo=data_controle['notes']
+            notes_promo = [{'id_etudiant': data_controle['id_etudiant'], 'evaluation': data_controle['evaluation']}]
 
         moyenne, mediane, ecart_type, X_notes, Y_notes=calcul_informations(notes_promo, liste_promo)
         _, podium=get_classement_podium(notes_promo, liste_promo)
@@ -258,7 +302,7 @@ def register_callbacks(app):
         # ajout de la moyenne
         fig.add_vline(
             x=moyenne,
-            line=dict(color='#2e6f9f', dash='dash'),
+            line=dict(color='#FF0500', dash='dash'),
             annotation_text=f"Moyenne : {moyenne:.2f}",
             annotation_position="top right"
         )
@@ -266,7 +310,7 @@ def register_callbacks(app):
         # ajout de la médiane
         fig.add_vline(
             x=mediane,
-            line=dict(color='#167fb7', dash='dash'),
+            line=dict(color='#FF8400', dash='dash'),
             annotation_text=f"Médiane : {mediane:.2f}",
             annotation_position="top right",
             annotation_y=0.95 # décaller l'affichage pour que la médiane soit en dessous de la moyenne
@@ -276,7 +320,7 @@ def register_callbacks(app):
         fig.add_trace(go.Bar(
             x=X_notes,
             y=Y_notes,
-            marker_color='#2e6f9f',
+            marker_color='#007bff',
             text=[str(y) if y>0 else '' for y in Y_notes],
             textposition='inside',
             name="Nombre d'étudiants"

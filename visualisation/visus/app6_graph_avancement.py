@@ -1,22 +1,70 @@
 from dash import dcc, html
 from dash.dependencies import Input, Output
+import mysql
 import pandas as pd
 import plotly.graph_objects as go
 
+'''
 #Charger les données d'un fichier
 file_name = "../data/Avancement_etu.csv"
 
 def load_data(filename):
     df = pd.read_csv(filename, decimal='.', sep=';')
-    return df
+    return df'''
+
+# Lire les informations de connexion depuis logs_db.txt
+with open('logs_db.txt', 'r') as file:
+    lines = file.readlines()
+    user = lines[0].strip()
+    password = lines[1].strip()
+    host = lines[2].strip()
+    port = lines[3].strip()
+    database = lines[4].strip()
+
+# Se connecter à la base de données MySQL
+conn = mysql.connector.connect(
+    user=user,
+    password=password,
+    host=host,
+    port=port,
+    database=database
+)
+
+# Exécuter la requête pour récupérer les dépendances
+cur = conn.cursor()
+
+def get_data_done(id_etudiant) : 
+    cur.execute(f"SELECT etu.nom, sessens.schedule as date_prevue, promo.annee, sequencage.duree_h, module.nom FROM CLASS_session_to_be_affected as sess JOIN CLASS_session_to_be_affected_as_enseignant as sessens ON sessens.id_seance_to_be_affected=sess.id_seance_to_be_affected JOIN LNM_groupe as grp ON sess.id_groupe = grp.id_groupe JOIN LNM_promo as promo ON grp.id_promo = promo.id_promo JOIN LNM_etudiant as etu ON grp.id_promo = etu.id_promo JOIN MAQUETTE_module_sequence as sequence ON sess.id_module_sequence=sequence.id_module_sequence JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module WHERE sessens.schedule < CURRENT_DATE and etu.id_etudiant = {id_etudiant};")
+    
+    rows = cur.fetchall()
+
+    # Récupération des données 
+    data = pd.DataFrame(rows, columns=["nom", "date_prevue", "annee", "nb_heure", "matiere"])
+    return data
+
+def get_all_data(id_etudiant) : 
+    cur.execute(f"SELECT etu.nom, sessens.schedule as date_prevue, promo.annee, sequencage.duree_h, module.nom FROM CLASS_session_to_be_affected as sess JOIN CLASS_session_to_be_affected_as_enseignant as sessens ON sessens.id_seance_to_be_affected=sess.id_seance_to_be_affected JOIN LNM_groupe as grp ON sess.id_groupe = grp.id_groupe JOIN LNM_promo as promo ON grp.id_promo = promo.id_promo JOIN LNM_etudiant as etu ON grp.id_promo = etu.id_promo JOIN MAQUETTE_module_sequence as sequence ON sess.id_module_sequence=sequence.id_module_sequence JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module WHERE etu.id_etudiant = {id_etudiant};")
+
+    rows = cur.fetchall()
+
+    # Récupération des données 
+    data = pd.DataFrame(rows, columns=["nom", "date_prevue", "annee", "nb_heure", "matiere"])
+    return data
+
+num_etudiant = 259
 
 #Calculer les avancements
-def calcul_avancement(data):
+def calcul_avancement(data_done, data_all):
     res = {'Année':0,
            'Année_total':0}
-    for _, row in data.iterrows():
-        res['Année'] += row['Heure CM fait'] + row['Heure TD fait'] + row['Heure TP fait']
-        res['Année_total'] += row['Heure CM total'] + row['Heure TD total'] + row['Heure TP total']
+
+    res['Année'] = data_done['nb_heure'].sum()
+    res['Année_total'] = data_all['nb_heure'].sum()
+    
+    '''
+    for _, row in data_all.iterrows():
+        res['Année'] += data_done
+        res['Année_total'] += data_all
         
         semestre = str(row['Semestre'])
         if semestre not in res:
@@ -32,7 +80,7 @@ def calcul_avancement(data):
             res[f"{ue}_total"] = 0
         
         res[ue] += row['Heure CM fait'] + row['Heure TD fait'] + row['Heure TP fait']
-        res[f"{ue}_total"] += row['Heure CM total'] + row['Heure TD total'] + row['Heure TP total']
+        res[f"{ue}_total"] += row['Heure CM total'] + row['Heure TD total'] + row['Heure TP total']'''
             
     return res
 
@@ -50,19 +98,22 @@ def transforme_données(data):
                 })
     return pd.DataFrame(rows)
 
-data_brute = load_data(file_name)
-data = calcul_avancement(data_brute)
+data_done = get_data_done(num_etudiant)
+data_all = get_all_data(num_etudiant)
+data = calcul_avancement(data_done, data_all)
 df = transforme_données(data)
 
 # Calculer les pourcentages
 df["Completion (%)"] = (df["Realized"] / df["Total"]) * 100
 
 # Catégories par niveau d'agrégation
-levels = {
+'''levels = {
     "Année": ["Année"],
     "Semestre": list(map(str, data_brute['Semestre'].unique())),
-    "UE": list(data_brute['Module'].unique()) 
-}
+    "UE": list(data_brute['Module'].unique())
+}'''
+
+levels = {"Année": ["Année"]}
 
 
 # # Initialiser l'application Dash
@@ -143,8 +194,8 @@ def register_callbacks(app):
             text=filtered_df["Completion (%)"].map(lambda x: f"{x:.0f}%"),
             textposition='inside',
             marker=dict(
-                color='rgba(44, 168, 235, 0.6)',
-                line=dict(color='rgba(44, 168, 235, 1)', width=3)
+                color='rgba(0, 123, 255, 0.6)',
+                line=dict(color='rgba(0, 123, 255, 1)', width=3)
             ),
             hoverinfo='none'
         )

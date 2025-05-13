@@ -3,7 +3,7 @@
 
 <div id="container">
 <div id="menu">
-    <h1>Learnagement</h1>
+    <h2 id="titre">Learnagement</h2>
     <ul id="lemenu">
         <li><a href="?page=accueil&section=agenda" class="btn_menu ">Agenda</a></li>
         <?php if ($_SESSION["type"]=="etudiant"){
