@@ -148,7 +148,7 @@ app5_layout = html.Div([
                 id='choix_promo_prof',
                 options=[
                         {'label': 'Toutes les promos', 'value': 'all'}]
-                    +[{'label': promo['id_promo'], 'value': promo['etudiants']} for promo in promo_disponibles],
+                    +[{'label': promo['id_promo'], 'value': ', '.join(map(str, promo['etudiants']))} for promo in promo_disponibles],
                 # value=', '.join(map(str, promo_disponibles[0]['etudiants'])),
                 value='all',
                 style={'width': '48%'}
@@ -196,10 +196,10 @@ def register_callbacks(app):
     def update_matiere(promo_selectionnee):
         global derniere_matiere_selectionnee
 
-        if promo_selectionnee=='all':  # si on veut toutes les promos
-            promo_selectionnee=[etu for promo in promo_disponibles for etu in promo['etudiants']]
+        if promo_selectionnee == 'all':  # si on veut toutes les promos
+            promo_selectionnee = [etu for promo in promo_disponibles for etu in promo['etudiants']]
         else:
-            promo_selectionnee=list(map(int, promo_selectionnee.split(', ')))
+            promo_selectionnee = list(map(int, promo_selectionnee.split(', ')))
 
 
         # on récupère les matières disponibles pour la promo sélectionnée
