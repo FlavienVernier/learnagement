@@ -63,19 +63,30 @@ df_grouped = df_grouped.dropna(subset=['Latitude', 'Longitude'])
 
 app1_layout = html.Div(
     children=[
-        html.H1("Carte des Universités Partenaires", style={"textAlign": "center"}),
-        dcc.Dropdown(
-            id="country-dropdown",
-            options=[{"label": "Tous", "value": "Tous"}] + [{"label": country, "value": country} for country in df_grouped['Country'].unique()],
-            value="Tous",
-            clearable=False,
-            style={"width": "50%", "margin": "auto"}
-        ),
-        dcc.Graph(
-            id="university-map"
-        )
+        html.Div([
+            html.H1("Carte des Universités Partenaires", style={"textAlign": "center"}),
+            dcc.Dropdown(
+                id="country-dropdown",
+                options=[{"label": "Tous", "value": "Tous"}] + [{"label": country, "value": country} for country in df_grouped['Country'].unique()],
+                value="Tous",
+                clearable=False,
+                style={"width": "60%", "margin": "auto"}
+            ),
+            dcc.Graph(
+                id="university-map",
+                style={"height": "600px", "marginTop": "20px"}
+            )
+        ], style={
+            "backgroundColor": "white",
+            "padding": "30px",
+            "margin": "40px auto",
+            "width": "90%",
+            "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
+            "borderRadius": "15px"
+        })
     ]
 )
+
 
 def register_callbacks(app):
     # Callback pour mettre à jour la carte en fonction du pays sélectionné
@@ -105,9 +116,9 @@ def register_callbacks(app):
                 lon=country_data['Longitude'],
                 mode='markers',
                 marker=dict(size=12, opacity=0.8),
-                name=country,
                 hoverinfo='text',
-                hovertext=country_data.apply(lambda row: f"Université(s): {row['Universities']}<br>Ville: {row['City']}<br>Pays: {row['Country']}", axis=1)
+                hovertext=country_data.apply(lambda row: f"Université(s): {row['Universities']}<br>Ville: {row['City']}<br>Pays: {row['Country']}", axis=1),
+                showlegend=False  # Désactive l'affichage des traces dans la légende
             ))
 
         # Configuration de la carte

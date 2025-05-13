@@ -99,8 +99,9 @@ app2_layout = html.Div([
         ).update_traces(
                 fill="toself",
                 mode="markers+lines",  # Ajoute des marqueurs cliquables
-                marker=dict(size=10, color='blue')  # Augmente la visibilité des points
-        ).update_layout(
+                marker=dict(size=10, color='#007bff'),  # Augmente la visibilité des points
+                line=dict(color="#007bff", width=3)
+            ).update_layout(
             polar=dict(
             radialaxis=dict(
                 dtick=1,
@@ -117,7 +118,7 @@ app2_layout = html.Div([
         id="niveau-apprentissage-critique",
         figure=go.Figure().update_traces(fill="toself", 
                 mode="markers",  # Ajoute des marqueurs cliquables
-                marker=dict(size=10, color='blue')).update_layout(title="Niveau par apprentissage critique")
+                marker=dict(size=10, color='#007bff')).update_layout(title="Niveau par apprentissage critique")
     ),
 ])
 
@@ -152,7 +153,9 @@ def register_callbacks(app):
                 text=filtered_df["evaluation"],
                 textposition="top center",
                 fill="toself",
-                name="Apprentissages Critiques"
+                name="Apprentissages Critiques",
+                line=dict(color="#007bff", width=3),  # ← ligne orange ici
+                marker=dict(size=10, color="#007bff")  # ← points oranges
             ))
             fig.update_layout(
                 polar=dict(

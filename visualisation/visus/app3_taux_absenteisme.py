@@ -71,7 +71,6 @@ default_figure_filiere.update_layout(
 # Application Dash
 app = Dash(__name__)
 """
-# Layout de l'application
 app3_layout = html.Div([
     # Dropdown pour sélectionner l'année
     html.Div([
@@ -79,34 +78,39 @@ app3_layout = html.Div([
         dcc.Dropdown(
             id='dropdown-annee',
             options=[{'label': str(annee), 'value': annee} for annee in sorted(fusion['annee'].unique())],
-            value=default_annee  # Valeur par défaut
+            value=default_annee,  # Valeur par défaut
+            className="dropdown-style"  # Classe CSS pour le Dropdown
         )
-    ]),
-    
+    ], className="dropdown-container"),  # Conteneur avec une classe pour l'ajouter au style CSS
+
     # Bar chart pour les filières d'une année avec figure par défaut
     dcc.Graph(
         id='bar-chart-annee',
-        figure=default_figure_annee  # Figure par défaut
+        figure=default_figure_annee,  # Figure par défaut
+        className="graph-style"  # Classe CSS pour le graphique
     ),
-    
+
     html.Hr(),
-    
+
     # Dropdown pour sélectionner la filière
     html.Div([
         html.Label("Sélectionnez une filière :"),
         dcc.Dropdown(
             id='dropdown-filiere',
             options=[{'label': filiere, 'value': filiere} for filiere in sorted(fusion['promo'].unique())],
-            value=default_filiere  # Valeur par défaut
+            value=default_filiere,  # Valeur par défaut
+            className="dropdown-style"  # Classe CSS pour le Dropdown
         )
-    ]),
-    
+    ], className="dropdown-container"),  # Conteneur avec une classe pour l'ajouter au style CSS
+
     # Bar chart pour les années d'une filière avec figure par défaut
     dcc.Graph(
         id='bar-chart-filiere',
-        figure=default_figure_filiere  # Figure par défaut
+        figure=default_figure_filiere,  # Figure par défaut
+        className="graph-style"  # Classe CSS pour le graphique
     )
 ])
+
 
 def register_callbacks(app):
     # Callbacks pour mettre à jour les graphiques en fonction des sélections
@@ -123,7 +127,8 @@ def register_callbacks(app):
             x='promo',
             y='absence_moyenne',
             title=f"Répartition des absences par filière pour l'année {selected_annee}",
-            labels={"promo": "Filière", "absence_moyenne": "Absence moyenne"}
+            labels={"promo": "Filière", "absence_moyenne": "Absence moyenne"},
+            color_discrete_sequence=['#007bff']  # ← couleur personnalisée
         )
         return fig
 
@@ -140,7 +145,8 @@ def register_callbacks(app):
             x='annee',
             y='absence_moyenne',
             title=f"Répartition des absences pour la filière {selected_filiere} sur plusieurs années",
-            labels={"annee": "Année", "absence_moyenne": "Absence moyenne"}
+            labels={"annee": "Année", "absence_moyenne": "Absence moyenne"},
+            color_discrete_sequence=['#007bff']  # ← couleur personnalisée
         )
         
         # Forcer l'axe x à être catégoriel

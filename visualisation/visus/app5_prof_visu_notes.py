@@ -302,7 +302,7 @@ def register_callbacks(app):
         # ajout de la moyenne
         fig.add_vline(
             x=moyenne,
-            line=dict(color='#2e6f9f', dash='dash'),
+            line=dict(color='#FF0500', dash='dash'),
             annotation_text=f"Moyenne : {moyenne:.2f}",
             annotation_position="top right"
         )
@@ -310,7 +310,7 @@ def register_callbacks(app):
         # ajout de la médiane
         fig.add_vline(
             x=mediane,
-            line=dict(color='#167fb7', dash='dash'),
+            line=dict(color='#FF8400', dash='dash'),
             annotation_text=f"Médiane : {mediane:.2f}",
             annotation_position="top right",
             annotation_y=0.95 # décaller l'affichage pour que la médiane soit en dessous de la moyenne
@@ -320,7 +320,7 @@ def register_callbacks(app):
         fig.add_trace(go.Bar(
             x=X_notes,
             y=Y_notes,
-            marker_color='#2e6f9f',
+            marker_color='#007bff',
             text=[str(y) if y>0 else '' for y in Y_notes],
             textposition='inside',
             name="Nombre d'étudiants"

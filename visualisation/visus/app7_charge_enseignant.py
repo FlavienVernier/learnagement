@@ -10,6 +10,12 @@ file = '../data/charge_ensegnants.csv'
 # Charger le fichier CSV
 df = pd.read_csv(file, encoding='ISO-8859-1', delimiter=',')'''
 
+# Palette originale
+original_palette = px.colors.qualitative.Alphabet
+
+# Retirer une couleur (ex : '#FFB5E8')
+custom_palette = [c for c in original_palette if c.lower() != '#85660d']
+
 # Lire les informations de connexion depuis logs_db.txt
 with open('logs_db.txt', 'r') as file:
     lines = file.readlines()
@@ -121,7 +127,8 @@ def register_callbacks(app):
             color='matiere',  # Couleur par matière
             title=f"Charge de travail des enseignants ({filtre_periode})",
             labels={'nom': 'Enseignant', 'nb_heure': 'Nombre d\'heures', 'matiere': 'Matière'},
-            text='matiere'  # Afficher la matière des cours sur les barres
+            text='matiere',  # Afficher la matière des cours sur les barres
+            color_discrete_sequence=custom_palette  # ou 'Bold', 'Dark2', etc. 
         )
 
         fig.update_traces(textposition='outside')  # Placer les labels à l'extérieur des barres

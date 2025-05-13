@@ -194,8 +194,8 @@ def register_callbacks(app):
             text=filtered_df["Completion (%)"].map(lambda x: f"{x:.0f}%"),
             textposition='inside',
             marker=dict(
-                color='rgba(44, 168, 235, 0.6)',
-                line=dict(color='rgba(44, 168, 235, 1)', width=3)
+                color='rgba(0, 123, 255, 0.6)',
+                line=dict(color='rgba(0, 123, 255, 1)', width=3)
             ),
             hoverinfo='none'
         )

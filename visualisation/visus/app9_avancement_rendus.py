@@ -111,8 +111,8 @@ def register_callbacks(app):
                 textposition='inside',
                 orientation='h', 
                 marker=dict(
-                color='rgba(36, 213, 20, 0.6)',
-                line=dict(color='rgba(19, 141, 8, 1)', width=3)
+                color='rgba(0, 123, 255, 0.6)',
+                line=dict(color='rgba(0, 123, 255, 1)', width=3)
             ),
                 hoverinfo='none'),
             go.Bar(
@@ -121,8 +121,8 @@ def register_callbacks(app):
                 x=df_pourcentage[df_pourcentage['Statut'] == 'Non terminés']['Pourcentage'], 
                 orientation='h', 
                 marker=dict(
-                color='rgba(237, 19, 27, 0.6)',
-                line=dict(color='rgba(229, 7, 15, 1)', width=3)
+                color='rgba(255, 132, 0, 0.6)',
+                line=dict(color='rgba(255, 132, 0, 1)', width=3)
             ),
                 hoverinfo='none')
         ])
