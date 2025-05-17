@@ -6,6 +6,8 @@ import shutil
 import subprocess
 import time
 from getpass import getpass
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+from cryptography.hazmat.primitives import hashes
 
 # Couleurs pour les messages (non directement nécessaires dans Python mais émulation via ANSI codes)
 RED = "\033[0;31m"
@@ -19,6 +21,22 @@ NC = "\033[0m"  # No color
 
 INSTANCE_NAME=None
 INSTANCE_NUMBER=None
+
+#def generate_nextauth_secret(base_secret: str) -> bytes:
+def generate_nextauth_secret() -> bytes:  
+    base_secret = os.urandom(32).hex()
+    """
+    Génère une clé dérivée compatible avec NextAuth à partir d'un secret de base.
+    """
+    info = "NextAuth.js Generated Encryption Key".encode('utf-8')
+    hkdf = HKDF(
+        algorithm=hashes.SHA256(),
+        length=32,  # 32 octets pour une clé symétrique
+        salt=b"",    # pas de sel ici, mais peut être personnalisé
+        info=info
+    )
+    derived_key = hkdf.derive(base_secret.encode('utf-8'))
+    return derived_key
 
 def mainConfiguration():
     """
@@ -39,7 +57,40 @@ def mainConfiguration():
         configurationSettings["INSTANCE_MYSQL_USER_PASSWORD"]=getpass("Give the MySQL User password: ")
         with open("config.py", 'w') as file:
             file.write("configurationSettings=" + repr(configurationSettings))
+        with open(".env", 'w') as file:
+            file.write("INSTANCE_NAME=" + configurationSettings["INSTANCE_NAME"] + "\n")
+            file.write("INSTANCE_NUMBER=" + str(configurationSettings["INSTANCE_NUMBER"]) + "\n")
+            
+            file.write("INSTANCE_MYSQL_SERVER=learement_mysql_" + configurationSettings["INSTANCE_NAME"] + "\n")
+            file.write("INSTANCE_MYSQL_ROOT_PASSWORD=" + configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"] + "\n")
+            file.write("INSTANCE_MYSQL_USER_LOGIN=learnagement" + "\n")
+            file.write("INSTANCE_MYSQL_USER_PASSWORD=" + configurationSettings["INSTANCE_MYSQL_USER_PASSWORD"] + "\n")
 
+            file.write("INSTANCE_DASH_SERVER=learnagement_python_web_server_" + configurationSettings["INSTANCE_NAME"] + "\n")
+            file.write("INSTANCE_DASH_PORT=" + str(configurationSettings["INSTANCE_NUMBER"]) + "8050" + "\n")
+
+            file.write("NEXTAUTH_URL=http://learnagement_phpbackend_" + configurationSettings["INSTANCE_NAME"] + str(configurationSettings["INSTANCE_NUMBER"]) + "\n")
+            file.write("NEXTAUTH_DOCKER_URL=http://learnagement_phpbackend_" + configurationSettings["INSTANCE_NAME"] + "/connection/authenticate.php" + "\n")
+            file.write("NEXTAUTH_SECRET=" + generate_nextauth_secret().hex() + "\n")
+        print(f".env générated")
+            
+        source_path = os.path.join("./", ".env")
+        
+        target_path = os.path.join("webApp", ".env")
+        shutil.copy(source_path, target_path)
+        print(f"Copied: {source_path} -> {target_path}")
+        
+        target_path = os.path.join("webappnext", ".env")
+        shutil.copy(source_path, target_path)
+        print(f"Copied: {source_path} -> {target_path}")
+        
+        target_path = os.path.join("visualisation", ".env")
+        shutil.copy(source_path, target_path)
+        print(f"Copied: {source_path} -> {target_path}")
+        
+        target_path = os.path.join("phpbackend", ".env")
+        shutil.copy(source_path, target_path)
+        print(f"Copied: {source_path} -> {target_path}")
 
     
 def webAppConfiguration(configurationSettings):
