@@ -11,7 +11,36 @@ services:
             - "INSTANCE_NUMBER0080:80"
         volumes:
             - ../webApp:/var/www/html
-            - ./log:/var/log/apache2
+            - ./log/php:/var/log/apache2
+        depends_on:
+            - mysql_INSTANCE_NAME
+            - python_web_server_INSTANCE_NAME
+    phpbackend_INSTANCE_NAME:
+        container_name: learnagement_phpbackend_INSTANCE_NAME
+        build: ./phpbackend/
+        restart: always
+        networks:
+              - learnagement_INSTANCE_NAME
+        ports:
+            - "INSTANCE_NUMBER0081:80"
+        volumes:
+            - ../phpbackend:/var/www/html
+            - ./log/phpbackend:/var/log/apache2
+        depends_on:
+            - mysql_INSTANCE_NAME
+    nextjs_INSTANCE_NAME:
+        container_name: learnagement_nextjs_INSTANCE_NAME
+        build: ./webappnext
+        restart: always
+        networks:
+              - learnagement_INSTANCE_NAME
+        ports:
+            - "INSTANCE_NUMBER3000:3000"
+        volumes:
+            - ../webappnext:/app
+            - ../webappnext/node_modules:/app/node_modules
+        depends_on:
+            - phpbackend_INSTANCE_NAME
     mysql_INSTANCE_NAME:
         container_name: learnagement_mysql_INSTANCE_NAME
         image: mysql:8.0
@@ -42,8 +71,10 @@ services:
             - RELATIONA_DISPLAY=D
         volumes:
             - ./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
+        depends_on:
+            - mysql_INSTANCE_NAME
     python_web_server_INSTANCE_NAME:
-        container_name: python_web_server_INSTANCE_NAME
+        container_name: learnagement_python_web_server_INSTANCE_NAME
         build: ./python_web_server/
         restart: always
         networks:
@@ -53,10 +84,18 @@ services:
         volumes:
             - ../visualisation/visus/:/app/
             - ../visualisation/data/:/data/
+        depends_on:
+            - mysql_INSTANCE_NAME
 volumes:
     learnagement_persistent_db_INSTANCE_NAME:
 networks:
     learnagement_INSTANCE_NAME:
+        name: learnagement_INSTANCE_NAME
+        driver: bridge
+    learnagement_front_INSTANCE_NAME:
+        name: learnagement_INSTANCE_NAME
+        driver: bridge
+    learnagement_beck_INSTANCE_NAME:
         name: learnagement_INSTANCE_NAME
         driver: bridge
     

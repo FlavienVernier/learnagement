@@ -128,7 +128,7 @@ def dockerConfiguration(configurationSettings):
 
 
 
-def dockerRun(configurationSettings):  
+def dockerRun(configurationSettings, docker_option):  
     
     ##########
     # Run Docker
@@ -140,10 +140,10 @@ def dockerRun(configurationSettings):
     if os.name == 'nt':
         #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose up'],stdin=subprocess.PIPE)
         #prog.stdin.write(b'password')
-        prog = subprocess.Popen(['docker-compose', 'up'])
+        prog = subprocess.Popen(['docker-compose', 'up'] + docker_option)
         prog.communicate()
     else:    
-        subprocess.run(["sudo", "docker-compose", "up"], check=True)
+        subprocess.run(["sudo", "docker-compose", "up"] + docker_option, check=True)
 
     # Pause pour laisser Docker démarrer
     time.sleep(5)
@@ -161,14 +161,14 @@ def dockerRun(configurationSettings):
 
     
 
-def run():
+def run(docker_option = []):
     mainConfiguration()
     from config import configurationSettings
     
     webAppConfiguration(configurationSettings)
     dbDataConfiguration()
     dockerConfiguration(configurationSettings)
-    dockerRun(configurationSettings)
+    dockerRun(configurationSettings, docker_option)
     
     # Population avec des données libres
     # subprocess.run(["sh", "populationScript.sh"], check=True)
@@ -248,7 +248,7 @@ def destroy():
         print(f"{GREEN}App not destroyed{NC}")
 
 def help(argv):
-    print("Usage: " + argv[0] + " [-start|-stop|-destroy|-help]")
+    print("Usage: " + argv[0] + " [-start|-stop|-build|-destroy|-help]")
             
 def main(argv):
     # if script parameter is destroy
@@ -256,6 +256,8 @@ def main(argv):
         run()
     elif len(argv)==2 and argv[1] == "-stop":
         stop()
+    elif len(argv)==2 and argv[1] == "-build":
+        run(docker_option = ["--build"])
     elif len(argv)==2 and argv[1] == "-destroy":
         destroy()
     else:
