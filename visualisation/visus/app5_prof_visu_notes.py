@@ -137,53 +137,56 @@ def calcul_moyenne(matiere_selectionnee):
 data = get_data_as_enseignant(id_enseignant).to_dict(orient='records')
 # # lancement de Dash
 # app=dash.Dash(__name__)
+if len(data) > 0:
+    app5_layout = html.Div([
+        html.H1(f"Visualisation des notes - prof ", style={'textAlign': 'center', 'marginBottom': '5px'}),
 
-app5_layout = html.Div([
-    html.H1(f"Visualisation des notes - prof ", style={'textAlign': 'center', 'marginBottom': '5px'}),
-
-    html.Div(
-        children=[
+        html.Div(
+            children=[
             # choix de la promo
-            dcc.Dropdown(
-                id='choix_promo_prof',
-                options=[
+                dcc.Dropdown(
+                    id='choix_promo_prof',
+                    options=[
                         {'label': 'Toutes les promos', 'value': 'all'}]
                     +[{'label': promo['id_promo'], 'value': ', '.join(map(str, promo['etudiants']))} for promo in promo_disponibles],
-                # value=', '.join(map(str, promo_disponibles[0]['etudiants'])),
-                value='all',
-                style={'width': '48%'}
-            ),
+                    # value=', '.join(map(str, promo_disponibles[0]['etudiants'])),
+                    value='all',
+                    style={'width': '48%'}
+                ),
 
-            # choix de la matière
-            dcc.Dropdown(
-                id='choix_matiere_prof',
-                options=[{'label': matiere['nom_module'], 'value': matiere['nom_module']} for matiere in data],
-                value=data[0]['nom_module'],
-                style={'width': '48%'}
-            ),
+                # choix de la matière
+                dcc.Dropdown(
+                    id='choix_matiere_prof',
+                    options=[{'label': matiere['nom_module'], 'value': matiere['nom_module']} for matiere in data],
+                    value=data[0]['nom_module'],
+                    style={'width': '48%'}
+                ),
 
-            # choix du contrôle
-            dcc.Dropdown(
-                id='choix_controle_prof',
-                style={'width': '48%', 'margin': 'auto'}
-            ),
-        ],
-        style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'gap': '10px', 'marginBottom': '3px'}
-    ),
+                # choix du contrôle
+                dcc.Dropdown(
+                    id='choix_controle_prof',
+                    style={'width': '48%', 'margin': 'auto'}
+                ),
+            ],
+            style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'gap': '10px', 'marginBottom': '3px'}
+        ),
 
-    # affichage des notes
-    dcc.Graph(
-        id='affichage_note_prof',
-        config={'displayModeBar': False},
-        style={'margin': '10px auto', 'marginTop': '5px', 'marginBottom': '0px'}
-    ),
+        # affichage des notes
+        dcc.Graph(
+            id='affichage_note_prof',
+            config={'displayModeBar': False},
+            style={'margin': '10px auto', 'marginTop': '5px', 'marginBottom': '0px'}
+        ),
 
-    # affichage du classement
-    html.Div(
-        id='affichage_classement_prof',
-        style={'textAlign': 'center', 'fontSize': 18, 'marginTop': '0px', 'whiteSpace': 'pre-wrap'}, 
-    )
-])
+        # affichage du classement
+        html.Div(
+            id='affichage_classement_prof',
+            style={'textAlign': 'center', 'fontSize': 18, 'marginTop': '0px', 'whiteSpace': 'pre-wrap'}, 
+        )
+    ])
+else:
+    app5_layout = html.Div([
+        html.H1(f"Visualisation des notes - prof ", style={'textAlign': 'center', 'marginBottom': '5px'})])
 
 
 def register_callbacks(app):

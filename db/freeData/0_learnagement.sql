@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : mysql_dev
--- Généré le : lun. 07 avr. 2025 à 08:57
--- Version du serveur : 8.4.4
+-- Généré le : sam. 17 mai 2025 à 12:37
+-- Version du serveur : 8.0.33
 -- Version de PHP : 8.2.8
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -2938,6 +2938,16 @@ INSERT INTO `CLASS_session_type_to_be_affected_as_enseignant` (`id_type_seance_t
 (300, 302, 18, 18, 1),
 (301, 303, 18, 18, 1),
 (302, 304, 30, 18, 1);
+
+--
+-- Déchargement des données de la table `ETU_classical_evaluation`
+--
+
+INSERT INTO `ETU_classical_evaluation` (`id_classical_evaluation`, `id_etudiant`, `id_evaluation_type`, `evaluation`, `date`, `id_module`) VALUES
+(1, 259, 1, 17, '2025-01-15 00:00:00', 56),
+(2, 120, 1, 12, '2024-11-22 00:00:00', 78),
+(3, 465, 1, 9, '2025-04-01 00:00:00', 3),
+(4, 38, 1, 17, '2025-03-25 00:00:00', 167);
 
 --
 -- Déchargement des données de la table `ETU_competence_evaluation`
@@ -9057,7 +9067,7 @@ INSERT INTO `INFO_etat_module` (`id_etat_module`, `etat`, `commentaire`, `id_res
 --
 
 INSERT INTO `LNM_administratif` (`id_administratif`, `nom`, `prenom`, `mail`, `password`, `password_updated`) VALUES
-(1, 'Tartampion', 'Pierre', 'pierre.tartampion@truc.com', '$2y$10$sr7kFLecwNzaaItZI0MWSu4oxVi.APy0hjaaXPL8zurGvAHaA5LnK', 0);
+(1, 'Tartampion', 'Pierre', 'pierre.tartampion@truc.com', '$2y$10$zESfySbjXHm5w52l.eU4pe4L3lyiK5TPnLaNm7ca9Nqi9W74qxgVO', 0);
 
 --
 -- Déchargement des données de la table `LNM_enseignant`
@@ -9120,7 +9130,7 @@ INSERT INTO `LNM_enseignant` (`id_enseignant`, `prenom`, `nom`, `mail`, `passwor
 --
 
 INSERT INTO `LNM_etudiant` (`id_etudiant`, `nom`, `prenom`, `mail`, `password`, `password_updated`, `id_promo`) VALUES
-(1, 'BONNIFAIT', 'LAURENT', 'LAURENT.BONNIFAIT@machin.com', '$2y$10$sr7kFLecwNzaaItZI0MWSu4oxVi.APy0hjaaXPL8zurGvAHaA5LnK', 0, 13),
+(1, 'BONNIFAIT', 'LAURENT', 'LAURENT.BONNIFAIT@machin.com', '$2y$10$zESfySbjXHm5w52l.eU4pe4L3lyiK5TPnLaNm7ca9Nqi9W74qxgVO', 0, 13),
 (2, 'CELLAURO', 'FREDERIC', 'FREDERIC.CELLAURO@machin.com', '$2y$10$sr7kFLecwNzaaItZI0MWSu4oxVi.APy0hjaaXPL8zurGvAHaA5LnK', 0, 10),
 (3, 'LE JAN', 'SEBASTIEN', 'SEBASTIEN.LE JAN@machin.com', '$2y$10$sr7kFLecwNzaaItZI0MWSu4oxVi.APy0hjaaXPL8zurGvAHaA5LnK', 0, 14),
 (4, 'CHRISTIAN', 'PIERRE', 'PIERRE.CHRISTIAN@machin.com', '$2y$10$sr7kFLecwNzaaItZI0MWSu4oxVi.APy0hjaaXPL8zurGvAHaA5LnK', 0, 29),
@@ -11978,6 +11988,13 @@ INSERT INTO `VIEW_display` (`id_view`, `sortIndex`, `name`, `group_of_views`, `r
 (22, 20, '0 Intervention : Charge', 'Enseignant', 'SELECT LNM_enseignant.prenom, LNM_enseignant.nom, \r\nSUM(\r\nCASE \r\nWHEN LNM_seanceType.type = \"CM\" THEN MAQUETTE_module_sequencage.duree_h \r\nWHEN LNM_seanceType.type = \"TD\" THEN MAQUETTE_module_sequencage.duree_h\r\nWHEN LNM_seanceType.type = \"TP\" THEN MAQUETTE_module_sequencage.duree_h \r\nEND) AS \"Charge\"\r\nFROM `MAQUETTE_module` \r\nJOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module = MAQUETTE_module.id_module\r\nJOIN MAQUETTE_module_sequence ON MAQUETTE_module_sequence.id_module_sequencage = MAQUETTE_module_sequencage.id_module_sequencage\r\nJOIN CLASS_session_to_be_affected ON CLASS_session_to_be_affected.id_module_sequence = MAQUETTE_module_sequence.id_module_sequence\r\nJOIN LNM_groupe ON LNM_groupe.id_groupe = CLASS_session_to_be_affected.id_groupe\r\nJOIN CLASS_session_to_be_affected_as_enseignant ON CLASS_session_to_be_affected_as_enseignant.id_seance_to_be_affected = CLASS_session_to_be_affected.id_seance_to_be_affected\r\nJOIN LNM_enseignant ON LNM_enseignant.id_enseignant = CLASS_session_to_be_affected_as_enseignant.id_enseignant\r\nJOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type\r\nWHERE 1\r\nGROUP BY LNM_enseignant.prenom, LNM_enseignant.nom\r\nORDER BY `LNM_enseignant`.`nom` DESC;'),
 (23, 10, 'Enseignant sans cours', 'Check', 'SELECT `LNM_enseignant`.* \r\nFROM `LNM_enseignant` \r\nLEFT JOIN CLASS_session_to_be_affected_as_enseignant ON CLASS_session_to_be_affected_as_enseignant.id_enseignant = LNM_enseignant.id_enseignant\r\nWHERE CLASS_session_to_be_affected_as_enseignant.id_enseignant IS NUll;'),
 (24, 10, 'Erreur de nombre de séquences', 'Check', 'SELECT MAQUETTE_module.code_module, LNM_seanceType.type, LNM_groupe_type.groupe_type, max(MAQUETTE_module_sequencage.nombre) - count(`MAQUETTE_module_sequence`.`numero_ordre`) \r\nFROM `MAQUETTE_module_sequence` \r\nJOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage\r\nJOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module\r\nJOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type\r\nJOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type\r\nWHERE 1\r\nGROUP BY MAQUETTE_module.code_module, LNM_seanceType.type, LNM_groupe_type.groupe_type  \r\nHAVING max(MAQUETTE_module_sequencage.nombre) - count(`MAQUETTE_module_sequence`.`numero_ordre`) != 0;');
+
+--
+-- Déchargement des données de la table `VIEW_parameters_of_views`
+--
+
+INSERT INTO `VIEW_parameters_of_views` (`id_parameters_of_views`, `userId`, `sessionId`, `id_semestre`, `id_module`, `id_discipline`, `id_enseignant`, `id_filiere`, `id_statut`) VALUES
+(4, 6, 'ccdc72062628625b1bf2f51be2fc2429', NULL, NULL, NULL, 6, NULL, NULL);
 
 --
 -- Déchargement des données de la table `VIEW_updatable`

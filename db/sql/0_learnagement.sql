@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : mysql_dev
--- Généré le : lun. 07 avr. 2025 à 08:56
--- Version du serveur : 8.4.4
+-- Généré le : sam. 17 mai 2025 à 11:52
+-- Version du serveur : 8.0.33
 -- Version de PHP : 8.2.8
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -182,7 +182,8 @@ CREATE TABLE `ETU_classical_evaluation` (
   `id_etudiant` int NOT NULL,
   `id_evaluation_type` int NOT NULL,
   `evaluation` int NOT NULL,
-  `date` datetime NOT NULL
+  `date` datetime NOT NULL,
+  `id_module` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -772,7 +773,8 @@ ALTER TABLE `CLASS_session_type_to_be_affected_as_enseignant`
 ALTER TABLE `ETU_classical_evaluation`
   ADD PRIMARY KEY (`id_classical_evaluation`),
   ADD KEY `FK_id_etudiant` (`id_etudiant`),
-  ADD KEY `FK_evaluation_type` (`id_evaluation_type`);
+  ADD KEY `FK_evaluation_type` (`id_evaluation_type`),
+  ADD KEY `FK_classical_evaluation_as_module` (`id_module`);
 
 --
 -- Index pour la table `ETU_competence_evaluation`
@@ -1326,8 +1328,9 @@ ALTER TABLE `CLASS_session_type_to_be_affected_as_enseignant`
 -- Contraintes pour la table `ETU_classical_evaluation`
 --
 ALTER TABLE `ETU_classical_evaluation`
-  ADD CONSTRAINT `FK_evaluation_type` FOREIGN KEY (`id_evaluation_type`) REFERENCES `LNM_evaluation_type` (`id_evaluation_type`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `FK_id_etudiant` FOREIGN KEY (`id_etudiant`) REFERENCES `LNM_etudiant` (`id_etudiant`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `FK_classical_evaluation_as_etudiant` FOREIGN KEY (`id_etudiant`) REFERENCES `LNM_etudiant` (`id_etudiant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `FK_classical_evaluation_as_evaluation_type` FOREIGN KEY (`id_evaluation_type`) REFERENCES `LNM_evaluation_type` (`id_evaluation_type`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `FK_classical_evaluation_as_module` FOREIGN KEY (`id_module`) REFERENCES `MAQUETTE_module` (`id_module`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Contraintes pour la table `ETU_competence_evaluation`
