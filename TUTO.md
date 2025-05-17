@@ -42,6 +42,15 @@ Si l'installation est réussie, aller sur un navigateur web en `localhost` pour 
 python Learnagement.py
 ```
 
+## Free Data
+
+L'installation propose d'utiliser des données libres pour tester l'application, 3 utilisateurs par défaut sont créés :
+
+- un enseignant : FABRICE.LE_SAINT@truc.com / toto
+- un étudiant : LAURENT.BONNIFAIT@machin.com / toto
+- un administratif : pierre.tartampion@truc.com / toto
+
+
 ## Faire une autre installation 
 
 Pour créer une autre instance :
