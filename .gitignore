@@ -11,10 +11,9 @@ __pycache__
 #*
 *#
 
-# private files that contain password, NEVER PUT IN ON GIT
+# private files that contain password, NEVER PUT IN ON GIT (must be replaced by .env)
 webApp/config.php
 docker/docker-compose.yml
-config.py
 visualisation/visus/logs_db.txt
 
 webApp/**/*.txt

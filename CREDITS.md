@@ -17,6 +17,14 @@
   Student dev during IDU Project Base Learning (2023-2026)
   - Axelle Roy:  
   Student dev during IDU Project Base Learning (2023-2026)
+  - Luka Andrieu:
+  Student dev during L3 Info SCEM project (2025)
+  - Timeo Chatelain:   
+  Student dev during L3 Info SCEM project (2025)
+  - Nathan Roi:   
+  Student dev during L3 Info SCEM project (2025)
+  - Alain Wiklacz:   
+  Student dev during L3 Info SCEM project (2025)
   - Ansame Gazouani:  
   Junior dev of Web App IHM (2023)
 - Original Project

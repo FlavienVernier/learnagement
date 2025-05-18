@@ -5,6 +5,7 @@ import sys
 import shutil
 import subprocess
 import time
+from dotenv import load_dotenv, dotenv_values 
 from getpass import getpass
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes
@@ -43,7 +44,8 @@ def mainConfiguration():
     Ask the system administrator for configuration information if the configuration file does not exist and store these information into "config.py"
     """
     
-    if not os.path.exists("config.py"):
+    #if not os.path.exists("config.py") or not os.path.exists(".env"):
+    if not os.path.exists(".env"):
         configurationSettings={}
         configurationSettings["INSTANCE_NAME"]=input("Give the intance name (lowercase): ").lower()
         instance_number = 0
@@ -55,8 +57,8 @@ def mainConfiguration():
         configurationSettings["INSTANCE_NUMBER"]=instance_number
         configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"]=getpass("Give the MySQL Root password: ")
         configurationSettings["INSTANCE_MYSQL_USER_PASSWORD"]=getpass("Give the MySQL User password: ")
-        with open("config.py", 'w') as file:
-            file.write("configurationSettings=" + repr(configurationSettings))
+        #with open("config.py", 'w') as file:
+            #file.write("configurationSettings=" + repr(configurationSettings))
         with open(".env", 'w') as file:
             file.write("INSTANCE_NAME=" + configurationSettings["INSTANCE_NAME"] + "\n")
             file.write("INSTANCE_NUMBER=" + str(configurationSettings["INSTANCE_NUMBER"]) + "\n")
@@ -69,7 +71,7 @@ def mainConfiguration():
             file.write("INSTANCE_DASH_SERVER=learnagement_python_web_server_" + configurationSettings["INSTANCE_NAME"] + "\n")
             file.write("INSTANCE_DASH_PORT=" + str(configurationSettings["INSTANCE_NUMBER"]) + "8050" + "\n")
 
-            file.write("NEXTAUTH_URL=http://learnagement_phpbackend_" + configurationSettings["INSTANCE_NAME"] + str(configurationSettings["INSTANCE_NUMBER"]) + "\n")
+            file.write("NEXTAUTH_URL=http://learnagement_phpbackend_" + configurationSettings["INSTANCE_NAME"] + "\n")
             file.write("NEXTAUTH_DOCKER_URL=http://learnagement_phpbackend_" + configurationSettings["INSTANCE_NAME"] + "/connection/authenticate.php" + "\n")
             file.write("NEXTAUTH_SECRET=" + generate_nextauth_secret().hex() + "\n")
         print(f".env générated")
@@ -92,7 +94,13 @@ def mainConfiguration():
         shutil.copy(source_path, target_path)
         print(f"Copied: {source_path} -> {target_path}")
 
-    
+        return configurationSettings
+    else:
+        #from config import configurationSettings
+        # Load environment variables from the .env file
+        load_dotenv()
+        return os.environ
+        
 def webAppConfiguration(configurationSettings):
 
     ##########
@@ -213,8 +221,7 @@ def dockerRun(configurationSettings, docker_option):
     
 
 def run(docker_option = []):
-    mainConfiguration()
-    from config import configurationSettings
+    configurationSettings = mainConfiguration()
     
     webAppConfiguration(configurationSettings)
     dbDataConfiguration()
