@@ -23,8 +23,9 @@ const handler= NextAuth({
                 formData.append("password", credentials.password)
 
                 try {
-                    //const res = await axios.post("http://php_dev/L3_INFO_SCEM_2025/connection/authenticate.php", formData, {withCredentials: true})
-                    const res = await axios.post(process.env.NEXTAUTH_DOCKER_URL, formData, {withCredentials: true})
+                    //const res = await axios.post("http://learnagement_phpbackend_dev/connection/authenticate.php", formData, {withCredentials: true})
+                    const res = await axios.post(process.env.PHP_BACKEND_DOCKER_URL+"/connection/authenticate.php", formData, {withCredentials: true})
+                    //const res = await axios.post(process.env.NEXTAUTH_DOCKER_URL, formData, {withCredentials: true})
 
                     if (res.status === 200) {
                         const sessionId = res.data['sessionId']

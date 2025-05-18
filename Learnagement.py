@@ -71,7 +71,10 @@ def mainConfiguration():
             file.write("INSTANCE_DASH_SERVER=learnagement_python_web_server_" + configurationSettings["INSTANCE_NAME"] + "\n")
             file.write("INSTANCE_DASH_PORT=" + str(configurationSettings["INSTANCE_NUMBER"]) + "8050" + "\n")
 
-            file.write("NEXTAUTH_URL=http://learnagement_phpbackend_" + configurationSettings["INSTANCE_NAME"] + "\n")
+            file.write("PHP_BACKEND_URL=http://localhost:" + str(configurationSettings["INSTANCE_NUMBER"]) + "0081" + "\n")
+            file.write("PHP_BACKEND_DOCKER_URL=http://learnagement_phpbackend_" + configurationSettings["INSTANCE_NAME"] + "\n")
+            
+            file.write("NEXTAUTH_URL=http://localhost:" + str(configurationSettings["INSTANCE_NUMBER"]) + "3000" + "\n")
             file.write("NEXTAUTH_DOCKER_URL=http://learnagement_phpbackend_" + configurationSettings["INSTANCE_NAME"] + "/connection/authenticate.php" + "\n")
             file.write("NEXTAUTH_SECRET=" + generate_nextauth_secret().hex() + "\n")
         print(f".env générated")
