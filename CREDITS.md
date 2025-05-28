@@ -17,7 +17,7 @@
   Student dev during IDU Project Base Learning (2023-2026)
   - Axelle Roy:  
   Student dev during IDU Project Base Learning (2023-2026)
-  - Luka Andrieu:
+  - Luka Andrieu:   
   Student dev during L3 Info SCEM project (2025)
   - Timeo Chatelain:   
   Student dev during L3 Info SCEM project (2025)

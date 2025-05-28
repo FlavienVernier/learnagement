@@ -68,6 +68,8 @@ def mainConfiguration():
             file.write("INSTANCE_MYSQL_USER_LOGIN=learnagement" + "\n")
             file.write("INSTANCE_MYSQL_USER_PASSWORD=" + configurationSettings["INSTANCE_MYSQL_USER_PASSWORD"] + "\n")
 
+            # Refactor XXX_URL (not XXX_DOCKER_URL) must be XXX_PUBLIC_URL
+            
             file.write("INSTANCE_DASH_SERVER=learnagement_python_web_server_" + configurationSettings["INSTANCE_NAME"] + "\n")
             file.write("INSTANCE_DASH_PORT=" + str(configurationSettings["INSTANCE_NUMBER"]) + "8050" + "\n")
 
@@ -75,7 +77,7 @@ def mainConfiguration():
             file.write("PHP_BACKEND_DOCKER_URL=http://learnagement_phpbackend_" + configurationSettings["INSTANCE_NAME"] + "\n")
             
             file.write("NEXTAUTH_URL=http://localhost:" + str(configurationSettings["INSTANCE_NUMBER"]) + "3000" + "\n")
-            file.write("NEXTAUTH_DOCKER_URL=http://learnagement_phpbackend_" + configurationSettings["INSTANCE_NAME"] + "/connection/authenticate.php" + "\n")
+            file.write("NEXTAUTH_DOCKER_URL=http://learnagement_nextjs_" + configurationSettings["INSTANCE_NAME"] + "\n")
             file.write("NEXTAUTH_SECRET=" + generate_nextauth_secret().hex() + "\n")
         print(f".env générated")
             
