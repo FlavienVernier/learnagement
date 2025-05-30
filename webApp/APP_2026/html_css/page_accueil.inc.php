@@ -17,6 +17,7 @@
             echo "<li><a href='?page=accueil&section=dashboard_enseignant' class='btn_menu'>Tableau de bord</a></li>";
         }
         else{
+            echo "<li><a href='?page=accueil&section=info_administratif' class='btn_menu'>Mon Compte</a></li>";
             echo "<li><a href='?page=accueil&section=dashboard_administration' class='btn_menu'>Tableau de bord</a></li>";
         }
         ?>

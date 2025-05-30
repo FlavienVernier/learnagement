@@ -5,7 +5,7 @@
 if( isset( $_POST["inscription_ok"])){
 
   //vérification si personne prof ou etu
-  $sql1="SELECT mail, password, password_updated FROM LNM_etudiant WHERE mail LIKE'".$_POST["id"]."'";
+  $sql1="SELECT id_etudiant, mail, password, password_updated FROM LNM_etudiant WHERE mail LIKE'".$_POST["id"]."'";
   $result1 = mysqli_query($conn, $sql1) or die("Requête invalide: ". mysqli_error( $conn )."\n".$sql1);
   $val= mysqli_fetch_array($result1);
   if ($val){
@@ -15,6 +15,7 @@ if( isset( $_POST["inscription_ok"])){
       $_SESSION["connecte"]=true; 
       $_SESSION["mail"]=$_POST["id"];
       $_SESSION["type"]="etudiant";
+      $_SESSION["id_etudiant"]=$val['id_etudiant'];
       //redirection
       echo "<script>window.location.href='?page=accueil'</script>";
     }
@@ -22,6 +23,7 @@ if( isset( $_POST["inscription_ok"])){
     else if ($val['password_updated'] == NULL && $val['password'] == $_POST['mdp']){
       $mail = $_POST['id'];
       $_SESSION["type"]="etudiant";
+      $_SESSION["id_etudiant"]=$val['id_etudiant'];
       echo"<div id= principal>";
       echo "<div id='requete'><h1 id= textprincipal>Initialisation du mot de passe</h1>";
       echo "<form action='?page=verification_inscription' method='post'>";
@@ -39,7 +41,7 @@ if( isset( $_POST["inscription_ok"])){
     }
   }
   else if ($val == NULL){
-    $sql2="SELECT mail, password, password_updated FROM LNM_enseignant WHERE mail LIKE'".$_POST["id"]."'";
+    $sql2="SELECT id_enseignant, mail, password, password_updated FROM LNM_enseignant WHERE mail LIKE'".$_POST["id"]."'";
     $result2 = mysqli_query($conn, $sql2) or die("Requête invalide: ". mysqli_error( $conn )."\n".$sql2);
     $val= mysqli_fetch_array($result2);
 
@@ -50,6 +52,7 @@ if( isset( $_POST["inscription_ok"])){
         $_SESSION["connecte"]=true; 
         $_SESSION["mail"]=$_POST["id"];
         $_SESSION["type"]="enseignant";
+        $_SESSION["id_enseignant"]=$val['id_enseignant'];
         //redirection
         echo "<script>window.location.href='?page=accueil'</script>";
       }
@@ -57,6 +60,7 @@ if( isset( $_POST["inscription_ok"])){
       else if ($val['password_updated'] == NULL && $val['password'] == $_POST['mdp']){
         $mail = $_POST['id'];
         $_SESSION["type"]="enseignant";
+        $_SESSION["id_enseignant"]=$val['id_enseignant'];
         echo"<div id= principal>";
         echo "<div id='requete'><h1 id= textprincipal>Initialisation du mot de passe</h1>";
         echo "<form action='?page=verification_inscription' method='post'>";

@@ -2,7 +2,7 @@
     header("Access-Control-Allow-Origin: http://localhost:40080"); // Activer CORS
     header("Access-Control-Allow-Credentials: true"); // Autoriser le partage de cookies
 
-    header("Content-Type: application/json");
+    header("Content-Type: application/json; charset=utf-8");
 
     session_start();
 
@@ -11,12 +11,7 @@
     include("../crud/function_rs_to_table.php");
     include("../crud/function_action_allowed.php");
 
-    if (isset($_POST['id_enseignant'])){
-        $id_enseignant = $_POST['id_enseignant'];
-        $rsStages = listLNM_stageBySupervisorId($conn, $id_enseignant);
+    $rsStages = listLNM_stage($conn);
 
-        echo json_encode($rsStages);
-    }else{
-        echo json_encode("Error id_enseignant undefined");
-    }
+    echo json_encode($rsStages, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
