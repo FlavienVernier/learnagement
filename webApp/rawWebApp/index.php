@@ -13,7 +13,7 @@ if(!isset($_SESSION["loggedin"])){
   initFilter($conn, "NULL", $sessionId);
  
  }
-$_SESSION['timeout'] = $session_timeout;
+$_SESSION['timeout'] = $_ENV["SESSION_TIMEOUT"];
 ?>
   
 <!DOCTYPE html>

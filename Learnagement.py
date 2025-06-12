@@ -47,6 +47,7 @@ def mainConfiguration():
     #if not os.path.exists("config.py") or not os.path.exists(".env"):
     if not os.path.exists(".env"):
         configurationSettings={}
+        configurationSettings["SESSION_TIMEOUT"] = "900"
         configurationSettings["INSTANCE_NAME"]=input("Give the intance name (lowercase): ").lower()
         instance_number = 0
         while instance_number < 2 or instance_number > 4:
@@ -55,18 +56,21 @@ def mainConfiguration():
             except:
                 instance_number = 0
         configurationSettings["INSTANCE_NUMBER"]=instance_number
-        configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"]=getpass("Give the MySQL Root password: ")
-        configurationSettings["INSTANCE_MYSQL_USER_PASSWORD"]=getpass("Give the MySQL User password: ")
+        configurationSettings["MYSQL_ROOT_PASSWORD"]=getpass("Give the MySQL Root password: ")
+        configurationSettings["MYSQL_USER_PASSWORD"]=getpass("Give the MySQL User password: ")
         #with open("config.py", 'w') as file:
             #file.write("configurationSettings=" + repr(configurationSettings))
         with open(".env", 'w') as file:
+            file.write("SESSION_TIMEOUT=" + configurationSettings["SESSION_TIMEOUT"] + "\n")
             file.write("INSTANCE_NAME=" + configurationSettings["INSTANCE_NAME"] + "\n")
             file.write("INSTANCE_NUMBER=" + str(configurationSettings["INSTANCE_NUMBER"]) + "\n")
             
-            file.write("INSTANCE_MYSQL_SERVER=learement_mysql_" + configurationSettings["INSTANCE_NAME"] + "\n")
-            file.write("INSTANCE_MYSQL_ROOT_PASSWORD=" + configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"] + "\n")
-            file.write("INSTANCE_MYSQL_USER_LOGIN=learnagement" + "\n")
-            file.write("INSTANCE_MYSQL_USER_PASSWORD=" + configurationSettings["INSTANCE_MYSQL_USER_PASSWORD"] + "\n")
+            file.write("MYSQL_SERVER=learnagement_mysql_" + configurationSettings["INSTANCE_NAME"] + "\n")
+            file.write("MYSQL_PORT=3306" + "\n")
+            file.write("MYSQL_DB=learnagement" + "\n")
+            file.write("MYSQL_ROOT_PASSWORD=" + configurationSettings["MYSQL_ROOT_PASSWORD"] + "\n")
+            file.write("MYSQL_USER_LOGIN=learnagement" + "\n")
+            file.write("MYSQL_USER_PASSWORD=" + configurationSettings["MYSQL_USER_PASSWORD"] + "\n")
 
             # Refactor XXX_URL (not XXX_DOCKER_URL) must be XXX_PUBLIC_URL
             
@@ -105,7 +109,8 @@ def mainConfiguration():
         # Load environment variables from the .env file
         load_dotenv()
         return os.environ
-        
+
+# Deprecated
 def webAppConfiguration(configurationSettings):
 
     ##########
@@ -119,8 +124,8 @@ def webAppConfiguration(configurationSettings):
         shutil.copy("config.php.skeleton", "config.php")
         searchReplaceInFile("config.php", "INSTANCE_NAME", configurationSettings["INSTANCE_NAME"])
         searchReplaceInFile("config.php", "INSTANCE_NUMBER", str(configurationSettings["INSTANCE_NUMBER"]))
-        searchReplaceInFile("config.php", "INSTANCE_MYSQL_ROOT_PASSWORD", configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"])
-        searchReplaceInFile("config.php", "INSTANCE_MYSQL_USER_PASSWORD", configurationSettings["INSTANCE_MYSQL_USER_PASSWORD"])
+        searchReplaceInFile("config.php", "MYSQL_ROOT_PASSWORD", configurationSettings["MYSQL_ROOT_PASSWORD"])
+        searchReplaceInFile("config.php", "MYSQL_USER_PASSWORD", configurationSettings["MYSQL_USER_PASSWORD"])
     elif(os.path.getmtime("config.php.skeleton") > os.path.getmtime("config.php")):
         print(f"{YELLOW}WARNING: config.php.skeleton has been updated, your confing.php can be deprecated{NC}")
     
@@ -184,7 +189,7 @@ def dockerConfiguration(configurationSettings):
         shutil.copy("docker-compose.yml.skeleton", "docker-compose.yml")
         searchReplaceInFile("docker-compose.yml", "INSTANCE_NAME", configurationSettings["INSTANCE_NAME"])
         searchReplaceInFile("docker-compose.yml", "INSTANCE_NUMBER", str(configurationSettings["INSTANCE_NUMBER"]))
-        searchReplaceInFile("docker-compose.yml", "INSTANCE_MYSQL_ROOT_PASSWORD", configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"])
+        searchReplaceInFile("docker-compose.yml", "MYSQL_ROOT_PASSWORD", configurationSettings["MYSQL_ROOT_PASSWORD"])
     elif(os.path.getmtime("docker-compose.yml.skeleton") > os.path.getmtime("docker-compose.yml")):
         print(f"{YELLOW}WARNING: docker-compose.yml.skeleton has been updated, your docker-compose.yml can be deprecated{NC}")
     
@@ -228,7 +233,7 @@ def dockerRun(configurationSettings, docker_option):
 def run(docker_option = []):
     configurationSettings = mainConfiguration()
     
-    webAppConfiguration(configurationSettings)
+    #webAppConfiguration(configurationSettings)
     dbDataConfiguration()
     dockerConfiguration(configurationSettings)
     dockerRun(configurationSettings, docker_option)

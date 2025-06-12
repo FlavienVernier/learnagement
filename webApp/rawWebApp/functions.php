@@ -12,7 +12,7 @@
    */
 function getPrimaryKeyFields($conn, $table_name){
 
-  global $mysql_db;
+  $mysql_db = $_ENV['MYSQL_DB'];
   
   $primaryKeyField_req = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = \"$mysql_db\" AND COLUMN_KEY = 'PRI' AND table_name = \"$table_name\"";
 
@@ -118,7 +118,7 @@ function getSecondaryKeys($conn, $table){
  */
 function getSecondaryKeyValue($conn, $reference_table_name, $primary_value){
 
-  global $mysql_db;
+  $mysql_db = $_ENV['MYSQL_DB'];
 
   // get primary K fields
   $primaryKFields = getPrimaryKeyFields($conn, $reference_table_name);
@@ -180,7 +180,7 @@ function getPrimarySecondaryKeyValues($conn, $reference_table_name){
  */
 function getForeignKeys($conn, $table_name){
 
-  global $mysql_db;
+  $mysql_db = $_ENV['MYSQL_DB'];
 
   $foreignK_req = "SELECT TABLE_NAME,COLUMN_NAME,CONSTRAINT_NAME, REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE REFERENCED_TABLE_SCHEMA = \"$mysql_db\" AND TABLE_NAME = \"$table_name\"";
 
@@ -301,7 +301,7 @@ function getTableData($conn, $table_name, $fields, $id_responsable){
  */
 function getKeysValuesResponsibles($conn, $table_name){
 
-  global $mysql_db;
+  //global $mysql_db;
 
   $fields = getFields($conn, $table_name);
 

@@ -4,7 +4,7 @@
     <iframe src=
 <?php
     require_once("../../config.php");
-    print("\"http://localhost:" . $python_web_server_port . "/administratif\"");
+    print("\"http://localhost:" . $_env['PYTHON_WEB_SERVER_PORT'] . "/administratif\"");
 ?>
    width="100%" height="600px" style="border:none;"></iframe>
 </div>

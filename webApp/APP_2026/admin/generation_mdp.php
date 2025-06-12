@@ -13,7 +13,7 @@
 
         require_once("../config.php");
 
-        $conn = mysqli_connect("$mysql_server","$mysql_user","$mysql_passwd","$mysql_db","$mysql_port")
+        $conn = mysqli_connect("$_ENV['MYSQL_SERVER']","$_ENV['MYSQL_USER']","$_ENV['MYSQL_PASSWD']","$_ENV['MYSQL_DB']","$_ENV['MYSQL_PORT']")
         or die("Failed to connect to MySQL: " . mysqli_connect_error());
 
         set_time_limit(300);
