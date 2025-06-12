@@ -74,8 +74,8 @@ def mainConfiguration():
 
             # Refactor XXX_URL (not XXX_DOCKER_URL) must be XXX_PUBLIC_URL
             
-            file.write("INSTANCE_DASH_SERVER=learnagement_python_web_server_" + configurationSettings["INSTANCE_NAME"] + "\n")
-            file.write("INSTANCE_DASH_PORT=" + str(configurationSettings["INSTANCE_NUMBER"]) + "8050" + "\n")
+            file.write("DASH_SERVER=learnagement_python_web_server_" + configurationSettings["INSTANCE_NAME"] + "\n")
+            file.write("DASH_PORT=" + str(configurationSettings["INSTANCE_NUMBER"]) + "8050" + "\n")
 
             file.write("PHP_BACKEND_URL=http://localhost:" + str(configurationSettings["INSTANCE_NUMBER"]) + "0081" + "\n")
             file.write("PHP_BACKEND_DOCKER_URL=http://learnagement_phpbackend_" + configurationSettings["INSTANCE_NAME"] + "\n")

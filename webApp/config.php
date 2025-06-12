@@ -17,7 +17,7 @@ function loadEnv($path): void
        }
    }
 
-loadEnv("..");
+
 
 // Session timeout in second
 //$session_timeout = 900;

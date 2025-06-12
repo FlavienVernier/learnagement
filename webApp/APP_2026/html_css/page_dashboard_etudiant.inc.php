@@ -4,7 +4,9 @@
     <iframe src=
 <?php
     require_once("../../config.php");
-    print("\"http://localhost:" . $_env['PYTHON_WEB_SERVER_PORT'] . "/etudiant\"");
+    loadEnv("../..");
+
+    print("\"http://localhost:" . $_ENV['PYTHON_WEB_SERVER_PORT'] . "/etudiant\"");
 ?>
   width="100%" height="600px" style="border:none;"></iframe>
 </div>

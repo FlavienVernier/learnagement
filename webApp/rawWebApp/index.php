@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once("../config.php");
+loadEnv("..");
 require_once("functions.php");
 require_once("functions_filter.php");
 if(!isset($_SESSION["loggedin"])){

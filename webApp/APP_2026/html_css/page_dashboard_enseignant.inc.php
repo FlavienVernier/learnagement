@@ -4,6 +4,8 @@
     <iframe src=
 <?php
     require_once("../../config.php");
+    loadEnv("../..");
+
     $payload = [
         'id_enseignant' => $_SESSION['id_enseignant'],
         'expires' => time() + 300 // 5 minutes
@@ -14,8 +16,9 @@
     $secret = 'Cle secrete a generer automatiquement au lancement de Learnagement';
     $token = base64_encode(json_encode($payload)) . '.' . hash_hmac('sha256', json_encode($payload), $secret);
 
+    //print("\"http://localhost:" . $python_web_server_port . "/enseignant/?auth_token=" . urlencode($token) . "\" ");
 
-    print("\"http://localhost:" . $_env['PYTHON_WEB_SERVER_PORT'] . "/enseignant/?auth_token=" . urlencode($token) . "\"");
+    print("\"http://localhost:" . $_ENV['DASH_PORT'] . "/enseignant/?auth_token=" . urlencode($token) . "\" ");
 ?>
 width="100%" height="600px" style="border:none;"></iframe>
 </div>
