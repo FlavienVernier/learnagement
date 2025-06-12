@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+import os
 import dash
 from dash import html, dcc
 from dash.dependencies import Input, Output
@@ -11,14 +13,14 @@ df = pd.read_csv('../data/avancement_rendus.csv')
 
 # Supprimer les espaces en tête et en queue des noms de colonnes
 df.columns = df.columns.str.strip()'''
-# Lire les informations de connexion depuis logs_db.txt
-with open('logs_db.txt', 'r') as file:
-    lines = file.readlines()
-    user = lines[0].strip()
-    password = lines[1].strip()
-    host = lines[2].strip()
-    port = lines[3].strip()
-    database = lines[4].strip()
+
+load_dotenv()
+
+user = os.getenv("MYSQL_USER_LOGIN")
+password = os.getenv("MYSQL_USER_PASSWORD")
+host = os.getenv("MYSQL_SERVER")
+port = os.getenv("MYSQL_PORT")
+database = os.getenv("MYSQL_DB")
     
 # Se connecter à la base de données MySQL
 conn = mysql.connector.connect(

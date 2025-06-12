@@ -95,7 +95,7 @@ def mainConfiguration():
         shutil.copy(source_path, target_path)
         print(f"Copied: {source_path} -> {target_path}")
         
-        target_path = os.path.join("visualisation", ".env")
+        target_path = os.path.join("visualisation", "visus", ".env")
         shutil.copy(source_path, target_path)
         print(f"Copied: {source_path} -> {target_path}")
         

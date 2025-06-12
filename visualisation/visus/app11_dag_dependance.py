@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+import os
 import plotly.graph_objects as go
 import plotly.express as px
 import networkx as nx
@@ -13,14 +15,13 @@ color_mode = "module"  # "groupe" ou "module"
 edge_color = "#555" 
 node_radius = 0.05 
 
-# Lire les informations de connexion depuis logs_db.txt
-with open('logs_db.txt', 'r') as file:
-    lines = file.readlines()
-    user = lines[0].strip()
-    password = lines[1].strip()
-    host = lines[2].strip()
-    port = lines[3].strip()
-    database = lines[4].strip()
+load_dotenv()
+
+user = os.getenv("MYSQL_USER_LOGIN")
+password = os.getenv("MYSQL_USER_PASSWORD")
+host = os.getenv("MYSQL_SERVER")
+port = os.getenv("MYSQL_PORT")
+database = os.getenv("MYSQL_DB")
 
 # Se connecter à la base de données MySQL
 conn = mysql.connector.connect(
