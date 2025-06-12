@@ -3,7 +3,8 @@ FROM python:3.9
 
 # Install requirement,
 #ToDo must be moved into requirement file of app
-RUN pip install requests beautifulsoup4 python-dotenv dash dash_bootstrap_components dash_core_components dash_html_components pandas geopy networkx matplotlib mysql mysql-connector mysql_connector_repackaged plotly
+RUN pip install --upgrade pip
+RUN pip install requests beautifulsoup4 python-dotenv dash dash_bootstrap_components dash_core_components dash_html_components pandas geopy networkx matplotlib mysql mysql-connector mysql_connector_repackaged plotly flask_session
 
 # Define container app directory
 RUN mkdir /app

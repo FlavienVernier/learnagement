@@ -12,8 +12,9 @@ import app10_stage_tools
 
 #
 
-df_stages = app10_stage_tools.get_stages_by_supervisorId(14)
+#df_stages = app10_stage_tools.get_stages_by_supervisorId(14)
 #df_stages = app10_stage_tools.get_stages_by_supervisorId(int(session.get('id_enseignant')))
+'''
 table_stages = dbc.Table.from_dataframe(
     df_stages,
     # Key styling options:
@@ -21,6 +22,7 @@ table_stages = dbc.Table.from_dataframe(
     bordered=True,
     hover=True,
 )
+'''
 
 # Définition de la mise en page de l'application
 app10_enseignant_layout = html.Div(children=[
@@ -29,19 +31,26 @@ app10_enseignant_layout = html.Div(children=[
         style={'display': 'inline-block', 'verticalAlign': 'top',},
         children=[ 
             html.H2(children='Encadrement de stages'),
-            html.Div([table_stages])])
+            dcc.Input(id='fake', value='0', type='hidden'),
+            #html.Div([table_stages])])
+            html.Div(id='table_stages')])
 ])
 
 
 
 def register_callbacks(app):
     @app.callback(
-        Output("table_stages", "figure"),
-        #Input("dashboard_option_dropdown", "value"),
-        State("user_id_store", "data")
+        Output(component_id='table_stages', component_property='children'),
+        #Output(component_id='my-id', component_property='value'),
+        #"table_stages", "figure"),
+        Input(component_id='fake', component_property='value'),
+        Input('user_id', 'data')
+        #Input(component_id='my-id', component_property='value')
     )
-    def display_table(user_id):
-        df_stages = app10_stage_tools.get_stages_by_supervisorId(int(session.get('id_enseignant')))
+    def display_table(user_id_fake, user_id):
+        print("user-id:'",user_id,"'", flush=True)
+        df_stages = app10_stage_tools.get_stages_by_supervisorId(user_id)
+        #df_stages = app10_stage_tools.get_stages_by_supervisorId(int(session.get('id_enseignant')))
         table_stages = dbc.Table.from_dataframe(
             df_stages,
             # Key styling options:
@@ -49,5 +58,7 @@ def register_callbacks(app):
             bordered=True,
             hover=True,
         )
-        return table_stages
+        #print("user-id:'",user_id,"'")
+        #return [table_stages], user_id
+        return [table_stages]
 

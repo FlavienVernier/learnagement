@@ -1,8 +1,12 @@
 from flask import request, abort, session
+from flask_session import Session
 import dash
 import dash_bootstrap_components as dbc
 from dash import Input, Output, dcc, html, State
 import json, base64, hmac, hashlib, time
+import traceback
+#from urllib import unquote
+import urllib.parse
 
 app = dash.Dash(__name__, suppress_callback_exceptions=True,
                 external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME])
@@ -37,8 +41,8 @@ def import_apps():
     from app9_avancement_rendus import app9_layout, register_callbacks as register_callbacks_app9
     from app10_proportion_stages import app10_layout
     from app10_stage_administratif import app10_administratif_layout
-    from app10_stage_enseignant import app10_enseignant_layout
-    #from app10_stage_enseignant import app10_enseignant_layout, register_callbacks as register_callbacks_app10_enseignant
+    #from app10_stage_enseignant import app10_enseignant_layout
+    from app10_stage_enseignant import app10_enseignant_layout, register_callbacks as register_callbacks_app10_enseignant
     return {
         'app1': (app1_layout, register_callbacks_app1),
         'app2': (app2_layout, register_callbacks_app2),
@@ -51,8 +55,8 @@ def import_apps():
         'app9': (app9_layout, register_callbacks_app9),
         'app10': (app10_layout, None),
         'app10_administratif': (app10_administratif_layout, None),
-        'app10_enseignant': (app10_enseignant_layout, None)
-        #'app10_enseignant': (app10_enseignant_layout, register_callbacks_app10_enseignant)
+        #'app10_enseignant': (app10_enseignant_layout, None)
+        'app10_enseignant': (app10_enseignant_layout, register_callbacks_app10_enseignant)
     }
 
 LOGO = "https://placehold.co/100x100"
@@ -66,7 +70,7 @@ menu_items = {
         ('Avancement des cours', 'app6'),
         ('Charge de travail (enseignant)', 'app7'),
         ('Proportion stages', 'app10'),
-        ('Proportion stages', 'app10_enseignant')
+        ('Tutorat stages', 'app10_enseignant')
     ],
     'etudiant': [
         ('Carte des Universités', 'app1'),
@@ -83,43 +87,15 @@ menu_items = {
 
 #ToDo
 SECRET_KEY = b'Cle secrete a generer automatiquement au lancement de Learnagement';
+
+"""
 app.server.secret_key = SECRET_KEY
+app.server.config["SESSION_PERMANENT"] = False     # Sessions expire when the browser is closed
+app.server.config["SESSION_TYPE"] = "filesystem"     # Store session data in files
+Session(app.server)
+"""
 
-#@app.server.before_request
-def check_auth_token():
-    token = request.args.get('auth_token')
-    if not token:
-        print("no token")
-        #return abort(403)
-
-    try:
-        payload_b64, signature = token.split('.')
-        payload_json = base64.b64decode(payload_b64).decode()
-        expected_sig = hmac.new(SECRET_KEY, payload_json.encode(), hashlib.sha256).hexdigest()
-
-        if not hmac.compare_digest(signature, expected_sig):
-            return abort(403)
-
-        payload = json.loads(payload_json)
-        if payload['expires'] < time.time():
-            return abort(403)
-
-        # Attach user info to the Flask global context
-        return payload['id_enseignant']
-        #request.user_id = payload['id_enseignant']
-        session['id_enseignant'] = payload['id_enseignant']
-        #dcc.Store("user_id_store", data=user_id)
-        
-        #return {'valeur': user_id}
-        #return "14"
-    
-    except Exception as e:
-        print(e)
-        #return abort(403)
-
-
-
-def render_sidebar(section):
+def render_sidebar(section, token_arg):
     links = []
     # Logo + titre
     links.append(html.Div([
@@ -130,7 +106,7 @@ def render_sidebar(section):
     # Navigation
     navs = []
     for label, key in menu_items[section]:
-        href = f"/{section}/{key}"
+        href = f"/{section}/{key}?" + token_arg 
         icon_class = icon_map.get(key, 'fa-solid fa-circle')  # icône par défaut si manquante
         navs.append(
             dbc.NavLink([
@@ -144,23 +120,71 @@ def render_sidebar(section):
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
-    dcc.Store("user_id_store", storage_type="memory"),
+    dcc.Store(id='user_id', storage_type="memory", data='0'),
     html.Div(id='sidebar'),
     html.Div(id='page-content', className='content')
 ])
 
+'''
+@app.server.before_request
+def prout():
+    token = request.args.get('auth_token')
+    #print("t",token,  type(token))
+'''
+
+@app.callback(
+    Output('user_id', 'data'),
+    Input('url', 'href')
+)
+def check_auth_token(url):
+    print(url)
+    token = urllib.parse.unquote(url.strip().split('=')[1])#.decode('utf8')
+    print(token)
+
+    #if not session.get("token") or not token:
+    if not token:
+        print("no token", flush=True)
+        return "0"
+    try:
+        payload_b64, signature = token.split('.')
+        payload_json = base64.b64decode(payload_b64 + '=' * (-len(payload_b64) % 4)).decode()
+        expected_sig = hmac.new(SECRET_KEY, payload_json.encode(), hashlib.sha256).hexdigest()
+
+        if not hmac.compare_digest(signature, expected_sig):
+            print("Signature mismatch", flush=True)
+            return "0"
+
+        payload = json.loads(payload_json)
+        if payload['expires'] < time.time():
+            print("time out", flush=True)
+            return "14" 
+            
+        print("done", flush=True)
+        # Attach user info to the Flask global context
+        return payload['id_enseignant']
+
+    
+    except Exception as e:
+        print(e)
+        print(traceback.format_exc())
+        return "0"
+
+
+
 # Callback pour mettre à jour la sidebar
 @app.callback(
     Output('sidebar', 'children'),
+    Input('url', 'href'),
     Input('url', 'pathname')
 )
-def update_sidebar(pathname):
+def update_sidebar(url, pathname):
+    token_arg = url.strip().split('?')[1]
     if pathname and pathname.startswith('/enseignant'):
-        return render_sidebar('enseignant')
+        return render_sidebar('enseignant', token_arg)
     elif pathname and pathname.startswith('/etudiant'):
-        return render_sidebar('etudiant')
+        return render_sidebar('etudiant', token_arg)
     elif pathname and pathname.startswith('/administratif'):
-        return render_sidebar('administratif')
+        return render_sidebar('administratif', token_arg)
     else:
         # Chemin non reconnu : sidebar vide ou message par défaut
         return html.Div([
@@ -171,9 +195,12 @@ def update_sidebar(pathname):
 # Callback pour rendre le bon contenu
 @app.callback(
     Output('page-content', 'children'),
+    Input('url', 'href'),
     Input('url', 'pathname')
 )
-def render_page_content(pathname):
+def render_page_content(url, pathname):
+    token_arg = url.strip().split('?')[1]
+    #print('token',token_arg)
     if not pathname or pathname == '/':
         return html.Div()
     parts = pathname.strip('/').split('/')  # ['enseignant', 'app1'] ou ['etudiant','app7'] ou ['enseignant'] etc.
