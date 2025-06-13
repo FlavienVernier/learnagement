@@ -118,27 +118,6 @@ def mainConfiguration():
         load_dotenv()
         return os.environ
 
-# Deprecated
-def webAppConfiguration(configurationSettings):
-
-    ##########
-    # Initialisation de la configuration de l'application web
-    print("##########")
-    print("Initialisation de la configuration de l'application web")
-    
-    os.chdir("webApp")
-    
-    if not os.path.exists("config.php"):
-        shutil.copy("config.php.skeleton", "config.php")
-        searchReplaceInFile("config.php", "INSTANCE_NAME", configurationSettings["INSTANCE_NAME"])
-        searchReplaceInFile("config.php", "INSTANCE_NUMBER", str(configurationSettings["INSTANCE_NUMBER"]))
-        searchReplaceInFile("config.php", "MYSQL_ROOT_PASSWORD", configurationSettings["MYSQL_ROOT_PASSWORD"])
-        searchReplaceInFile("config.php", "MYSQL_USER_PASSWORD", configurationSettings["MYSQL_USER_PASSWORD"])
-    elif(os.path.getmtime("config.php.skeleton") > os.path.getmtime("config.php")):
-        print(f"{YELLOW}WARNING: config.php.skeleton has been updated, your confing.php can be deprecated{NC}")
-    
-    os.chdir("..")
-
 def dbDataConfiguration():
 
     ##########
@@ -195,9 +174,9 @@ def dockerConfiguration(configurationSettings):
     
     if not os.path.exists("docker-compose.yml"):
         shutil.copy("docker-compose.yml.skeleton", "docker-compose.yml")
-        searchReplaceInFile("docker-compose.yml", "INSTANCE_NAME", configurationSettings["INSTANCE_NAME"])
-        searchReplaceInFile("docker-compose.yml", "INSTANCE_NUMBER", str(configurationSettings["INSTANCE_NUMBER"]))
-        searchReplaceInFile("docker-compose.yml", "MYSQL_ROOT_PASSWORD", configurationSettings["MYSQL_ROOT_PASSWORD"])
+        searchReplaceInFile("docker-compose.yml", "${INSTANCE_NAME}", configurationSettings["INSTANCE_NAME"])
+        searchReplaceInFile("docker-compose.yml", "${INSTANCE_NUMBER}", str(configurationSettings["INSTANCE_NUMBER"]))
+        #searchReplaceInFile("docker-compose.yml", "MYSQL_ROOT_PASSWORD", configurationSettings["MYSQL_ROOT_PASSWORD"])
     elif(os.path.getmtime("docker-compose.yml.skeleton") > os.path.getmtime("docker-compose.yml")):
         print(f"{YELLOW}WARNING: docker-compose.yml.skeleton has been updated, your docker-compose.yml can be deprecated{NC}")
     
@@ -240,8 +219,7 @@ def dockerRun(configurationSettings, docker_option):
 
 def run(docker_option = []):
     configurationSettings = mainConfiguration()
-    
-    #webAppConfiguration(configurationSettings)
+
     dbDataConfiguration()
     dockerConfiguration(configurationSettings)
     dockerRun(configurationSettings, docker_option)
