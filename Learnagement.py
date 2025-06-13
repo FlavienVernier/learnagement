@@ -87,7 +87,14 @@ def mainConfiguration():
         print(f".env générated")
             
         source_path = os.path.join("./", ".env")
-        
+
+        containers=["docker", "phpbackend", "webApp", "visualisation", "webappnext", ]
+
+        for container in containers:
+            target_path = os.path.join(container, ".env")
+            shutil.copy(source_path, target_path)
+            print(f"Copied: {source_path} -> {target_path}")
+        '''
         target_path = os.path.join("webApp", ".env")
         shutil.copy(source_path, target_path)
         print(f"Copied: {source_path} -> {target_path}")
@@ -103,7 +110,7 @@ def mainConfiguration():
         target_path = os.path.join("phpbackend", ".env")
         shutil.copy(source_path, target_path)
         print(f"Copied: {source_path} -> {target_path}")
-
+        '''
         return configurationSettings
     else:
         #from config import configurationSettings

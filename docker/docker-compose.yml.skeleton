@@ -82,7 +82,7 @@ services:
         ports:
             - "INSTANCE_NUMBER8050:8050"
         volumes:
-            - ../visualisation/visus/:/app/
+            - ../visualisation/:/app/
             - ../visualisation/data/:/data/
         depends_on:
             - mysql_INSTANCE_NAME
