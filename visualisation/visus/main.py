@@ -24,7 +24,9 @@ icon_map = {
     'app7': 'fa-solid fa-briefcase',
     'app8': 'fa-solid fa-book',
     'app9': 'fa-solid fa-tasks',
-    'app10': 'fa-solid fa-percentage'
+    'app10': 'fa-solid fa-percentage',
+    'connected': 'fa-solid fa-check',
+    'disconnected': 'fa-solid fa-xmark'
 }
 
     
@@ -95,7 +97,7 @@ app.server.config["SESSION_TYPE"] = "filesystem"     # Store session data in fil
 Session(app.server)
 """
 
-def render_sidebar(section, token_arg):
+def render_sidebar(section, token_arg, status):
     links = []
     # Logo + titre
     links.append(html.Div([
@@ -116,11 +118,15 @@ def render_sidebar(section, token_arg):
         )
 
     links.append(dbc.Nav(navs, vertical=True, pills=True))
+    links.append(html.Div([
+        html.I(className='fa-solid fa-check', style={'marginRight': '2rem'}),
+        html.P("(" + status + ")")], className='sidebar-header'))
     return html.Div(links, className='sidebar')
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     dcc.Store(id='user_id', storage_type="memory", data='0'),
+    dcc.Store(id='status', storage_type="memory", data='not connected'),
     html.Div(id='sidebar'),
     html.Div(id='page-content', className='content')
 ])
@@ -134,40 +140,41 @@ def prout():
 
 @app.callback(
     Output('user_id', 'data'),
+    Output('status', 'data'),
     Input('url', 'href')
 )
 def check_auth_token(url):
-    print(url)
+    #print(url)
     token = urllib.parse.unquote(url.strip().split('=')[1])#.decode('utf8')
-    print(token)
+    #print(token)
 
     #if not session.get("token") or not token:
     if not token:
-        print("no token", flush=True)
-        return "0"
+        #print("no token", flush=True)
+        return "-1", "no token"
     try:
         payload_b64, signature = token.split('.')
         payload_json = base64.b64decode(payload_b64 + '=' * (-len(payload_b64) % 4)).decode()
         expected_sig = hmac.new(SECRET_KEY, payload_json.encode(), hashlib.sha256).hexdigest()
 
         if not hmac.compare_digest(signature, expected_sig):
-            print("Signature mismatch", flush=True)
-            return "0"
+            #print("Signature mismatch", flush=True)
+            return "-1", "Signature mismatch"
 
         payload = json.loads(payload_json)
         if payload['expires'] < time.time():
-            print("time out", flush=True)
-            return "14" 
+            #print("time out", flush=True)
+            return "-1", "time out"
             
-        print("done", flush=True)
+        #print("done", flush=True)
         # Attach user info to the Flask global context
-        return payload['id_enseignant']
+        return payload['id_enseignant'], "Connected"
 
     
     except Exception as e:
         print(e)
         print(traceback.format_exc())
-        return "0"
+        return "-1", "Exception"
 
 
 
@@ -175,16 +182,17 @@ def check_auth_token(url):
 @app.callback(
     Output('sidebar', 'children'),
     Input('url', 'href'),
-    Input('url', 'pathname')
+    Input('url', 'pathname'),
+    Input('status', 'data')
 )
-def update_sidebar(url, pathname):
+def update_sidebar(url, pathname, status):
     token_arg = url.strip().split('?')[1]
     if pathname and pathname.startswith('/enseignant'):
-        return render_sidebar('enseignant', token_arg)
+        return render_sidebar('enseignant', token_arg, status)
     elif pathname and pathname.startswith('/etudiant'):
-        return render_sidebar('etudiant', token_arg)
+        return render_sidebar('etudiant', token_arg, status)
     elif pathname and pathname.startswith('/administratif'):
-        return render_sidebar('administratif', token_arg)
+        return render_sidebar('administratif', token_arg, status)
     else:
         # Chemin non reconnu : sidebar vide ou message par défaut
         return html.Div([
