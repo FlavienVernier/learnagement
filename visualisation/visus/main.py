@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+import os
 from flask import request, abort, session
 from flask_session import Session
 import dash
@@ -7,6 +9,8 @@ import json, base64, hmac, hashlib, time
 import traceback
 #from urllib import unquote
 import urllib.parse
+
+load_dotenv()
 
 app = dash.Dash(__name__, suppress_callback_exceptions=True,
                 external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME])
@@ -67,6 +71,7 @@ apps = import_apps()
 # MENU DE LA SIDEBAR (EDITABLE)
 menu_items = {
     'enseignant': [
+        ('Carte des Universités', 'app1'),
         ('Absences', 'app3'),
         ('Notes (professeurs)', 'app5'),
         ('Avancement des cours', 'app6'),
@@ -87,9 +92,8 @@ menu_items = {
         ]
 }
 
-#ToDo
-SECRET_KEY = b'Cle secrete a generer automatiquement au lancement de Learnagement';
-
+SECRET_KEY = os.getenv("INSTANCE_SECRET").encode()
+#print(SECRET_KEY)
 """
 app.server.secret_key = SECRET_KEY
 app.server.config["SESSION_PERMANENT"] = False     # Sessions expire when the browser is closed
@@ -168,8 +172,14 @@ def check_auth_token(url):
             
         #print("done", flush=True)
         # Attach user info to the Flask global context
-        return payload['id_enseignant'], "Connected"
-
+        if 'id_enseignant' in payload:
+            return payload['id_enseignant'], "Connected"
+        elif 'id_etudiant' in payload:
+            return payload['id_etudiant'], "Connected"
+        elif 'id_administratif' in payload:
+            return payload['id_administratif'], "Connected"
+        else:
+            raise Exception("Unknown user class")
     
     except Exception as e:
         print(e)

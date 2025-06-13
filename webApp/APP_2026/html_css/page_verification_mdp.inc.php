@@ -88,6 +88,7 @@ if( isset( $_POST["inscription_ok"])){
         $_SESSION["connecte"]=true; 
         $_SESSION["mail"]=$_POST["id"];
         $_SESSION["type"]="administratif";
+        $_SESSION["id_administratif"]=$val['id_administratif'];
         //redirection
         echo "<script>window.location.href='?page=accueil'</script>";
       }
@@ -95,6 +96,7 @@ if( isset( $_POST["inscription_ok"])){
       else if ($val['password_updated'] == NULL && $val['password'] == $_POST['mdp']){
         $mail = $_POST['id'];
         $_SESSION["type"]="administratif";
+        $_SESSION["id_administratif"]=$val['id_administratif'];
         echo"<div id= principal>";
         echo "<div id='requete'><h1 id= textprincipal>Initialisation du mot de passe</h1>";
         echo "<form action='?page=verification_inscription' method='post'>";

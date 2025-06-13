@@ -64,7 +64,7 @@ const handler= NextAuth({
     pages: {
         signIn: "/connection", // page de connexion par défaut
     },
-    secret: process.env.NEXTAUTH_SECRET
+    secret: process.env.INSTANCE_SECRET
 })
 
 export {handler as GET, handler as POST}

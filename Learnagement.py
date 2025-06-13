@@ -24,7 +24,7 @@ INSTANCE_NAME=None
 INSTANCE_NUMBER=None
 
 #def generate_nextauth_secret(base_secret: str) -> bytes:
-def generate_nextauth_secret() -> bytes:  
+def generate_secret() -> bytes:
     base_secret = os.urandom(32).hex()
     """
     Génère une clé dérivée compatible avec NextAuth à partir d'un secret de base.
@@ -64,7 +64,8 @@ def mainConfiguration():
             file.write("SESSION_TIMEOUT=" + configurationSettings["SESSION_TIMEOUT"] + "\n")
             file.write("INSTANCE_NAME=" + configurationSettings["INSTANCE_NAME"] + "\n")
             file.write("INSTANCE_NUMBER=" + str(configurationSettings["INSTANCE_NUMBER"]) + "\n")
-            
+            file.write("INSTANCE_SECRET=" + generate_secret().hex() + "\n")
+
             file.write("MYSQL_SERVER=learnagement_mysql_" + configurationSettings["INSTANCE_NAME"] + "\n")
             file.write("MYSQL_PORT=3306" + "\n")
             file.write("MYSQL_DB=learnagement" + "\n")
@@ -82,7 +83,7 @@ def mainConfiguration():
             
             file.write("NEXTAUTH_URL=http://localhost:" + str(configurationSettings["INSTANCE_NUMBER"]) + "3000" + "\n")
             file.write("NEXTAUTH_DOCKER_URL=http://learnagement_nextjs_" + configurationSettings["INSTANCE_NAME"] + "\n")
-            file.write("NEXTAUTH_SECRET=" + generate_nextauth_secret().hex() + "\n")
+
         print(f".env générated")
             
         source_path = os.path.join("./", ".env")

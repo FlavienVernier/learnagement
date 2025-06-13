@@ -11,12 +11,8 @@
         'expires' => time() + 300 // 5 minutes
     ];
 
-    // Utilise une clé secrète partagée avec l'application Dash
-    //ToDo
-    $secret = 'Cle secrete a generer automatiquement au lancement de Learnagement';
+    $secret = $_ENV["INSTANCE_SECRET"];
     $token = base64_encode(json_encode($payload)) . '.' . hash_hmac('sha256', json_encode($payload), $secret);
-
-    //print("\"http://localhost:" . $python_web_server_port . "/enseignant/?auth_token=" . urlencode($token) . "\" ");
 
     print("\"http://localhost:" . $_ENV['DASH_PORT'] . "/enseignant/?auth_token=" . urlencode($token) . "\" ");
 ?>
