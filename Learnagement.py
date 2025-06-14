@@ -5,6 +5,7 @@ import sys
 import shutil
 import subprocess
 import time
+import socket
 from dotenv import load_dotenv, dotenv_values 
 from getpass import getpass
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
@@ -61,11 +62,19 @@ def mainConfiguration():
         #with open("config.py", 'w') as file:
             #file.write("configurationSettings=" + repr(configurationSettings))
         with open(".env", 'w') as file:
+            file.write("#########################################################################" + "\n")
+            file.write("# Edit only root .env, next propagate it with 'Learnagement -updateEnv' #" + "\n")
+            file.write("#########################################################################" + "\n")
+            file.write("" + "\n")
             file.write("SESSION_TIMEOUT=" + configurationSettings["SESSION_TIMEOUT"] + "\n")
             file.write("INSTANCE_NAME=" + configurationSettings["INSTANCE_NAME"] + "\n")
             file.write("INSTANCE_NUMBER=" + str(configurationSettings["INSTANCE_NUMBER"]) + "\n")
             file.write("INSTANCE_SECRET=" + generate_secret().hex() + "\n")
+            file.write("INSTANCE_URL=" + socket.gethostname() + ":" + str(configurationSettings["INSTANCE_NUMBER"]) + "0080" + "\n")
 
+            file.write("" + "\n")
+            file.write("#########################################################################" + "\n")
+            file.write("" + "\n")
             file.write("MYSQL_SERVER=learnagement_mysql_" + configurationSettings["INSTANCE_NAME"] + "\n")
             file.write("MYSQL_PORT=3306" + "\n")
             file.write("MYSQL_DB=learnagement" + "\n")
@@ -73,27 +82,51 @@ def mainConfiguration():
             file.write("MYSQL_USER_LOGIN=learnagement" + "\n")
             file.write("MYSQL_USER_PASSWORD=" + configurationSettings["MYSQL_USER_PASSWORD"] + "\n")
 
+
+            file.write("" + "\n")
+            file.write("#########################################################################" + "\n")
+            file.write("" + "\n")
+
             # Refactor XXX_URL (not XXX_DOCKER_URL) must be XXX_PUBLIC_URL
-            
-            file.write("DASH_SERVER=learnagement_python_web_server_" + configurationSettings["INSTANCE_NAME"] + "\n")
-            file.write("DASH_PORT=" + str(configurationSettings["INSTANCE_NUMBER"]) + "8050" + "\n")
 
             file.write("PHP_BACKEND_URL=http://localhost:" + str(configurationSettings["INSTANCE_NUMBER"]) + "0081" + "\n")
             file.write("PHP_BACKEND_DOCKER_URL=http://learnagement_phpbackend_" + configurationSettings["INSTANCE_NAME"] + "\n")
-            
+
+            file.write("" + "\n")
+            file.write("#########################################################################" + "\n")
+            file.write("" + "\n")
+
+            file.write("DASH_SERVER=learnagement_python_web_server_" + configurationSettings["INSTANCE_NAME"] + "\n")
+            file.write("DASH_PORT=" + str(configurationSettings["INSTANCE_NUMBER"]) + "8050" + "\n")
+
+            file.write("" + "\n")
+            file.write("#########################################################################" + "\n")
+            file.write("" + "\n")
+
             file.write("NEXTAUTH_URL=http://localhost:" + str(configurationSettings["INSTANCE_NUMBER"]) + "3000" + "\n")
             file.write("NEXTAUTH_DOCKER_URL=http://learnagement_nextjs_" + configurationSettings["INSTANCE_NAME"] + "\n")
 
         print(f".env générated")
-            
-        source_path = os.path.join("./", ".env")
 
-        containers=["docker", "phpbackend", "webApp", "visualisation", "webappnext", ]
+        updateEnv()
 
-        for container in containers:
-            target_path = os.path.join(container, ".env")
-            shutil.copy(source_path, target_path)
-            print(f"Copied: {source_path} -> {target_path}")
+        return configurationSettings
+    else:
+        #from config import configurationSettings
+        # Load environment variables from the .env file
+        load_dotenv()
+        return os.environ
+
+def updateEnv():
+    source_path = os.path.join("./", ".env")
+
+    containers=["docker", "phpbackend", "webApp", "visualisation", "webappnext", ]
+
+    for container in containers:
+        target_path = os.path.join(container, ".env")
+        shutil.copy(source_path, target_path)
+        print(f"Copied: {source_path} -> {target_path}")
+
         '''
         target_path = os.path.join("webApp", ".env")
         shutil.copy(source_path, target_path)
@@ -111,12 +144,6 @@ def mainConfiguration():
         shutil.copy(source_path, target_path)
         print(f"Copied: {source_path} -> {target_path}")
         '''
-        return configurationSettings
-    else:
-        #from config import configurationSettings
-        # Load environment variables from the .env file
-        load_dotenv()
-        return os.environ
 
 def dbDataConfiguration():
 
@@ -314,6 +341,8 @@ def main(argv):
         run(docker_option = ["--build"])
     elif len(argv)==2 and argv[1] == "-destroy":
         destroy()
+    elif len(argv)==2 and argv[1] == "-updateEnv":
+        updateEnv()
     else:
         help(argv)
 

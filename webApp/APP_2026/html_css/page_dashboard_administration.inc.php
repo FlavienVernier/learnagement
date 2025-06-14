@@ -14,8 +14,7 @@
         $secret = $_ENV["INSTANCE_SECRET"];
         $token = base64_encode(json_encode($payload)) . '.' . hash_hmac('sha256', json_encode($payload), $secret);
 
-        print("\"http://localhost:" . $_ENV['DASH_PORT'] . "/administratif/?auth_token=" . urlencode($token) . "\" ");
-
+        print("\"http://" . $_SERVER['SERVER_NAME'] . ":" . $_ENV['DASH_PORT'] . "/administratif/?auth_token=" . urlencode($token) . "\" ");
     ?>
     width="100%" height="600px" style="border:none;"></iframe>
 </div>

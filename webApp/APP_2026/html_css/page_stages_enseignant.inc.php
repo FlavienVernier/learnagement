@@ -8,7 +8,7 @@
 <script type="text/javascript" language="javascript">
    
 const userAction = async () => {
-   const response = await fetch('http://localhost:40081/list/listStagesEtudiant.php', {
+   const response = await fetch('http://' . $_ENV[PHP_BACKEND_DOCKER_URL] . "/list/listStagesEtudiant.php', {
 				method: 'POST',
 				id_etudiant: 503, // string or object
 				headers: {

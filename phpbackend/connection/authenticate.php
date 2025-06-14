@@ -1,5 +1,6 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:40080"); // Activer CORS
+//header("Access-Control-Allow-Origin: http://localhost:40080"); // Activer CORS
+header("Access-Control-Allow-Origin: " . $_ENV[INSTANCE_URL] ); // Activer CORS
 header("Access-Control-Allow-Credentials: true"); // Autoriser le partage de cookies
 
 header("Content-Type: application/json");
