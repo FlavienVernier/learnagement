@@ -57,3 +57,23 @@ function listLNM_stageBySupervisorId($conn, $supervisor_id) {
 function listLNM_stageByStudentId($conn, $student_id) {
   return listLNM_stageBy($conn, "id_etudiant", $student_id);
 }
+
+function listLNM_stageWithSupervisorId($conn){
+    $sql = "SELECT * FROM `LNM_stage` WHERE `id_enseignant` IS NOT NULL;";
+    $res = mysqli_query($conn, $sql);
+    $rs = rs_to_table($res);
+    return $rs;
+}
+
+function listLNM_stageWithoutSupervisorId($conn){
+    $sql = "SELECT * FROM `LNM_stage` WHERE `id_enseignant` IS NULL;";
+    $res = mysqli_query($conn, $sql);
+    $rs = rs_to_table($res);
+    return $rs;
+}
+function listLNM_stageStudentsWithoutStage($conn){
+    $sql = "SELECT `LNM_etudiant`.`nom`, `LNM_etudiant`.`prenom` FROM `LNM_etudiant` WHERE `LNM_etudiant`.`id_etudiant` NOT IN ( SELECT `LNM_stage`.`id_etudiant` FROM `LNM_stage` WHERE 1);";
+    $res = mysqli_query($conn, $sql);
+    $rs = rs_to_table($res);
+    return $rs;
+}

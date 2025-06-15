@@ -10,46 +10,25 @@ import pandas as pd
 import requests
 import app10_stage_tools
 
-'''
-# Données
-noms = ['Charlotte', 'Axelle', 'Arno', 'Livio', 'Cyprien', 'Louna', 'Mathieu', 'Emma', 'Thomas', 'Corentin', 'Ibtissam', 'Ikram', 'Sami', 'Walid', 'Maxens', 'Baptiste']
-stages = [0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0]'''
 
 load_dotenv()
 
-user = os.getenv("MYSQL_USER_LOGIN")
-password = os.getenv("MYSQL_USER_PASSWORD")
-host = os.getenv("MYSQL_SERVER")
-port = os.getenv("MYSQL_PORT")
-database = os.getenv("MYSQL_DB")
-    
-# Se connecter à la base de données MySQL
-conn = mysql.connector.connect(
-    user=user,
-    password=password,
-    host=host,
-    port=port,
-    database=database
-)
+df_stages_with_supervisor = app10_stage_tools.get_stages_with_supervisorId()
 
-# Exécuter la requête pour récupérer les dépendances
-cur = conn.cursor()
+df_stages_without_supervisor = app10_stage_tools.get_stages_without_supervisorId()
 
-id_promo=25
-noms=app10_stage_tools.get_etudiants_by_promo(cur, id_promo)['nom'].tolist()
-
-stages = app10_stage_tools.get_etudiant_stage(cur, id_promo, noms)
+df_students_without_stage = app10_stage_tools.get_students_without_stage()
 
 # Création du DataFrame
-data = {
+'''data = {
     "nom": noms,
     "stage": stages
 }
 df = pd.DataFrame(data)
-
+'''
 # Compter les étudiants avec et sans stage
-avec_stage = stages.count(1)
-sans_stage = stages.count(0)
+avec_stage = df_stages_with_supervisor.shape[0] + df_stages_without_supervisor.shape[0]
+sans_stage = df_students_without_stage.shape[0]
 
 # Données pour le pie chart
 labels = ['Avec Stage', 'Sans Stage']
@@ -63,9 +42,23 @@ fig.update_traces(marker=dict(colors=['#007BFF', '#FF8400']))
 fig.update_layout(title_text="Répartition des étudiants avec ou sans stage")
 
 #
-df_stages = app10_stage_tools.get_stages()
-table_stages = dbc.Table.from_dataframe(
-    df_stages,
+table_stages_with_supervisor = dbc.Table.from_dataframe(
+    df_stages_with_supervisor,
+    # Key styling options:
+    striped=True,
+    bordered=True,
+    hover=True,
+)
+table_stages_without_supervisor = dbc.Table.from_dataframe(
+    df_stages_without_supervisor,
+    # Key styling options:
+    striped=True,
+    bordered=True,
+    hover=True,
+)
+
+table_students_without_stage = dbc.Table.from_dataframe(
+    df_students_without_stage,
     # Key styling options:
     striped=True,
     bordered=True,
@@ -82,12 +75,16 @@ app10_administratif_layout = html.Div(children=[
     html.Div(
         style={'display': 'inline-block', 'verticalAlign': 'top',}, 
         children=[ 
-            html.H2(children='Étudiants sans stage'), 
-            html.Ul(children=[html.Li(etudiant) for etudiant in app10_stage_tools.get_eleves_sans(stages, noms)])]),
+            html.H2(children='Stage avec tuteur'),
+            html.Div([table_stages_with_supervisor])]),
     html.Div(
         style={'display': 'inline-block', 'verticalAlign': 'top',},
         children=[ 
-            html.H2(children='Gestion des stages'),
-            html.Div([table_stages])])
+            html.H2(children='Stage sans tuteur'),
+            html.Div([table_stages_without_supervisor])]),
+    html.Div(
+        style={'display': 'inline-block', 'verticalAlign': 'top',},
+        children=[
+            html.H2(children='Etudiants sans stage'),
+            html.Div([table_students_without_stage])])
 ])
-  

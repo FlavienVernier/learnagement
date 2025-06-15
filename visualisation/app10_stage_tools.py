@@ -65,3 +65,25 @@ def get_stages_by_studentId(studentId):
     resp = requests.post(url, data={'id_etudiant':studentId}, headers=headers)
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+
+
+def get_stages_with_supervisorId():
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    url = 'http://learnagement_phpbackend_dev/list/listStagesWithSupervisor.php'
+    resp = requests.post(url, data={}, headers=headers)
+    urlData = resp.content
+    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+
+def get_stages_without_supervisorId():
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    url = 'http://learnagement_phpbackend_dev/list/listStagesWithOutSupervisor.php'
+    resp = requests.post(url, data={}, headers=headers)
+    urlData = resp.content
+    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+
+def get_students_without_stage():
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    url = 'http://learnagement_phpbackend_dev/list/listStagesStudentsWithOutStage.php'
+    resp = requests.post(url, data={}, headers=headers)
+    urlData = resp.content
+    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
