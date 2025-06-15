@@ -1,17 +1,8 @@
-from dotenv import load_dotenv
-import os
-import dash
 from dash import html, dcc
-from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 import mysql
 import plotly.graph_objects as go
-import pandas as pd
-import requests
 import app10_stage_tools
-
-
-load_dotenv()
 
 df_stages_with_supervisor = app10_stage_tools.get_stages_with_supervisorId()
 
@@ -19,13 +10,6 @@ df_stages_without_supervisor = app10_stage_tools.get_stages_without_supervisorId
 
 df_students_without_stage = app10_stage_tools.get_students_without_stage()
 
-# Création du DataFrame
-'''data = {
-    "nom": noms,
-    "stage": stages
-}
-df = pd.DataFrame(data)
-'''
 # Compter les étudiants avec et sans stage
 avec_stage = df_stages_with_supervisor.shape[0] + df_stages_without_supervisor.shape[0]
 sans_stage = df_students_without_stage.shape[0]

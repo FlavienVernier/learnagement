@@ -47,8 +47,8 @@ def import_apps():
     from app9_avancement_rendus import app9_layout, register_callbacks as register_callbacks_app9
     from app10_proportion_stages import app10_layout
     from app10_stage_administratif import app10_administratif_layout
-    #from app10_stage_enseignant import app10_enseignant_layout
     from app10_stage_enseignant import app10_enseignant_layout, register_callbacks as register_callbacks_app10_enseignant
+    from app10_stage_etudiant import app10_etudiant_layout, register_callbacks as register_callbacks_app10_etudiant
     return {
         'app1': (app1_layout, register_callbacks_app1),
         'app2': (app2_layout, register_callbacks_app2),
@@ -61,7 +61,7 @@ def import_apps():
         'app9': (app9_layout, register_callbacks_app9),
         'app10': (app10_layout, None),
         'app10_administratif': (app10_administratif_layout, None),
-        #'app10_enseignant': (app10_enseignant_layout, None)
+        'app10_etudiant': (app10_etudiant_layout, register_callbacks_app10_etudiant),
         'app10_enseignant': (app10_enseignant_layout, register_callbacks_app10_enseignant)
     }
 
@@ -86,6 +86,7 @@ menu_items = {
         ('Avancement des cours', 'app6'),
         ('Charge de travail (étudiant)', 'app8'),
         ('Avancement rendus', 'app9'),
+        ('Stages', 'app10_etudiant')
     ],
     'administratif': [
         ('Gestion des stages', 'app10_administratif')

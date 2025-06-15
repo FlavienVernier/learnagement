@@ -1,134 +1,34 @@
-from dotenv import load_dotenv
-import os
-import dash
 from dash import html, dcc
 from dash.dependencies import Input, Output
+import dash_bootstrap_components as dbc
 import mysql
-import plotly.graph_objects as go
-import pandas as pd
-import requests
+import app10_stage_tools
 
-'''
-# Données
-noms = ['Charlotte', 'Axelle', 'Arno', 'Livio', 'Cyprien', 'Louna', 'Mathieu', 'Emma', 'Thomas', 'Corentin', 'Ibtissam', 'Ikram', 'Sami', 'Walid', 'Maxens', 'Baptiste']
-stages = [0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0]'''
-
-load_dotenv()
-
-user = os.getenv("MYSQL_USER_LOGIN")
-password = os.getenv("MYSQL_USER_PASSWORD")
-host = os.getenv("MYSQL_SERVER")
-port = os.getenv("MYSQL_PORT")
-database = os.getenv("MYSQL_DB")
-    
-# Se connecter à la base de données MySQL
-conn = mysql.connector.connect(
-    user=user,
-    password=password,
-    host=host,
-    port=port,
-    database=database
-)
-
-# Exécuter la requête pour récupérer les dépendances
-cur = conn.cursor()
-
-def get_etudiant_promo(id_promo) : 
-    cur.execute(f"SELECT id_etudiant, nom, prenom FROM LNM_etudiant as etu JOIN LNM_promo as promo ON etu.id_promo=promo.id_promo WHERE etu.id_promo = {id_promo};")
-    
-    rows = cur.fetchall()
-
-    # Récupération des données 
-    data = pd.DataFrame(rows, columns=["id_etudiant", "nom", "prenom"])
-    return data
-
-id_promo=25
-noms=get_etudiant_promo(id_promo)['nom'].tolist()
-
-def get_etudiant_stage(id_promo, noms_etudiant) : 
-    cur.execute(f"SELECT etu.id_etudiant, nom, prenom, stage.id_stage FROM LNM_etudiant as etu JOIN LNM_promo as promo ON etu.id_promo=promo.id_promo JOIN LNM_stage as stage ON stage.id_etudiant=etu.id_etudiant WHERE etu.id_promo = {id_promo};")
-    
-    rows = cur.fetchall()
-
-    # Récupération des données 
-    data = pd.DataFrame(rows, columns=["id_etudiant", "nom", "prenom", "stage"])
-    
-    stages = []
-    for nom in noms_etudiant:
-        if nom in data['nom'].values:
-            # Vérifier si l'étudiant a un stage
-            stage_value = data.loc[data['nom'] == nom, 'stage'].values[0]
-            stages.append(1 if pd.notna(stage_value) else 0)
-        else:
-            # Si l'étudiant n'est pas trouvé dans data, ajouter 0
-            stages.append(0)
-    
-    return stages
-
-stages = get_etudiant_stage(id_promo, noms)
-
-# Création du DataFrame
-data = {
-    "nom": noms,
-    "stage": stages
-}
-df = pd.DataFrame(data)
-
-# Compter les étudiants avec et sans stage
-avec_stage = stages.count(1)
-sans_stage = stages.count(0)
-
-# Données pour le pie chart
-labels = ['Avec Stage', 'Sans Stage']
-values = [avec_stage, sans_stage]
-
-# Création du pie chart
-fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.3)])
-
-# Personnalisation du pie chart
-fig.update_traces(marker=dict(colors=['#007BFF', '#FF8400']))
-fig.update_layout(title_text="Répartition des étudiants avec ou sans stage")
-
-def get_eleves_sans():
-    eleves_sans=[]
-    for i in range (0, len(noms)):
-        if (stages[i] == 0):
-            eleves_sans.append(noms[i])
-    return eleves_sans
-
-
-
-def get_encadrement():
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = 'http://learnagement_phpbackend_dev/list/listStagesEnseignant.php'
-    resp = requests.post(url, data={'id_enseignant':'14'}, headers=headers)
-    return pd.DataFrame(resp)
-
-    
-"""# Initialisation de l'application Dash
-app = dash.Dash(__name__)"""
 
 # Définition de la mise en page de l'application
-app10_layout = html.Div(children=[
-    html.H1(children='Représentation des Stages'), 
-    html.Div(
-       style={'display': 'inline-block', 'verticalAlign': 'top',}, 
-       children=[ 
-            dcc.Graph(id='pie-chart', figure=fig) ]), 
-    html.Div(
-        style={'display': 'inline-block', 'verticalAlign': 'top',}, 
-        children=[ 
-            html.H2(children='Étudiants sans stage'), 
-            html.Ul(children=[html.Li(etudiant) for etudiant in get_eleves_sans()])]),
+app10_etudiant_layout = html.Div(children=[
+    html.H1(children='Représentation des Stages'),
     html.Div(
         style={'display': 'inline-block', 'verticalAlign': 'top',},
-        children=[ 
-            html.H2(children='Encadrement de stage'),
-            html.Ul(children=[html.Li(etudiant) for etudiant in get_encadrement()])])
+        children=[
+            html.H2(children='Stages'),
+            dcc.Input(id='fake', value='0', type='hidden'),
+            html.Div(id='table_stages_etudiant')])
 ])
-    
-"""
-# Exécution de l'application
-if __name__ == '__main__':
-    app.run_server(debug=True)
-"""
+def register_callbacks(app):
+    @app.callback(
+        Output(component_id='table_stages_etudiant', component_property='children'),
+        Input(component_id='fake', component_property='value'),
+        Input('user_id', 'data')
+    )
+    def display_table(user_id_fake, user_id):
+        print("user-id:'",user_id,"'", flush=True)
+        df_stages = app10_stage_tools.get_stages_by_studentId(user_id)
+        table_stages = dbc.Table.from_dataframe(
+            df_stages,
+            # Key styling options:
+            striped=True,
+            bordered=True,
+            hover=True,
+        )
+        return [table_stages]

@@ -1,8 +1,4 @@
-import dash
-from dash import html, dcc
-from dash.dependencies import Input, Output
 import mysql
-import plotly.graph_objects as go
 import pandas as pd
 import requests
 import io
@@ -61,7 +57,7 @@ def get_stages_by_supervisorId(supervisorId):
 
 def get_stages_by_studentId(studentId):
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = 'http://learnagement_phpbackend_dev/list/listStagesEnseignant.php'
+    url = 'http://learnagement_phpbackend_dev/list/listStagesEtudiant.php'
     resp = requests.post(url, data={'id_etudiant':studentId}, headers=headers)
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
