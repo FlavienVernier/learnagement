@@ -83,3 +83,6 @@ def get_students_without_stage():
     resp = requests.post(url, data={}, headers=headers)
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+
+def add_stage(etudiant, entreprise, sujet, mission, start_date, end_date, enseignant):
+    return "Data Saved"

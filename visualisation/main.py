@@ -46,7 +46,7 @@ def import_apps():
     from app8_charge_etudiant import app8_layout, register_callbacks as register_callbacks_app8
     from app9_avancement_rendus import app9_layout, register_callbacks as register_callbacks_app9
     from app10_proportion_stages import app10_layout
-    from app10_stage_administratif import app10_administratif_layout
+    from app10_stage_administratif import app10_administratif_layout, register_callbacks as register_callbacks_app10_administratif
     from app10_stage_enseignant import app10_enseignant_layout, register_callbacks as register_callbacks_app10_enseignant
     from app10_stage_etudiant import app10_etudiant_layout, register_callbacks as register_callbacks_app10_etudiant
     return {
@@ -60,7 +60,7 @@ def import_apps():
         'app8': (app8_layout, register_callbacks_app8),
         'app9': (app9_layout, register_callbacks_app9),
         'app10': (app10_layout, None),
-        'app10_administratif': (app10_administratif_layout, None),
+        'app10_administratif': (app10_administratif_layout, register_callbacks_app10_administratif),
         'app10_etudiant': (app10_etudiant_layout, register_callbacks_app10_etudiant),
         'app10_enseignant': (app10_enseignant_layout, register_callbacks_app10_enseignant)
     }

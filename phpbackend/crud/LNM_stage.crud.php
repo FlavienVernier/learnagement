@@ -72,7 +72,7 @@ function listLNM_stageWithoutSupervisorId($conn){
     return $rs;
 }
 function listLNM_stageStudentsWithoutStage($conn){
-    $sql = "SELECT `LNM_etudiant`.`nom`, `LNM_etudiant`.`prenom` FROM `LNM_etudiant` WHERE `LNM_etudiant`.`id_etudiant` NOT IN ( SELECT `LNM_stage`.`id_etudiant` FROM `LNM_stage` WHERE 1);";
+    $sql = "SELECT `LNM_etudiant`.`id_etudiant`, `LNM_etudiant`.`nom`,`LNM_etudiant`.`prenom` FROM `LNM_etudiant` WHERE `LNM_etudiant`.`id_etudiant` NOT IN ( SELECT `LNM_stage`.`id_etudiant` FROM `LNM_stage` WHERE 1);";
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);
     return $rs;
