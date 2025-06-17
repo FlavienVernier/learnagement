@@ -329,7 +329,7 @@ def destroy():
         print(f"{GREEN}App not destroyed{NC}")
 
 def help(argv):
-    print("Usage: " + argv[0] + " [-start|-stop|-build|-destroy|-help]")
+    print("Usage: " + argv[0] + " [-start|-stop|-build|-destroy|-updateEnv|-help]")
             
 def main(argv):
     # if script parameter is destroy

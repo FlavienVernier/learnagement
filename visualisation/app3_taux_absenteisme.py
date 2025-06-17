@@ -45,24 +45,33 @@ fusion = (
 # Calcul de l'absence moyenne par étudiant (total des heures d'absence divisé par la taille de la promo)
 fusion["absence_moyenne"] = fusion["total_heures_absence"] / fusion["taille_promo"]
 
-# Créer des figures par défaut
-default_annee = fusion['annee'][0]  # La première année par défaut
-default_figure_annee = px.bar(
-    fusion[fusion['annee'] == default_annee],
-    x='promo',
-    y='absence_moyenne',
-    title=f"Répartition des absences par filière pour l'année {default_annee}",
-    labels={"promo": "Filière", "absence_moyenne": "Absence moyenne"}
-)
+if 'annee' in fusion and 'promo' in fusion:
+    # Créer des figures par défaut
+    default_annee = fusion['annee'][0]  # La première année par défaut
+    default_figure_annee = px.bar(
+        fusion[fusion['annee'] == default_annee],
+        x='promo',
+        y='absence_moyenne',
+        title=f"Répartition des absences par filière pour l'année {default_annee}",
+        labels={"promo": "Filière", "absence_moyenne": "Absence moyenne"}
+    )
 
-default_filiere = fusion['promo'][0]  # La première filière par défaut
-default_figure_filiere = px.bar(
-    fusion[fusion['promo'] == default_filiere],
-    x='promo',
-    y='absence_moyenne',
-    title=f"Répartition des absences pour la filière {default_filiere} sur plusieurs années",
-    labels={"annee": "Année", "absence_moyenne": "Absence moyenne"}
-)
+    default_filiere = fusion['promo'][0]  # La première filière par défaut
+    default_figure_filiere = px.bar(
+        fusion[fusion['promo'] == default_filiere],
+        x='promo',
+        y='absence_moyenne',
+        title=f"Répartition des absences pour la filière {default_filiere} sur plusieurs années",
+        labels={"annee": "Année", "absence_moyenne": "Absence moyenne"}
+    )
+else:
+    default_figure_annee = px.bar(
+        title=f"No Data",
+    )
+
+    default_figure_filiere = px.bar(
+        title=f"No Data",
+    )
 default_figure_filiere.update_layout(
     xaxis=dict(
         type='category'  # Forcer l'axe x à être catégoriel
