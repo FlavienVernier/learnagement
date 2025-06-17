@@ -45,7 +45,9 @@ fusion = (
 # Calcul de l'absence moyenne par étudiant (total des heures d'absence divisé par la taille de la promo)
 fusion["absence_moyenne"] = fusion["total_heures_absence"] / fusion["taille_promo"]
 
-if 'annee' in fusion and 'promo' in fusion:
+default_annee = 0
+default_filiere = "No Filiere"
+if 'annee' in fusion and 'promo' in fusion and len(fusion["annee"]) > 0 and len(fusion["promo"]) > 0:
     # Créer des figures par défaut
     default_annee = fusion['annee'][0]  # La première année par défaut
     default_figure_annee = px.bar(
@@ -129,17 +131,22 @@ def register_callbacks(app):
         Input('dropdown-annee', 'value')
     )
     def update_bar_chart_annee(selected_annee):
-        # Filtrer les données pour l'année sélectionnée
-        filtered_df = fusion[fusion['annee'] == selected_annee]
-        # Créer le bar chart avec l'absence moyenne
-        fig = px.bar(
-            filtered_df,
-            x='promo',
-            y='absence_moyenne',
-            title=f"Répartition des absences par filière pour l'année {selected_annee}",
-            labels={"promo": "Filière", "absence_moyenne": "Absence moyenne"},
-            color_discrete_sequence=['#007bff']  # ← couleur personnalisée
-        )
+        if 'annee' in fusion and len(fusion["annee"]) > 0 :
+            # Filtrer les données pour l'année sélectionnée
+            filtered_df = fusion[fusion['annee'] == selected_annee]
+            # Créer le bar chart avec l'absence moyenne
+            fig = px.bar(
+                filtered_df,
+                x='promo',
+                y='absence_moyenne',
+                title=f"Répartition des absences par filière pour l'année {selected_annee}",
+                labels={"promo": "Filière", "absence_moyenne": "Absence moyenne"},
+                color_discrete_sequence=['#007bff']  # ← couleur personnalisée
+            )
+        else:
+            fig = px.bar(
+                title="No Data",
+            )
         return fig
 
     @app.callback(
@@ -147,17 +154,22 @@ def register_callbacks(app):
         Input('dropdown-filiere', 'value')
     )
     def update_bar_chart_filiere(selected_filiere):
-        # Filtrer les données pour la filière sélectionnée
-        filtered_df = fusion[fusion['promo'] == selected_filiere]
-        # Créer le bar chart avec l'absence moyenne
-        fig = px.bar(
-            filtered_df,
-            x='annee',
-            y='absence_moyenne',
-            title=f"Répartition des absences pour la filière {selected_filiere} sur plusieurs années",
-            labels={"annee": "Année", "absence_moyenne": "Absence moyenne"},
-            color_discrete_sequence=['#007bff']  # ← couleur personnalisée
-        )
+        if 'promo' in fusion and len(fusion["promo"]) > 0 :
+            # Filtrer les données pour la filière sélectionnée
+            filtered_df = fusion[fusion['promo'] == selected_filiere]
+            # Créer le bar chart avec l'absence moyenne
+            fig = px.bar(
+                filtered_df,
+                x='annee',
+                y='absence_moyenne',
+                title=f"Répartition des absences pour la filière {selected_filiere} sur plusieurs années",
+                labels={"annee": "Année", "absence_moyenne": "Absence moyenne"},
+                color_discrete_sequence=['#007bff']  # ← couleur personnalisée
+            )
+        else:
+            fig = px.bar(
+                title="No Data",
+            )
         
         # Forcer l'axe x à être catégoriel
         fig.update_layout(

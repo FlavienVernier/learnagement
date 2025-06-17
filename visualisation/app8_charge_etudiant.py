@@ -72,7 +72,7 @@ app8_layout = html.Div([
     dcc.Dropdown(
         id='filtre-eleve',
         options=[{'label': nom, 'value': nom} for nom in df['nom'].unique()],
-        value=df['nom'].unique()[0],  # Sélectionner le premier élève par défaut
+        #value=df['nom'].unique()[0],  # don't select default if no data Sélectionner le premier élève par défaut
         placeholder="Sélectionnez un élève",
     ),
 
@@ -80,7 +80,7 @@ app8_layout = html.Div([
     dcc.Dropdown(
         id='filtre-semaine',
         options=semaine_options,
-        value=semaine_options[0]['value'],  # Par défaut, la première semaine disponible
+        #value=semaine_options[0]['value'],  # don't select default if no data Par défaut, la première semaine disponible
         placeholder="Sélectionnez une semaine",
     ),
 

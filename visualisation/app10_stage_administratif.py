@@ -17,18 +17,26 @@ df_stages_without_supervisor = app10_stage_tools.get_stages_without_supervisorId
 df_students_without_stage = app10_stage_tools.get_students_without_stage()
 
 # liste des étudiants sans stage
-etudiants_sans_stage_label = df_students_without_stage["nom"].map(str) + " " + df_students_without_stage["prenom"].map(str)
-etudiants_sans_stage_label = etudiants_sans_stage_label.tolist()
-etudiants_sans_stage_value = df_students_without_stage["id_etudiant"].tolist()
-etudiants_sans_stage = dict(zip(etudiants_sans_stage_label, etudiants_sans_stage_value))
+etudiants_sans_stage = {}
+if "nom" in df_students_without_stage :
+    etudiants_sans_stage_label = (df_students_without_stage["nom"].map(str) + " " + df_students_without_stage["prenom"].map(str))
+    etudiants_sans_stage_label = etudiants_sans_stage_label.tolist()
+    etudiants_sans_stage_value = df_students_without_stage["id_etudiant"].tolist()
+    etudiants_sans_stage = dict(zip(etudiants_sans_stage_label, etudiants_sans_stage_value))
 
 # liste des entreprises
-entreprises = df_stages_with_supervisor["entreprise"].tolist() + df_stages_without_supervisor["entreprise"].tolist()
+entreprises = []
+if "entreprise" in df_stages_with_supervisor:
+    entreprises = entreprises + df_stages_with_supervisor["entreprise"].tolist()
+if "entreprise" in df_stages_without_supervisor:
+    entreprises = entreprises + df_stages_without_supervisor["entreprise"].tolist()
 
 # liste des enseignants
 df_enseignants = app_tools.get_students_without_stage()
-enseignants = df_enseignants["nom"].map(str) + " " + df_enseignants["prenom"].map(str)
-enseignants = enseignants.tolist()
+enseignants = []
+if "enseignant" in df_enseignants:
+    enseignants = df_enseignants["nom"].map(str) + " " + df_enseignants["prenom"].map(str)
+    enseignants = enseignants.tolist()
 
 # Compter les étudiants avec et sans stage
 avec_stage_avec_tuteur = df_stages_with_supervisor.shape[0]

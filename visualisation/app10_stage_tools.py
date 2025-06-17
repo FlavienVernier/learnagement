@@ -1,8 +1,11 @@
+from dotenv import load_dotenv
+import os
 import mysql
 import pandas as pd
 import requests
 import io
 
+load_dotenv()
 
 def get_etudiants_by_promo(cur, id_promo) : 
     cur.execute(f"SELECT id_etudiant, nom, prenom FROM LNM_etudiant as etu JOIN LNM_promo as promo ON etu.id_promo=promo.id_promo WHERE etu.id_promo = {id_promo};")
@@ -42,7 +45,7 @@ def get_eleves_sans(stages, noms):
 
 def get_stages():
     headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
-    url = 'http://learnagement_phpbackend_dev/list/listStages.php'
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStages.php'
     resp = requests.post(url, data={}, headers=headers)
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
@@ -50,14 +53,14 @@ def get_stages():
 
 def get_stages_by_supervisorId(supervisorId):
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = 'http://learnagement_phpbackend_dev/list/listStagesEnseignant.php'
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStagesEnseignant.php'
     resp = requests.post(url, data={'id_enseignant':supervisorId}, headers=headers)
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
 def get_stages_by_studentId(studentId):
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = 'http://learnagement_phpbackend_dev/list/listStagesEtudiant.php'
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStagesEtudiant.php'
     resp = requests.post(url, data={'id_etudiant':studentId}, headers=headers)
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
@@ -65,21 +68,21 @@ def get_stages_by_studentId(studentId):
 
 def get_stages_with_supervisorId():
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = 'http://learnagement_phpbackend_dev/list/listStagesWithSupervisor.php'
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStagesWithSupervisor.php'
     resp = requests.post(url, data={}, headers=headers)
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
 def get_stages_without_supervisorId():
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = 'http://learnagement_phpbackend_dev/list/listStagesWithOutSupervisor.php'
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStagesWithOutSupervisor.php'
     resp = requests.post(url, data={}, headers=headers)
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
 def get_students_without_stage():
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = 'http://learnagement_phpbackend_dev/list/listStagesStudentsWithOutStage.php'
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStagesStudentsWithOutStage.php'
     resp = requests.post(url, data={}, headers=headers)
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))

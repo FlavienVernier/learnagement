@@ -64,7 +64,7 @@ app9_layout = html.Div([
     dcc.Dropdown(
         id='dropdown-etudiant',
         options=[{'label': etudiant, 'value': etudiant} for etudiant in etudiants],
-        value=etudiants[0],
+        #value=etudiants[0], # don't select default if no data
         style={'margin-bottom': '10px'}  # Ajouter une marge en bas
     ),
     dcc.Dropdown(

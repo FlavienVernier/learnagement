@@ -1,11 +1,15 @@
+from dotenv import load_dotenv
+import os
 import mysql
 import pandas as pd
 import requests
 import io
 
+load_dotenv()
+
 def get_students_without_stage():
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = 'http://learnagement_phpbackend_dev/list/listEnseignant.php'
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listEnseignant.php'
     resp = requests.post(url, data={}, headers=headers)
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
