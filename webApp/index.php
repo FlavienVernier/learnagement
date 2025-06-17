@@ -13,10 +13,11 @@
       <h1>Choose your app</h1>
       <a href="./rawWebApp">Raw Web App</a></br>
       <a href="./APP_2026/html_css/learnagement.php">APP 2026</a></br>
-      <a href="" id="L3SCEM">L3 INFO SCEM 2025</a></br>
-      <script>
-   document.getElementById('L3SCEM').setAttribute("href", "http://" + window.location.hostname + ":43000")
-      </script>
+        <?php
+            require_once("config.php");
+            loadEnv(".");
+            print("<a href=" . $_ENV["NEXTAUTH_URL"] . ">L3 INFO SCEM 2025</a></br>")
+        ?>
     </main>
   </body>
 </html>
