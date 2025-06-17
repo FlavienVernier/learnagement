@@ -24,7 +24,7 @@ loadEnv("..");
 
 // MySQL server
 $learnagement_instance = $_ENV['INSTANCE_NAME'];
-$mysql_server = ['MYSQL_SERVER'];
+$mysql_server = $_ENV['MYSQL_SERVER'];
 //$mysql_user = "learnagement";
 $mysql_user = $_ENV['MYSQL_USER_LOGIN'];
 //$mysql_passwd = "toto";
