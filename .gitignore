@@ -15,8 +15,6 @@ __pycache__
 # private files that contain password, NEVER PUT IN ON GIT (must be replaced by .env)
 docker/docker-compose.yml
 
-webApp/**/*.txt
-*.txt
 
 # don't add js modules on git
 webappnext/node_modules/
