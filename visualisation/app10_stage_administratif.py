@@ -18,7 +18,7 @@ df_students_without_stage = app10_stage_tools.get_students_without_stage()
 
 # liste des étudiants sans stage
 etudiants_sans_stage = {}
-if "nom" in df_students_without_stage :
+if "nom" in df_students_without_stage.columns.tolist() :
     etudiants_sans_stage_label = (df_students_without_stage["nom"].map(str) + " " + df_students_without_stage["prenom"].map(str))
     etudiants_sans_stage_label = etudiants_sans_stage_label.tolist()
     etudiants_sans_stage_value = df_students_without_stage["id_etudiant"].tolist()
@@ -26,15 +26,15 @@ if "nom" in df_students_without_stage :
 
 # liste des entreprises
 entreprises = []
-if "entreprise" in df_stages_with_supervisor:
+if "entreprise" in df_stages_with_supervisor.columns.tolist() :
     entreprises = entreprises + df_stages_with_supervisor["entreprise"].tolist()
-if "entreprise" in df_stages_without_supervisor:
+if "entreprise" in df_stages_without_supervisor.columns.tolist() :
     entreprises = entreprises + df_stages_without_supervisor["entreprise"].tolist()
 
 # liste des enseignants
 df_enseignants = app_tools.get_students_without_stage()
 enseignants = []
-if "enseignant" in df_enseignants:
+if "nom" in df_enseignants.columns.tolist() :
     enseignants = df_enseignants["nom"].map(str) + " " + df_enseignants["prenom"].map(str)
     enseignants = enseignants.tolist()
 
