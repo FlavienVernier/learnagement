@@ -87,5 +87,17 @@ def get_students_without_stage():
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
-def add_stage(etudiant, entreprise, sujet, mission, start_date, end_date, enseignant):
-    return "Data Saved"
+def add_stage(entreprise, sujet, mission, ville, start_date, end_date, id_etudiant, id_enseignant):
+    print(id_etudiant, entreprise, sujet, mission, start_date, end_date, id_enseignant, flush=True)
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/create/createStage.php'
+    resp = requests.post(url, data={'entreprise':entreprise,
+                                    'sujet':entreprise,
+                                    'mission':entreprise,
+                                    'ville':ville,
+                                    'start_date':start_date,
+                                    'end_date':end_date,
+                                    'id_etudiant': id_etudiant,
+                                    'id_enseignant':id_enseignant}, headers=headers)
+    urlData = resp.content
+    return urlData

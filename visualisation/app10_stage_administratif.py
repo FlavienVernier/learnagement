@@ -109,6 +109,10 @@ app10_administratif_layout = html.Div(children=[
             dbc.Col(dbc.Textarea(id="mission_input", placeholder="Please enter the mission"), width=8),
         ], className="mb-3",),
         dbc.Row([
+            dbc.Label("Ville", html_for="ville_input", width=2),
+            dbc.Col(dbc.Input(id="ville_input", placeholder="Please enter the location"), width=8),
+        ], className="mb-3",),
+        dbc.Row([
             dbc.Label("Dates", html_for="dates_input", width=2),
             dbc.Col(dcc.DatePickerRange(
                 id='dates_input',
@@ -123,7 +127,8 @@ app10_administratif_layout = html.Div(children=[
             dbc.Label("Tuteur", html_for="tuteur_input", width=2),
             dbc.Col(dcc.Dropdown(id="tuteur_input",
                                  options=[{'label': "Please select tuteur", 'value': "NULL"}] + [{'label': v, 'value': v} for v in enseignants],
-                                 placeholder="Please select tuteur"), width=8),
+                                 placeholder="Please select tuteur",
+                                 value=""), width=8),
         ], className="mb-3",),
         dbc.Row([
             dbc.Button("Save the data", id="submit-button", color="primary", outline=True, disabled=False)],
@@ -164,34 +169,31 @@ def register_callbacks(app):
         value = search_value
         if search_value == "":
             value = new_entreprise_input
-        print("search_value", value)
         return value, value
 
     @app.callback(
         Output(component_id='submit-button', component_property='children', allow_duplicate=True),
         Input(component_id='submit-button', component_property='n_clicks'),
-        State('etudiant_input', 'value'),
         State('entreprise_input', 'value'),
         State('new_entreprise_input', 'value'),
         State('sujet_input', 'value'),
         State('mission_input', 'value'),
+        State('ville_input', 'value'),
         State('dates_input', 'start_date'),
         State('dates_input', 'end_date'),
+        State('etudiant_input', 'value'),
         State('tuteur_input', 'value'),
         prevent_initial_call=True,
         running=[(Output("submit-button", "disabled"), True, False)]
 
     )
-    def save_stage(save_button, etudiant, entreprise, new_entreprise, sujet, mission, start_date, end_date, enseignant):
-        print("call", etudiant, entreprise, sujet, mission, new_entreprise, start_date, end_date, enseignant, flush=True)
-        if etudiant and (entreprise or new_entreprise) and sujet and mission and start_date and end_date:
+    def save_stage(save_button, entreprise, new_entreprise, sujet, mission, ville, start_date, end_date, id_etudiant, id_enseignant):
+        if id_etudiant and (entreprise or new_entreprise) and sujet and mission and start_date and end_date:
             if not entreprise:
                 entreprise = new_entreprise
-            print(etudiant, entreprise, sujet, mission, start_date, end_date, enseignant, flush=True)
-            save_status = app10_stage_tools.add_stage(etudiant, entreprise, sujet, mission, start_date, end_date, enseignant)
+            save_status = app10_stage_tools.add_stage(entreprise, sujet, mission, ville, start_date, end_date, id_etudiant, id_enseignant)
             return save_status
         else:
-            print("prout", flush=True)
             raise PreventUpdate
 
     @app.callback(
