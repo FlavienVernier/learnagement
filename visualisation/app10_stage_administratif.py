@@ -94,7 +94,11 @@ app10_administratif_layout = html.Div(children=[
             dbc.Label("Entreprise", html_for="entreprise_input", width=2),
             dbc.Col(dcc.Dropdown(id="entreprise_input",
                                  options=[{'label': v, 'value': v} for v in entreprises],
-                                 placeholder="Please enter the entreprise name"), width=8),
+                                 placeholder="Please enter the entreprise name",
+                                 search_value='',
+                                 clearable=True,
+                                 ), width=8),
+            dbc.Input(id="new_entreprise_input", type='hidden', value=''),
         ], className="mb-3",),
         dbc.Row([
             dbc.Label("Sujet", html_for="sujet_input", width=2),
@@ -148,11 +152,27 @@ app10_administratif_layout = html.Div(children=[
 
 
 def register_callbacks(app):
+
+    @app.callback(
+        Output('new_entreprise_input', 'value'),
+        Output('entreprise_input', 'placeholder'),
+        Input('entreprise_input', 'search_value'),
+        State('new_entreprise_input', 'value'),
+        prevent_initial_call=True
+    )
+    def store_new_entreprise(search_value, new_entreprise_input):
+        value = search_value
+        if search_value == "":
+            value = new_entreprise_input
+        print("search_value", value)
+        return value, value
+
     @app.callback(
         Output(component_id='submit-button', component_property='children', allow_duplicate=True),
         Input(component_id='submit-button', component_property='n_clicks'),
         State('etudiant_input', 'value'),
         State('entreprise_input', 'value'),
+        State('new_entreprise_input', 'value'),
         State('sujet_input', 'value'),
         State('mission_input', 'value'),
         State('dates_input', 'start_date'),
@@ -162,9 +182,11 @@ def register_callbacks(app):
         running=[(Output("submit-button", "disabled"), True, False)]
 
     )
-    def save_stage(save_button, etudiant, entreprise, sujet, mission, start_date, end_date, enseignant):
-        print(etudiant, entreprise, sujet, mission, start_date, end_date, enseignant, flush=True)
-        if etudiant and entreprise and sujet and mission and start_date and end_date:
+    def save_stage(save_button, etudiant, entreprise, new_entreprise, sujet, mission, start_date, end_date, enseignant):
+        print("call", etudiant, entreprise, sujet, mission, new_entreprise, start_date, end_date, enseignant, flush=True)
+        if etudiant and (entreprise or new_entreprise) and sujet and mission and start_date and end_date:
+            if not entreprise:
+                entreprise = new_entreprise
             print(etudiant, entreprise, sujet, mission, start_date, end_date, enseignant, flush=True)
             save_status = app10_stage_tools.add_stage(etudiant, entreprise, sujet, mission, start_date, end_date, enseignant)
             return save_status
