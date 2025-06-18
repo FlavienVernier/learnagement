@@ -10,32 +10,37 @@ from geopy.geocoders import Nominatim
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 
+import app1_map_generation_tools
+
 load_dotenv()
 
-user = os.getenv("MYSQL_USER_LOGIN")
-password = os.getenv("MYSQL_USER_PASSWORD")
-host = os.getenv("MYSQL_SERVER")
-port = os.getenv("MYSQL_PORT")
-database = os.getenv("MYSQL_DB")
+# user = os.getenv("MYSQL_USER_LOGIN")
+# password = os.getenv("MYSQL_USER_PASSWORD")
+# host = os.getenv("MYSQL_SERVER")
+# port = os.getenv("MYSQL_PORT")
+# database = os.getenv("MYSQL_DB")
+#
+# # Se connecter à la base de données MySQL
+# conn = mysql.connector.connect(
+#     user=user,
+#     password=password,
+#     host=host,
+#     port=port,
+#     database=database
+# )
+#
+# # Exécuter la requête pour récupérer les dépendances
+# cur = conn.cursor()
+#
+# #cur.execute("SELECT * FROM VIEW_graphe_dependances")
+# cur.execute("SELECT nom, ville, pays FROM LNM_universite")
+#
+# rows = cur.fetchall()
 
-# Se connecter à la base de données MySQL
-conn = mysql.connector.connect(
-    user=user,
-    password=password,
-    host=host,
-    port=port,
-    database=database
-)
 
-# Exécuter la requête pour récupérer les dépendances
-cur = conn.cursor()
-
-#cur.execute("SELECT * FROM VIEW_graphe_dependances")
-cur.execute("SELECT nom, ville, pays FROM LNM_universite")
-
-rows = cur.fetchall()
-
-df = pd.DataFrame(rows, columns=["University", "City", "Country"])
+#df = pd.DataFrame(rows, columns=["University", "City", "Country"])
+df = app1_map_generation_tools.get_universites()[["nom", "ville", "pays"]]
+df = df.rename(columns={"nom" : "University", "ville" : "City", "pays" : "Country"})
 
 # Ajouter une colonne combinée pour afficher toutes les universités dans une ville
 df_grouped = df.groupby(["City", "Country"])['University'].apply(lambda x: ', '.join(x)).reset_index()

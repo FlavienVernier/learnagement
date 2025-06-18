@@ -1,52 +1,13 @@
-version: "3.6"
+#version: "3.6"
 
 services:
-    php_${INSTANCE_NAME}:
-        container_name: learnagement_php_${INSTANCE_NAME}
-        build: ./php/
-        restart: always
-        networks:
-              - learnagement_${INSTANCE_NAME}
-        ports:
-            - "${INSTANCE_NUMBER}0080:80"
-        volumes:
-            - ../webApp:/var/www/html
-            - ./log/php:/var/log/apache2
-        depends_on:
-            - mysql_${INSTANCE_NAME}
-            - python_web_server_${INSTANCE_NAME}
-    phpbackend_${INSTANCE_NAME}:
-        container_name: learnagement_phpbackend_${INSTANCE_NAME}
-        build: ./phpbackend/
-        restart: always
-        networks:
-              - learnagement_${INSTANCE_NAME}
-        ports:
-            - "${INSTANCE_NUMBER}0081:80"
-        volumes:
-            - ../phpbackend:/var/www/html
-            - ./log/phpbackend:/var/log/apache2
-        depends_on:
-            - mysql_${INSTANCE_NAME}
-    nextjs_${INSTANCE_NAME}:
-        container_name: learnagement_nextjs_${INSTANCE_NAME}
-        build: ./webappnext
-        restart: always
-        networks:
-              - learnagement_${INSTANCE_NAME}
-        ports:
-            - "${INSTANCE_NUMBER}3000:3000"
-        volumes:
-            - ../webappnext:/app
-            - ../webappnext/node_modules:/app/node_modules
-        depends_on:
-            - phpbackend_${INSTANCE_NAME}
     mysql_${INSTANCE_NAME}:
         container_name: learnagement_mysql_${INSTANCE_NAME}
         image: mysql:8.0
         restart: always
         networks:
-            - learnagement_${INSTANCE_NAME}
+            - learnagement_back_${INSTANCE_NAME}
+            - learnagement_front_${INSTANCE_NAME}  # ToDo remove when all dependencies, except CRUD backend, will be removed
         command: --default-authentication-plugin=mysql_native_password
         environment:
             - MYSQL_DATABASE=${MYSQL_DB}
@@ -63,7 +24,7 @@ services:
         image: phpmyadmin
         restart: always
         networks:
-            - learnagement_${INSTANCE_NAME}
+            - learnagement_back_${INSTANCE_NAME}
         ports:
             - ${INSTANCE_NUMBER}8080:80
         environment:
@@ -73,12 +34,53 @@ services:
             - ./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
         depends_on:
             - mysql_${INSTANCE_NAME}
+    phpbackend_${INSTANCE_NAME}:
+        container_name: learnagement_phpbackend_${INSTANCE_NAME}
+        build: ./phpbackend/
+        restart: always
+        networks:
+              - learnagement_back_${INSTANCE_NAME}
+              - learnagement_front_${INSTANCE_NAME}
+        ports:
+            - "${INSTANCE_NUMBER}0081:80"
+        volumes:
+            - ../phpbackend:/var/www/html
+            - ./log/phpbackend:/var/log/apache2
+        depends_on:
+            - mysql_${INSTANCE_NAME}
+    php_${INSTANCE_NAME}:
+        container_name: learnagement_php_${INSTANCE_NAME}
+        build: ./php/
+        restart: always
+        networks:
+              - learnagement_front_${INSTANCE_NAME}
+        ports:
+            - "${INSTANCE_NUMBER}0080:80"
+        volumes:
+            - ../webApp:/var/www/html
+            - ./log/php:/var/log/apache2
+        depends_on:
+            - mysql_${INSTANCE_NAME}
+            - python_web_server_${INSTANCE_NAME}
+    nextjs_${INSTANCE_NAME}:
+        container_name: learnagement_nextjs_${INSTANCE_NAME}
+        build: ./webappnext
+        restart: always
+        networks:
+              - learnagement_front_${INSTANCE_NAME}
+        ports:
+            - "${INSTANCE_NUMBER}3000:3000"
+        volumes:
+            - ../webappnext:/app
+            - ../webappnext/node_modules:/app/node_modules
+        depends_on:
+            - phpbackend_${INSTANCE_NAME}
     python_web_server_${INSTANCE_NAME}:
         container_name: learnagement_python_web_server_${INSTANCE_NAME}
         build: ./python_web_server/
         restart: always
         networks:
-              - learnagement_${INSTANCE_NAME}
+              - learnagement_front_${INSTANCE_NAME}
         ports:
             - "${INSTANCE_NUMBER}8050:8050"
         volumes:
@@ -89,13 +91,10 @@ services:
 volumes:
     learnagement_persistent_db_${INSTANCE_NAME}:
 networks:
-    learnagement_${INSTANCE_NAME}:
-        name: learnagement_${INSTANCE_NAME}
-        driver: bridge
     learnagement_front_${INSTANCE_NAME}:
-        name: learnagement_${INSTANCE_NAME}
+        name: learnagement_front_${INSTANCE_NAME}
         driver: bridge
-    learnagement_beck_${INSTANCE_NAME}:
-        name: learnagement_${INSTANCE_NAME}
+    learnagement_back_${INSTANCE_NAME}:
+        name: learnagement_back_${INSTANCE_NAME}
         driver: bridge
     

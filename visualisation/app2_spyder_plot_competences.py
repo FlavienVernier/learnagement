@@ -7,44 +7,46 @@ import plotly.graph_objects as go
 import pandas as pd
 import mysql.connector
 import mysql
+import app2_spyder_plot_competences_tools
 
 load_dotenv()
-
-user = os.getenv("MYSQL_USER_LOGIN")
-password = os.getenv("MYSQL_USER_PASSWORD")
-host = os.getenv("MYSQL_SERVER")
-port = os.getenv("MYSQL_PORT")
-database = os.getenv("MYSQL_DB")
-
-# Se connecter à la base de données MySQL
-conn = mysql.connector.connect(
-    user=user,
-    password=password,
-    host=host,
-    port=port,
-    database=database
-)
-
-# Exécuter la requête pour récupérer les dépendances
-cur = conn.cursor()
-
-def get_data (id_etudiant) :
-    #cur.execute("SELECT * FROM VIEW_graphe_dependances")
-    cur.execute(f"SELECT eval.id_etudiant, eval.evaluation, ac.libelle_apprentissage, niveau.libelle_niveau, competence.libelle_competence, competence.id_competence FROM ETU_competence_evaluation as eval INNER JOIN APC_apprentissage_critique as ac ON eval.id_apprentissage_critique=ac.id_apprentissage_critique INNER JOIN APC_niveau as niveau ON ac.id_niveau=niveau.id_niveau INNER JOIN APC_competence as competence ON niveau.id_competence=competence.id_competence WHERE eval.id_etudiant = {id_etudiant};")
-
-    rows = cur.fetchall()
-
-    # Récupération des données 
-    data = pd.DataFrame(rows, columns=["etudiant", "evaluation", "libelle_apprentissage", "libelle_niveau", "libelle_competence", "id_competence"])
-
-    # On trie la ligne des évaluations par ordre alphabétique : 
-    data = data.sort_values(by=["evaluation"], ascending=False)
-    
-    return data
+#
+# user = os.getenv("MYSQL_USER_LOGIN")
+# password = os.getenv("MYSQL_USER_PASSWORD")
+# host = os.getenv("MYSQL_SERVER")
+# port = os.getenv("MYSQL_PORT")
+# database = os.getenv("MYSQL_DB")
+#
+# # Se connecter à la base de données MySQL
+# conn = mysql.connector.connect(
+#     user=user,
+#     password=password,
+#     host=host,
+#     port=port,
+#     database=database
+# )
+#
+# # Exécuter la requête pour récupérer les dépendances
+# cur = conn.cursor()
+#
+# def get_data (id_etudiant) :
+#     #cur.execute("SELECT * FROM VIEW_graphe_dependances")
+#     cur.execute(f"SELECT eval.id_etudiant, eval.evaluation, ac.libelle_apprentissage, niveau.libelle_niveau, competence.libelle_competence, competence.id_competence FROM ETU_competence_evaluation as eval INNER JOIN APC_apprentissage_critique as ac ON eval.id_apprentissage_critique=ac.id_apprentissage_critique INNER JOIN APC_niveau as niveau ON ac.id_niveau=niveau.id_niveau INNER JOIN APC_competence as competence ON niveau.id_competence=competence.id_competence WHERE eval.id_etudiant = {id_etudiant};")
+#
+#     rows = cur.fetchall()
+#
+#     # Récupération des données
+#     data = pd.DataFrame(rows, columns=["etudiant", "evaluation", "libelle_apprentissage", "libelle_niveau", "libelle_competence", "id_competence"])
+#
+#     # On trie la ligne des évaluations par ordre alphabétique :
+#     data = data.sort_values(by=["evaluation"], ascending=False)
+#
+#     return data
 
 # Temporaire : UPDATE A FAIRE = numéro étudiant de l'étudiant connecté
-id_etudiant = 2
-data = get_data(id_etudiant)
+#id_etudiant = 2
+#data = get_data(id_etudiant)
+#data = app2_spyder_plot_competences_tools.get_evaluation_apprentissage_critique_by_studentId(id_etudiant)
 
 # Charger les données pour le deuxième graphique
 '''data = pd.DataFrame({
@@ -83,15 +85,32 @@ def choix_apprentissage_critique(df, competence, niveau):
         r=[niveau] * len(filtered_df),
         theta=filtered_df['libelle_apprentissage']
     ))
-"""
-# Créer l'application Dash
-app = dash.Dash(__name__)
-"""
+
 
 app2_layout = html.Div([
     # Premier Spyder Chart
     dcc.Graph(
-        id="spyder-competence-globale",
+        id="spyder_competence_globale",
+    ),
+    
+    # Deuxième Spyder Chart
+    dcc.Graph(
+        id="niveau_apprentissage_critique",
+        figure=go.Figure().update_traces(fill="toself", 
+                mode="markers",  # Ajoute des marqueurs cliquables
+                marker=dict(size=10, color='#007bff')).update_layout(title="Niveau par apprentissage critique")
+    ),
+])
+
+# Callbacks pour l'interaction entre les graphiques
+def register_callbacks(app):
+    @app.callback(
+        Output("spyder_competence_globale", "figure"),
+        Input('user_id', 'data')  # Réagit au clic sur le premier graphique
+    )
+
+    def create_chart(user_id):
+        data = app2_spyder_plot_competences_tools.get_evaluation_apprentissage_critique_by_studentId(user_id)
         figure=px.line_polar(
             data,
             r="evaluation",
@@ -112,26 +131,18 @@ app2_layout = html.Div([
             ),
             title="Niveau par compétence globale"
         )
-    ),
-    
-    # Deuxième Spyder Chart
-    dcc.Graph(
-        id="niveau-apprentissage-critique",
-        figure=go.Figure().update_traces(fill="toself", 
-                mode="markers",  # Ajoute des marqueurs cliquables
-                marker=dict(size=10, color='#007bff')).update_layout(title="Niveau par apprentissage critique")
-    ),
-])
+        return figure
 
-# Callbacks pour l'interaction entre les graphiques
-def register_callbacks(app):
+
     @app.callback(
-        Output("niveau-apprentissage-critique", "figure"),  # Met à jour le second Spyder Chart
-        Input("spyder-competence-globale", "clickData")  # Réagit au clic sur le premier graphique
+        Output("niveau_apprentissage_critique", "figure"),  # Met à jour le second Spyder Chart
+        Input("spyder_competence_globale", "clickData"),
+        Input('user_id', 'data')  # Réagit au clic sur le premier graphique
     )
         
-    def update_chart(click_data):
+    def update_chart(click_data, user_id):
         if click_data and "points" in click_data:
+            data = app2_spyder_plot_competences_tools.get_evaluation_apprentissage_critique_by_studentId(user_id)
             # Extraire le libellé de la compétence (theta)
             points = click_data["points"][0]
             clicked_theta = points.get("theta")  # Compétence cliquée
@@ -172,8 +183,4 @@ def register_callbacks(app):
 
         # Graphique vide si aucun clic
         return go.Figure().update_layout(title="Cliquez sur une compétence.")
-"""
-# Lancer l'application
-if __name__ == "__main__":
-    app.run_server(debug=True)
-"""    
+

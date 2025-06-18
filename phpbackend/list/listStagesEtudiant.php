@@ -21,6 +21,6 @@
 	echo json_encode($e->getMessage());
       }
     }else{
-        echo json_encode("Error id_enseignant undefined");
+        echo json_encode("Error id_etudiant undefined");
     }
 
