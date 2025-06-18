@@ -100,4 +100,4 @@ def add_stage(entreprise, sujet, mission, ville, start_date, end_date, id_etudia
                                     'id_etudiant': id_etudiant,
                                     'id_enseignant':id_enseignant}, headers=headers)
     urlData = resp.content
-    return urlData
+    return urlData.decode('utf-8')

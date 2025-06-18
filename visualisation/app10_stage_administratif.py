@@ -192,6 +192,7 @@ def register_callbacks(app):
             if not entreprise:
                 entreprise = new_entreprise
             save_status = app10_stage_tools.add_stage(entreprise, sujet, mission, ville, start_date, end_date, id_etudiant, id_enseignant)
+            print(save_status, flush=True)
             return save_status
         else:
             raise PreventUpdate

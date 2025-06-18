@@ -3,13 +3,22 @@
 
 function createLNM_stage($conn, $entreprise, $intitule, $description, $ville, $date_debut, $date_fin, $nature, $id_etudiant, $id_enseignant)
 {
-  if(action_allowed('INSERT', 'LNM_stage', NULL)){
-    $sql = "INSERT INTO `LNM_stage` (`entreprise`, `intitule`, `description`, `ville`, `date_debut`, `date_fin`, `nature`, `id_etudiant`, `id_enseignant`) VALUES ('$entreprise', '$intitule', '$description', '$ville', '$date_debut', '$date_fin', '$nature', '$id_etudiant', '$id_enseignant')";
-    $res = mysqli_query($conn, $sql);
-    return $res;
-  }else{
-    return ['No permission to INSERT into LNM_stage'];
-  }
+  //if(action_allowed('INSERT', 'LNM_stage', NULL)){
+    if($id_enseignant == "NULL"){
+        $sql = "INSERT INTO `LNM_stage` (`entreprise`, `intitulé`, `description`, `ville`, `date_debut`, `date_fin`, `nature`, `id_etudiant`) 
+                             VALUES ('$entreprise', '$intitule', '$description', '$ville', '$date_debut', '$date_fin', '$nature', '$id_etudiant')";
+    }else {
+        $sql = "INSERT INTO `LNM_stage` (`entreprise`, `intitulé`, `description`, `ville`, `date_debut`, `date_fin`, `nature`, `id_etudiant`, `id_enseignant`) 
+                             VALUES ('$entreprise', '$intitule', '$description', '$ville', '$date_debut', '$date_fin', '$nature', '$id_etudiant', '$id_enseignant')";
+    };
+    if(mysqli_query($conn, $sql)){
+        return "Data Inserted";
+    }else{
+        return "Insertion Failed";
+    }
+  //}else{
+  //  return ['No permission to INSERT into LNM_stage'];
+  //}
 }
 
 function updateLNM_stage($conn, $id, $entreprise, $intitule, $description, $ville, $date_debut, $date_fin, $nature, $id_etudiant, $id_enseignant)
