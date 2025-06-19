@@ -1,6 +1,7 @@
 *.log
 *~
 **/logs
+**/venv
 
 # data and backup directories store private data, NEVER PUT IN ON GIT 
 **/data
@@ -12,13 +13,9 @@ __pycache__
 #*
 *#
 
-# private files that contain password, NEVER PUT IN ON GIT
-webApp/config.php
+# private files that contain password, NEVER PUT IN ON GIT (must be replaced by .env)
 docker/docker-compose.yml
-config.py
-visualisation/visus/logs_db.txt
-
-webApp/**/*.txt
-*.txt
 
 
+# don't add js modules on git
+webappnext/node_modules/

@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+h1{
+   @apply w-full text-center text-4xl font-bold mt-5
+}
+
+h3{
+    @apply text-2xl font-bold ml-5 mb-16
+}
+
+h4 {
+    @apply text-xl font-bold mb-5
+}
+
+button, .button {
+    @apply px-4 py-2 rounded-lg bg-usmb-cyan text-white hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300;
+}
+
+.button-second {
+    @apply px-4 py-2 rounded-lg border border-gray-300 bg-white text-usmb-cyan hover:bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300;
+}
+
+input {
+    @apply w-full rounded-lg border border-gray-300 p-2 focus:border-blue-500 focus:ring focus:ring-blue-200;
+}
+
+.shadow-default {
+    -webkit-box-shadow: 0px 0px 9.3px 4px rgba(193,193,193,0.45);
+    -moz-box-shadow: 0px 0px 9.3px 4px rgba(193,193,193,0.45);
+    box-shadow: 0px 0px 9.3px 4px rgba(193,193,193,0.45);
+}
+
+.foreground-full{
+    @apply absolute top-0 left-0 w-screen h-screen bg-black bg-opacity-50
+}
+
+.clickable-animation{
+    @apply transition-transform hover:scale-105 active:scale-95
+}

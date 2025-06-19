@@ -40,7 +40,7 @@ function __getTableFromRequest($conn, $request){
 // ToDo give the dictionnary structure
 function __buidSecondaryKeyRequest($conn, $table){
 
-  global $mysql_db;
+  $mysql_db = $_ENV['MYSQL_DB'];
 
   //get primary K fields  
   $primaryKsFields = getPrimaryKeyFields($conn, $table);

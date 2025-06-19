@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once("../config.php");
+loadEnv("..");
 require_once("functions.php");
 require_once("functions_filter.php");
 if(!isset($_SESSION["loggedin"])){
@@ -13,7 +14,7 @@ if(!isset($_SESSION["loggedin"])){
   initFilter($conn, "NULL", $sessionId);
  
  }
-$_SESSION['timeout'] = $session_timeout;
+$_SESSION['timeout'] = $_ENV["SESSION_TIMEOUT"];
 ?>
   
 <!DOCTYPE html>

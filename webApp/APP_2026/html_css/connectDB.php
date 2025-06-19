@@ -1,7 +1,8 @@
 <?php
     require_once("../../config.php");
+    loadEnv("../..");
 
-    $conn = mysqli_connect("$mysql_server","$mysql_user","$mysql_passwd","$mysql_db","$mysql_port");
+    $conn = mysqli_connect($_ENV['MYSQL_SERVER'], $_ENV['MYSQL_USER_LOGIN'], $_ENV['MYSQL_USER_PASSWORD'], $_ENV['MYSQL_DB'], $_ENV['MYSQL_PORT']);
 
     if  ($conn === FALSE){
         echo "connexion au serveur impossible: ".myslq_error();

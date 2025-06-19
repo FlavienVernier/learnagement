@@ -85,6 +85,9 @@ function getParameters($conn){
   }
   $parameters = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
-  return $parameters[0];
+  if(sizeof($parameters) > 0){
+    return $parameters[0];
+  }
+  return array();
 }
 ?>
