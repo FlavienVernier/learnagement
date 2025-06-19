@@ -34,97 +34,131 @@ load_dotenv()
 #
 # data = pd.DataFrame(rows, columns=["seance", "etudiant", "promo", "annee"])
 data = app3_taux_absenteisme_tools.get_all_anonymous_absence()
-data = data.rename(columns={"id_seance_to_be_affected_as_enseignant" : "seance", "id_etudiant" : "etudiant", "id_promo" : "promo", "annee" : "annee"})
+data = data.rename(
+    columns={"id_seance_to_be_affected_as_enseignant": "seance", "id_etudiant": "etudiant", "id_promo": "promo",
+             "annee": "annee"})
 
-# Calculer les heures d'absence totales et la taille des promotions
-fusion = (
-    pd.DataFrame(data)
-    .groupby(["etudiant", "promo", "annee"])
-    .agg(total_heures_absence=("seance", "count"),
-         taille_promo=("promo", "count"))  # 'size' pour compter les lignes
-    .reset_index()
-)
-
-# Calcul de l'absence moyenne par étudiant (total des heures d'absence divisé par la taille de la promo)
-fusion["absence_moyenne"] = fusion["total_heures_absence"] / fusion["taille_promo"]
-
-default_annee = 0
-default_filiere = "No Filiere"
-if 'annee' in fusion and 'promo' in fusion and len(fusion["annee"]) > 0 and len(fusion["promo"]) > 0:
-    # Créer des figures par défaut
-    default_annee = fusion['annee'][0]  # La première année par défaut
-    default_figure_annee = px.bar(
-        fusion[fusion['annee'] == default_annee],
-        x='promo',
-        y='absence_moyenne',
-        title=f"Répartition des absences par filière pour l'année {default_annee}",
-        labels={"promo": "Filière", "absence_moyenne": "Absence moyenne"}
+if "etudiant" in data.columns.tolist():
+    # Calculer les heures d'absence totales et la taille des promotions
+    fusion = (
+        pd.DataFrame(data)
+        .groupby(["etudiant", "promo", "annee"])
+        .agg(total_heures_absence=("seance", "count"),
+             taille_promo=("promo", "count"))  # 'size' pour compter les lignes
+        .reset_index()
     )
 
-    default_filiere = fusion['promo'][0]  # La première filière par défaut
-    default_figure_filiere = px.bar(
-        fusion[fusion['promo'] == default_filiere],
-        x='promo',
-        y='absence_moyenne',
-        title=f"Répartition des absences pour la filière {default_filiere} sur plusieurs années",
-        labels={"annee": "Année", "absence_moyenne": "Absence moyenne"}
+    # Calcul de l'absence moyenne par étudiant (total des heures d'absence divisé par la taille de la promo)
+    fusion["absence_moyenne"] = fusion["total_heures_absence"] / fusion["taille_promo"]
+
+    default_annee = 0
+    default_filiere = "No Filiere"
+    if 'annee' in fusion and 'promo' in fusion and len(fusion["annee"]) > 0 and len(fusion["promo"]) > 0:
+        # Créer des figures par défaut
+        default_annee = fusion['annee'][0]  # La première année par défaut
+        default_figure_annee = px.bar(
+            fusion[fusion['annee'] == default_annee],
+            x='promo',
+            y='absence_moyenne',
+            title=f"Répartition des absences par filière pour l'année {default_annee}",
+            labels={"promo": "Filière", "absence_moyenne": "Absence moyenne"}
+        )
+
+        default_filiere = fusion['promo'][0]  # La première filière par défaut
+        default_figure_filiere = px.bar(
+            fusion[fusion['promo'] == default_filiere],
+            x='promo',
+            y='absence_moyenne',
+            title=f"Répartition des absences pour la filière {default_filiere} sur plusieurs années",
+            labels={"annee": "Année", "absence_moyenne": "Absence moyenne"}
+        )
+    else:
+        default_figure_annee = px.bar(
+            title=f"No Data",
+        )
+
+        default_figure_filiere = px.bar(
+            title=f"No Data",
+        )
+    default_figure_filiere.update_layout(
+        xaxis=dict(
+            type='category'  # Forcer l'axe x à être catégoriel
+        )
     )
+
+    app3_layout = html.Div([
+        # Dropdown pour sélectionner l'année
+        html.Div([
+            html.Label("Sélectionnez une année :"),
+            dcc.Dropdown(
+                id='dropdown-annee',
+                options=[{'label': str(annee), 'value': annee} for annee in sorted(fusion['annee'].unique())],
+                value=default_annee,  # Valeur par défaut
+                className="dropdown-style"  # Classe CSS pour le Dropdown
+            )
+        ], className="dropdown-container"),  # Conteneur avec une classe pour l'ajouter au style CSS
+
+        # Bar chart pour les filières d'une année avec figure par défaut
+        dcc.Graph(
+            id='bar-chart-annee',
+            figure=default_figure_annee,  # Figure par défaut
+            className="graph-style"  # Classe CSS pour le graphique
+        ),
+
+        html.Hr(),
+
+        # Dropdown pour sélectionner la filière
+        html.Div([
+            html.Label("Sélectionnez une filière :"),
+            dcc.Dropdown(
+                id='dropdown-filiere',
+                options=[{'label': filiere, 'value': filiere} for filiere in sorted(fusion['promo'].unique())],
+                value=default_filiere,  # Valeur par défaut
+                className="dropdown-style"  # Classe CSS pour le Dropdown
+            )
+        ], className="dropdown-container"),  # Conteneur avec une classe pour l'ajouter au style CSS
+
+        # Bar chart pour les années d'une filière avec figure par défaut
+        dcc.Graph(
+            id='bar-chart-filiere',
+            figure=default_figure_filiere,  # Figure par défaut
+            className="graph-style"  # Classe CSS pour le graphique
+        )
+    ])
 else:
-    default_figure_annee = px.bar(
-        title=f"No Data",
-    )
+    app3_layout = html.Div([
+        # Dropdown pour sélectionner l'année
+        html.Div([
+            html.Label("NO DATA :"),
+            dcc.Dropdown(
+                id='dropdown-annee',
+                className="dropdown-style"  # Classe CSS pour le Dropdown
+            )
+        ], className="dropdown-container"),  # Conteneur avec une classe pour l'ajouter au style CSS
 
-    default_figure_filiere = px.bar(
-        title=f"No Data",
-    )
-default_figure_filiere.update_layout(
-    xaxis=dict(
-        type='category'  # Forcer l'axe x à être catégoriel
-    )
-)
-"""
-# Application Dash
-app = Dash(__name__)
-"""
-app3_layout = html.Div([
-    # Dropdown pour sélectionner l'année
-    html.Div([
-        html.Label("Sélectionnez une année :"),
-        dcc.Dropdown(
-            id='dropdown-annee',
-            options=[{'label': str(annee), 'value': annee} for annee in sorted(fusion['annee'].unique())],
-            value=default_annee,  # Valeur par défaut
-            className="dropdown-style"  # Classe CSS pour le Dropdown
+        # Bar chart pour les filières d'une année avec figure par défaut
+        dcc.Graph(
+            id='bar-chart-annee',
+            className="graph-style"  # Classe CSS pour le graphique
+        ),
+
+        html.Hr(),
+
+        # Dropdown pour sélectionner la filière
+        html.Div([
+            html.Label("Sélectionnez une filière :"),
+            dcc.Dropdown(
+                id='dropdown-filiere',
+                className="dropdown-style"  # Classe CSS pour le Dropdown
+            )
+        ], className="dropdown-container"),  # Conteneur avec une classe pour l'ajouter au style CSS
+
+        # Bar chart pour les années d'une filière avec figure par défaut
+        dcc.Graph(
+            id='bar-chart-filiere',
+            className="graph-style"  # Classe CSS pour le graphique
         )
-    ], className="dropdown-container"),  # Conteneur avec une classe pour l'ajouter au style CSS
-
-    # Bar chart pour les filières d'une année avec figure par défaut
-    dcc.Graph(
-        id='bar-chart-annee',
-        figure=default_figure_annee,  # Figure par défaut
-        className="graph-style"  # Classe CSS pour le graphique
-    ),
-
-    html.Hr(),
-
-    # Dropdown pour sélectionner la filière
-    html.Div([
-        html.Label("Sélectionnez une filière :"),
-        dcc.Dropdown(
-            id='dropdown-filiere',
-            options=[{'label': filiere, 'value': filiere} for filiere in sorted(fusion['promo'].unique())],
-            value=default_filiere,  # Valeur par défaut
-            className="dropdown-style"  # Classe CSS pour le Dropdown
-        )
-    ], className="dropdown-container"),  # Conteneur avec une classe pour l'ajouter au style CSS
-
-    # Bar chart pour les années d'une filière avec figure par défaut
-    dcc.Graph(
-        id='bar-chart-filiere',
-        figure=default_figure_filiere,  # Figure par défaut
-        className="graph-style"  # Classe CSS pour le graphique
-    )
-])
+    ])
 
 
 def register_callbacks(app):
@@ -134,7 +168,7 @@ def register_callbacks(app):
         Input('dropdown-annee', 'value')
     )
     def update_bar_chart_annee(selected_annee):
-        if 'annee' in fusion and len(fusion["annee"]) > 0 :
+        if 'annee' in fusion and len(fusion["annee"]) > 0:
             # Filtrer les données pour l'année sélectionnée
             filtered_df = fusion[fusion['annee'] == selected_annee]
             # Créer le bar chart avec l'absence moyenne
@@ -157,7 +191,7 @@ def register_callbacks(app):
         Input('dropdown-filiere', 'value')
     )
     def update_bar_chart_filiere(selected_filiere):
-        if 'promo' in fusion and len(fusion["promo"]) > 0 :
+        if 'promo' in fusion and len(fusion["promo"]) > 0:
             # Filtrer les données pour la filière sélectionnée
             filtered_df = fusion[fusion['promo'] == selected_filiere]
             # Créer le bar chart avec l'absence moyenne
@@ -173,15 +207,17 @@ def register_callbacks(app):
             fig = px.bar(
                 title="No Data",
             )
-        
+
         # Forcer l'axe x à être catégoriel
         fig.update_layout(
             xaxis=dict(
                 type='category'  # Assurez-vous que l'axe des années est catégoriel
             )
         )
-        
+
         return fig
+
+
 """
 # Lancer l'application
 if __name__ == '__main__':
