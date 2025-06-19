@@ -1,104 +1,23 @@
-<?php
-session_start();
-require_once("config.php");
-require_once("functions.php");
-require_once("functions_filter.php");
-if(!isset($_SESSION["loggedin"])){
-  $_SESSION['loggedin'] = false;
-  $_SESSION['start'] = time();
-  
-  $sessionId = session_id();
-  include("connectDB.php");
-  
-  initFilter($conn, "NULL", $sessionId);
- 
- }
-$_SESSION['timeout'] = $session_timeout;
-?>
-  
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8">
-    <title>Learnagement</title>
-    <link href="inc/css/style.css" rel="stylesheet" type="text/css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Learnagement Web Sites</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
   </head>
-  <body class="loggedin" onload="setMain(getCookie('mainPage')); setCollapsible();">
-    <header>
-      <h1>Learnagement</h1>
-    </header>
-    <nav class="navtop">
-      <div>
-    <a href="#" onclick="setMain('view.php');">View</a>
-   <?php
-    if($_SESSION['loggedin']){
-      print("<a href=\"#\" onclick=\"setMain('modif.php');\">Manage</a>\n");
-      print("<a href=\"profil.php\"><i class=\"fas fa-user-circle\"></i>" . $_SESSION['userFirstname'] . " " . $_SESSION['userLastname'] . "</a>\n");
-      print("<a href=\"logout.php\"><i class=\"fas fa-sign-out-alt\"></i>Logout</a>\n");
-    }else{
-      // set view as main page
-      print("<script>
-	    document.cookie = 'mainPage='.concat('', 'view.php').concat('','; SameSite=Strict');
-	    </script>");
-      print("<a href=\"login.php\"><i class=\"fas fa-sign-in-alt\"></i>Login</a>\n");
-    }
-    
-   ?>
-    <a href="activateAccount.php">Activate Account</a>
-
-	   </div>
-    </nav>
-    <aside>
-      <?php include("filter.php"); ?> 
-    </aside>
-    <main class="tabs">
-      <?php include("view.php"); ?> 
+  <body>
+    <main>
+      <h1>Choose your app</h1>
+      <a href="./rawWebApp">Raw Web App</a></br>
+      <a href="./APP_2026/html_css/learnagement.php">APP 2026</a></br>
+        <?php
+            require_once("config.php");
+            loadEnv(".");
+            print("<a href=" . $_ENV["NEXTAUTH_URL"] . ">L3 INFO SCEM 2025</a></br>")
+        ?>
     </main>
-    <footer>
-    <a href='https://github.com/FlavienVernier/learnagement'>Lernagement GitHub</a>
-    </footer>
-
-    <script type="text/javascript">
-
-    function getCookie(name) {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop().split(';').shift();
-    }
-
-
-   function setCollapsible(){
-   var coll = document.getElementsByClassName("collapsible");
-   var i;
-   
-   for (i = 0; i < coll.length; i++) {
-     coll[i].addEventListener("click", function() {
-	 this.classList.toggle("active");
-	 var content = this.nextElementSibling;
-	 if (content.style.display === "block") {
-	   content.style.display = "none";
-	 } else {
-	   content.style.display = "block";
-	 }
-       });
-   }
- }
-
-   function setMain(fileName){
-    
-   
-   var xhr = typeof XMLHttpRequest != 'undefined' ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-   xhr.open('get', fileName, true);
-   xhr.onreadystatechange = function() {
-     if (xhr.readyState == 4 && xhr.status == 200) { 
-       document.getElementsByTagName('main')[0].innerHTML = xhr.responseText;
-       setCollapsible();
-     } 
-   }
-   xhr.send();
-   document.cookie = 'mainPage='.concat('', fileName).concat('',"; SameSite=Strict");
- }
-</script>
   </body>
-    
 </html>

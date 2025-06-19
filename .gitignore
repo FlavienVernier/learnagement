@@ -1,10 +1,20 @@
 *.log
 *~
 **/logs
+**/venv
+
+# data directories store private data, NEVER PUT IN ON GIT 
 **/data
+
+
 __pycache__
 .*
 #*
 *#
-webApp/config.php
+
+# private files that contain password, NEVER PUT IN ON GIT (must be replaced by .env)
 docker/docker-compose.yml
+
+
+# don't add js modules on git
+webappnext/node_modules/

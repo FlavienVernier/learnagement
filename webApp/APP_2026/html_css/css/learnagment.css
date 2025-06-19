@@ -1,0 +1,23 @@
+html {
+    width: 100vw;
+    height: 1080px;
+}
+
+body {
+    margin: 0;
+    position: relative;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+}
+
+#piedpage {
+    background-color: #f7f7f7;
+    color: #666;
+    border-top: 1px solid #112074;
+    line-height: 40px;
+    grid-area: footer;
+      padding: 1rem;
+      text-align: center;
+}
