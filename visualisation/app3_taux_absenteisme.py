@@ -5,33 +5,36 @@ import plotly.express as px
 from dash import Dash, dcc, html, Input, Output
 import mysql
 import mysql.connector
+import app3_taux_absenteisme_tools
 
 load_dotenv()
 
-user = os.getenv("MYSQL_USER_LOGIN")
-password = os.getenv("MYSQL_USER_PASSWORD")
-host = os.getenv("MYSQL_SERVER")
-port = os.getenv("MYSQL_PORT")
-database = os.getenv("MYSQL_DB")
-
-# Se connecter à la base de données MySQL
-conn = mysql.connector.connect(
-    user=user,
-    password=password,
-    host=host,
-    port=port,
-    database=database
-)
-
-# Exécuter la requête pour récupérer les dépendances
-cur = conn.cursor()
-
-#cur.execute("SELECT * FROM VIEW_graphe_dependances")
-cur.execute("SELECT abs.id_seance_to_be_affected_as_enseignant, abs.id_etudiant, id_promo, YEAR(sess.schedule) FROM CLASS_absence as abs INNER JOIN LNM_etudiant as etu ON abs.id_etudiant=etu.id_etudiant INNER JOIN CLASS_session_to_be_affected_as_enseignant as sess ON abs.id_seance_to_be_affected_as_enseignant=sess.id_seance_to_be_affected_as_enseignant;")
-
-rows = cur.fetchall()
-
-data = pd.DataFrame(rows, columns=["seance", "etudiant", "promo", "annee"])
+# user = os.getenv("MYSQL_USER_LOGIN")
+# password = os.getenv("MYSQL_USER_PASSWORD")
+# host = os.getenv("MYSQL_SERVER")
+# port = os.getenv("MYSQL_PORT")
+# database = os.getenv("MYSQL_DB")
+#
+# # Se connecter à la base de données MySQL
+# conn = mysql.connector.connect(
+#     user=user,
+#     password=password,
+#     host=host,
+#     port=port,
+#     database=database
+# )
+#
+# # Exécuter la requête pour récupérer les dépendances
+# cur = conn.cursor()
+#
+# #cur.execute("SELECT * FROM VIEW_graphe_dependances")
+# cur.execute("SELECT abs.id_seance_to_be_affected_as_enseignant, abs.id_etudiant, id_promo, YEAR(sess.schedule) FROM CLASS_absence as abs INNER JOIN LNM_etudiant as etu ON abs.id_etudiant=etu.id_etudiant INNER JOIN CLASS_session_to_be_affected_as_enseignant as sess ON abs.id_seance_to_be_affected_as_enseignant=sess.id_seance_to_be_affected_as_enseignant;")
+#
+# rows = cur.fetchall()
+#
+# data = pd.DataFrame(rows, columns=["seance", "etudiant", "promo", "annee"])
+data = app3_taux_absenteisme_tools.get_all_anonymous_absence()
+data = data.rename(columns={"id_seance_to_be_affected_as_enseignant" : "seance", "id_etudiant" : "etudiant", "id_promo" : "promo", "annee" : "annee"})
 
 # Calculer les heures d'absence totales et la taille des promotions
 fusion = (
