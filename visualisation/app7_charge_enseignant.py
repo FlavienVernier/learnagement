@@ -32,7 +32,8 @@ conn = mysql.connector.connect(
     password=password,
     host=host,
     port=port,
-    database=database
+    database=database,
+    auth_plugin='mysql_native_password'
 )
 
 # Exécuter la requête pour récupérer les dépendances

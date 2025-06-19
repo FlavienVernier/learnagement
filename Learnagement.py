@@ -25,7 +25,7 @@ INSTANCE_NAME=None
 INSTANCE_NUMBER=None
 
 #def generate_nextauth_secret(base_secret: str) -> bytes:
-def generate_secret() -> bytes:
+def __generate_secret__() -> bytes:
     base_secret = os.urandom(32).hex()
     """
     Génère une clé dérivée compatible avec NextAuth à partir d'un secret de base.
@@ -40,47 +40,40 @@ def generate_secret() -> bytes:
     derived_key = hkdf.derive(base_secret.encode('utf-8'))
     return derived_key
 
-def mainConfiguration():
+def __mainConfiguration__():
     """
     Ask the system administrator for configuration information if the configuration file does not exist and store these information into "config.py"
     """
     
     #if not os.path.exists("config.py") or not os.path.exists(".env"):
     if not os.path.exists(".env"):
-        configurationSettings={}
-        configurationSettings["SESSION_TIMEOUT"] = "900"
-        configurationSettings["INSTANCE_NAME"]=input("Give the intance name (lowercase): ").lower()
-        instance_number = 0
-        while instance_number < 2 or instance_number > 4:
-            try:
-                instance_number = int(input("Give the instance number (2..4): "))
-            except:
-                instance_number = 0
-        configurationSettings["INSTANCE_NUMBER"]=instance_number
-        configurationSettings["MYSQL_ROOT_PASSWORD"]=getpass("Give the MySQL Root password: ")
-        configurationSettings["MYSQL_USER_PASSWORD"]=getpass("Give the MySQL User password: ")
-        #with open("config.py", 'w') as file:
-            #file.write("configurationSettings=" + repr(configurationSettings))
         with open(".env", 'w') as file:
             file.write("#########################################################################" + "\n")
             file.write("# Edit only root .env, next propagate it with 'Learnagement -updateEnv' #" + "\n")
             file.write("#########################################################################" + "\n")
             file.write("" + "\n")
-            file.write("SESSION_TIMEOUT=" + configurationSettings["SESSION_TIMEOUT"] + "\n")
-            file.write("INSTANCE_NAME=" + configurationSettings["INSTANCE_NAME"] + "\n")
-            file.write("INSTANCE_NUMBER=" + str(configurationSettings["INSTANCE_NUMBER"]) + "\n")
-            file.write("INSTANCE_SECRET=" + generate_secret().hex() + "\n")
-            file.write("INSTANCE_URL=" + socket.gethostname() + ":" + str(configurationSettings["INSTANCE_NUMBER"]) + "0080" + "\n")
+            file.write("SESSION_TIMEOUT=" + "900" + "\n")
+            instance_name = input("Give the intance name (lowercase): ").lower()
+            file.write("INSTANCE_NAME=" + instance_name + "\n")
+            instance_number = 0
+            while instance_number < 2 or instance_number > 4:
+                try:
+                    instance_number = int(input("Give the instance number (2..4): "))
+                except:
+                    instance_number = 0
+            file.write("INSTANCE_NUMBER=" + str(instance_number) + "\n")
+            file.write("INSTANCE_SECRET=" + __generate_secret__().hex() + "\n")
+            file.write("INSTANCE_URL=" + socket.gethostname() + ":" + str(instance_number) + "0080" + "\n")
 
             file.write("" + "\n")
             file.write("#########################################################################" + "\n")
             file.write("" + "\n")
-            file.write("MYSQL_SERVER=learnagement_mysql_" + configurationSettings["INSTANCE_NAME"] + "\n")
+            file.write("MYSQL_SERVER=learnagement_mysql_" + instance_name + "\n")
             file.write("MYSQL_PORT=3306" + "\n")
             file.write("MYSQL_DB=learnagement" + "\n")
-            file.write("MYSQL_ROOT_PASSWORD=" + configurationSettings["MYSQL_ROOT_PASSWORD"] + "\n")
+            file.write("MYSQL_ROOT_PASSWORD=" + getpass("Give the MySQL Root password: ") + "\n")
             file.write("MYSQL_USER_LOGIN=learnagement" + "\n")
-            file.write("MYSQL_USER_PASSWORD=" + configurationSettings["MYSQL_USER_PASSWORD"] + "\n")
+            file.write("MYSQL_USER_PASSWORD=" + getpass("Give the MySQL User password: ") + "\n")
 
 
             file.write("" + "\n")
@@ -89,33 +82,31 @@ def mainConfiguration():
 
             # Refactor XXX_URL (not XXX_DOCKER_URL) must be XXX_PUBLIC_URL
 
-            file.write("PHP_BACKEND_URL=http://localhost:" + str(configurationSettings["INSTANCE_NUMBER"]) + "0081" + "\n")
-            file.write("PHP_BACKEND_DOCKER_URL=http://learnagement_phpbackend_" + configurationSettings["INSTANCE_NAME"] + "\n")
+            file.write("PHP_BACKEND_URL=http://localhost:" + str(instance_number) + "0081" + "\n")
+            file.write("PHP_BACKEND_DOCKER_URL=http://learnagement_phpbackend_" + instance_name + "\n")
 
             file.write("" + "\n")
             file.write("#########################################################################" + "\n")
             file.write("" + "\n")
 
-            file.write("DASH_SERVER=learnagement_python_web_server_" + configurationSettings["INSTANCE_NAME"] + "\n")
-            file.write("DASH_PORT=" + str(configurationSettings["INSTANCE_NUMBER"]) + "8050" + "\n")
+            file.write("DASH_SERVER=learnagement_python_web_server_" + instance_name + "\n")
+            file.write("DASH_PORT=" + str(instance_number) + "8050" + "\n")
 
             file.write("" + "\n")
             file.write("#########################################################################" + "\n")
             file.write("" + "\n")
 
-            file.write("NEXTAUTH_URL=http://localhost:" + str(configurationSettings["INSTANCE_NUMBER"]) + "3000" + "\n")
-            file.write("NEXTAUTH_DOCKER_URL=http://learnagement_nextjs_" + configurationSettings["INSTANCE_NAME"] + "\n")
+            file.write("NEXTAUTH_URL=http://localhost:" + str(instance_number) + "3000" + "\n")
+            file.write("NEXTAUTH_DOCKER_URL=http://learnagement_nextjs_" + instance_name + "\n")
 
         print(f".env générated")
 
         updateEnv()
 
-        return configurationSettings
-    else:
-        #from config import configurationSettings
-        # Load environment variables from the .env file
-        load_dotenv()
-        return os.environ
+
+    # Load environment variables from the .env file
+    load_dotenv()
+    return os.environ
 
 def updateEnv():
     source_path = os.path.join("./", ".env")
@@ -127,25 +118,7 @@ def updateEnv():
         shutil.copy(source_path, target_path)
         print(f"Copied: {source_path} -> {target_path}")
 
-        '''
-        target_path = os.path.join("webApp", ".env")
-        shutil.copy(source_path, target_path)
-        print(f"Copied: {source_path} -> {target_path}")
-        
-        target_path = os.path.join("webappnext", ".env")
-        shutil.copy(source_path, target_path)
-        print(f"Copied: {source_path} -> {target_path}")
-        
-        target_path = os.path.join("visualisation", "visus", ".env")
-        shutil.copy(source_path, target_path)
-        print(f"Copied: {source_path} -> {target_path}")
-        
-        target_path = os.path.join("phpbackend", ".env")
-        shutil.copy(source_path, target_path)
-        print(f"Copied: {source_path} -> {target_path}")
-        '''
-
-def dbDataConfiguration():
+def __dbDataConfiguration__():
 
     ##########
     # Création du répertoire de données initiales
@@ -190,7 +163,7 @@ def dbDataConfiguration():
     subprocess.run([sys.executable, "insertPrivateData.py"], check=True)
     os.chdir("..")
 
-def dockerConfiguration(configurationSettings):
+def __dockerConfiguration__():
     
     ##########
     # Docker configuration
@@ -201,29 +174,17 @@ def dockerConfiguration(configurationSettings):
     
     if not os.path.exists("docker-compose.yml"):
         shutil.copy("docker-compose.yml.skeleton", "docker-compose.yml")
-        searchReplaceInFile("docker-compose.yml", "${INSTANCE_NAME}", configurationSettings["INSTANCE_NAME"])
-        searchReplaceInFile("docker-compose.yml", "${INSTANCE_NUMBER}", str(configurationSettings["INSTANCE_NUMBER"]))
-        #searchReplaceInFile("docker-compose.yml", "MYSQL_ROOT_PASSWORD", configurationSettings["MYSQL_ROOT_PASSWORD"])
+        __searchReplaceInFile__("docker-compose.yml", "${INSTANCE_NAME}", os.environ["INSTANCE_NAME"])
+        __searchReplaceInFile__("docker-compose.yml", "${INSTANCE_NUMBER}", str(os.environ["INSTANCE_NUMBER"]))
+        #searchReplaceInFile("docker-compose.yml", "MYSQL_ROOT_PASSWORD", os.environ["MYSQL_ROOT_PASSWORD"])
     elif(os.path.getmtime("docker-compose.yml.skeleton") > os.path.getmtime("docker-compose.yml")):
         print(f"{YELLOW}WARNING: docker-compose.yml.skeleton has been updated, your docker-compose.yml can be deprecated{NC}")
-
-        
-    os.chdir("phpmyadmin")
-    
-    if not os.path.exists("config.inc.php"):
-        shutil.copy("config.inc.php.skeleton", "config.inc.php")
-        searchReplaceInFile("config.inc.php", "INSTANCE_NAME", configurationSettings["INSTANCE_NAME"])
-        searchReplaceInFile("config.inc.php", "INSTANCE_NUMBER", str(configurationSettings["INSTANCE_NUMBER"]))
-    elif(os.path.getmtime("config.inc.php.skeleton") > os.path.getmtime("config.inc.php")):
-        print(f"{YELLOW}WARNING: config.inc.php.skeleton has been updated, your config.inc.php can be deprecated{NC}")
-    
-    os.chdir("..")
     
     os.chdir("..")
 
 
 
-def dockerRun(configurationSettings, docker_option):  
+def __dockerRun__(docker_option):
     
     ##########
     # Run Docker
@@ -256,15 +217,15 @@ def dockerRun(configurationSettings, docker_option):
 
     
 
-def run(docker_option = []):
-    configurationSettings = mainConfiguration()
+def start(docker_option = []):
+    __mainConfiguration__()
 
-    dbDataConfiguration()
-    dockerConfiguration(configurationSettings)
-    dockerRun(configurationSettings, docker_option)
+    __dbDataConfiguration__()
+    __dockerConfiguration__()
+    __dockerRun__(docker_option)
     
-    print(f"{YELLOW}WWeb Apps will run on: http://127.0.0.1:{configurationSettings["INSTANCE_NUMBER"]}0080{NC}")
-    print(f"{YELLOW}WPHPMyAdmin will run on: http://127.0.0.1:{configurationSettings["INSTANCE_NUMBER"]}8080{NC}")
+    print(f"{YELLOW}WWeb Apps will run on: {os.environ['INSTANCE_NUMBER']}0080{NC}")
+    print(f"{YELLOW}WPHPMyAdmin will run on: http://127.0.0.1:{os.environ['INSTANCE_NUMBER']}8080{NC}")
     
     # Population avec des données libres
     # subprocess.run(["sh", "populationScript.sh"], check=True)
@@ -272,12 +233,12 @@ def run(docker_option = []):
     # Population via ADE
     # subprocess.run([sys.executable, "ade2sql.py"], check=True)
 
-def filecmp(file1, file2):
+def __filecmp__(file1, file2):
     """Compare deux fichiers pour vérifier s'ils sont identiques."""
     with open(file1, "r") as f1, open(file2, "r") as f2:
         return f1.read() == f2.read()
 
-def searchReplaceInFile(fileName, patern, value):
+def __searchReplaceInFile__(fileName, patern, value):
     # Read in the file
     with open(fileName, 'r') as file:
         filedata = file.read()
@@ -290,12 +251,13 @@ def searchReplaceInFile(fileName, patern, value):
         file.write(filedata)
 
 def backup():
-    from config import configurationSettings
 
     """
 SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagement" AND TABLE_TYPE = "BASE TABLE"
     """
-    
+    load_dotenv()
+    print(os.environ)
+
     ##########
     # Backup DB
     print("##########")
@@ -313,27 +275,34 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
     if os.name == 'nt':
         print ("Not yet implemented for Windows.")
     else:
+        # Création du répertoire de données initiales s'il n'existe pas
+        backup_folder = "db/backup"
+        try:
+            os.makedirs(backup_folder, exist_ok=False)  # if it exists, an exception is thrown
+        except OSError as error:
+            pass
+
         # display MySQL server version (useful to request sudo passwd 1st)
-        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysqld", "--version"]
+        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_" + os.environ["INSTANCE_NAME"], "mysqld", "--version"]
         os.system(" ".join(cmd))
        
         # get Learnagement db schemas
         structureFile = "db/backup/struct_"+now
-        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p", "--no-data", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "learnagement", ">", structureFile]
+        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p" + os.environ["MYSQL_ROOT_PASSWORD"], "--no-data", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "learnagement", ">", structureFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
 
         # get Learnagement DB data
         dataFile = "db/backup/data_"+now
-        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p", "--no-create-info", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "learnagement", ">", dataFile]
+        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p" + os.environ["MYSQL_ROOT_PASSWORD"], "--no-create-info", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "learnagement", ">", dataFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
 
         # get Learnagement db triggers
         triggerFile = "db/backup/trigger_"+now
-        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p", "--no-create-info", "--ignore-views", "--no-data", "--skip-comments", "--skip-extended-insert", "learnagement", ">", triggerFile]
+        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p" + os.environ["MYSQL_ROOT_PASSWORD"], "--no-create-info", "--ignore-views", "--no-data", "--skip-comments", "--skip-extended-insert", "learnagement", ">", triggerFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
@@ -377,8 +346,9 @@ def stop():
     os.chdir("..")
     
 def destroy():
-    from config import configurationSettings 
-    
+
+    load_dotenv()
+
     ##########
     # Destroy App
     print("##########")
@@ -396,10 +366,10 @@ def destroy():
             if os.name == 'nt':
                 #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose up'],stdin=subprocess.PIPE)
                 #prog.stdin.write(b'password')
-                prog = subprocess.Popen(['docker', 'volume', 'rm', 'docker_learnagement_persistent_db_'+configurationSettings["INSTANCE_NAME"]])
+                prog = subprocess.Popen(['docker', 'volume', 'rm', 'docker_learnagement_persistent_db_'+os.environ["INSTANCE_NAME"]])
                 prog.communicate()
             else:
-                subprocess.run(["sudo", "docker", "volume", "rm", "docker_learnagement_persistent_db_"+configurationSettings["INSTANCE_NAME"]], check=True)
+                subprocess.run(["sudo", "docker", "volume", "rm", "docker_learnagement_persistent_db_"+os.environ["INSTANCE_NAME"]], check=True)
             print(f"{RED}App destroyed{NC}")
             
         except subprocess.CalledProcessError as e:
@@ -411,7 +381,9 @@ def destroy():
         print(f"{GREEN}App not destroyed{NC}")
 
 def fromscratch():
-    
+
+    load_dotenv()
+
     ##########
     # Clean up App from scratch
     print("##########")
@@ -422,23 +394,23 @@ def fromscratch():
         for f in glob.glob("db/sql/5*"):
             os.remove(f)
         os.remove("docker/docker-compose.yml")
-        os.remove("docker/phpmyadmin/config.inc.php")
+        #os.remove("docker/phpmyadmin/config.inc.php")
         os.remove("webApp/config.php")
         os.remove("config.py")
         
 def help(argv):
-    print("Usage: " + argv[0] + " [-start|-stop|-build|-destroy|-updateEnv|-help]")
+    print("Usage: " + argv[0] + " [-start|-stop|-build|-backup|-destroy|-updateEnv|-help]")
             
 def main(argv):
     # if script parameter is destroy
     if len(argv)==1 or (len(argv)==2 and argv[1] == "-start"):
-        run()
+        start()
     elif len(argv)==2 and argv[1] == "-backup":
         backup()
     elif len(argv)==2 and argv[1] == "-stop":
         stop()
     elif len(argv)==2 and argv[1] == "-build":
-        run(docker_option = ["--build"])
+        start(docker_option = ["--build"])
     elif len(argv)==2 and argv[1] == "-destroy":
         destroy()
     elif len(argv)==2 and argv[1] == "-updateEnv":

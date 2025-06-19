@@ -22,10 +22,7 @@ services:
     phpmyadmin_${INSTANCE_NAME}:
         container_name: learnagement_phpmyadmin_${INSTANCE_NAME}
         image: phpmyadmin
-        #build: ./phpmyadmin/
         restart: always
-        depends_on:
-            - mysql_INSTANCE_NAME
         networks:
             - learnagement_back_${INSTANCE_NAME}
         ports:
@@ -82,8 +79,6 @@ services:
         container_name: learnagement_python_web_server_${INSTANCE_NAME}
         build: ./python_web_server/
         restart: always
-        depends_on:
-            - mysql_INSTANCE_NAME
         networks:
               - learnagement_front_${INSTANCE_NAME}
         ports:
