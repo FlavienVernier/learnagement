@@ -64,6 +64,20 @@ function listMAQUETTE_moduleByIdResp($conn, $id) {
     return $rs;
 }
 
+function listMAQUETTE_moduleByIdEtudiant($conn, $id) {
+    $sql = "SELECT MAQUETTE_module.id_module, MAQUETTE_module.code_module, MAQUETTE_module.nom 
+            FROM `MAQUETTE_module` 
+                JOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module 
+                JOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_learning_unit = MAQUETTE_module_as_learning_unit.id_learning_unit 
+                JOIN LNM_promo ON LNM_promo.id_promo = MAQUETTE_learning_unit.id_promo 
+                JOIN LNM_etudiant ON LNM_etudiant.id_promo = LNM_promo.id_promo 
+            WHERE LNM_etudiant.id_etudiant = '$id'";
+    $res = mysqli_query($conn, $sql);
+    $rs = rs_to_table($res);
+    return $rs;
+}
+
+
 function createMAQUETTE_module($conn, $id_module, $code_module, $nom, $ECTS, $id_discipline, $id_semestre, $hCM, $hTD, $hTP, $hTPTD, $hPROJ, $hPersonnelle, $id_responsable, $id_etat_module, $commentaire, $modifiable) {
     $sql = "INSERT INTO `MAQUETTE_module` (`id_module`, `code_module`, `nom`, `ECTS`, `id_discipline`, `id_semestre`, `hCM`, `hTD`, `hTP`, `hTPTD`, `hPROJ`, `hPersonnelle`, `id_responsable`, `id_etat_module`, `commentaire`, `modifiable`) VALUES ('$id_module', '$code_module', '$nom', '$ECTS', '$id_discipline', '$id_semestre', '$hCM', '$hTD', '$hTP', '$hTPTD', '$hPROJ', '$hPersonnelle', '$id_responsable', '$id_etat_module', '$commentaire', '$modifiable')";
     $res = mysqli_query($conn, $sql);

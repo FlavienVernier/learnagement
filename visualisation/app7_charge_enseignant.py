@@ -40,7 +40,13 @@ conn = mysql.connector.connect(
 cur = conn.cursor()
 
 def get_data(id_enseignant) : 
-    cur.execute(f"SELECT ens.nom, ens.prenom, sessens.schedule, sequencage.duree_h, module.nom FROM CLASS_session_to_be_affected as sess JOIN CLASS_session_to_be_affected_as_enseignant as sessens ON sessens.id_seance_to_be_affected=sess.id_seance_to_be_affected JOIN LNM_enseignant as ens ON ens.id_enseignant=sessens.id_enseignant JOIN MAQUETTE_module_sequence as sequence ON sess.id_module_sequence=sequence.id_module_sequence JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module WHERE ens.id_enseignant={id_enseignant};")
+    cur.execute(f"SELECT ens.nom, ens.prenom, session.schedule, sequencage.duree_h, module.nom "
+                f"FROM CLASS_session as session "
+                f"JOIN LNM_enseignant as ens ON ens.id_enseignant=session.id_enseignant "
+                f"JOIN MAQUETTE_module_sequence as sequence ON session.id_module_sequence=sequence.id_module_sequence "
+                f"JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage "
+                f"JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module "
+                f"WHERE ens.id_enseignant={id_enseignant};")
     
     rows = cur.fetchall()
 
