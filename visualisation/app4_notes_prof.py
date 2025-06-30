@@ -3,12 +3,13 @@ import os
 import statistics
 import dash
 from dash import dcc, html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import mysql
 import pandas as pd
 import plotly.graph_objs as go
 import json
 import math
+import app4_notes_tools
 
 load_dotenv()
 
@@ -34,19 +35,24 @@ cur = conn.cursor()
 # pour avoir les notes par promotion, 
 # il faudra récupérer les numéros étudiants 
 # de tous ceux qui correspondent à la promotion voulue
-def get_data_as_enseignant(id_enseignant) : 
-    cur.execute(f"SELECT evaluation, id_etudiant, module.nom FROM ETU_classical_evaluation as eval JOIN MAQUETTE_module as module ON eval.id_module=module.id_module JOIN LNM_enseignant as enseignant ON module.id_responsable = enseignant.id_enseignant WHERE enseignant.id_enseignant={id_enseignant};")
-    
+def get_data_as_enseignant(id_enseignant) :
+    cur.execute(f"SELECT evaluation, id_etudiant, module.nom "
+                f"FROM ETU_classical_evaluation as eval "
+                f"JOIN MAQUETTE_module as module ON eval.id_module=module.id_module "
+                f"JOIN LNM_enseignant as enseignant ON module.id_responsable = enseignant.id_enseignant "
+                f"WHERE enseignant.id_enseignant={id_enseignant};")
+
     rows = cur.fetchall()
 
-    # Récupération des données 
+    # Récupération des données
     data = pd.DataFrame(rows, columns=["evaluation", "id_etudiant", "nom_module"])
      # Structurer les données pour inclure des contrôles
-    data['controles'] = data.apply(lambda row: [{'type': 'CC', 'evaluation': row['evaluation'], 'id_etudiant': row['id_etudiant']}], axis=1) # Aucunes informations ne sont données sur les types de contrôles que ce sont donc on laisse CC 
+    data['controles'] = data.apply(lambda row: [{'type': 'CC', 'evaluation': row['evaluation'], 'id_etudiant': row['id_etudiant']}], axis=1) # Aucunes informations ne sont données sur les types de contrôles que ce sont donc on laisse CC
     return data
 
-id_enseignant = 16 # Temporaire
+id_enseignant = 14 # Temporaire
 data = get_data_as_enseignant(id_enseignant)
+#data = app4_notes_tools.get_data_prof(id_enseignant)
 
 def define_promo():
     cur.execute(f"SELECT id_promo, GROUP_CONCAT(id_etudiant) AS etudiants FROM LNM_etudiant GROUP BY id_promo;")
@@ -65,9 +71,6 @@ def define_promo():
 
 promo_disponibles = define_promo()
 
-# variables globales pour garder en mémoire les choix de l'utilisateur
-dernier_controle_selectionne=None
-derniere_matiere_selectionnee=None
 
 def get_classement_podium(notes, liste_promo):
     """
@@ -140,7 +143,7 @@ data = get_data_as_enseignant(id_enseignant).to_dict(orient='records')
 # # lancement de Dash
 # app=dash.Dash(__name__)
 if len(data) > 0:
-    app5_layout = html.Div([
+    app4_enseignant_layout = html.Div([
         html.H1(f"Visualisation des notes - prof ", style={'textAlign': 'center', 'marginBottom': '5px'}),
 
         html.Div(
@@ -148,9 +151,8 @@ if len(data) > 0:
             # choix de la promo
                 dcc.Dropdown(
                     id='choix_promo_prof',
-                    options=[
-                        {'label': 'Toutes les promos', 'value': 'all'}]
-                    +[{'label': promo['id_promo'], 'value': ', '.join(map(str, promo['etudiants']))} for promo in promo_disponibles],
+                    options=[], #[{'label': 'Toutes les promos', 'value': 'all'}],
+                    # +[{'label': promo['id_promo'], 'value': ', '.join(map(str, promo['etudiants']))} for promo in promo_disponibles],
                     # value=', '.join(map(str, promo_disponibles[0]['etudiants'])),
                     value='all',
                     style={'width': '48%'}
@@ -159,8 +161,8 @@ if len(data) > 0:
                 # choix de la matière
                 dcc.Dropdown(
                     id='choix_matiere_prof',
-                    options=[{'label': matiere['nom_module'], 'value': matiere['nom_module']} for matiere in data],
-                    value=data[0]['nom_module'],
+                    options=[],#[{'label': matiere['nom_module'], 'value': matiere['nom_module']} for matiere in data],
+                    #value=data[0]['nom_module'],
                     style={'width': '48%'}
                 ),
 
@@ -187,100 +189,81 @@ if len(data) > 0:
         )
     ])
 else:
-    app5_layout = html.Div([
+    app4_enseignant_layout = html.Div([
         html.H1(f"Visualisation des notes - prof ", style={'textAlign': 'center', 'marginBottom': '5px'})])
 
 
 def register_callbacks(app):
+
+    # mise à jour des promo
+    @app.callback(
+        Output('choix_promo_prof', 'options'),
+        Input('user_id','data')
+    )
+    def update_options_promo_prof(prof_id):
+        promo = app4_notes_tools.get_data_prof(prof_id)['promo'].drop_duplicates()
+
+        options_controles = [] #[{'label': 'Toutes les promos', 'value': 'all'}]
+        options_controles.extend([{'label': p, 'value': p} for p in promo])
+        return options_controles
+
     # Callback pour choisir la matiere
     @app.callback(
-        [Output('choix_matiere_prof', 'value'), Output('choix_matiere_prof', 'options')],
-        [Input('choix_promo_prof', 'value')]
+        Output('choix_matiere_prof', 'value'),
+        Output('choix_matiere_prof', 'options'),
+        Input('choix_promo_prof', 'value'),
+        State('user_id', 'data')
     )
 
-    def update_matiere(promo_selectionnee):
-        global derniere_matiere_selectionnee
+    def update_matiere(promo_selectionnee, prof_id):
 
-        if promo_selectionnee == 'all':  # si on veut toutes les promos
-            promo_selectionnee = [etu for promo in promo_disponibles for etu in promo['etudiants']]
-        else:
-            promo_selectionnee = list(map(int, promo_selectionnee.split(', ')))
+        prof_data = app4_notes_tools.get_data_prof(prof_id)
+        modules = prof_data[prof_data['promo'] == promo_selectionnee]['nom'].drop_duplicates()
 
+        options_controles = []  # [{'label': 'Toutes les promos', 'value': 'all'}]
+        options_controles.extend([{'label': m, 'value': m} for m in modules])
 
-        # on récupère les matières disponibles pour la promo sélectionnée
-        matieres_promo=[]
+        matiere_selectionnee = options_controles[0]['label']
 
-        for matiere in data :
-            # on vérifie si la promo a des notes pour cette matière
-            for controle in matiere['controles']:
-                #for note in controle['evaluation']:
-                    if controle['id_etudiant'] in promo_selectionnee:
-                        matieres_promo.append(matiere)
-                        break
-                    else:
-                        continue
-                #break
-        options_matiere=[
-            {'label': matiere['nom_module'], 'value': matiere['nom_module']}
-            for matiere in matieres_promo]
-        matiere_selectionnee=(
-            derniere_matiere_selectionnee
-            if derniere_matiere_selectionnee in [opt['value'] for opt in options_matiere] 
-            else options_matiere[0]['value']
-            )
-
-        derniere_matiere_selectionnee=matiere_selectionnee
-
-        return matiere_selectionnee, options_matiere
+        return matiere_selectionnee, options_controles
 
 
     # Callback choix de controle en fonction de la matière sélectionnée
     @app.callback(
-        [Output('choix_controle_prof', 'options'), Output('choix_controle_prof', 'value')],
-        [Input('choix_matiere_prof', 'value'), Input('choix_promo_prof', 'value')],
+        Output('choix_controle_prof', 'options'),
+        Output('choix_controle_prof', 'value'),
+        Input('choix_matiere_prof', 'value'),
+        Input('choix_promo_prof', 'value'),
+        State('user_id', 'data'),
         prevent_initial_call=True
     )
-    def update_controles(matiere_selectionnee, promo_selectionnee):
-        global dernier_controle_selectionne
+    def update_controles(matiere_selectionnee, promo_selectionnee, prof_id):
 
-        if promo_selectionnee=='all':  # on veut toutes les promos
-            promo_selectionnee=[etu for promo in promo_disponibles for etu in promo['etudiants']]
-        else:
-            promo_selectionnee=list(map(int, promo_selectionnee.split(', ')))
+        prof_data = app4_notes_tools.get_data_prof(prof_id)
 
-        #on récupère les données de la matière sélectionnée
-        data_matiere=next(matiere for matiere in data if matiere['nom_module']==matiere_selectionnee)
+        dates = prof_data[prof_data['promo'] == promo_selectionnee][prof_data['nom'] == matiere_selectionnee]['date'].drop_duplicates()
 
-        # contrôles disponibles pour cette matière :
-        if len(data_matiere['controles'])>1: # s'il y a qu'un seul controle, pas besoin de faire la moyenne
-            options_controles=[{'label': 'moyenne', 'value': 'moyenne'}]
-            options_controles.extend({'label' : controle['type'], 'value':controle['type']} for controle in data_matiere['controles'])
-        else : # s'il y a qu'un seul contrôle :
-            options_controles=[{'label' : controle['type'], 'value':controle['type']} for controle in data_matiere['controles']]
+        print("mod", dates, flush=True)
 
-        if dernier_controle_selectionne in [controle['value'] for controle in options_controles]:
-            controle_par_defaut=dernier_controle_selectionne
-        else:
-            controle_par_defaut=options_controles[0]['value']
+        options_controles = [{'label': 'Moyenne', 'value': 'moyenne'}]
+        options_controles.extend({'label': "Eval. du " + str(date), 'value': str(date)} for date in dates)
 
-        dernier_controle_selectionne=controle_par_defaut
-
-        return options_controles, controle_par_defaut
+        return options_controles, "moyenne"
 
     # Callback en fonction du controle sélectionné
     @app.callback(
-        [Output('affichage_note_prof', 'figure'), Output('affichage_classement_prof', 'children')],
-        [Input('choix_promo_prof', 'value'), Input('choix_matiere_prof', 'value'), Input('choix_controle_prof', 'value')]
+        Output('affichage_note_prof', 'figure'),
+        Output('affichage_classement_prof', 'children'),
+        Input('choix_promo_prof', 'value'),
+        Input('choix_matiere_prof', 'value'),
+        Input('choix_controle_prof', 'value'),
+        prevent_initial_call=True
     )
 
     def update_graphique(liste_promo, matiere_selectionnee, controle_selectionne):
         # print("liste_promo", liste_promo)
         # print("matiere_selectionnee", matiere_selectionnee)
         # print("controle_selectionne", controle_selectionne)
-
-        global dernier_controle_selectionne, derniere_matiere_selectionnee
-        derniere_matiere_selectionnee=matiere_selectionnee
-        dernier_controle_selectionne=controle_selectionne
 
         if liste_promo == 'all': # si on veut toutes les promos
             liste_promo = [etu for promo in promo_disponibles for etu in promo['etudiants']]

@@ -39,8 +39,8 @@ def import_apps():
     from app1_map_generation import app1_layout, register_callbacks as register_callbacks_app1
     from app2_spyder_plot_competences import app2_layout, register_callbacks as register_callbacks_app2
     from app3_taux_absenteisme import app3_layout, register_callbacks as register_callbacks_app3
-    from app4_notes_eleve import app4_etudiant_layout, register_callbacks as register_callbacks_app4
-    from app4_notes_prof import app5_layout, register_callbacks as register_callbacks_app5
+    from app4_notes_eleve import app4_etudiant_layout, register_callbacks as register_callbacks_app4_etudiant
+    from app4_notes_prof import app4_enseignant_layout, register_callbacks as register_callbacks_app4_enseignant
     from app6_graph_avancement import app6_layout, register_callbacks as register_callbacks_app6
     from app7_charge_enseignant import app7_layout, register_callbacks as register_callbacks_app7
     from app8_charge_etudiant import app8_layout, register_callbacks as register_callbacks_app8
@@ -52,8 +52,8 @@ def import_apps():
         'app1': (app1_layout, register_callbacks_app1),
         'app2': (app2_layout, register_callbacks_app2),
         'app3': (app3_layout, register_callbacks_app3),
-        'app4_etudiant': (app4_etudiant_layout, register_callbacks_app4),
-        'app4_enseignant': (app5_layout, register_callbacks_app5),
+        'app4_etudiant': (app4_etudiant_layout, register_callbacks_app4_etudiant),
+        'app4_enseignant': (app4_enseignant_layout, register_callbacks_app4_enseignant),
         'app6': (app6_layout, register_callbacks_app6),
         'app7': (app7_layout, register_callbacks_app7),
         'app8': (app8_layout, register_callbacks_app8),
