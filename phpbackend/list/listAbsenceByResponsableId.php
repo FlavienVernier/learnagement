@@ -11,7 +11,12 @@
     include("../crud/function_rs_to_table.php");
     include("../crud/function_action_allowed.php");
 
-    $rsStages = listCLASS_absence_anonymous($conn);
+if (isset($_POST['id_responsable'])){
+    $id_responsable = $_POST['id_responsable'];
+    $rsStages = listCLASS_absenceByResponsableId($conn, $id_responsable);
 
     echo json_encode($rsStages, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+}else{
+    echo json_encode("Error id_responsable undefined");
+}
 
