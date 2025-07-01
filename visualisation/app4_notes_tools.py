@@ -1,13 +1,43 @@
+import statistics
+
 from dotenv import load_dotenv
 import os
 import mysql
 import pandas as pd
 import requests
 import io
-
+import math
 
 load_dotenv()
 
+
+def calcul_informations(notes_promo, note_eleve=None):
+    # calcul des informations
+    # on récupère seulement les notes :
+
+    # notes_promo=[eleve['note'] for eleve in notes_promo]
+
+    if note_eleve == None:
+        note_eleve = notes_promo[0]
+
+    ordre_notes = [round(val, 2) for val in sorted(notes_promo, reverse=True)]
+    classement = ordre_notes.index(round(note_eleve, 2)) + 1
+
+    moyenne = statistics.mean(notes_promo)
+    mediane = statistics.median(notes_promo)
+
+    ecart_type = statistics.pstdev(notes_promo)
+
+    X_notes = list(range(21))  # liste qui va de 0 à 20
+    Y_notes = [0] * len(X_notes)  # initialisation de la liste
+    for note in notes_promo:
+        note_arrondie = math.floor(note)
+        Y_notes[note_arrondie] += 1
+
+    couleur = ['#007bff' if math.floor(i) != math.floor(note_eleve) else '#D10065' if i < 10 else '#65D100' for i in
+               X_notes]
+
+    return classement, moyenne, mediane, ecart_type, X_notes, Y_notes, couleur
 
 def get_notes_eleves(id_etudiant):
     # cur.execute(f"SELECT evaluation, id_etudiant, module.nom  FROM ETU_classical_evaluation as eval JOIN MAQUETTE_module as module ON eval.id_module=module.id_module WHERE eval.id_etudiant={num_etu}")

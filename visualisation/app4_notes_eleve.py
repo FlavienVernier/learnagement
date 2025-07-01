@@ -15,37 +15,7 @@ import app4_notes_tools
 load_dotenv()
 
 
-def calcul_informations(notes_promo, note_eleve):
 
-    # calcul des informations
-    # on récupère seulement les notes :
-    
-    #notes_promo=[eleve['note'] for eleve in notes_promo]
-    notes_promo = notes_promo["evaluation"]
-
-    if len(notes_promo) != 0:
-        moyenne=sum(notes_promo)/len(notes_promo)
-    else:
-        moyenne=0
-    ordre_notes=[round(val, 2) for val in sorted(notes_promo, reverse=True)]
-    classement=ordre_notes.index(round(note_eleve, 2))+1
-    
-    # médiane :
-    n=len(ordre_notes)
-    if n%2==1 : # si on a un nombre impair :
-        mediane=ordre_notes[n//2]
-    else : # si on a un nombre pair
-        mediane=(ordre_notes[n//2 -1]+ordre_notes[n//2])/2 #on fait la moyenne entre celle d'avant et celle d'après
-
-    X_notes=list(range(21)) #liste qui va de 0 à 20 
-    Y_notes=[0]*len(X_notes) # initialisation de la liste
-    for note in notes_promo :
-        note_arrondie=math.floor(note)
-        Y_notes[note_arrondie]+=1
-
-    couleur=['#007bff' if math.floor(i)!=math.floor(note_eleve) else '#D10065' if i<10 else '#65D100' for i in X_notes]
-
-    return classement, moyenne, mediane, X_notes, Y_notes, couleur
 
 app4_etudiant_layout=html.Div([
     html.H1(f"Visualisation des notes", style={'textAlign': 'center', 'marginBottom': '5px'}),
@@ -151,12 +121,12 @@ def register_callbacks(app):
         else :
             # on récupère les données correspondant à la matière et au contrôle
             data_matiere = app4_notes_tools.get_data_promo(matiere_selectionnee)
-            notes_promo = data_matiere[data_matiere['date'] == controle_selectionne]
+            notes_promo = data_matiere[data_matiere['date'] == controle_selectionne]["evaluation"]
             note_eleve = notes_eleve[notes_eleve['date'] == controle_selectionne]
             note_eleve = note_eleve.iloc[0]['evaluation']
 
         # Calcul des informations
-        classement, moyenne, mediane, X_notes, Y_notes, couleur = calcul_informations(notes_promo, note_eleve)
+        classement, moyenne, mediane, ecart_type, X_notes, Y_notes, couleur = app4_notes_tools.calcul_informations(notes_promo, note_eleve)
 
         fig=go.Figure()
 
