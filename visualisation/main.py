@@ -38,9 +38,11 @@ icon_map = {
 def import_apps():
     from app1_map_generation import app1_layout, register_callbacks as register_callbacks_app1
     from app2_spyder_plot_competences import app2_layout, register_callbacks as register_callbacks_app2
-    from app3_taux_absenteisme import app3_layout, register_callbacks as register_callbacks_app3
-    from app4_notes_eleve import app4_etudiant_layout, register_callbacks as register_callbacks_app4_etudiant
+    from app3_absenteisme_administratif import app3_administratif_layout, register_callbacks as register_callbacks_app3_administratif
+    from app3_absenteisme_enseignant import app3_enseignant_layout, register_callbacks as register_callbacks_app3_enseignant
+    from app3_absenteisme_etudiant import app3_etudiant_layout, register_callbacks as register_callbacks_app3_etudiant
     from app4_notes_prof import app4_enseignant_layout, register_callbacks as register_callbacks_app4_enseignant
+    from app4_notes_eleve import app4_etudiant_layout, register_callbacks as register_callbacks_app4_etudiant
     from app6_graph_avancement import app6_layout, register_callbacks as register_callbacks_app6
     from app7_charge_enseignant import app7_layout, register_callbacks as register_callbacks_app7
     from app8_charge_etudiant import app8_layout, register_callbacks as register_callbacks_app8
@@ -51,16 +53,18 @@ def import_apps():
     return {
         'app1': (app1_layout, register_callbacks_app1),
         'app2': (app2_layout, register_callbacks_app2),
-        'app3': (app3_layout, register_callbacks_app3),
-        'app4_etudiant': (app4_etudiant_layout, register_callbacks_app4_etudiant),
+        'app3_administratif': (app3_administratif_layout, register_callbacks_app3_administratif),
+        'app3_enseignant': (app3_enseignant_layout, register_callbacks_app3_enseignant),
+        'app3_etudiant': (app3_etudiant_layout, register_callbacks_app3_etudiant),
         'app4_enseignant': (app4_enseignant_layout, register_callbacks_app4_enseignant),
+        'app4_etudiant': (app4_etudiant_layout, register_callbacks_app4_etudiant),
         'app6': (app6_layout, register_callbacks_app6),
         'app7': (app7_layout, register_callbacks_app7),
         'app8': (app8_layout, register_callbacks_app8),
         'app9': (app9_layout, register_callbacks_app9),
         'app10_administratif': (app10_administratif_layout, register_callbacks_app10_administratif),
-        'app10_etudiant': (app10_etudiant_layout, register_callbacks_app10_etudiant),
-        'app10_enseignant': (app10_enseignant_layout, register_callbacks_app10_enseignant)
+        'app10_enseignant': (app10_enseignant_layout, register_callbacks_app10_enseignant),
+        'app10_etudiant': (app10_etudiant_layout, register_callbacks_app10_etudiant)
     }
 
 LOGO = "https://placehold.co/100x100"
@@ -68,9 +72,13 @@ apps = import_apps()
 
 # MENU DE LA SIDEBAR (EDITABLE)
 menu_items = {
+    'administratif': [
+        ('Absences', 'app3_administratif'),
+        ('Gestion des stages', 'app10_administratif')
+    ],
     'enseignant': [
         ('Carte des Universités', 'app1'),
-        ('Absences', 'app3'),
+        ('Absences', 'app3_enseignant'),
         ('Notes (professeurs)', 'app4_enseignant'),
         ('Avancement des cours', 'app6'),
         ('Charge de travail (enseignant)', 'app7'),
@@ -79,15 +87,13 @@ menu_items = {
     'etudiant': [
         ('Carte des Universités', 'app1'),
         ('Compétences', 'app2'),
+        ('Absences', 'app3_etudiant'),
         ('Notes (élèves)', 'app4_etudiant'),
         ('Avancement des cours', 'app6'),
         ('Charge de travail (étudiant)', 'app8'),
         ('Avancement rendus', 'app9'),
         ('Stages', 'app10_etudiant')
-    ],
-    'administratif': [
-        ('Gestion des stages', 'app10_administratif')
-        ]
+    ]
 }
 
 SECRET_KEY = os.getenv("INSTANCE_SECRET").encode()
