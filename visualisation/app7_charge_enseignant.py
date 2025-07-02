@@ -5,57 +5,7 @@ import pandas as pd
 import plotly.express as px
 from dash import Dash, html, dcc, Input, Output
 from datetime import datetime
-'''
-# Nom du fichier
-file = '../data/charge_ensegnants.csv'
-
-# Charger le fichier CSV
-df = pd.read_csv(file, encoding='ISO-8859-1', delimiter=',')'''
-
-# Palette originale
-original_palette = px.colors.qualitative.Alphabet
-
-# Retirer une couleur (ex : '#FFB5E8')
-custom_palette = [c for c in original_palette if c.lower() != '#85660d']
-
-load_dotenv()
-
-user = os.getenv("MYSQL_USER_LOGIN")
-password = os.getenv("MYSQL_USER_PASSWORD")
-host = os.getenv("MYSQL_SERVER")
-port = os.getenv("MYSQL_PORT")
-database = os.getenv("MYSQL_DB")
-
-# Se connecter à la base de données MySQL
-conn = mysql.connector.connect(
-    user=user,
-    password=password,
-    host=host,
-    port=port,
-    database=database,
-    auth_plugin='mysql_native_password'
-)
-
-# Exécuter la requête pour récupérer les dépendances
-cur = conn.cursor()
-
-def get_data(id_enseignant) : 
-    cur.execute(f"SELECT ens.nom, ens.prenom, session.schedule, sequencage.duree_h, module.nom "
-                f"FROM CLASS_session as session "
-                f"JOIN LNM_enseignant as ens ON ens.id_enseignant=session.id_enseignant "
-                f"JOIN MAQUETTE_module_sequence as sequence ON session.id_module_sequence=sequence.id_module_sequence "
-                f"JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage "
-                f"JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module "
-                f"WHERE ens.id_enseignant={id_enseignant};")
-    
-    rows = cur.fetchall()
-
-    # Récupération des données 
-    data = pd.DataFrame(rows, columns=["nom", "prenom", "date", "nb_heure", "matiere"])
-    return data
-
-id_enseignant = 16
-df = get_data(id_enseignant)
+import app7_charge_tools
 
 # Fonction pour calculer le numéro de la semaine
 def calculer_semaine(date_cours, format_date='%Y-%m-%d'):
@@ -67,28 +17,29 @@ def calculer_semaine(date_cours, format_date='%Y-%m-%d'):
         return numero_semaine
     except ValueError:
         return "Erreur : Format de date invalide. Veuillez vérifier la date et le format."
+def update_df(df):
+    # Ajouter les colonnes "jour_semaine" et "mois" dans le DataFrame initial
+    df['schedule'] = pd.to_datetime(df['schedule'])
+    df['jour_semaine'] = df['schedule'].dt.day_name()  # Ex : Monday, Tuesday
+    df['mois'] = df['schedule'].dt.month_name()       # Ex : January, February
+    df['jour'] = df['schedule'].dt.date               # Ex : 2025-01-07, utilisé pour filtrer aujourd'hui
 
-# Ajouter les colonnes "jour_semaine" et "mois" dans le DataFrame initial
-df['date'] = pd.to_datetime(df['date'])
-df['jour_semaine'] = df['date'].dt.day_name()  # Ex : Monday, Tuesday
-df['mois'] = df['date'].dt.month_name()       # Ex : January, February
-df['jour'] = df['date'].dt.date               # Ex : 2025-01-07, utilisé pour filtrer aujourd'hui
+    # Regroupement par "nom" et "type" et somme des heures
+    df_calcule = df.groupby(['nom'], as_index=False).agg({
+        'duree_h': 'sum',
+        'nom': 'first',
+        'schedule': 'first',
+        'jour_semaine': 'first',  # Conserver le jour de la semaine
+        'mois': 'first',           # Conserver le mois
+        'jour': 'first'            # Conserver le jour complet pour "Aujourd'hui"
+    })
 
-# Regroupement par "nom" et "type" et somme des heures
-df_calcule = df.groupby(['nom', 'matiere'], as_index=False).agg({
-    'nb_heure': 'sum',
-    'matiere': 'first',
-    'date': 'first',
-    'jour_semaine': 'first',  # Conserver le jour de la semaine
-    'mois': 'first',           # Conserver le mois
-    'jour': 'first'            # Conserver le jour complet pour "Aujourd'hui"
-})
+    return df_calcule
 
-# Créer l'application Dash
-# app = Dash(__name__)
+
 
 # Layout de l'application
-app7_layout = html.Div([
+app7_enseignant_layout = html.Div([
     html.H1("Visualisation de la charge de travail des enseignants"),
     
     # Dropdown pour sélectionner le filtre de période
@@ -111,9 +62,13 @@ def register_callbacks(app):
     # Callback pour mettre à jour le graphique
     @app.callback(
         Output('graphique-charge_enseignant', 'figure'),
-        [Input('filtre-periode', 'value')]
+        Input('filtre-periode', 'value'),
+        Input('user_id', 'data')
     )
-    def update_graph(filtre_periode):
+    def update_graph(filtre_periode, user_id):
+        df = app7_charge_tools.get_chargeByEnseignantId(user_id)
+        df_calcule = update_df(df)
+
         today = datetime.today().date()  # Date d'aujourd'hui
         current_month = datetime.today().strftime('%B')  # Mois courant, par exemple "January"
 
@@ -131,18 +86,13 @@ def register_callbacks(app):
         fig = px.bar(
             df_filtered,
             x='nom',  # Axe X : noms des enseignants
-            y='nb_heure',  # Axe Y : nombre d'heures
-            color='matiere',  # Couleur par matière
+            y='duree_h',  # Axe Y : nombre d'heures
+            color='nom',  # Couleur par matière
             title=f"Charge de travail des enseignants ({filtre_periode})",
-            labels={'nom': 'Enseignant', 'nb_heure': 'Nombre d\'heures', 'matiere': 'Matière'},
-            text='matiere',  # Afficher la matière des cours sur les barres
-            color_discrete_sequence=custom_palette  # ou 'Bold', 'Dark2', etc. 
+            labels={ 'duree_h': 'Nombre d\'heures', 'nom': 'Matière'},
+            text='nom',  # Afficher la matière des cours sur les barres
+            color_discrete_sequence=app7_charge_tools.custom_palette  # ou 'Bold', 'Dark2', etc.
         )
 
         fig.update_traces(textposition='outside')  # Placer les labels à l'extérieur des barres
         return fig
-
-# Lancer l'application
-# if __name__ == '__main__':
-#     app.run_server(debug=True)
-

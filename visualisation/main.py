@@ -44,8 +44,8 @@ def import_apps():
     from app4_notes_prof import app4_enseignant_layout, register_callbacks as register_callbacks_app4_enseignant
     from app4_notes_eleve import app4_etudiant_layout, register_callbacks as register_callbacks_app4_etudiant
     from app6_graph_avancement import app6_layout, register_callbacks as register_callbacks_app6
-    from app7_charge_enseignant import app7_layout, register_callbacks as register_callbacks_app7
-    from app8_charge_etudiant import app8_layout, register_callbacks as register_callbacks_app8
+    from app7_charge_enseignant import app7_enseignant_layout, register_callbacks as register_callbacks_app7_enseignant
+    from app7_charge_etudiant import app7_etudiant_layout, register_callbacks as register_callbacks_app7_etudiant
     from app9_avancement_rendus import app9_layout, register_callbacks as register_callbacks_app9
     from app10_stage_administratif import app10_administratif_layout, register_callbacks as register_callbacks_app10_administratif
     from app10_stage_enseignant import app10_enseignant_layout, register_callbacks as register_callbacks_app10_enseignant
@@ -59,8 +59,8 @@ def import_apps():
         'app4_enseignant': (app4_enseignant_layout, register_callbacks_app4_enseignant),
         'app4_etudiant': (app4_etudiant_layout, register_callbacks_app4_etudiant),
         'app6': (app6_layout, register_callbacks_app6),
-        'app7': (app7_layout, register_callbacks_app7),
-        'app8': (app8_layout, register_callbacks_app8),
+        'app7_enseignant': (app7_enseignant_layout, register_callbacks_app7_enseignant),
+        'app7_etudiant': (app7_etudiant_layout, register_callbacks_app7_etudiant),
         'app9': (app9_layout, register_callbacks_app9),
         'app10_administratif': (app10_administratif_layout, register_callbacks_app10_administratif),
         'app10_enseignant': (app10_enseignant_layout, register_callbacks_app10_enseignant),
@@ -81,7 +81,7 @@ menu_items = {
         ('Absences', 'app3_enseignant'),
         ('Notes (professeurs)', 'app4_enseignant'),
         ('Avancement des cours', 'app6'),
-        ('Charge de travail (enseignant)', 'app7'),
+        ('Charge de travail', 'app7_enseignant'),
         ('Tutorat stages', 'app10_enseignant')
     ],
     'etudiant': [
@@ -90,7 +90,7 @@ menu_items = {
         ('Absences', 'app3_etudiant'),
         ('Notes (élèves)', 'app4_etudiant'),
         ('Avancement des cours', 'app6'),
-        ('Charge de travail (étudiant)', 'app8'),
+        ('Charge de travail', 'app7_etudiant'),
         ('Avancement rendus', 'app9'),
         ('Stages', 'app10_etudiant')
     ]
