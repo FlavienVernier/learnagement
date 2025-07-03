@@ -1,9 +1,6 @@
-from dotenv import load_dotenv
-import os
-import mysql
 import pandas as pd
 import plotly.express as px
-from dash import Dash, html, dcc, Input, Output
+from dash import html, dcc, Input, Output
 from datetime import datetime
 import app7_charge_tools
 

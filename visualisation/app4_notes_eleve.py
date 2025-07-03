@@ -1,21 +1,7 @@
-import sys
-
-from dotenv import load_dotenv
-import os
-import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
-import mysql
-import pandas as pd
 import plotly.graph_objs as go
-import json
-import math
 import app4_notes_tools
-
-load_dotenv()
-
-
-
 
 app4_etudiant_layout=html.Div([
     html.H1(f"Visualisation des notes", style={'textAlign': 'center', 'marginBottom': '5px'}),
@@ -115,7 +101,7 @@ def register_callbacks(app):
             return go.Figure().update_layout(title="Aucune note disponible"), "Aucune note disponible"
 
         if controle_selectionne=='moyenne' :
-            notes_promo = app4_notes_tools.get_average_notes_promo(matiere_selectionnee)
+            notes_promo = app4_notes_tools.get_average_notes_promo(matiere_selectionnee)["evaluation"]
             note_eleve = notes_eleve.loc[:, 'evaluation'].mean()
 
         else :
@@ -168,8 +154,9 @@ def register_callbacks(app):
             plot_bgcolor="rgba(240,240,240,1)"
         )
 
+
         # affichage du classement :
-        classement_text=f"Note : {note_eleve:.2f}/20 - Classement : {classement}e/{len(notes_promo[['evaluation']].values.tolist())} ",
+        classement_text=f"Note : {note_eleve:.2f}/20 - Classement : {classement}e/{len(notes_promo)} ",
 
         return fig, classement_text
 

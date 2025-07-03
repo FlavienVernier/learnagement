@@ -1,14 +1,6 @@
-from dotenv import load_dotenv
-import os
-import statistics
-import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
-import mysql
-import pandas as pd
 import plotly.graph_objs as go
-import json
-import math
 import app4_notes_tools
 
 app4_enseignant_layout = html.Div([

@@ -1,10 +1,8 @@
 from time import sleep
-
 from dash import html, dcc
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
-import mysql
 import plotly.graph_objects as go
 import app10_stage_tools
 import app_tools

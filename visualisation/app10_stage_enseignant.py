@@ -1,7 +1,6 @@
-from dash import html, dcc, State
+from dash import html, dcc
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
-import mysql
 import app10_stage_tools
 
 # Définition de la mise en page de l'application

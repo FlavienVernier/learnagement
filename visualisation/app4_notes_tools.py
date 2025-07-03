@@ -1,8 +1,7 @@
-import statistics
+import sys
 
 from dotenv import load_dotenv
 import os
-import mysql
 import pandas as pd
 import requests
 import io
@@ -11,7 +10,7 @@ import math
 load_dotenv()
 
 
-def calcul_informations(notes_promo, note_eleve=None):
+def calcul_informations(notes_promo: pd.Series, note_eleve=None):
     # calcul des informations
     # on récupère seulement les notes :
 
@@ -20,19 +19,32 @@ def calcul_informations(notes_promo, note_eleve=None):
     if note_eleve == None:
         note_eleve = notes_promo[0]
 
-    ordre_notes = [round(val, 2) for val in sorted(notes_promo, reverse=True)]
-    classement = ordre_notes.index(round(note_eleve, 2)) + 1
 
-    moyenne = statistics.mean(notes_promo)
-    mediane = statistics.median(notes_promo)
+    #ordre_notes = [round(val, 2) for val in sorted(notes_promo, reverse=True)]
+    ordre_notes = notes_promo.sort_values().round().reset_index(drop=True)
+    classement = ordre_notes[ordre_notes == round(note_eleve)].index[0]
 
-    ecart_type = statistics.pstdev(notes_promo)
+    #moyenne = statistics.mean(notes_promo)
+    moyenne = notes_promo.mean()
+    #mediane = statistics.median(notes_promo)
+    mediane = notes_promo.median()
+
+    #ecart_type = statistics.pstdev(notes_promo)
+    ecart_type = notes_promo.std()
+
+    print(moyenne, mediane, ecart_type, flush=True)
+
+    print(type(notes_promo), flush=True)
 
     X_notes = list(range(21))  # liste qui va de 0 à 20
-    Y_notes = [0] * len(X_notes)  # initialisation de la liste
-    for note in notes_promo:
-        note_arrondie = math.floor(note)
-        Y_notes[note_arrondie] += 1
+    #Y_notes = [0] * len(X_notes)  # initialisation de la liste
+    Y_notes = notes_promo.round().to_list()
+
+
+
+    # for note in notes_promo:
+    #     note_arrondie = math.floor(note)
+    #     Y_notes[note_arrondie] += 1
 
     couleur = ['#007bff' if math.floor(i) != math.floor(note_eleve) else '#D10065' if i < 10 else '#65D100' for i in
                X_notes]

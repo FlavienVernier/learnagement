@@ -2,9 +2,10 @@ from dotenv import load_dotenv
 import os
 from dash import dcc, html
 from dash.dependencies import Input, Output
-import mysql
 import pandas as pd
 import plotly.graph_objects as go
+import mysql
+import mysql.connector
 
 '''
 #Charger les données d'un fichier

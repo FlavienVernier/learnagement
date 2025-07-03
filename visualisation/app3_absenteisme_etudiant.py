@@ -1,11 +1,5 @@
-from dotenv import load_dotenv
-import os
-import pandas as pd
-import plotly.express as px
-from dash import Dash, dcc, html, Input, Output
+from dash import html, Input, Output
 import dash_bootstrap_components as dbc
-import mysql
-import mysql.connector
 import app3_absenteisme_tools
 
 

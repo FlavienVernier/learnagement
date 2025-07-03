@@ -1,14 +1,7 @@
-from dotenv import load_dotenv
-import os
-import mysql
 import pandas as pd
 import plotly.express as px
-from dash import Dash, html, dcc, Input, Output
-from datetime import datetime
+from dash import html, dcc, Input, Output
 import app7_charge_tools
-
-
-
 
 def update_df(df):
     # Convertir la colonne "date" en format datetime
@@ -17,9 +10,6 @@ def update_df(df):
     df['semaine'] = df['schedule'].dt.isocalendar().week  # Numéro de la semaine ISO
     df['annee'] = df['schedule'].dt.year  # Ajouter l'année pour gérer les années distinctes
 
-
-# Créer l'application Dash
-# app = Dash(__name__)
 
 # Layout de l'application
 app7_etudiant_layout = html.Div([
@@ -102,7 +92,3 @@ def register_callbacks(app):
         fig.update_yaxes(title_text="Nombre d'heures")
 
         return fig, semaine_options
-
-# Lancer l'application
-# if __name__ == '__main__':
-#     app.run_server(debug=True)

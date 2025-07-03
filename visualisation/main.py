@@ -46,7 +46,7 @@ def import_apps():
     from app6_graph_avancement import app6_layout, register_callbacks as register_callbacks_app6
     from app7_charge_enseignant import app7_enseignant_layout, register_callbacks as register_callbacks_app7_enseignant
     from app7_charge_etudiant import app7_etudiant_layout, register_callbacks as register_callbacks_app7_etudiant
-    from app9_avancement_rendus import app9_layout, register_callbacks as register_callbacks_app9
+    from app9_rendus_etudiant import app9_layout, register_callbacks as register_callbacks_app9
     from app10_stage_administratif import app10_administratif_layout, register_callbacks as register_callbacks_app10_administratif
     from app10_stage_enseignant import app10_enseignant_layout, register_callbacks as register_callbacks_app10_enseignant
     from app10_stage_etudiant import app10_etudiant_layout, register_callbacks as register_callbacks_app10_etudiant

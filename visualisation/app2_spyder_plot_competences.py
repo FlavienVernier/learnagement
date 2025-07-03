@@ -1,80 +1,8 @@
-from dotenv import load_dotenv
-import os
-import dash
 from dash import dcc, html, Input, Output
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
-import mysql.connector
-import mysql
 import app2_spyder_plot_competences_tools
-
-load_dotenv()
-#
-# user = os.getenv("MYSQL_USER_LOGIN")
-# password = os.getenv("MYSQL_USER_PASSWORD")
-# host = os.getenv("MYSQL_SERVER")
-# port = os.getenv("MYSQL_PORT")
-# database = os.getenv("MYSQL_DB")
-#
-# # Se connecter à la base de données MySQL
-# conn = mysql.connector.connect(
-#     user=user,
-#     password=password,
-#     host=host,
-#     port=port,
-#     database=database
-# )
-#
-# # Exécuter la requête pour récupérer les dépendances
-# cur = conn.cursor()
-#
-# def get_data (id_etudiant) :
-#     #cur.execute("SELECT * FROM VIEW_graphe_dependances")
-#     cur.execute(f"SELECT eval.id_etudiant, eval.evaluation, ac.libelle_apprentissage, niveau.libelle_niveau, competence.libelle_competence, competence.id_competence FROM ETU_competence_evaluation as eval INNER JOIN APC_apprentissage_critique as ac ON eval.id_apprentissage_critique=ac.id_apprentissage_critique INNER JOIN APC_niveau as niveau ON ac.id_niveau=niveau.id_niveau INNER JOIN APC_competence as competence ON niveau.id_competence=competence.id_competence WHERE eval.id_etudiant = {id_etudiant};")
-#
-#     rows = cur.fetchall()
-#
-#     # Récupération des données
-#     data = pd.DataFrame(rows, columns=["etudiant", "evaluation", "libelle_apprentissage", "libelle_niveau", "libelle_competence", "id_competence"])
-#
-#     # On trie la ligne des évaluations par ordre alphabétique :
-#     data = data.sort_values(by=["evaluation"], ascending=False)
-#
-#     return data
-
-# Temporaire : UPDATE A FAIRE = numéro étudiant de l'étudiant connecté
-#id_etudiant = 2
-#data = get_data(id_etudiant)
-#data = app2_spyder_plot_competences_tools.get_evaluation_apprentissage_critique_by_studentId(id_etudiant)
-
-# Charger les données pour le deuxième graphique
-'''data = pd.DataFrame({
-    "id_etudiant": [1, 1, 1, 1, 1, 1, 1, 1, 1],
-    "evaluation": [1, 1, 2, 3, 3,2,1,2,3],
-    "libelle_competence": [
-        "Concevoir et mettre en œuvre des systèmes informatiques",
-        "Concevoir et mettre en œuvre des systèmes informatiques",
-        "Concevoir et mettre en œuvre des systèmes informatiques",
-        "Concevoir et mettre en œuvre des systèmes informatiques",
-        "Concevoir et mettre en œuvre des systèmes informatiques",
-        "Collecter et traiter des données numériques",
-        "Collecter et traiter des données numériques",
-        "Collecter et traiter des données numériques",
-        "Collecter et traiter des données numériques"
-    ],
-    "libelle_apprentissage": [
-        "Concevoir et gérer une base de données",
-        "Mettre en œuvre une architecture client-serveur",
-        "Choisir une méthode de développement adaptée",
-        "Définir une architecture de système logiciel",
-        "Évaluer et optimiser les performances",
-        "Choisir et mettre en œuvre des outils d’IA (approches stochastiques deep learning) pour l’analyse et la prédiction de données",
-        "Implémenter des outils mathématiques",
-        "Répartir les fonctionnalités (acquisition stockage traitements visualisation...) sur un système N-Tieris",
-        "Développer des rendus visuels divers en vue d’une aide à la décision multi-critères"
-    ]
-    })'''
 
 # Fonction pour filtrer les apprentissages critiques
 def choix_apprentissage_critique(df, competence, niveau):
