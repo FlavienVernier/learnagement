@@ -43,7 +43,6 @@ def import_apps():
     from app3_absenteisme_etudiant import app3_etudiant_layout, register_callbacks as register_callbacks_app3_etudiant
     from app4_notes_prof import app4_enseignant_layout, register_callbacks as register_callbacks_app4_enseignant
     from app4_notes_eleve import app4_etudiant_layout, register_callbacks as register_callbacks_app4_etudiant
-    from app6_graph_avancement import app6_layout, register_callbacks as register_callbacks_app6
     from app7_charge_enseignant import app7_enseignant_layout, register_callbacks as register_callbacks_app7_enseignant
     from app7_charge_etudiant import app7_etudiant_layout, register_callbacks as register_callbacks_app7_etudiant
     from app9_rendus_etudiant import app9_layout, register_callbacks as register_callbacks_app9
@@ -58,7 +57,6 @@ def import_apps():
         'app3_etudiant': (app3_etudiant_layout, register_callbacks_app3_etudiant),
         'app4_enseignant': (app4_enseignant_layout, register_callbacks_app4_enseignant),
         'app4_etudiant': (app4_etudiant_layout, register_callbacks_app4_etudiant),
-        'app6': (app6_layout, register_callbacks_app6),
         'app7_enseignant': (app7_enseignant_layout, register_callbacks_app7_enseignant),
         'app7_etudiant': (app7_etudiant_layout, register_callbacks_app7_etudiant),
         'app9': (app9_layout, register_callbacks_app9),
@@ -79,8 +77,7 @@ menu_items = {
     'enseignant': [
         ('Carte des Universités', 'app1'),
         ('Absences', 'app3_enseignant'),
-        ('Notes (professeurs)', 'app4_enseignant'),
-        ('Avancement des cours', 'app6'),
+        ('Notes', 'app4_enseignant'),
         ('Charge de travail', 'app7_enseignant'),
         ('Tutorat stages', 'app10_enseignant')
     ],
@@ -88,8 +85,7 @@ menu_items = {
         ('Carte des Universités', 'app1'),
         ('Compétences', 'app2'),
         ('Absences', 'app3_etudiant'),
-        ('Notes (élèves)', 'app4_etudiant'),
-        ('Avancement des cours', 'app6'),
+        ('Notes', 'app4_etudiant'),
         ('Charge de travail', 'app7_etudiant'),
         ('Avancement rendus', 'app9'),
         ('Stages', 'app10_etudiant')

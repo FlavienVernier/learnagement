@@ -10,6 +10,8 @@ import mysql.connector
 from dash import dcc, html
 from dash.dependencies import Input, Output
 
+# DEPRECATED Must be updated
+
 # variables de configuration
 color_mode = "module"  # "groupe" ou "module"
 edge_color = "#555"

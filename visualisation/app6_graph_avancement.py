@@ -7,6 +7,8 @@ import plotly.graph_objects as go
 import mysql
 import mysql.connector
 
+# DEPRECATED Must be integrated int app7
+
 '''
 #Charger les données d'un fichier
 file_name = "../data/Avancement_etu.csv"
