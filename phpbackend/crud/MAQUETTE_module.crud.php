@@ -58,7 +58,14 @@ function listMAQUETTE_module($conn) {
 }
 
 function listMAQUETTE_moduleByIdResp($conn, $id) {
-    $sql = "SELECT * FROM `MAQUETTE_module` WHERE `id_responsable`='$id'";
+    $sql = "SELECT MAQUETTE_module.code_module, MAQUETTE_module.nom as nom_module, LNM_semestre.semestre, MAQUETTE_module.hCM, MAQUETTE_module.hTD, MAQUETTE_module.hTP, MAQUETTE_module.hTPTD, MAQUETTE_module.hPROJ, MAQUETTE_module.hPersonnelle, MAQUETTE_module.commentaire, LNM_enseignant.nom, LNM_enseignant.prenom
+            FROM `MAQUETTE_module` 
+                LEFT JOIN LNM_semestre ON LNM_semestre.id_semestre = MAQUETTE_module.id_semestre
+                LEFT JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module = MAQUETTE_module.id_module
+                LEFT JOIN MAQUETTE_module_sequence ON MAQUETTE_module_sequence.id_module_sequencage = MAQUETTE_module_sequencage.id_module_sequencage
+                LEFT JOIN CLASS_session ON CLASS_session.id_module_sequence = MAQUETTE_module_sequence.id_module_sequence
+                LEFT JOIN LNM_enseignant ON LNM_enseignant.id_enseignant = CLASS_session.id_enseignant
+            WHERE `id_responsable`='$id'";
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);
     return $rs;
@@ -136,3 +143,4 @@ function listMAQUETTE_module_with_learning_unit($conn, $id)
     $rs = rs_to_table($res);
     return $rs;
 }
+

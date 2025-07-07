@@ -1,13 +1,10 @@
 from dotenv import load_dotenv
 import os
-from flask import request, abort, session
-from flask_session import Session
 import dash
 import dash_bootstrap_components as dbc
 from dash import Input, Output, dcc, html, State
 import json, base64, hmac, hashlib, time
 import traceback
-#from urllib import unquote
 import urllib.parse
 
 load_dotenv()
@@ -41,8 +38,9 @@ def import_apps():
     from app3_absenteisme_administratif import app3_administratif_layout, register_callbacks as register_callbacks_app3_administratif
     from app3_absenteisme_enseignant import app3_enseignant_layout, register_callbacks as register_callbacks_app3_enseignant
     from app3_absenteisme_etudiant import app3_etudiant_layout, register_callbacks as register_callbacks_app3_etudiant
-    from app4_notes_prof import app4_enseignant_layout, register_callbacks as register_callbacks_app4_enseignant
+    from app4_notes_enseignant import app4_enseignant_layout, register_callbacks as register_callbacks_app4_enseignant
     from app4_notes_eleve import app4_etudiant_layout, register_callbacks as register_callbacks_app4_etudiant
+    from app5_module_enseignant import app5_enseignant_layout, register_callbacks as register_callbacks_app5_enseignant
     from app7_charge_enseignant import app7_enseignant_layout, register_callbacks as register_callbacks_app7_enseignant
     from app7_charge_etudiant import app7_etudiant_layout, register_callbacks as register_callbacks_app7_etudiant
     from app9_rendus_etudiant import app9_layout, register_callbacks as register_callbacks_app9
@@ -57,6 +55,7 @@ def import_apps():
         'app3_etudiant': (app3_etudiant_layout, register_callbacks_app3_etudiant),
         'app4_enseignant': (app4_enseignant_layout, register_callbacks_app4_enseignant),
         'app4_etudiant': (app4_etudiant_layout, register_callbacks_app4_etudiant),
+        'app5_enseignant': (app5_enseignant_layout, register_callbacks_app5_enseignant),
         'app7_enseignant': (app7_enseignant_layout, register_callbacks_app7_enseignant),
         'app7_etudiant': (app7_etudiant_layout, register_callbacks_app7_etudiant),
         'app9': (app9_layout, register_callbacks_app9),
@@ -76,6 +75,7 @@ menu_items = {
     ],
     'enseignant': [
         ('Carte des Universités', 'app1'),
+        ('Mes modules', 'app5_enseignant'),
         ('Absences', 'app3_enseignant'),
         ('Notes', 'app4_enseignant'),
         ('Charge de travail', 'app7_enseignant'),
@@ -93,13 +93,6 @@ menu_items = {
 }
 
 SECRET_KEY = os.getenv("INSTANCE_SECRET").encode()
-#print(SECRET_KEY)
-"""
-app.server.secret_key = SECRET_KEY
-app.server.config["SESSION_PERMANENT"] = False     # Sessions expire when the browser is closed
-app.server.config["SESSION_TYPE"] = "filesystem"     # Store session data in files
-Session(app.server)
-"""
 
 def render_sidebar(section, token_arg, status):
     links = []
