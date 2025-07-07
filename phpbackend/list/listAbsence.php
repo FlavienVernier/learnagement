@@ -11,7 +11,9 @@
     include("../crud/function_rs_to_table.php");
     include("../crud/function_action_allowed.php");
 
-    $rsStages = listCLASS_absence_anonymous($conn);
+
+    $rsStages = listCLASS_absence($conn);
 
     echo json_encode($rsStages, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
 

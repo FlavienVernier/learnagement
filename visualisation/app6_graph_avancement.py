@@ -2,9 +2,12 @@ from dotenv import load_dotenv
 import os
 from dash import dcc, html
 from dash.dependencies import Input, Output
-import mysql
 import pandas as pd
 import plotly.graph_objects as go
+import mysql
+import mysql.connector
+
+# DEPRECATED Must be integrated int app7
 
 '''
 #Charger les données d'un fichier
@@ -28,14 +31,23 @@ conn = mysql.connector.connect(
     password=password,
     host=host,
     port=port,
-    database=database
+    database=database,
+    auth_plugin='mysql_native_password'
 )
 
 # Exécuter la requête pour récupérer les dépendances
 cur = conn.cursor()
 
 def get_data_done(id_etudiant) : 
-    cur.execute(f"SELECT etu.nom, sessens.schedule as date_prevue, promo.annee, sequencage.duree_h, module.nom FROM CLASS_session_to_be_affected as sess JOIN CLASS_session_to_be_affected_as_enseignant as sessens ON sessens.id_seance_to_be_affected=sess.id_seance_to_be_affected JOIN LNM_groupe as grp ON sess.id_groupe = grp.id_groupe JOIN LNM_promo as promo ON grp.id_promo = promo.id_promo JOIN LNM_etudiant as etu ON grp.id_promo = etu.id_promo JOIN MAQUETTE_module_sequence as sequence ON sess.id_module_sequence=sequence.id_module_sequence JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module WHERE sessens.schedule < CURRENT_DATE and etu.id_etudiant = {id_etudiant};")
+    cur.execute(f"SELECT etu.nom, session.schedule as date_prevue, promo.annee, sequencage.duree_h, module.nom "
+                f"FROM CLASS_session as session "
+                f"JOIN LNM_groupe as grp ON session.id_groupe = grp.id_groupe "
+                f"JOIN LNM_promo as promo ON grp.id_promo = promo.id_promo "
+                f"JOIN LNM_etudiant as etu ON grp.id_promo = etu.id_promo "
+                f"JOIN MAQUETTE_module_sequence as sequence ON session.id_module_sequence=sequence.id_module_sequence "
+                f"JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage "
+                f"JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module "
+                f"WHERE session.schedule < CURRENT_DATE and etu.id_etudiant = {id_etudiant};")
     
     rows = cur.fetchall()
 
@@ -44,7 +56,15 @@ def get_data_done(id_etudiant) :
     return data
 
 def get_all_data(id_etudiant) : 
-    cur.execute(f"SELECT etu.nom, sessens.schedule as date_prevue, promo.annee, sequencage.duree_h, module.nom FROM CLASS_session_to_be_affected as sess JOIN CLASS_session_to_be_affected_as_enseignant as sessens ON sessens.id_seance_to_be_affected=sess.id_seance_to_be_affected JOIN LNM_groupe as grp ON sess.id_groupe = grp.id_groupe JOIN LNM_promo as promo ON grp.id_promo = promo.id_promo JOIN LNM_etudiant as etu ON grp.id_promo = etu.id_promo JOIN MAQUETTE_module_sequence as sequence ON sess.id_module_sequence=sequence.id_module_sequence JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module WHERE etu.id_etudiant = {id_etudiant};")
+    cur.execute(f"SELECT etu.nom, session.schedule as date_prevue, promo.annee, sequencage.duree_h, module.nom "
+                f"FROM CLASS_session as session "
+                f"JOIN LNM_groupe as grp ON session.id_groupe = grp.id_groupe "
+                f"JOIN LNM_promo as promo ON grp.id_promo = promo.id_promo "
+                f"JOIN LNM_etudiant as etu ON grp.id_promo = etu.id_promo "
+                f"JOIN MAQUETTE_module_sequence as sequence ON session.id_module_sequence=sequence.id_module_sequence "
+                f"JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage "
+                f"JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module "
+                f"WHERE etu.id_etudiant = {id_etudiant};")
 
     rows = cur.fetchall()
 

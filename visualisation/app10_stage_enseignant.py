@@ -1,7 +1,6 @@
-from dash import html, dcc, State
+from dash import html, dcc
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
-import mysql
 import app10_stage_tools
 
 # Définition de la mise en page de l'application
@@ -22,7 +21,7 @@ def register_callbacks(app):
         Input('user_id', 'data')
     )
     def display_table(user_id_fake, user_id):
-        print("user-id:'",user_id,"'", flush=True)
+        #print("user-id:'",user_id,"'", flush=True)
         df_stages = app10_stage_tools.get_stages_by_supervisorId(user_id)
         table_stages = dbc.Table.from_dataframe(
             df_stages,

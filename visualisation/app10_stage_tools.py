@@ -1,40 +1,39 @@
 from dotenv import load_dotenv
 import os
-import mysql
 import pandas as pd
 import requests
 import io
 
 load_dotenv()
 
-def get_etudiants_by_promo(cur, id_promo) : 
-    cur.execute(f"SELECT id_etudiant, nom, prenom FROM LNM_etudiant as etu JOIN LNM_promo as promo ON etu.id_promo=promo.id_promo WHERE etu.id_promo = {id_promo};")
-    
-    rows = cur.fetchall()
-
-    # Récupération des données 
-    data = pd.DataFrame(rows, columns=["id_etudiant", "nom", "prenom"])
-    return data
-
-def get_etudiant_stage(cur, id_promo, noms_etudiant) : 
-    cur.execute(f"SELECT etu.id_etudiant, nom, prenom, stage.id_stage FROM LNM_etudiant as etu JOIN LNM_promo as promo ON etu.id_promo=promo.id_promo JOIN LNM_stage as stage ON stage.id_etudiant=etu.id_etudiant WHERE etu.id_promo = {id_promo};")
-    
-    rows = cur.fetchall()
-
-    # Récupération des données 
-    data = pd.DataFrame(rows, columns=["id_etudiant", "nom", "prenom", "stage"])
-    
-    stages = []
-    for nom in noms_etudiant:
-        if nom in data['nom'].values:
-            # Vérifier si l'étudiant a un stage
-            stage_value = data.loc[data['nom'] == nom, 'stage'].values[0]
-            stages.append(1 if pd.notna(stage_value) else 0)
-        else:
-            # Si l'étudiant n'est pas trouvé dans data, ajouter 0
-            stages.append(0)
-    
-    return stages
+# def get_etudiants_by_promo(cur, id_promo) :
+#     cur.execute(f"SELECT id_etudiant, nom, prenom FROM LNM_etudiant as etu JOIN LNM_promo as promo ON etu.id_promo=promo.id_promo WHERE etu.id_promo = {id_promo};")
+#
+#     rows = cur.fetchall()
+#
+#     # Récupération des données
+#     data = pd.DataFrame(rows, columns=["id_etudiant", "nom", "prenom"])
+#     return data
+#
+# def get_etudiant_stage(cur, id_promo, noms_etudiant) :
+#     cur.execute(f"SELECT etu.id_etudiant, nom, prenom, stage.id_stage FROM LNM_etudiant as etu JOIN LNM_promo as promo ON etu.id_promo=promo.id_promo JOIN LNM_stage as stage ON stage.id_etudiant=etu.id_etudiant WHERE etu.id_promo = {id_promo};")
+#
+#     rows = cur.fetchall()
+#
+#     # Récupération des données
+#     data = pd.DataFrame(rows, columns=["id_etudiant", "nom", "prenom", "stage"])
+#
+#     stages = []
+#     for nom in noms_etudiant:
+#         if nom in data['nom'].values:
+#             # Vérifier si l'étudiant a un stage
+#             stage_value = data.loc[data['nom'] == nom, 'stage'].values[0]
+#             stages.append(1 if pd.notna(stage_value) else 0)
+#         else:
+#             # Si l'étudiant n'est pas trouvé dans data, ajouter 0
+#             stages.append(0)
+#
+#     return stages
 
 def get_eleves_sans(stages, noms):
     eleves_sans=[]

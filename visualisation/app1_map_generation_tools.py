@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 import os
-import mysql
 import pandas as pd
 import requests
 import io

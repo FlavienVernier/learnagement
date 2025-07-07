@@ -3,8 +3,9 @@
 **/logs
 **/venv
 
-# data directories store private data, NEVER PUT IN ON GIT 
+# data and backup directories store private data, NEVER PUT IN ON GIT 
 **/data
+**/backup
 
 
 __pycache__

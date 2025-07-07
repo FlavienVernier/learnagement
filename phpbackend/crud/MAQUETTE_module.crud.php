@@ -1,9 +1,9 @@
 <?php
-function deleteMAQUETTE_module($conn, $id) {
+/*function deleteMAQUETTE_module($conn, $id) {
     $sql = "DELETE FROM `MAQUETTE_module` WHERE `id`=$id";
     $res = mysqli_query($conn, $sql);
     return $res;
-}
+}*/
 
 function select_infos_module($conn, $id) {
     $sql = "SELECT * FROM `MAQUETTE_module` WHERE `id_module`=$id";
@@ -58,24 +58,72 @@ function listMAQUETTE_module($conn) {
 }
 
 function listMAQUETTE_moduleByIdResp($conn, $id) {
-    $sql = "SELECT * FROM `MAQUETTE_module` WHERE `id_responsable`='$id'";
+    $sql = "SELECT MAQUETTE_module.code_module, MAQUETTE_module.nom as nom_module, LNM_semestre.semestre, MAQUETTE_module.hCM, MAQUETTE_module.hTD, MAQUETTE_module.hTP, MAQUETTE_module.hTPTD, MAQUETTE_module.hPROJ, MAQUETTE_module.hPersonnelle, MAQUETTE_module.commentaire, LNM_enseignant.nom, LNM_enseignant.prenom
+            FROM `MAQUETTE_module` 
+                LEFT JOIN LNM_semestre ON LNM_semestre.id_semestre = MAQUETTE_module.id_semestre
+                LEFT JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module = MAQUETTE_module.id_module
+                LEFT JOIN MAQUETTE_module_sequence ON MAQUETTE_module_sequence.id_module_sequencage = MAQUETTE_module_sequencage.id_module_sequencage
+                LEFT JOIN CLASS_session ON CLASS_session.id_module_sequence = MAQUETTE_module_sequence.id_module_sequence
+                LEFT JOIN LNM_enseignant ON LNM_enseignant.id_enseignant = CLASS_session.id_enseignant
+            WHERE `id_responsable`='$id'";
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);
     return $rs;
 }
 
-function createMAQUETTE_module($conn, $id_module, $code_module, $nom, $ECTS, $id_discipline, $id_semestre, $hCM, $hTD, $hTP, $hTPTD, $hPROJ, $hPersonnelle, $id_responsable, $id_etat_module, $commentaire, $modifiable) {
+function listMAQUETTE_moduleByIdEtudiant($conn, $id) {
+    $sql = "SELECT MAQUETTE_module.id_module, MAQUETTE_module.code_module, MAQUETTE_module.nom 
+            FROM `MAQUETTE_module` 
+                JOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module 
+                JOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_learning_unit = MAQUETTE_module_as_learning_unit.id_learning_unit 
+                JOIN LNM_promo ON LNM_promo.id_promo = MAQUETTE_learning_unit.id_promo 
+                JOIN LNM_etudiant ON LNM_etudiant.id_promo = LNM_promo.id_promo 
+            WHERE LNM_etudiant.id_etudiant = '$id'";
+    $res = mysqli_query($conn, $sql);
+    $rs = rs_to_table($res);
+    return $rs;
+}
+function listMAQUETTE_moduleChargeBuIdEnseignant($conn, $id) {
+    $sql = "SELECT session.schedule, sequencage.duree_h, module.nom 
+            FROM CLASS_session as session 
+                JOIN LNM_enseignant as ens ON ens.id_enseignant=session.id_enseignant 
+                JOIN MAQUETTE_module_sequence as sequence ON session.id_module_sequence=sequence.id_module_sequence 
+                JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage 
+                JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module 
+            WHERE ens.id_enseignant = '$id'";
+    $res = mysqli_query($conn, $sql);
+    $rs = rs_to_table($res);
+    return $rs;
+}
+
+function listMAQUETTE_moduleChargeBuIdEtudiant($conn, $id) {
+    $sql = "SELECT session.schedule, sequencage.duree_h, module.nom 
+            FROM CLASS_session as session 
+                JOIN LNM_groupe as grp ON session.id_groupe = grp.id_groupe 
+                JOIN LNM_promo as promo ON grp.id_promo = promo.id_promo 
+                JOIN LNM_etudiant as etu ON grp.id_promo = etu.id_promo 
+                JOIN MAQUETTE_module_sequence as sequence ON session.id_module_sequence=sequence.id_module_sequence 
+                JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage 
+                JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module 
+            WHERE etu.id_etudiant = '$id'";
+    $res = mysqli_query($conn, $sql);
+    $rs = rs_to_table($res);
+    return $rs;
+}
+
+
+/*function createMAQUETTE_module($conn, $id_module, $code_module, $nom, $ECTS, $id_discipline, $id_semestre, $hCM, $hTD, $hTP, $hTPTD, $hPROJ, $hPersonnelle, $id_responsable, $id_etat_module, $commentaire, $modifiable) {
     $sql = "INSERT INTO `MAQUETTE_module` (`id_module`, `code_module`, `nom`, `ECTS`, `id_discipline`, `id_semestre`, `hCM`, `hTD`, `hTP`, `hTPTD`, `hPROJ`, `hPersonnelle`, `id_responsable`, `id_etat_module`, `commentaire`, `modifiable`) VALUES ('$id_module', '$code_module', '$nom', '$ECTS', '$id_discipline', '$id_semestre', '$hCM', '$hTD', '$hTP', '$hTPTD', '$hPROJ', '$hPersonnelle', '$id_responsable', '$id_etat_module', '$commentaire', '$modifiable')";
     $res = mysqli_query($conn, $sql);
     return $res;
-}
+}$/
 
-function updateMAQUETTE_module($conn, $id,$id_module, $code_module, $nom, $ECTS, $id_discipline, $id_semestre, $hCM, $hTD, $hTP, $hTPTD, $hPROJ, $hPersonnelle, $id_responsable, $id_etat_module, $commentaire, $modifiable)
+/*function updateMAQUETTE_module($conn, $id,$id_module, $code_module, $nom, $ECTS, $id_discipline, $id_semestre, $hCM, $hTD, $hTP, $hTPTD, $hPROJ, $hPersonnelle, $id_responsable, $id_etat_module, $commentaire, $modifiable)
 {
     $sql = "UPDATE `MAQUETTE_module` SET `id_module`='$id_module', `code_module`='$code_module', `nom`='$nom', `ECTS`='$ECTS', `id_discipline`='$id_discipline', `id_semestre`='$id_semestre', `hCM`='$hCM', `hTD`='$hTD', `hTP`='$hTP', `hTPTD`='$hTPTD', `hPROJ`='$hPROJ', `hPersonnelle`='$hPersonnelle', `id_responsable`='$id_responsable', `id_etat_module`='$id_etat_module', `commentaire`='$commentaire', `modifiable`='$modifiable' WHERE `id` = $id";
     $res = mysqli_query($conn, $sql);
     return $res;
-}
+}*/
 
 function listMAQUETTE_module_with_learning_unit($conn, $id)
 {
@@ -95,3 +143,4 @@ function listMAQUETTE_module_with_learning_unit($conn, $id)
     $rs = rs_to_table($res);
     return $rs;
 }
+

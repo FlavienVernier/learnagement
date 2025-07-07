@@ -1,13 +1,10 @@
 from dotenv import load_dotenv
 import os
-from flask import request, abort, session
-from flask_session import Session
 import dash
 import dash_bootstrap_components as dbc
 from dash import Input, Output, dcc, html, State
 import json, base64, hmac, hashlib, time
 import traceback
-#from urllib import unquote
 import urllib.parse
 
 load_dotenv()
@@ -38,29 +35,33 @@ icon_map = {
 def import_apps():
     from app1_map_generation import app1_layout, register_callbacks as register_callbacks_app1
     from app2_spyder_plot_competences import app2_layout, register_callbacks as register_callbacks_app2
-    from app3_taux_absenteisme import app3_layout, register_callbacks as register_callbacks_app3
-    from app4_eleve_visu_notes import app4_layout, register_callbacks as register_callbacks_app4
-    from app5_prof_visu_notes import app5_layout, register_callbacks as register_callbacks_app5
-    from app6_graph_avancement import app6_layout, register_callbacks as register_callbacks_app6
-    from app7_charge_enseignant import app7_layout, register_callbacks as register_callbacks_app7
-    from app8_charge_etudiant import app8_layout, register_callbacks as register_callbacks_app8
-    from app9_avancement_rendus import app9_layout, register_callbacks as register_callbacks_app9
+    from app3_absenteisme_administratif import app3_administratif_layout, register_callbacks as register_callbacks_app3_administratif
+    from app3_absenteisme_enseignant import app3_enseignant_layout, register_callbacks as register_callbacks_app3_enseignant
+    from app3_absenteisme_etudiant import app3_etudiant_layout, register_callbacks as register_callbacks_app3_etudiant
+    from app4_notes_enseignant import app4_enseignant_layout, register_callbacks as register_callbacks_app4_enseignant
+    from app4_notes_eleve import app4_etudiant_layout, register_callbacks as register_callbacks_app4_etudiant
+    from app5_module_enseignant import app5_enseignant_layout, register_callbacks as register_callbacks_app5_enseignant
+    from app7_charge_enseignant import app7_enseignant_layout, register_callbacks as register_callbacks_app7_enseignant
+    from app7_charge_etudiant import app7_etudiant_layout, register_callbacks as register_callbacks_app7_etudiant
+    from app9_rendus_etudiant import app9_layout, register_callbacks as register_callbacks_app9
     from app10_stage_administratif import app10_administratif_layout, register_callbacks as register_callbacks_app10_administratif
     from app10_stage_enseignant import app10_enseignant_layout, register_callbacks as register_callbacks_app10_enseignant
     from app10_stage_etudiant import app10_etudiant_layout, register_callbacks as register_callbacks_app10_etudiant
     return {
         'app1': (app1_layout, register_callbacks_app1),
         'app2': (app2_layout, register_callbacks_app2),
-        'app3': (app3_layout, register_callbacks_app3),
-        'app4': (app4_layout, register_callbacks_app4),
-        'app5': (app5_layout, register_callbacks_app5),
-        'app6': (app6_layout, register_callbacks_app6),
-        'app7': (app7_layout, register_callbacks_app7),
-        'app8': (app8_layout, register_callbacks_app8),
+        'app3_administratif': (app3_administratif_layout, register_callbacks_app3_administratif),
+        'app3_enseignant': (app3_enseignant_layout, register_callbacks_app3_enseignant),
+        'app3_etudiant': (app3_etudiant_layout, register_callbacks_app3_etudiant),
+        'app4_enseignant': (app4_enseignant_layout, register_callbacks_app4_enseignant),
+        'app4_etudiant': (app4_etudiant_layout, register_callbacks_app4_etudiant),
+        'app5_enseignant': (app5_enseignant_layout, register_callbacks_app5_enseignant),
+        'app7_enseignant': (app7_enseignant_layout, register_callbacks_app7_enseignant),
+        'app7_etudiant': (app7_etudiant_layout, register_callbacks_app7_etudiant),
         'app9': (app9_layout, register_callbacks_app9),
         'app10_administratif': (app10_administratif_layout, register_callbacks_app10_administratif),
-        'app10_etudiant': (app10_etudiant_layout, register_callbacks_app10_etudiant),
-        'app10_enseignant': (app10_enseignant_layout, register_callbacks_app10_enseignant)
+        'app10_enseignant': (app10_enseignant_layout, register_callbacks_app10_enseignant),
+        'app10_etudiant': (app10_etudiant_layout, register_callbacks_app10_etudiant)
     }
 
 LOGO = "https://placehold.co/100x100"
@@ -68,36 +69,30 @@ apps = import_apps()
 
 # MENU DE LA SIDEBAR (EDITABLE)
 menu_items = {
+    'administratif': [
+        ('Absences', 'app3_administratif'),
+        ('Gestion des stages', 'app10_administratif')
+    ],
     'enseignant': [
         ('Carte des Universités', 'app1'),
-        ('Absences', 'app3'),
-        ('Notes (professeurs)', 'app5'),
-        ('Avancement des cours', 'app6'),
-        ('Charge de travail (enseignant)', 'app7'),
+        ('Mes modules', 'app5_enseignant'),
+        ('Absences', 'app3_enseignant'),
+        ('Notes', 'app4_enseignant'),
+        ('Charge de travail', 'app7_enseignant'),
         ('Tutorat stages', 'app10_enseignant')
     ],
     'etudiant': [
         ('Carte des Universités', 'app1'),
         ('Compétences', 'app2'),
-        ('Notes (élèves)', 'app4'),
-        ('Avancement des cours', 'app6'),
-        ('Charge de travail (étudiant)', 'app8'),
+        ('Absences', 'app3_etudiant'),
+        ('Notes', 'app4_etudiant'),
+        ('Charge de travail', 'app7_etudiant'),
         ('Avancement rendus', 'app9'),
         ('Stages', 'app10_etudiant')
-    ],
-    'administratif': [
-        ('Gestion des stages', 'app10_administratif')
-        ]
+    ]
 }
 
 SECRET_KEY = os.getenv("INSTANCE_SECRET").encode()
-#print(SECRET_KEY)
-"""
-app.server.secret_key = SECRET_KEY
-app.server.config["SESSION_PERMANENT"] = False     # Sessions expire when the browser is closed
-app.server.config["SESSION_TYPE"] = "filesystem"     # Store session data in files
-Session(app.server)
-"""
 
 def render_sidebar(section, token_arg, status):
     links = []
