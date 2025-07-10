@@ -33,8 +33,6 @@ df_grouped[['Latitude', 'Longitude']] = df_grouped.apply(get_coordinates, axis=1
 # Supprimer les lignes avec des coordonnées manquantes
 df_grouped = df_grouped.dropna(subset=['Latitude', 'Longitude'])
 
-# app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
 app1_layout = html.Div(
     children=[
         html.Div([
@@ -107,6 +105,3 @@ def register_callbacks(app):
         )
 
         return fig
-
-# if __name__ == "__main__":
-#     app.run_server(debug=True)
