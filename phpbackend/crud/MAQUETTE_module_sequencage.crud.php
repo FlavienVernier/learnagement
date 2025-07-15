@@ -1,5 +1,40 @@
 <?php
 
+function createMAQUETE_module_sequencage($conn, $id_module, $nombre, $id_seance_type, $id_groupe_type, $duree_h, $id_intervenant_principal)
+{
+    if($id_intervenant_principal == "NULL"){
+        $sql = "INSERT INTO `MAQUETTE_module_sequencage` (`id_module`, `nombre`, `id_seance_type`, `id_groupe_type`, `duree_h`) 
+                             VALUES ('$id_module', '$nombre', '$id_seance_type', '$id_groupe_type', '$duree_h')";
+    }else {
+        $sql = "INSERT INTO `MAQUETTE_module_sequencage` (`id_module`, `nombre`, `id_seance_type`, `id_groupe_type`, `duree_h`, `id_intervenant_principal`) 
+                             VALUES ('$id_module', '$nombre', '$id_seance_type', '$id_groupe_type', '$duree_h', '$id_intervenant_principal')";
+    };
+    if(mysqli_query($conn, $sql)){
+        return "Data Inserted";
+    }else{
+        return "Insertion Failed";
+    }
+    //}else{
+    //  return ['No permission to INSERT into MAQUETE_module_sequencage'];
+    //}
+}
+
+function deleteMAQUETE_module_sequencage($conn, $id_module_sequencage)
+{
+    $sql = "DELETE FROM MAQUETTE_module_sequencage
+            WHERE id_module_sequencage = '$id_module_sequencage'";
+
+    if(mysqli_query($conn, $sql)){
+        return "Data Deleted";
+    }else{
+        return "Deletion Failed";
+    }
+    //}else{
+    //  return ['No permission to INSERT into MAQUETE_module_sequencage'];
+    //}
+}
+
+
 function listMAQUETTE_moduleSequencageByIdResp($conn, $id) {
     $sql = "SELECT MAQUETTE_module_sequencage.*, MAQUETTE_module.code_module, LNM_seanceType.type, LNM_groupe_type.groupe_type, ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK as intervenant_principal
             FROM MAQUETTE_module_sequencage

@@ -40,12 +40,13 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `generate_type_seance_from_sequencage` AFTER INSERT ON `MAQUETTE_module_sequencage` FOR EACH ROW INSERT IGNORE INTO CLASS_session_type_to_be_affected (`id_module_sequencage`, `id_groupe`)
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `generate_type_seance_from_sequencage` AFTER INSERT ON `MAQUETTE_module_sequencage` FOR EACH ROW INSERT IGNORE INTO CLASS_session (`id_module_sequencage`, `id_groupe`, `id_enseignant`)
 (
 SELECT
   `learnagement`.`MAQUETTE_module_sequencage`.`id_module_sequencage` AS `id_module_sequencage`,
-  `learnagement`.`LNM_groupe`.`id_groupe` AS `id_groupe`
-  
+  `learnagement`.`LNM_groupe`.`id_groupe` AS `id_groupe`,
+  `learnagement`.`MAQUETTE_module_sequencage`.`id_intervenant_principal` as `id_enseignant`
+
   FROM `learnagement`.`MAQUETTE_module`
 
   JOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module

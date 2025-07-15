@@ -11,7 +11,7 @@ include("../crud/MAQUETTE_module_sequencage.crud.php");
 include("../crud/function_rs_to_table.php");
 include("../crud/function_action_allowed.php");
 
-if (isset($_POST['module'])
+/*if (isset($_POST['module'])
     && isset($_POST['nombre'])
     && isset($_POST['type'])
     && isset($_POST['duree_h'])
@@ -22,16 +22,12 @@ if (isset($_POST['module'])
     $id_seance_type = $_POST['type'];
     $duree_h = $_POST['duree_h'];
     $id_groupe_type = $_POST['groupe_type'];
-    $id_intervenant_principal = $_POST['intervenant_principal'];
-    if (isset($_POST['intervenant_principal']) && (trim($_POST['intervenant_principal']) != "") && (strtoupper(trim($_POST['intervenant_principal'])) != "NULL")) {
-        $id_intervenant_principal = $_POST['intervenant_principal'];
-    }else{
-        $id_intervenant_principal = "NULL";
-    }
+    $id_intervenant_principal = $_POST['intervenant_principal'];*/
+if(isset($_POST["id_module_sequencage"])){
+    $id_module_sequencage = $_POST["id_module_sequencage"];
 
-    $rsStage = createMAQUETE_module_sequencage($conn, $id_module, $nombre, $id_seance_type, $id_groupe_type, $duree_h, $id_intervenant_principal);
-
-    echo json_encode($rsStage);
+    $rs = deleteMAQUETE_module_sequencage($conn, $id_module_sequencage);
+    echo json_encode($rs);
 }else{
     echo json_encode("Error at least one required data undefined");
 }

@@ -26,8 +26,16 @@ def add_moduleSequencage(data):
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/create/createSequencage.php'
     resp = requests.post(url, data=data, headers=headers)
     urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+    print(urlData, flush=True)
+    return io.StringIO(urlData.decode('utf-8'))
 
+def remove_moduleSequencage(id_sequencage):
+    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/delete/deleteSequencage.php'
+    resp = requests.post(url, data={'id_module_sequencage': id_sequencage}, headers=headers)
+    urlData = resp.content
+    print(urlData, flush=True)
+    return io.StringIO(urlData.decode('utf-8'))
 #
 # def headers(df : pd.DataFrame) -> list:
 #     return [ft.DataColumn(ft.Text(header)) for header in df.columns]
