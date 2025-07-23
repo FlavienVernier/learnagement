@@ -6,7 +6,7 @@ import pandas as pd
 import app5_module_tools
 import app_tools
 
-app5_enseignant_layout = html.Div([
+app5_enseignant_view_layout = html.Div([
     html.H1(children='Modules et intervenants'),
     dcc.Dropdown(
         id='filtre_semestre',
@@ -21,6 +21,12 @@ app5_enseignant_layout = html.Div([
         html.Label("Résumé de mes intervenants :"),
         html.Div(id='intervenants_div'),
     ]),
+    html.Div([
+        html.Label("Résumé de mes interventions :"),
+        html.Div(id='interventions_div'),
+    ]),
+])
+app5_enseignant_edit_layout = html.Div([
     html.H1(children='Séquençage'),
     dcc.Dropdown(
         id='filtre_module',
@@ -71,7 +77,7 @@ def update_table_sequencage(user_id, selected_module):
     dfi = app_tools.get_explicit_keys("LNM_enseignant")
     intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in dfi.iterrows()]
 
-    table_intervenants = dash_table.DataTable(
+    table_sequencage = dash_table.DataTable(
         id='table_sequencage',
         columns=[{"name": i, "id": i}
                  for i in df.columns],  # columns must be defined so that DataTable be editable
@@ -83,13 +89,70 @@ def update_table_sequencage(user_id, selected_module):
             },
         },
     )
-    return [table_intervenants]
+    return [table_sequencage]
 
+def update_table_sequence(user_id, selected_module, selected_seance_type):
+    if not selected_module:
+        return []
+    df = app5_module_tools.get_moduleSequenceByEnseignantId(user_id)
+    if selected_seance_type:
+        df = df[(df['id_module'] == selected_module) & (df['id_seance_type'] == selected_seance_type)][['type', 'duree_h', 'groupe_type', 'numero_ordre', 'intervenant_principal', 'commentaire']]
+    else:
+        df = df[df['id_module'] == selected_module][['type', 'numero_ordre', 'duree_h', 'groupe_type', 'intervenant_principal', 'commentaire']]
 
+    dfi = app_tools.get_explicit_keys("LNM_enseignant")
+    intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in dfi.iterrows()]
+
+    table_sequence = dash_table.DataTable(
+        id='table_sequence',
+        columns=[{"name": i, "id": i}
+                 for i in df.columns],  # columns must be defined so that DataTable be editable
+        data=df.to_dict('records'),
+        row_deletable=False,
+        dropdown={
+            "intervenant_principal": {
+                "options": intervenant_options
+            },
+        },
+    )
+    return [table_sequence]
+
+def update_table_session(user_id, selected_module, selected_seance_type, selected_promotion):
+    if not selected_module:
+        return []
+    df = app5_module_tools.get_moduleSessionByEnseignantId(user_id)
+
+    if selected_seance_type and selected_promotion:
+        df = df[(df['id_module'] == selected_module) &
+                (df['id_seance_type'] == selected_seance_type) &
+                (df['id_promotion'] == selected_promotion)][['type', 'duree_h', 'nom_groupe', 'numero_ordre', 'intervenant', 'commentaire']]
+    elif selected_seance_type:
+        df = df[(df['id_module'] == selected_module) &
+                (df['id_seance_type'] == selected_seance_type)][['type', 'numero_ordre', 'duree_h', 'nom_groupe', 'intervenant', 'commentaire']]
+    else:
+        df = df[(df['id_module'] == selected_module)][
+            ['type', 'numero_ordre', 'duree_h', 'nom_groupe', 'intervenant', 'commentaire']]
+
+    dfi = app_tools.get_explicit_keys("LNM_enseignant")
+    intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in dfi.iterrows()]
+
+    table_session = dash_table.DataTable(
+        id='table_session',
+        columns=[{"name": i, "id": i}
+                 for i in df.columns],  # columns must be defined so that DataTable be editable
+        data=df.to_dict('records'),
+        row_deletable=False,
+        dropdown={
+            "intervenant": {
+                "options": intervenant_options
+            },
+        },
+    )
+    return [table_session]
 #
 # CallBack
 #
-def register_callbacks(app):
+def register_callbacks_view(app):
 
     #
     # Display Modules et Intervenants
@@ -147,7 +210,30 @@ def register_callbacks(app):
         )
         return [table_intervenants]
 
+    # Création de la table des interventions selon l'utilisateur et le semestre sélectionné
 
+    @app.callback(
+        Output('interventions_div', 'children'),
+        State('user_id', 'data'),
+        Input('filtre_semestre', 'value'),
+    )
+    def update_table_intervenants(user_id, selected_semestre):
+        df = app5_module_tools.get_moduleByIntervenantId(user_id)[
+            ['semestre', 'code_module', 'nom_module', 'nom_groupe', 'type', 'numero_ordre', 'duree_h']].drop_duplicates().replace([None], [''], regex=True).sort_values(by=['semestre', 'code_module'])
+        if selected_semestre != 'all':
+            df = df[df['semestre'] == selected_semestre]
+        #df = df.groupby(['code_module', 'nom_module']).apply(','.join).to_frame().reset_index(level=[0, 1])
+
+        table_intervenants = dbc.Table.from_dataframe(
+            df,
+            # Key styling options:
+            striped=True,
+            bordered=True,
+            hover=True,
+        )
+        return [table_intervenants]
+
+def register_callbacks_edit(app):
     #
     # Séquençage
     #
@@ -218,9 +304,9 @@ def register_callbacks(app):
         if not selected_module:
             return []
         data[0]["module"] = selected_module
-        print(data[0], flush=True)
+        #print(data[0], flush=True)
         ret = app5_module_tools.add_moduleSequencage(data[0])
-        print(ret)
+        #print(ret)
         return update_table_sequencage(user_id,selected_module)#, ret
 
     # Remove
@@ -256,27 +342,56 @@ def register_callbacks(app):
         return update_table_sequencage(user_id,selected_module)
 
     #
-    # Séances
+    # Séances (Séquences)
     #
+
+    # Mise à jour du filtre des types de cours en fonction du module selectionné
+    @app.callback(
+        Output('filtre_type', 'options'),
+        State('user_id', 'data'),
+        Input('filtre_module', 'value'),
+        prevent_initial_call=True,
+    )
+    def update_filter_sequence_option(user_id, selected_module):
+        df = app5_module_tools.get_moduleSequenceByEnseignantId(user_id)
+        options = [{'label': row['type'], 'value': row['id_seance_type']} for _, row in df[df['id_module'] == selected_module][['id_seance_type', 'type']].drop_duplicates().iterrows()]
+        return options
+
+    # Mise à jour de la table des séances (séquences) selon le module sélectionné et le type de cours
     @app.callback(
         Output('seance_div', 'children'),
         State('user_id', 'data'),
         Input('filtre_module', 'value'),
         Input('filtre_type', 'value'),
+        prevent_initial_call=True,
     )
-    def cb_update_table_seance(user_id,selected_type):
-        return []
+    def cb_update_table_seance(user_id, selected_module, selected_type):
+        return update_table_sequence(user_id, selected_module, selected_type)
 
 
     #
     # Session
     #
+
+    # Mise à jour du filtre des promo en fonction du module selectionné
     @app.callback(
-        Output('seance_div', 'children'),
+        Output('filtre_promo', 'options'),
+        State('user_id', 'data'),
+        Input('filtre_module', 'value'),
+        prevent_initial_call=True,
+    )
+    def update_filter_session_option(user_id, selected_module):
+        df = app5_module_tools.get_moduleSessionByEnseignantId(user_id)
+        options = [{'label': row['promo'], 'value': row['id_promo']} for _, row in df[df['id_module'] == selected_module][['id_promo', 'promo']].drop_duplicates().iterrows()]
+        return options
+
+    @app.callback(
+        Output('session_div', 'children'),
         State('user_id', 'data'),
         Input('filtre_module', 'value'),
         Input('filtre_type', 'value'),
         Input('filtre_promo', 'value'),
+        prevent_initial_call=True,
     )
-    def cb_update_table_seance(user_id,selected_promo):
-        return []
+    def cb_update_table_seance(user_id, selected_module, selected_type, selected_promo):
+        return update_table_session(user_id, selected_module, selected_type, selected_promo)

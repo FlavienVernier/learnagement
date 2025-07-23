@@ -14,6 +14,13 @@ def get_moduleByEnseignantId(id_enseignant):
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
+def get_moduleByIntervenantId(id_enseignant):
+    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listSessionIntervenant.php'
+    resp = requests.post(url, data={'id_enseignant': id_enseignant}, headers=headers)
+    urlData = resp.content
+    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+
 def get_moduleSequencageByEnseignantId(id_enseignant):
     headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listModuleSequencage.php'
@@ -36,6 +43,20 @@ def remove_moduleSequencage(id_sequencage):
     urlData = resp.content
     print(urlData, flush=True)
     return io.StringIO(urlData.decode('utf-8'))
+
+def get_moduleSequenceByEnseignantId(id_enseignant):
+    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listModuleSequence.php'
+    resp = requests.post(url, data={'id_enseignant': id_enseignant}, headers=headers)
+    urlData = resp.content
+    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+
+def get_moduleSessionByEnseignantId(id_enseignant):
+    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listSessionEnseignant.php'
+    resp = requests.post(url, data={'id_enseignant': id_enseignant}, headers=headers)
+    urlData = resp.content
+    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 #
 # def headers(df : pd.DataFrame) -> list:
 #     return [ft.DataColumn(ft.Text(header)) for header in df.columns]
