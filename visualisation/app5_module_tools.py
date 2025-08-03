@@ -41,8 +41,25 @@ def remove_moduleSequencage(id_sequencage):
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/delete/deleteSequencage.php'
     resp = requests.post(url, data={'id_module_sequencage': id_sequencage}, headers=headers)
     urlData = resp.content
+    #print(urlData, flush=True)
+    return io.StringIO(urlData.decode('utf-8'))
+
+def set_intervenant_principal(id_sequencage, id_intervenant_principal):
+    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/update/setSequencageIntervenantPrincipal.php'
+    resp = requests.post(url, data={'id_module_sequencage': id_sequencage, 'id_intervenant_principal': id_intervenant_principal }, headers=headers)
+    urlData = resp.content
     print(urlData, flush=True)
     return io.StringIO(urlData.decode('utf-8'))
+
+
+def check_moduleSequencage(id_enseignant):
+    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/check/listModuleSequencageVsMaquette.php'
+    resp = requests.post(url, data={'id_enseignant': id_enseignant}, headers=headers)
+    urlData = resp.content
+    #print(urlData, flush=True)
+    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
 def get_moduleSequenceByEnseignantId(id_enseignant):
     headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}

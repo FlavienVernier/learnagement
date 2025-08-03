@@ -11,10 +11,12 @@ include("../crud/MAQUETTE_module_sequencage.crud.php");
 include("../crud/function_rs_to_table.php");
 include("../crud/function_action_allowed.php");
 
-if(isset($_POST["id_module_sequencage"])){
+if(isset($_POST["id_module_sequencage"])
+    && isset($_POST["id_intervenant_principal"])){
     $id_module_sequencage = $_POST["id_module_sequencage"];
+    $id_intervenant_principal = $_POST["id_intervenant_principal"];
 
-    $rs = deleteMAQUETE_module_sequencage($conn, $id_module_sequencage);
+    $rs = setMAQUETE_module_sequencage_intervenant_principal($conn, $id_module_sequencage,  $id_intervenant_principal);
     echo json_encode($rs);
 }else{
     echo json_encode("Error at least one required data undefined");

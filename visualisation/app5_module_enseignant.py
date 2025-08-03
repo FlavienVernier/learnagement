@@ -43,6 +43,10 @@ app5_enseignant_edit_layout = html.Div([
         html.Label("Séquencage :"),
         html.Div(id='sequencage_div'),
     ]),
+    html.Div([
+        html.Label("Séquencage vs Maquette :"),
+        html.Div(id='sequencage_vs_maquette_div'),
+    ]),
     html.H1(children='Séances'),
     dcc.Dropdown(
         id='filtre_type',
@@ -79,14 +83,23 @@ def update_table_sequencage(user_id, selected_module):
 
     table_sequencage = dash_table.DataTable(
         id='table_sequencage',
+        # columns=[{"name": i, "id": i}
+        #          if i != 'intervenant_principal'
+        #          else {"name": i, "id": i, "editable": True, "presentation": "dropdown",}
+        #          for i in df.columns],  # columns must be defined so that DataTable be editable
         columns=[{"name": i, "id": i}
-                 for i in df.columns],  # columns must be defined so that DataTable be editable
+                 if i != 'intervenant_principal'
+                 else {"name": i, "id": i, "editable": True, "presentation": "dropdown", }
+                 for i in df.columns] + [{"name": 'nouvel_intervenant', "id": 'nouvel_intervenant', "editable": True, "presentation": "dropdown", }],  # columns must be defined so that DataTable be editable
         data=df.to_dict('records'),
+        editable=True,
         row_deletable=True,
         dropdown={
-            "intervenant_principal": {
-                "options": intervenant_options
-            },
+            #"intervenant_principal": {
+            "nouvel_intervenant": {
+                "options": intervenant_options,
+                "clearable":True,
+            }
         },
     )
     return [table_sequencage]
@@ -107,12 +120,13 @@ def update_table_sequence(user_id, selected_module, selected_seance_type):
         id='table_sequence',
         columns=[{"name": i, "id": i}
                  for i in df.columns],  # columns must be defined so that DataTable be editable
+        editable=True,
         data=df.to_dict('records'),
         row_deletable=False,
         dropdown={
             "intervenant_principal": {
                 "options": intervenant_options
-            },
+            }
         },
     )
     return [table_sequence]
@@ -233,6 +247,9 @@ def register_callbacks_view(app):
         )
         return [table_intervenants]
 
+####################################################
+# Edit Callbacks
+####################################################
 def register_callbacks_edit(app):
     #
     # Séquençage
@@ -321,16 +338,41 @@ def register_callbacks_edit(app):
         if previous is None:
             print("Kaboum", flush=True)
             #return "Kaboum"
-        else:
-            df = app5_module_tools.get_moduleSequencageByEnseignantId(user_id)
+        elif len(previous) > len(current): #else row updated
             to_remove = [row for row in previous if row not in current][0]
+            df = app5_module_tools.get_moduleSequencageByEnseignantId(user_id)
             #print('toRemove', to_remove, flush=True)
             id_to_remove = df[(df['nombre'] == to_remove['nombre'])
-                             & (df['type'] == to_remove['type'])
-                             & (df['duree_h'] == to_remove['duree_h'])
-                             & (df['groupe_type'] == to_remove['groupe_type'])][['id_module_sequencage']].iat[0, 0]
+                              & (df['type'] == to_remove['type'])
+                              & (df['duree_h'] == to_remove['duree_h'])
+                              & (df['groupe_type'] == to_remove['groupe_type'])][['id_module_sequencage']].iat[0, 0]
             #print('id_toRemove', id_to_remove, flush=True)
             app5_module_tools.remove_moduleSequencage(id_to_remove)
+
+    # Changement d'intervenant principal au niveau séquençage
+    @app.callback(
+        Output('sequencage_div', 'children', allow_duplicate=True),
+        Input('table_sequencage', 'data_previous'),
+        State('table_sequencage', 'data'),
+        State('user_id', 'data'),
+        State('filtre_module', 'value'),
+        prevent_initial_call=True,
+    )
+    def cb_change_intervenant(previous, current, user_id, selected_module):
+        if previous is None:
+            return update_table_sequencage(user_id, selected_module)
+        else:
+            row_changed = [row for row in current  if row not in previous]
+            if len(row_changed) > 0: # else callback invoked by data deleted
+                df = app5_module_tools.get_moduleSequencageByEnseignantId(user_id)
+                row_changed = row_changed[0]
+                new_intervenant_id = row_changed['nouvel_intervenant']
+                id_sequencage = df[(df['nombre'] == row_changed['nombre'])
+                                  & (df['type'] == row_changed['type'])
+                                  & (df['duree_h'] == row_changed['duree_h'])
+                                  & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0]
+                ret = app5_module_tools.set_intervenant_principal(id_sequencage, new_intervenant_id)
+                return update_table_sequencage(user_id, selected_module)
 
     # Mise à jour de la table des séquençages selon le module sélectionné
     @app.callback(
@@ -340,6 +382,23 @@ def register_callbacks_edit(app):
     )
     def cb_update_table_sequencage(user_id,selected_module):
         return update_table_sequencage(user_id,selected_module)
+
+    @app.callback(
+        Output('sequencage_vs_maquette_div', 'children'),
+        Input('table_sequencage', 'data'),
+        State('filtre_module', 'value'),
+        State('user_id', 'data'),
+    )
+    def cb_check_sequencage_vs_maquette(data, id_module, user_id):
+        df = app5_module_tools.check_moduleSequencage(user_id)
+        if id_module:
+            df = df[df['id_module'] == id_module][['code_module', 'ecart_CM', 'ecart_TD', 'ecart_TP', 'ecart_TPTD']]
+
+        table_check = dash_table.DataTable(
+            id='check_table',
+            data=df.to_dict('records'),
+        )
+        return [table_check]
 
     #
     # Séances (Séquences)
