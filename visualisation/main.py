@@ -40,7 +40,8 @@ def import_apps():
     from app3_absenteisme_etudiant import app3_etudiant_layout, register_callbacks as register_callbacks_app3_etudiant
     from app4_notes_enseignant import app4_enseignant_layout, register_callbacks as register_callbacks_app4_enseignant
     from app4_notes_eleve import app4_etudiant_layout, register_callbacks as register_callbacks_app4_etudiant
-    from app5_module_enseignant import app5_enseignant_view_layout, app5_enseignant_edit_layout, register_callbacks_view as register_callbacks_app5_enseignant_view, register_callbacks_edit as register_callbacks_app5_enseignant_edit
+    from app5_module_enseignant_view import app5_enseignant_view_layout, register_callbacks_view as register_callbacks_app5_enseignant_view
+    from app5_module_enseignant_edit import app5_enseignant_edit_layout, register_callbacks_edit as register_callbacks_app5_enseignant_edit
     from app7_charge_enseignant import app7_enseignant_layout, register_callbacks as register_callbacks_app7_enseignant
     from app7_charge_etudiant import app7_etudiant_layout, register_callbacks as register_callbacks_app7_etudiant
     from app9_rendus_etudiant import app9_layout, register_callbacks as register_callbacks_app9

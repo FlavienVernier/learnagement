@@ -1,7 +1,7 @@
 <?php
 
 function listMAQUETTE_moduleSequenceByIdResp($conn, $id) {
-    $sql = "SELECT  MAQUETTE_module_sequence.numero_ordre, MAQUETTE_module_sequence.id_intervenant_principal, MAQUETTE_module_sequence.commentaire,
+    $sql = "SELECT  MAQUETTE_module_sequence.id_module_sequence AS id_sequence, MAQUETTE_module_sequence.numero_ordre, MAQUETTE_module_sequence.id_intervenant_principal, MAQUETTE_module_sequence.commentaire,
                     MAQUETTE_module_sequencage.id_module, MAQUETTE_module_sequencage.id_seance_type, MAQUETTE_module_sequencage.id_groupe_type, MAQUETTE_module_sequencage.duree_h,
                     MAQUETTE_module.code_module, 
                     LNM_seanceType.type, 
@@ -17,4 +17,16 @@ function listMAQUETTE_moduleSequenceByIdResp($conn, $id) {
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);
     return $rs;
+}
+
+function setMAQUETE_module_sequence_intervenant_principal($conn, $id_module_sequence, $id_intervenant_principal){
+    $sql = "UPDATE MAQUETTE_module_sequence
+            SET id_intervenant_principal = '$id_intervenant_principal'
+            WHERE id_module_sequence = '$id_module_sequence'";
+
+    if(mysqli_query($conn, $sql)){
+        return "Data Updated";
+    }else{
+        return "Updat Failed";
+    }
 }

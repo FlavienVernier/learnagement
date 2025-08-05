@@ -135,7 +135,7 @@ def __dbDataConfiguration__():
         # Vérifie si le dossier cible existe, sinon le crée
         os.makedirs(data_folder, exist_ok=True)
 
-        input("If you want an initial data set, put it into 'db/data' folder, then press enter")
+        input("If you want an initial data set, put it into 'db/data' folder with name matches with [0-9]*.sql, then press enter")
         # if "y" == input("Do you want to start with free data (y/n)? "):
         #     # Parcourt tous les fichiers dans le dossier source
         #     for filename in os.listdir(free_data_folder):
@@ -151,14 +151,14 @@ def __dbDataConfiguration__():
     except OSError as error:
         print(f"{GREEN}Data already exist!{NC}")
         
-    # Chemin vers le fichier db/data/README
-    readme_path = os.path.join(data_folder, "README")
-    # Texte à ajouter
-    text_to_append = "This folder contains data inserted into DB when the system is launch at the first time.  If it doesn't exist it will contans free data"
-    # Ouvrir le fichier en mode ajout et écrire le texte
-    with open(readme_path, "a") as file:
-        file.write(text_to_append)
-        file.write("\n")  # Ajoute une nouvelle ligne, comme `echo` le ferait
+    # # Chemin vers le fichier db/data/README
+    # readme_path = os.path.join(data_folder, "README")
+    # # Texte à ajouter
+    # text_to_append = "This folder contains data inserted into DB when the system is launch at the first time.  If it doesn't exist it will contans free data"
+    # # Ouvrir le fichier en mode ajout et écrire le texte
+    # with open(readme_path, "a") as file:
+    #     file.write(text_to_append)
+    #     file.write("\n")  # Ajoute une nouvelle ligne, comme `echo` le ferait
 
     os.chdir("db")
     subprocess.run([sys.executable, "insertPrivateData.py"], check=True)
