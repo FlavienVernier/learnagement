@@ -52,8 +52,9 @@ def __mainConfiguration__():
             file.write("# Edit only root .env, next propagate it with 'Learnagement -updateEnv' #" + "\n")
             file.write("#########################################################################" + "\n")
             file.write("" + "\n")
-            file.write("SESSION_TIMEOUT=" + "900" + "\n")
             instance_name = input("Give the intance name (lowercase): ").lower()
+            file.write("COMPOSE_PROJECT_NAME=learnagement_" + instance_name + "\n") # Define project name for docker
+            file.write("SESSION_TIMEOUT=" + "900" + "\n")
             file.write("INSTANCE_NAME=" + instance_name + "\n")
             instance_number = 0
             while instance_number < 2 or instance_number > 4:
@@ -149,7 +150,7 @@ def __dbDataConfiguration__():
         #             print(f"Copied: {source_path} -> {target_path}")
             
     except OSError as error:
-        print(f"{GREEN}Data already exist!{NC}")
+        print(f"{GREEN}Data already exist in 'db/data'!{NC}")
         
     # # Chemin vers le fichier db/data/README
     # readme_path = os.path.join(data_folder, "README")
@@ -369,8 +370,11 @@ def destroy():
                 #prog.stdin.write(b'password')
                 prog = subprocess.Popen(['docker', 'volume', 'rm', 'docker_learnagement_persistent_db_'+os.environ["INSTANCE_NAME"]])
                 prog.communicate()
+                prog = subprocess.Popen(["rm ", "../db/sql/5_*"])
+                prog.communicate()
             else:
                 subprocess.run(["sudo", "docker", "volume", "rm", "docker_learnagement_persistent_db_"+os.environ["INSTANCE_NAME"]], check=True)
+                subprocess.run(["sudo", "rm ", "../db/sql/5_*"], check=True)
             print(f"{RED}App destroyed{NC}")
             
         except subprocess.CalledProcessError as e:
