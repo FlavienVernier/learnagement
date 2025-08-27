@@ -15,7 +15,7 @@ function listCLASS_sessionByStudentId($conn, $id_etudiant){
 }
 
 function listCLASS_sessionByIdResp($conn, $id) {
-    $sql = "SELECT CLASS_session.id_groupe, LNM_groupe.nom_groupe, LNM_promo.id_promo, 'ExplicitSecondaryPromoKs not yet generated' as promo,
+    $sql = "SELECT CLASS_session.id_session, CLASS_session.id_groupe, LNM_groupe.nom_groupe, LNM_promo.id_promo, 'ExplicitSecondaryPromoKs not yet generated' as promo,
 MAQUETTE_module_sequence.numero_ordre, MAQUETTE_module_sequence.id_intervenant_principal, MAQUETTE_module_sequence.commentaire,
                     MAQUETTE_module_sequencage.id_module, MAQUETTE_module_sequencage.id_seance_type, MAQUETTE_module_sequencage.duree_h,
                     MAQUETTE_module.code_module, 
@@ -58,4 +58,16 @@ MAQUETTE_module_sequence.numero_ordre, MAQUETTE_module_sequence.id_intervenant_p
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);
     return $rs;
+}
+
+function setCLASS_session_enseignant($conn, $id_session,  $id_enseignant){
+    $sql = "UPDATE CLASS_session
+            SET id_enseignant = '$id_enseignant'
+            WHERE id_session = '$id_session'";
+
+    if(mysqli_query($conn, $sql)){
+        return "Data Updated";
+    }else{
+        return "Updat Failed";
+    }
 }

@@ -90,10 +90,10 @@ def get_moduleSessionByEnseignantId(id_enseignant):
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
-def set_intervenant_session(id_session, id_intervenant):
+def set_intervenant_session(id_session, id_enseignant):
     headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/update/setSessionIntervenant.php'
-    resp = requests.post(url, data={'id_module_session': id_session, 'id_intervenant_principal': id_intervenant}, headers=headers)
+    resp = requests.post(url, data={'id_session': id_session, 'id_enseignant': id_enseignant}, headers=headers)
     urlData = resp.content
     print(urlData, flush=True)
     return io.StringIO(urlData.decode('utf-8'))
