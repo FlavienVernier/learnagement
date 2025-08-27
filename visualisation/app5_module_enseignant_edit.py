@@ -104,7 +104,7 @@ def update_table_sequence(user_id, selected_module, selected_seance_type):
                  for i in df.columns] + [{"name": 'nouvel_intervenant', "id": 'nouvel_intervenant', "editable": True, "presentation": "dropdown", }],  # columns must be defined so that DataTable be editable
         editable=True,
         data=df.to_dict('records'),
-        row_deletable=True,
+        row_deletable=False,
         dropdown={
             "nouvel_intervenant": {
                 "options": intervenant_options,
@@ -292,7 +292,7 @@ def register_callbacks_edit(app):
                                   & (df['duree_h'] == row_changed['duree_h'])
                                   & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0]
                 ret = app5_module_tools.set_intervenant_principal_sequencage(id_sequencage, new_intervenant_id)
-                return update_table_sequencage(user_id, selected_module), update_table_sequence(user_id, selected_module, None)
+            return update_table_sequencage(user_id, selected_module), update_table_sequence(user_id, selected_module, None)
 
     # Mise à jour de la table des séquençages selon le module sélectionné
     @app.callback(
