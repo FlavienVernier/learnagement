@@ -121,16 +121,18 @@ DROP TABLE IF EXISTS `CLASS_session`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `CLASS_session` (
   `id_session` int NOT NULL AUTO_INCREMENT,
-  `id_module_sequence` int DEFAULT NULL,
+  `id_module_sequence` int NOT NULL,
   `id_groupe` int NOT NULL,
   `id_enseignant` int DEFAULT NULL,
   `schedule` datetime DEFAULT NULL,
   PRIMARY KEY (`id_session`),
   UNIQUE KEY `SECONDARY` (`id_module_sequence`,`id_groupe`) USING BTREE,
   KEY `FK_seance_to_be_affected_as_groupe` (`id_groupe`),
+  KEY `FK_session_to_enseignant` (`id_enseignant`),
   CONSTRAINT `FK_seance_to_be_affected_as_groupe` FOREIGN KEY (`id_groupe`) REFERENCES `LNM_groupe` (`id_groupe`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `FK_seance_to_be_affected_as_module_sequence` FOREIGN KEY (`id_module_sequence`) REFERENCES `MAQUETTE_module_sequence` (`id_module_sequence`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1330 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `FK_seance_to_be_affected_as_module_sequence` FOREIGN KEY (`id_module_sequence`) REFERENCES `MAQUETTE_module_sequence` (`id_module_sequence`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_session_to_enseignant` FOREIGN KEY (`id_enseignant`) REFERENCES `LNM_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB AUTO_INCREMENT=1394 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `ETU_classical_evaluation`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -149,7 +151,7 @@ CREATE TABLE `ETU_classical_evaluation` (
   CONSTRAINT `FK_classical_evaluation_as_etudiant` FOREIGN KEY (`id_etudiant`) REFERENCES `LNM_etudiant` (`id_etudiant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_classical_evaluation_as_evaluation_type` FOREIGN KEY (`id_evaluation_type`) REFERENCES `LNM_evaluation_type` (`id_evaluation_type`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_classical_evaluation_as_module` FOREIGN KEY (`id_module`) REFERENCES `MAQUETTE_module` (`id_module`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=196 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=169 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `ETU_competence_evaluation`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -382,6 +384,7 @@ CREATE TABLE `LNM_rendu_module_as_etudiant` (
   `id_rendu_module` int NOT NULL,
   `id_etudiant` int NOT NULL,
   `date_depot` date NOT NULL,
+  `avancement` decimal(3,2) NOT NULL DEFAULT '0.00',
   PRIMARY KEY (`id_rendu_module`,`id_etudiant`),
   KEY `FK_rendu_module_as_etudiant_as_etudiant` (`id_etudiant`),
   CONSTRAINT `FK_rendu_module_as_etudiant_as_etudiant` FOREIGN KEY (`id_etudiant`) REFERENCES `LNM_etudiant` (`id_etudiant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
@@ -544,17 +547,17 @@ CREATE TABLE `MAQUETTE_module_sequencage` (
   `id_seance_type` int DEFAULT NULL,
   `id_groupe_type` int NOT NULL,
   `duree_h` decimal(10,1) NOT NULL,
-  `intervenant_principal` int DEFAULT NULL,
+  `id_intervenant_principal` int DEFAULT NULL,
   PRIMARY KEY (`id_module_sequencage`),
   UNIQUE KEY `SECONDARY` (`id_module`,`id_seance_type`,`id_groupe_type`,`duree_h`) USING BTREE,
-  KEY `FK_module_sequencage_as_intervenant_principal` (`intervenant_principal`),
+  KEY `FK_module_sequencage_as_intervenant_principal` (`id_intervenant_principal`),
   KEY `FK_module_sequencage_as_groupe_type` (`id_groupe_type`),
   KEY `FK_module_sequencage_as_seanceType` (`id_seance_type`),
   CONSTRAINT `FK_module_sequencage_as_groupe_type` FOREIGN KEY (`id_groupe_type`) REFERENCES `LNM_groupe_type` (`id_groupe_type`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `FK_module_sequencage_as_intervenant_principal` FOREIGN KEY (`intervenant_principal`) REFERENCES `LNM_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `FK_module_sequencage_as_intervenant_principal` FOREIGN KEY (`id_intervenant_principal`) REFERENCES `LNM_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_module_sequencage_as_module` FOREIGN KEY (`id_module`) REFERENCES `MAQUETTE_module` (`id_module`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_module_sequencage_as_seanceType` FOREIGN KEY (`id_seance_type`) REFERENCES `LNM_seanceType` (`id_seance_type`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=114 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=126 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `MAQUETTE_module_sequence`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -563,11 +566,14 @@ CREATE TABLE `MAQUETTE_module_sequence` (
   `id_module_sequence` int NOT NULL AUTO_INCREMENT,
   `id_module_sequencage` int DEFAULT NULL,
   `numero_ordre` int DEFAULT NULL,
+  `id_intervenant_principal` int DEFAULT NULL,
   `commentaire` text,
   PRIMARY KEY (`id_module_sequence`),
   UNIQUE KEY `SECONDARY` (`id_module_sequencage`,`numero_ordre`) USING BTREE,
-  CONSTRAINT `FK_module_sequence_as_module_sequencage` FOREIGN KEY (`id_module_sequencage`) REFERENCES `MAQUETTE_module_sequencage` (`id_module_sequencage`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=772 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `FK_module_sequence_as_enseignant` (`id_intervenant_principal`),
+  CONSTRAINT `FK_module_sequence_as_enseignant` FOREIGN KEY (`id_intervenant_principal`) REFERENCES `LNM_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `FK_module_sequence_as_module_sequencage` FOREIGN KEY (`id_module_sequencage`) REFERENCES `MAQUETTE_module_sequencage` (`id_module_sequencage`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=812 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `MRDBF_system_request`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -634,7 +640,7 @@ CREATE TABLE `VIEW_parameters_of_views` (
   CONSTRAINT `FK_parameters_of_views_as_module` FOREIGN KEY (`id_module`) REFERENCES `MAQUETTE_module` (`id_module`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_parameters_of_views_as_semestre` FOREIGN KEY (`id_semestre`) REFERENCES `LNM_semestre` (`id_semestre`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_parameters_of_views_as_status` FOREIGN KEY (`id_statut`) REFERENCES `LNM_statut` (`id_statut`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `VIEW_updatable`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

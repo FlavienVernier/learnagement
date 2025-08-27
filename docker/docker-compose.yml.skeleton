@@ -11,12 +11,11 @@ services:
         command: --mysql-native-password=ON
         environment:
             - MYSQL_DATABASE=${MYSQL_DB}
-            - MYSQL_USER=${MYSQL_USER_LOGIN}
-            - MYSQL_PASSWORD=${MYSQL_USER_PASSWORD}
+            # - MYSQL_USER=${MYSQL_USER_LOGIN}
+            # - MYSQL_PASSWORD=${MYSQL_USER_PASSWORD}
             - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
         volumes:
             - ../db/sql:/docker-entrypoint-initdb.d
-            - ../db/data:/data
             - ./mysql/conf.d:/etc/mysql/conf.d
             - learnagement_persistent_db_${INSTANCE_NAME}:/var/lib/mysql
     phpmyadmin_${INSTANCE_NAME}:

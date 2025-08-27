@@ -52,8 +52,9 @@ def __mainConfiguration__():
             file.write("# Edit only root .env, next propagate it with 'Learnagement -updateEnv' #" + "\n")
             file.write("#########################################################################" + "\n")
             file.write("" + "\n")
-            file.write("SESSION_TIMEOUT=" + "900" + "\n")
             instance_name = input("Give the intance name (lowercase): ").lower()
+            file.write("COMPOSE_PROJECT_NAME=learnagement_" + instance_name + "\n") # Define project name for docker
+            file.write("SESSION_TIMEOUT=" + "900" + "\n")
             file.write("INSTANCE_NAME=" + instance_name + "\n")
             instance_number = 0
             while instance_number < 2 or instance_number > 4:
@@ -135,7 +136,7 @@ def __dbDataConfiguration__():
         # Vérifie si le dossier cible existe, sinon le crée
         os.makedirs(data_folder, exist_ok=True)
 
-        input("If you want an initial data set, put it into 'db/data' folder, then press enter")
+        input("If you want an initial data set, put it into 'db/data' folder with name matches with [0-9]*.sql, then press enter")
         # if "y" == input("Do you want to start with free data (y/n)? "):
         #     # Parcourt tous les fichiers dans le dossier source
         #     for filename in os.listdir(free_data_folder):
@@ -149,16 +150,16 @@ def __dbDataConfiguration__():
         #             print(f"Copied: {source_path} -> {target_path}")
             
     except OSError as error:
-        print(f"{GREEN}Data already exist!{NC}")
+        print(f"{GREEN}Data already exist in 'db/data'!{NC}")
         
-    # Chemin vers le fichier db/data/README
-    readme_path = os.path.join(data_folder, "README")
-    # Texte à ajouter
-    text_to_append = "This folder contains data inserted into DB when the system is launch at the first time.  If it doesn't exist it will contans free data"
-    # Ouvrir le fichier en mode ajout et écrire le texte
-    with open(readme_path, "a") as file:
-        file.write(text_to_append)
-        file.write("\n")  # Ajoute une nouvelle ligne, comme `echo` le ferait
+    # # Chemin vers le fichier db/data/README
+    # readme_path = os.path.join(data_folder, "README")
+    # # Texte à ajouter
+    # text_to_append = "This folder contains data inserted into DB when the system is launch at the first time.  If it doesn't exist it will contans free data"
+    # # Ouvrir le fichier en mode ajout et écrire le texte
+    # with open(readme_path, "a") as file:
+    #     file.write(text_to_append)
+    #     file.write("\n")  # Ajoute une nouvelle ligne, comme `echo` le ferait
 
     os.chdir("db")
     subprocess.run([sys.executable, "insertPrivateData.py"], check=True)
@@ -369,8 +370,11 @@ def destroy():
                 #prog.stdin.write(b'password')
                 prog = subprocess.Popen(['docker', 'volume', 'rm', 'docker_learnagement_persistent_db_'+os.environ["INSTANCE_NAME"]])
                 prog.communicate()
+                prog = subprocess.Popen(["rm ", "../db/sql/5_*"])
+                prog.communicate()
             else:
                 subprocess.run(["sudo", "docker", "volume", "rm", "docker_learnagement_persistent_db_"+os.environ["INSTANCE_NAME"]], check=True)
+                subprocess.run(["sudo", "rm ", "../db/sql/5_*"], check=True)
             print(f"{RED}App destroyed{NC}")
             
         except subprocess.CalledProcessError as e:

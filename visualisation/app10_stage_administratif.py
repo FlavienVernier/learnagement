@@ -30,7 +30,7 @@ if "entreprise" in df_stages_without_supervisor.columns.tolist() :
     entreprises = entreprises + df_stages_without_supervisor["entreprise"].tolist()
 
 # liste des enseignants
-df_enseignants = app_tools.get_students_without_stage()
+df_enseignants = app_tools.get_list_enseignants()
 enseignants = []
 if "nom" in df_enseignants.columns.tolist() :
     enseignants = df_enseignants["nom"].map(str) + " " + df_enseignants["prenom"].map(str)
