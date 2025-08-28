@@ -6,10 +6,12 @@ import shutil
 import subprocess
 import time
 import socket
+import datetime
 from dotenv import load_dotenv, dotenv_values 
 from getpass import getpass
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes
+from pathlib import Path
 
 # Couleurs pour les messages (non directement nécessaires dans Python mais émulation via ANSI codes)
 RED = "\033[0;31m"
@@ -252,7 +254,7 @@ def __searchReplaceInFile__(fileName, patern, value):
     with open(fileName, 'w') as file:
         file.write(filedata)
 
-def backup():
+def backupDB(backup_folder="db/backup"):
 
     """
 SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagement" AND TABLE_TYPE = "BASE TABLE"
@@ -270,15 +272,13 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
     #cmd=["docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysql",  "-u",  "root", "-p"+configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"], "-e", "'SELECT", "table_name", "FROM", "information_schema.tables", "WHERE", "TABLE_SCHEMA", "=", "\"learnagement\"", "AND", "TABLE_TYPE", "=", "\"BASE TABLE\"'"]
     #cmd=["docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysql",  "-u",  "root", "-p", "-e", "'SELECT", "table_name", "FROM", "information_schema.tables", "WHERE", "TABLE_SCHEMA", "=", "\"learnagement\"", "AND", "TABLE_TYPE", "=", "\"BASE TABLE\"'"]
 
-    import datetime
-
     now = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S.%f')
     
     if os.name == 'nt':
         print ("Not yet implemented for Windows.")
     else:
         # Création du répertoire de données initiales s'il n'existe pas
-        backup_folder = "db/backup"
+        #backup_folder = "db/backup"
         try:
             os.makedirs(backup_folder, exist_ok=False)  # if it exists, an exception is thrown
         except OSError as error:
@@ -289,21 +289,21 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
         os.system(" ".join(cmd))
        
         # get Learnagement db schemas
-        structureFile = "db/backup/struct_"+now
+        structureFile = os.path.join(backup_folder,"struct_"+now)
         cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p" + os.environ["MYSQL_ROOT_PASSWORD"], "--no-data", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "learnagement", ">", structureFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
 
         # get Learnagement DB data
-        dataFile = "db/backup/data_"+now
+        dataFile = os.path.join(backup_folder,"data_"+now)
         cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p" + os.environ["MYSQL_ROOT_PASSWORD"], "--no-create-info", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "learnagement", ">", dataFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
 
         # get Learnagement db triggers
-        triggerFile = "db/backup/trigger_"+now
+        triggerFile = os.path.join(backup_folder,"trigger_"+now)
         cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p" + os.environ["MYSQL_ROOT_PASSWORD"], "--no-create-info", "--ignore-views", "--no-data", "--skip-comments", "--skip-extended-insert", "learnagement", ">", triggerFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
@@ -325,8 +325,47 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
         with open(triggerFile, 'w') as fout:
             fout.writelines(data[1:])
 
-            
-    
+def exportInstance():
+    load_dotenv()
+    now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S_%f')
+    export_dir_path = 'Learnagement_'+ os.environ["INSTANCE_NAME"] + '_' + now
+
+    try:
+        # Build export directory
+        os.mkdir(export_dir_path)
+        # Export BD (backup struct, data and triggers) and move them into export directory
+        backupDB(export_dir_path)
+        # Copi .env into export directory
+        shutil.copy(os.path.join("docker", "docker-compose.yml"), export_dir_path)
+        # Copy docker-compose into export directory
+        shutil.copy(".env", os.path.join(export_dir_path, "env"))
+        # Build archive from export directory
+        archive_name = export_dir_path
+        shutil.make_archive(archive_name, 'zip', '.', export_dir_path)
+        # Remove export directory
+        shutil.rmtree(export_dir_path)
+    except OSError as error:
+        print(error)
+
+def importInstance(instanceArchive):
+    # Check if instance is not already running from .
+    # ToDo
+    # If no instance running
+    import_dir_path = Path(instanceArchive).stem
+    # Unarchive instance archive
+    shutil.unpack_archive(instanceArchive)
+    # Move .env from import directory to .
+    shutil.copy(os.path.join(import_dir_path, "env"), ".env")
+    updateEnv()
+    # Copy docker-compose to docker directory
+    shutil.copy(os.path.join(import_dir_path, "docker-compose.yml"), "docker")
+    # Move BD files into the appropriate directories
+    shutil.copy(os.path.join(import_dir_path, "*.sql"), os.path.join("db","sql"))
+    # Remove import directory
+    shutil.rmtree(import_dir_path)
+    # Run instance
+    # ToDo
+
 def stop():
     ##########
     # Stop App
@@ -404,14 +443,14 @@ def fromscratch():
         os.remove("config.py")
         
 def help(argv):
-    print("Usage: " + argv[0] + " [-start|-stop|-build|-backup|-destroy|-updateEnv|-help]")
+    print("Usage: " + argv[0] + " [-start|-stop|-build|-backupDB|-destroy|-updateEnv|-help]")
             
 def main(argv):
     # if script parameter is destroy
     if len(argv)==1 or (len(argv)==2 and argv[1] == "-start"):
         start()
-    elif len(argv)==2 and argv[1] == "-backup":
-        backup()
+    elif len(argv)==2 and argv[1] == "-backupDB":
+        backupDB()
     elif len(argv)==2 and argv[1] == "-stop":
         stop()
     elif len(argv)==2 and argv[1] == "-build":
@@ -420,6 +459,10 @@ def main(argv):
         destroy()
     elif len(argv)==2 and argv[1] == "-updateEnv":
         updateEnv()
+    elif len(argv)==2 and argv[1] == "-exportInstance":
+        exportInstance()
+    elif len(argv)==3 and argv[1] == "-importInstance":
+        importInstance(argv[2])
     else:
         help(argv)
 
