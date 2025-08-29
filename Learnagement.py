@@ -290,21 +290,21 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
        
         # get Learnagement db schemas
         structureFile = os.path.join(backup_folder,"0_struct_" + now + ".sql")
-        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p" + os.environ["MYSQL_ROOT_PASSWORD"], "--no-data", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "learnagement", ">", structureFile]
+        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-data", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "learnagement", ">", structureFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
 
         # get Learnagement DB data
         dataFile = os.path.join(backup_folder,"5_data_" + now + ".sql")
-        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p" + os.environ["MYSQL_ROOT_PASSWORD"], "--no-create-info", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "learnagement", ">", dataFile]
+        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-create-info", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "learnagement", ">", dataFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
 
         # get Learnagement db triggers
         triggerFile = os.path.join(backup_folder,"99_trigger_" + now + ".sql")
-        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p" + os.environ["MYSQL_ROOT_PASSWORD"], "--no-create-info", "--ignore-views", "--no-data", "--skip-comments", "--skip-extended-insert", "learnagement", ">", triggerFile]
+        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-create-info", "--ignore-views", "--no-data", "--skip-comments", "--skip-extended-insert", "learnagement", ">", triggerFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
