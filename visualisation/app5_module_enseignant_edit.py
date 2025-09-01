@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from dash import html, dcc, Input, State, Output, dash_table
 import dash_bootstrap_components as dbc
 from pandas.core.interchange.dataframe_protocol import DataFrame
@@ -102,7 +104,7 @@ def update_table_sequence(user_id, selected_module, selected_seance_type):
                  for i in df.columns] + [{"name": 'nouvel_intervenant', "id": 'nouvel_intervenant', "editable": True, "presentation": "dropdown", }],  # columns must be defined so that DataTable be editable
         editable=True,
         data=df.to_dict('records'),
-        row_deletable=True,
+        row_deletable=False,
         dropdown={
             "nouvel_intervenant": {
                 "options": intervenant_options,
@@ -133,13 +135,13 @@ def update_table_session(user_id, selected_module, selected_seance_type, selecte
     if selected_seance_type and selected_promotion:
         df = df[(df['id_module'] == selected_module) &
                 (df['id_seance_type'] == selected_seance_type) &
-                (df['id_promotion'] == selected_promotion)][['type', 'duree_h', 'nom_groupe', 'numero_ordre', 'intervenant', 'commentaire']]
+                (df['id_promotion'] == selected_promotion)][['id_session', 'type', 'duree_h', 'nom_groupe', 'numero_ordre', 'intervenant', 'commentaire']].sort_values(by=['type', 'numero_ordre'], ascending=[False, False])
     elif selected_seance_type:
         df = df[(df['id_module'] == selected_module) &
-                (df['id_seance_type'] == selected_seance_type)][['type', 'numero_ordre', 'duree_h', 'nom_groupe', 'intervenant', 'commentaire']]
+                (df['id_seance_type'] == selected_seance_type)][['id_session', 'type', 'numero_ordre', 'duree_h', 'nom_groupe', 'intervenant', 'commentaire']].sort_values(by=['type', 'numero_ordre'], ascending=[False, False])
     else:
         df = df[(df['id_module'] == selected_module)][
-            ['type', 'numero_ordre', 'duree_h', 'nom_groupe', 'intervenant', 'commentaire']]
+            ['id_session', 'type', 'numero_ordre', 'duree_h', 'nom_groupe', 'intervenant', 'commentaire']].sort_values(by=['type', 'numero_ordre'], ascending=[False, False])
 
     dfi = app_tools.get_explicit_keys("LNM_enseignant")
     intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in dfi.iterrows()]
@@ -147,14 +149,20 @@ def update_table_session(user_id, selected_module, selected_seance_type, selecte
     table_session = dash_table.DataTable(
         id='table_session',
         columns=[{"name": i, "id": i}
-                 for i in df.columns],  # columns must be defined so that DataTable be editable
+                 for i in df.columns] + [{"name": 'nouvel_intervenant', "id": 'nouvel_intervenant', "editable": True, "presentation": "dropdown", }],  # columns must be defined so that DataTable be editable
         data=df.to_dict('records'),
+        sort_action='native',
+        sort_mode="multi",
         row_deletable=False,
         dropdown={
-            "intervenant": {
-                "options": intervenant_options
-            },
+            "nouvel_intervenant": {
+                "options": intervenant_options,
+                "clearable":True,
+            }
         },
+        style_cell_conditional=[
+            {'if': {'column_id': 'id_session', },
+             'display': 'None', }],
     )
     return [table_session]
 #
@@ -284,7 +292,7 @@ def register_callbacks_edit(app):
                                   & (df['duree_h'] == row_changed['duree_h'])
                                   & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0]
                 ret = app5_module_tools.set_intervenant_principal_sequencage(id_sequencage, new_intervenant_id)
-                return update_table_sequencage(user_id, selected_module), update_table_sequence(user_id, selected_module, None)
+            return update_table_sequencage(user_id, selected_module), update_table_sequence(user_id, selected_module, None)
 
     # Mise à jour de la table des séquençages selon le module sélectionné
     @app.callback(
@@ -356,7 +364,7 @@ def register_callbacks_edit(app):
         else:
             row_changed = [row for row in current if row not in previous]
             if len(row_changed) > 0:  # else callback invoked by data deleted
-                df = app5_module_tools.get_moduleSequenceByEnseignantId(user_id)
+                #df = app5_module_tools.get_moduleSequenceByEnseignantId(user_id)
                 row_changed = row_changed[0]
                 new_intervenant_id = row_changed['nouvel_intervenant']
                 id_sequence = row_changed['id_sequence']
@@ -383,6 +391,7 @@ def register_callbacks_edit(app):
         options = [{'label': row['promo'], 'value': row['id_promo']} for _, row in df[df['id_module'] == selected_module][['id_promo', 'promo']].drop_duplicates().iterrows()]
         return options
 
+    # Update session table
     @app.callback(
         Output('session_div', 'children', allow_duplicate=True),
         State('user_id', 'data'),
@@ -391,5 +400,33 @@ def register_callbacks_edit(app):
         Input('filtre_promo', 'value'),
         prevent_initial_call=True,
     )
-    def cb_update_table_seance(user_id, selected_module, selected_type, selected_promo):
+    def cb_update_table_session(user_id, selected_module, selected_type, selected_promo):
         return update_table_session(user_id, selected_module, selected_type, selected_promo)
+
+    # Update teacher session
+    @app.callback(
+        Output('session_div', 'children', allow_duplicate=True),
+        Input('table_session', 'data_previous'),
+        State('table_session', 'data'),
+        State('user_id', 'data'),
+        State('filtre_module', 'value'),
+        Input('filtre_type', 'value'),
+        Input('filtre_promo', 'value'),
+        prevent_initial_call=True,
+    )
+    def cb_change_intervenant_session(previous, current, user_id, selected_module, selected_type, selected_promo):
+        if previous is None:
+            return update_table_session(user_id, selected_module, selected_type, selected_promo)
+        else:
+            row_changed = [row for row in current if row not in previous]
+            if len(row_changed) > 0:  # else callback invoked by data deleted
+                #df = app5_module_tools.get_moduleSequenceByEnseignantId(user_id)
+                row_changed = row_changed[0]
+                new_intervenant_id = row_changed['nouvel_intervenant']
+                id_session = row_changed['id_session']
+                # id_sequence = df[(df['type'] == row_changed['type'])
+                #                    & (df['numero_ordre'] == row_changed['numero_ordre'])
+                #                    & (df['duree_h'] == row_changed['duree_h'])
+                #                    & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0]
+                ret = app5_module_tools.set_intervenant_session(id_session, new_intervenant_id)
+                return update_table_session(user_id, selected_module, selected_type, selected_promo)

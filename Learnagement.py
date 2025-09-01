@@ -1,15 +1,18 @@
 # coding=utf-8
-
+import glob
 import os
 import sys
 import shutil
 import subprocess
 import time
 import socket
-from dotenv import load_dotenv, dotenv_values 
+import datetime
+import dotenv
+#from dotenv import load_dotenv
 from getpass import getpass
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes
+from pathlib import Path
 
 # Couleurs pour les messages (non directement nécessaires dans Python mais émulation via ANSI codes)
 RED = "\033[0;31m"
@@ -23,6 +26,15 @@ NC = "\033[0m"  # No color
 
 INSTANCE_NAME=None
 INSTANCE_NUMBER=None
+DOCKER_COMMAND=[]
+DOCKER_COMPOSE_COMMAND=[]
+
+def load_dotenv():
+    dotenv.load_dotenv()
+    global DOCKER_COMMAND
+    DOCKER_COMMAND=os.environ["DOCKER_COMMAND"].split(' ')
+    global DOCKER_COMPOSE_COMMAND
+    DOCKER_COMPOSE_COMMAND=os.environ["DOCKER_COMPOSE_COMMAND"].split(' ')
 
 #def generate_nextauth_secret(base_secret: str) -> bytes:
 def __generate_secret__() -> bytes:
@@ -65,6 +77,12 @@ def __mainConfiguration__():
             file.write("INSTANCE_NUMBER=" + str(instance_number) + "\n")
             file.write("INSTANCE_SECRET=" + __generate_secret__().hex() + "\n")
             file.write("INSTANCE_URL=" + socket.gethostname() + ":" + str(instance_number) + "0080" + "\n")
+
+            file.write("" + "\n")
+            file.write("#########################################################################" + "\n")
+            file.write("" + "\n")
+            file.write("DOCKER_COMMAND=docker")
+            file.write("DOCKER_COMPOSE_COMMAND=docker compose")
 
             file.write("" + "\n")
             file.write("#########################################################################" + "\n")
@@ -198,10 +216,10 @@ def __dockerRun__(docker_option):
     if os.name == 'nt':
         #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose up'],stdin=subprocess.PIPE)
         #prog.stdin.write(b'password')
-        prog = subprocess.Popen(['docker-compose', 'up'] + docker_option)
+        prog = subprocess.Popen(['docker', 'compose', 'up'] + docker_option)
         prog.communicate()
     else:    
-        subprocess.run(["sudo", "docker-compose", "up"] + docker_option, check=True)
+        subprocess.run(DOCKER_COMPOSE_COMMAND + ["up"] + docker_option, check=True)
 
     # Pause pour laisser Docker démarrer
     time.sleep(5)
@@ -209,11 +227,11 @@ def __dockerRun__(docker_option):
     if os.name == 'nt':
         #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose ps'],stdin=subprocess.PIPE)
         #prog.stdin.write(b'password')
-        prog = subprocess.Popen(['docker-compose', 'ps'])
+        prog = subprocess.Popen(['docker', 'compose', 'ps'])
         #prog.stdin.write(b'password')
         prog.communicate()
     else:            
-        subprocess.run(["sudo", "docker-compose", "ps"], check=True)
+        subprocess.run(DOCKER_COMPOSE_COMMAND + ["ps"], check=True)
         
     os.chdir("..")
 
@@ -252,7 +270,7 @@ def __searchReplaceInFile__(fileName, patern, value):
     with open(fileName, 'w') as file:
         file.write(filedata)
 
-def backup():
+def backupDB(backup_folder="db/backup"):
 
     """
 SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagement" AND TABLE_TYPE = "BASE TABLE"
@@ -270,41 +288,39 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
     #cmd=["docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysql",  "-u",  "root", "-p"+configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"], "-e", "'SELECT", "table_name", "FROM", "information_schema.tables", "WHERE", "TABLE_SCHEMA", "=", "\"learnagement\"", "AND", "TABLE_TYPE", "=", "\"BASE TABLE\"'"]
     #cmd=["docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysql",  "-u",  "root", "-p", "-e", "'SELECT", "table_name", "FROM", "information_schema.tables", "WHERE", "TABLE_SCHEMA", "=", "\"learnagement\"", "AND", "TABLE_TYPE", "=", "\"BASE TABLE\"'"]
 
-    import datetime
-
-    now = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S.%f')
+    now = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
     
     if os.name == 'nt':
         print ("Not yet implemented for Windows.")
     else:
         # Création du répertoire de données initiales s'il n'existe pas
-        backup_folder = "db/backup"
+        #backup_folder = "db/backup"
         try:
             os.makedirs(backup_folder, exist_ok=False)  # if it exists, an exception is thrown
         except OSError as error:
             pass
 
-        # display MySQL server version (useful to request sudo passwd 1st)
-        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_" + os.environ["INSTANCE_NAME"], "mysqld", "--version"]
+        # display MySQL server version
+        cmd = DOCKER_COMMAND + ["exec", "-it", "learnagement_mysql_" + os.environ["INSTANCE_NAME"], "mysqld", "--version"]
         os.system(" ".join(cmd))
        
         # get Learnagement db schemas
-        structureFile = "db/backup/struct_"+now
-        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p" + os.environ["MYSQL_ROOT_PASSWORD"], "--no-data", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "learnagement", ">", structureFile]
+        structureFile = os.path.join(backup_folder,"0_struct_" + now + ".sql")
+        cmd = DOCKER_COMMAND + ["exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-data", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "--no-tablespaces", "learnagement", ">", structureFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
 
         # get Learnagement DB data
-        dataFile = "db/backup/data_"+now
-        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p" + os.environ["MYSQL_ROOT_PASSWORD"], "--no-create-info", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "learnagement", ">", dataFile]
+        dataFile = os.path.join(backup_folder,"5_data_" + now + ".sql")
+        cmd = DOCKER_COMMAND + ["exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-create-info", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "--no-tablespaces", "learnagement", ">", dataFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
 
         # get Learnagement db triggers
-        triggerFile = "db/backup/trigger_"+now
-        cmd = ["sudo", "docker", "exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", "root", "-p" + os.environ["MYSQL_ROOT_PASSWORD"], "--no-create-info", "--ignore-views", "--no-data", "--skip-comments", "--skip-extended-insert", "learnagement", ">", triggerFile]
+        triggerFile = os.path.join(backup_folder,"99_trigger_" + now + ".sql")
+        cmd = DOCKER_COMMAND + ["exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-create-info", "--ignore-views", "--no-data", "--skip-comments", "--skip-extended-insert", "--no-tablespaces", "learnagement", ">", triggerFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
@@ -325,9 +341,56 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
         with open(triggerFile, 'w') as fout:
             fout.writelines(data[1:])
 
-            
-    
+def exportInstance():
+    load_dotenv()
+    now = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
+    export_dir_path = 'Learnagement_'+ os.environ["INSTANCE_NAME"] + '_' + now
+
+    try:
+        # Build export directory
+        os.mkdir(export_dir_path)
+        # Export BD (backup struct, data and triggers) and move them into export directory
+        export_dir_path_sql = os.path.join(export_dir_path, "sql")
+        os.mkdir(export_dir_path_sql)
+        backupDB(export_dir_path_sql)
+        # Copi .env into export directory
+        shutil.copy(os.path.join("docker", "docker-compose.yml"), export_dir_path)
+        # Copy docker-compose into export directory
+        shutil.copy(".env", os.path.join(export_dir_path, "env"))
+        # Build archive from export directory
+        archive_name = export_dir_path
+        shutil.make_archive(archive_name, 'zip', '.', export_dir_path)
+        # Remove export directory
+        shutil.rmtree(export_dir_path)
+    except OSError as error:
+        print(error)
+
+def importInstance(instanceArchive):
+    # Check if instance is not already running from .
+    # ToDo
+    # If no instance running
+    import_dir_path = Path(instanceArchive).stem
+    # Unarchive instance archive
+    shutil.unpack_archive(instanceArchive)
+    # Move .env from import directory to .
+    shutil.copy(os.path.join(import_dir_path, "env"), ".env")
+    updateEnv()
+    # Copy docker-compose to docker directory
+    shutil.copy(os.path.join(import_dir_path, "docker-compose.yml"), "docker")
+    # Move BD files into the appropriate directories
+    os.mkdir(os.path.join("db","data")) # So that Learnagement does not ask for free data
+    sql_instance_path = os.path.join("db", "sql")
+    files = glob.glob(os.path.join(sql_instance_path,'*'))
+    for f in files:
+        os.remove(f)
+    shutil.copytree(os.path.join(import_dir_path, "sql"), sql_instance_path, dirs_exist_ok=True)
+    # Remove import directory
+    shutil.rmtree(import_dir_path)
+    # Run instance
+    # ToDo
+
 def stop():
+    load_dotenv()
     ##########
     # Stop App
     print("##########")
@@ -338,12 +401,10 @@ def stop():
     if os.name == 'nt':
         #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose up'],stdin=subprocess.PIPE)
         #prog.stdin.write(b'password')
-        prog = subprocess.Popen(['docker-compose', 'down'])
+        prog = subprocess.Popen(DOCKER_COMPOSE_COMMAND + ['down'])
         prog.communicate()
     else:    
-        subprocess.run(["sudo", "docker-compose", "down"], check=True)
-
-    # sudo docker-compose down
+        subprocess.run(DOCKER_COMPOSE_COMMAND + ["down"], check=True)
     
     os.chdir("..")
     
@@ -361,27 +422,22 @@ def destroy():
     
         #stop()
 
-        os.chdir("docker")
-
         try:
     
             if os.name == 'nt':
-                #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose up'],stdin=subprocess.PIPE)
-                #prog.stdin.write(b'password')
-                prog = subprocess.Popen(['docker', 'volume', 'rm', 'docker_learnagement_persistent_db_'+os.environ["INSTANCE_NAME"]])
+                prog = subprocess.Popen(['docker', 'volume', 'rm', os.environ["COMPOSE_PROJECT_NAME"] + '_learnagement_persistent_db_'+os.environ["INSTANCE_NAME"]])
                 prog.communicate()
-                prog = subprocess.Popen(["rm ", "../db/sql/5_*"])
+                prog = subprocess.Popen(["rm", "db/sql/5_*"])
                 prog.communicate()
             else:
-                subprocess.run(["sudo", "docker", "volume", "rm", "docker_learnagement_persistent_db_"+os.environ["INSTANCE_NAME"]], check=True)
-                subprocess.run(["sudo", "rm ", "../db/sql/5_*"], check=True)
+                subprocess.run(DOCKER_COMMAND + ["volume", "rm", os.environ["COMPOSE_PROJECT_NAME"] + "_learnagement_persistent_db_"+os.environ["INSTANCE_NAME"]], check=True)
+                subprocess.run(["pwd"], check=True)
+                subprocess.run(["rm", "db/sql/5_*"], check=True)
             print(f"{RED}App destroyed{NC}")
             
         except subprocess.CalledProcessError as e:
             print(e.output)
             print(f"{GREEN}App not destroyed{NC}")
-              
-        os.chdir("..")
     else:
         print(f"{GREEN}App not destroyed{NC}")
 
@@ -404,14 +460,14 @@ def fromscratch():
         os.remove("config.py")
         
 def help(argv):
-    print("Usage: " + argv[0] + " [-start|-stop|-build|-backup|-destroy|-updateEnv|-help]")
+    print("Usage: " + argv[0] + " [-start|-stop|-build|-backupDB|-destroy|-updateEnv|-exportInstance|-importInstance FILE_NAME|-help]")
             
 def main(argv):
     # if script parameter is destroy
     if len(argv)==1 or (len(argv)==2 and argv[1] == "-start"):
         start()
-    elif len(argv)==2 and argv[1] == "-backup":
-        backup()
+    elif len(argv)==2 and argv[1] == "-backupDB":
+        backupDB()
     elif len(argv)==2 and argv[1] == "-stop":
         stop()
     elif len(argv)==2 and argv[1] == "-build":
@@ -420,6 +476,10 @@ def main(argv):
         destroy()
     elif len(argv)==2 and argv[1] == "-updateEnv":
         updateEnv()
+    elif len(argv)==2 and argv[1] == "-exportInstance":
+        exportInstance()
+    elif len(argv)==3 and argv[1] == "-importInstance":
+        importInstance(argv[2])
     else:
         help(argv)
 

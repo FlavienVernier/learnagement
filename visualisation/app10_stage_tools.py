@@ -74,14 +74,14 @@ def get_stages_with_supervisorId():
 
 def get_stages_without_supervisorId():
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStagesWithOutSupervisor.php'
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStagesWithoutSupervisor.php'
     resp = requests.post(url, data={}, headers=headers)
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
 def get_students_without_stage():
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStagesStudentsWithOutStage.php'
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStagesStudentsWithoutStage.php'
     resp = requests.post(url, data={}, headers=headers)
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
