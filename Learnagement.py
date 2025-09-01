@@ -306,21 +306,21 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
        
         # get Learnagement db schemas
         structureFile = os.path.join(backup_folder,"0_struct_" + now + ".sql")
-        cmd = DOCKER_COMMAND + ["exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-data", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "learnagement", ">", structureFile]
+        cmd = DOCKER_COMMAND + ["exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-data", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "--no-tablespaces", "learnagement", ">", structureFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
 
         # get Learnagement DB data
         dataFile = os.path.join(backup_folder,"5_data_" + now + ".sql")
-        cmd = DOCKER_COMMAND + ["exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-create-info", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "learnagement", ">", dataFile]
+        cmd = DOCKER_COMMAND + ["exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-create-info", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "--no-tablespaces", "learnagement", ">", dataFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
 
         # get Learnagement db triggers
         triggerFile = os.path.join(backup_folder,"99_trigger_" + now + ".sql")
-        cmd = DOCKER_COMMAND + ["exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-create-info", "--ignore-views", "--no-data", "--skip-comments", "--skip-extended-insert", "learnagement", ">", triggerFile]
+        cmd = DOCKER_COMMAND + ["exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-create-info", "--ignore-views", "--no-data", "--skip-comments", "--skip-extended-insert", "--no-tablespaces", "learnagement", ">", triggerFile]
         print(" ".join(cmd))
         print("Enter MySQL password:")
         os.system(" ".join(cmd))
@@ -422,27 +422,22 @@ def destroy():
     
         #stop()
 
-        os.chdir("docker")
-
         try:
     
             if os.name == 'nt':
-                #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose up'],stdin=subprocess.PIPE)
-                #prog.stdin.write(b'password')
-                prog = subprocess.Popen(['docker', 'volume', 'rm', 'docker_learnagement_persistent_db_'+os.environ["INSTANCE_NAME"]])
+                prog = subprocess.Popen(['docker', 'volume', 'rm', os.environ["COMPOSE_PROJECT_NAME"] + '_learnagement_persistent_db_'+os.environ["INSTANCE_NAME"]])
                 prog.communicate()
-                prog = subprocess.Popen(["rm ", "../db/sql/5_*"])
+                prog = subprocess.Popen(["rm", "db/sql/5_*"])
                 prog.communicate()
             else:
-                subprocess.run(DOCKER_COMMAND + ["volume", "rm", "docker_learnagement_persistent_db_"+os.environ["INSTANCE_NAME"]], check=True)
-                subprocess.run(["sudo", "rm ", "../db/sql/5_*"], check=True)
+                subprocess.run(DOCKER_COMMAND + ["volume", "rm", os.environ["COMPOSE_PROJECT_NAME"] + "_learnagement_persistent_db_"+os.environ["INSTANCE_NAME"]], check=True)
+                subprocess.run(["pwd"], check=True)
+                subprocess.run(["rm", "db/sql/5_*"], check=True)
             print(f"{RED}App destroyed{NC}")
             
         except subprocess.CalledProcessError as e:
             print(e.output)
             print(f"{GREEN}App not destroyed{NC}")
-              
-        os.chdir("..")
     else:
         print(f"{GREEN}App not destroyed{NC}")
 
