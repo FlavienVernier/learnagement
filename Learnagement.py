@@ -29,6 +29,8 @@ INSTANCE_NUMBER=None
 DOCKER_COMMAND=[]
 DOCKER_COMPOSE_COMMAND=[]
 
+containers = ["docker", "phpbackend", "webApp", "visualisation", "webappnext", ]
+
 def load_dotenv():
     dotenv.load_dotenv()
     global DOCKER_COMMAND
@@ -61,12 +63,22 @@ def __mainConfiguration__():
     if not os.path.exists(".env"):
         with open(".env", 'w') as file:
             file.write("#########################################################################" + "\n")
-            file.write("# Edit only root .env, next propagate it with 'Learnagement -updateEnv' #" + "\n")
+            file.write("# Edit only .env in the Learnagement root directory, next propagate it with 'Learnagement -updateEnv' #" + "\n")
             file.write("#########################################################################" + "\n")
             file.write("" + "\n")
+            file.write("SESSION_TIMEOUT=" + "900" + "\n")
+            file.write("DOCKER_COMMAND=docker")
+            file.write("DOCKER_COMPOSE_COMMAND=docker compose")
+
+
+            file.write("" + "\n")
+            file.write("#########################################################################" + "\n")
+            file.write("# DO NOT EDIT ANY VARIABLE AFTER THIS LINE"  + "\n")
+            file.write("#########################################################################" + "\n")
+            file.write("" + "\n")
+
             instance_name = input("Give the intance name (lowercase): ").lower()
             file.write("COMPOSE_PROJECT_NAME=learnagement_" + instance_name + "\n") # Define project name for docker
-            file.write("SESSION_TIMEOUT=" + "900" + "\n")
             file.write("INSTANCE_NAME=" + instance_name + "\n")
             instance_number = 0
             while instance_number < 2 or instance_number > 4:
@@ -77,12 +89,6 @@ def __mainConfiguration__():
             file.write("INSTANCE_NUMBER=" + str(instance_number) + "\n")
             file.write("INSTANCE_SECRET=" + __generate_secret__().hex() + "\n")
             file.write("INSTANCE_URL=" + socket.gethostname() + ":" + str(instance_number) + "0080" + "\n")
-
-            file.write("" + "\n")
-            file.write("#########################################################################" + "\n")
-            file.write("" + "\n")
-            file.write("DOCKER_COMMAND=docker")
-            file.write("DOCKER_COMPOSE_COMMAND=docker compose")
 
             file.write("" + "\n")
             file.write("#########################################################################" + "\n")
@@ -130,12 +136,30 @@ def __mainConfiguration__():
 def updateEnv():
     source_path = os.path.join("./", ".env")
 
-    containers=["docker", "phpbackend", "webApp", "visualisation", "webappnext", ]
-
     for container in containers:
         target_path = os.path.join(container, ".env")
         shutil.copy(source_path, target_path)
         print(f"Copied: {source_path} -> {target_path}")
+
+def __dbConfiguration__():
+
+    init_db_folder = os.path.join("db", "docker-entrypoint-initdb.d")
+    try:
+        os.makedirs(init_db_folder, exist_ok=False) # if it exists, an exception is thrown
+
+        sql_folder = os.path.join("db", "sql")
+        for filename in os.listdir(sql_folder):
+             source_path = os.path.join(sql_folder, filename)
+             target_path = os.path.join(init_db_folder, filename)
+
+             # Vérifie si l'élément est un fichier (et non un dossier)
+             if os.path.isfile(source_path):
+                 # Copie le fichier
+                 shutil.copy(source_path, target_path)
+
+    except OSError as error:
+        print(f"{GREEN}DB already exist initialized!{NC}")
+
 
 def __dbDataConfiguration__():
 
@@ -145,16 +169,18 @@ def __dbDataConfiguration__():
     print("Configure the initial data folder")
     
     # Création du répertoire de données initiales s'il n'existe pas
-    data_folder = "db/data"
+    data_folder = os.path.join("db", "data")
     try:
         os.makedirs(data_folder, exist_ok=False) # if it exists, an exception is thrown
         # Dossiers source et cible
-        free_data_folder = "db/freeData"
+        #free_data_folder = "db/freeData"
 
         # Vérifie si le dossier cible existe, sinon le crée
-        os.makedirs(data_folder, exist_ok=True)
+        #os.makedirs(data_folder, exist_ok=True)
 
-        input("If you want an initial data set, put it into 'db/data' folder with name matches with [0-9]*.sql, then press enter")
+        input("If you want an initial data set, put it into 'db/data' folder with name matches with [0-9]*.sql.")
+        input("Free data samples are available at 'db/freeData' folder.")
+        input("Then press enter")
         # if "y" == input("Do you want to start with free data (y/n)? "):
         #     # Parcourt tous les fichiers dans le dossier source
         #     for filename in os.listdir(free_data_folder):
@@ -240,7 +266,9 @@ def __dockerRun__(docker_option):
 def start(docker_option = []):
     __mainConfiguration__()
 
+    __dbConfiguration__()
     __dbDataConfiguration__()
+
     __dockerConfiguration__()
     __dockerRun__(docker_option)
     
@@ -415,7 +443,7 @@ def destroy():
     ##########
     # Destroy App
     print("##########")
-    print(f"{RED}Destroy App{NC}")
+    print(f"{RED}DEPRECATED (use from scratch): Destroy App{NC}")
     
 
     if "YES" == input("Are you sure (YES/NO)? NO DATA CAN BE RECOVERED! ") and "YES" == input("Are you realy sure(YES/NO)? don't cry if you've lost your data! "):
@@ -449,16 +477,35 @@ def fromscratch():
     # Clean up App from scratch
     print("##########")
     print(f"{RED}Clean up App from scratch{NC}")
+    print(f"{RED}The application must be stopped{NC}")
+
     
     if "YES" == input("Are you sure (YES/NO)? NO INITIAL DATA OR CUSTOMIZED CONFIGURATION CAN BE RECOVERED! ") and "YES" == input("Are you realy sure(YES/NO)? don't cry if you've lost anything! "):
-        shutil.rmtree("db/data", ignore_errors=True)
-        for f in glob.glob("db/sql/5*"):
-            os.remove(f)
-        os.remove("docker/docker-compose.yml")
-        #os.remove("docker/phpmyadmin/config.inc.php")
-        os.remove("webApp/config.php")
-        os.remove("config.py")
-        
+        try:
+            if os.name == 'nt':
+                prog = subprocess.Popen(DOCKER_COMMAND + ['volume', 'rm', os.environ["COMPOSE_PROJECT_NAME"] + '_learnagement_persistent_db_' + os.environ["INSTANCE_NAME"]])
+                prog.communicate()
+            else:
+                subprocess.run(DOCKER_COMMAND + ["volume", "rm", os.environ["COMPOSE_PROJECT_NAME"] + "_learnagement_persistent_db_" + os.environ["INSTANCE_NAME"]], check=True)
+
+            shutil.rmtree(os.path.join("db", "data"), ignore_errors=True)
+            shutil.rmtree(os.path.join("db", "docker-entrypoint-initdb.d"), ignore_errors=True)
+            os.remove(os.path.join("docker", "docker-compose.yml"))
+            #os.remove(os.path.join("docker", "phpmyadmin", "config.inc.php"))
+            os.remove(os.path.join("webApp", "config.php"))
+            os.remove("config.py")
+
+            os.remove(".env")
+            for container in containers:
+                target_path = os.path.join(container, ".env")
+                os.remove(target_path)
+
+            print(f"{GREEN}The application was reset to its initial state.{NC}")
+        except subprocess.CalledProcessError as e:
+            print(e.output)
+            print(f"{RED}The application was not reset to its initial state.{NC}")
+
+
 def help(argv):
     print("Usage: " + argv[0] + " [-start|-stop|-build|-backupDB|-destroy|-updateEnv|-exportInstance|-importInstance FILE_NAME|-help]")
             

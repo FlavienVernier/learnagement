@@ -11,7 +11,7 @@ def main():
     # Dossier source contenant les fichiers .sql
     source_folder = os.path.join(os.getcwd(), "data")
     # Dossier cible où les liens symboliques seront créés
-    target_folder = os.path.join(os.getcwd(), "sql")
+    target_folder = os.path.join(os.getcwd(), "docker-entrypoint-initdb.d")
 
     # Crée le dossier cible s'il n'existe pas
     os.makedirs(target_folder, exist_ok=True)

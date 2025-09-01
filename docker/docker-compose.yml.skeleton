@@ -15,7 +15,7 @@ services:
             # - MYSQL_PASSWORD=${MYSQL_USER_PASSWORD}
             - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
         volumes:
-            - ../db/sql:/docker-entrypoint-initdb.d
+            - ../db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
             - ./mysql/conf.d:/etc/mysql/conf.d
             - learnagement_persistent_db_${INSTANCE_NAME}:/var/lib/mysql
     phpmyadmin_${INSTANCE_NAME}:

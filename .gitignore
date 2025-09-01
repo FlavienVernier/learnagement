@@ -6,7 +6,7 @@
 # data and backup directories store private data, NEVER PUT IN ON GIT 
 **/data
 **/backup
-
+db/docker-entrypoint-initdb.d
 
 __pycache__
 .*
