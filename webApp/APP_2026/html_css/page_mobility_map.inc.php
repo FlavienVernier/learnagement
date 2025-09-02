@@ -6,7 +6,7 @@
         require_once("../../config.php");
         loadEnv("../..");
 
-        print("\"" . $_ENV['MOBILITY_URL'] . "\"");
+        print("\"" . $_SERVER['SERVER_NAME'] . ":" . $_ENV['MOBILITY_PORT'] . "\"");
     ?>
     width="100%" height="600px" style="border:none;"></iframe>
 </div>
