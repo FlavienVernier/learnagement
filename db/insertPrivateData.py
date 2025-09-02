@@ -28,19 +28,20 @@ def main():
         # Construit le chemin relatif du fichier source par rapport au dossier cible
         relative_path = os.path.relpath(filepath, start=target_folder)
         source_path = os.path.join(source_folder , basename)
-        
+
+        shutil.copy(source_path, target_path)
         # Crée ou met à jour le lien symbolique
-        try:
-            if os.path.exists(target_path):  # Supprime le lien existant s'il est déjà présent
-                os.remove(target_path)
-            if os.name == 'nt':
-                shutil.copy(source_path, target_path)
-            else:
-                os.symlink(relative_path, target_path)
-                
-            print(f"{GREEN}Created symlink: {target_path} -> {source_path}{NC}")
-        except OSError as e:
-            print(f"{RED}Error creating symlink for {filepath}: {e}{NC}")
+        # try:
+        #     if os.path.exists(target_path):  # Supprime le lien existant s'il est déjà présent
+        #         os.remove(target_path)
+        #     if os.name == 'nt':
+        #         shutil.copy(source_path, target_path)
+        #     else:
+        #         os.symlink(relative_path, target_path)
+        #
+        #     print(f"{GREEN}Created symlink: {target_path} -> {source_path}{NC}")
+        # except OSError as e:
+        #     print(f"{RED}Error creating symlink for {filepath}: {e}{NC}")
 
 if __name__ == "__main__":
     main()

@@ -67,8 +67,8 @@ def __mainConfiguration__():
             file.write("#########################################################################" + "\n")
             file.write("" + "\n")
             file.write("SESSION_TIMEOUT=" + "900" + "\n")
-            file.write("DOCKER_COMMAND=docker")
-            file.write("DOCKER_COMPOSE_COMMAND=docker compose")
+            file.write("DOCKER_COMMAND=docker" + "\n")
+            file.write("DOCKER_COMPOSE_COMMAND=docker compose" + "\n")
 
 
             file.write("" + "\n")
@@ -124,6 +124,12 @@ def __mainConfiguration__():
             file.write("NEXTAUTH_URL=http://localhost:" + str(instance_number) + "3000" + "\n")
             file.write("NEXTAUTH_DOCKER_URL=http://learnagement_nextjs_" + instance_name + "\n")
 
+            file.write("" + "\n")
+            file.write("#########################################################################" + "\n")
+            file.write("" + "\n")
+
+            file.write("MOBILITY_URL=http://localhost:" + str(instance_number) + "5173" + "\n")
+
         print(f".env générated")
 
         updateEnv()
@@ -178,8 +184,8 @@ def __dbDataConfiguration__():
         # Vérifie si le dossier cible existe, sinon le crée
         #os.makedirs(data_folder, exist_ok=True)
 
-        input("If you want an initial data set, put it into 'db/data' folder with name matches with [0-9]*.sql.")
-        input("Free data samples are available at 'db/freeData' folder.")
+        print("If you want an initial data set, put it into 'db/data' folder with name matches with [0-9]*.sql.")
+        print("Free data samples are available at 'db/freeData' folder.")
         input("Then press enter")
         # if "y" == input("Do you want to start with free data (y/n)? "):
         #     # Parcourt tous les fichiers dans le dossier source
@@ -469,7 +475,7 @@ def destroy():
     else:
         print(f"{GREEN}App not destroyed{NC}")
 
-def fromscratch():
+def fromScratch():
 
     load_dotenv()
 
@@ -491,9 +497,6 @@ def fromscratch():
             shutil.rmtree(os.path.join("db", "data"), ignore_errors=True)
             shutil.rmtree(os.path.join("db", "docker-entrypoint-initdb.d"), ignore_errors=True)
             os.remove(os.path.join("docker", "docker-compose.yml"))
-            #os.remove(os.path.join("docker", "phpmyadmin", "config.inc.php"))
-            os.remove(os.path.join("webApp", "config.php"))
-            os.remove("config.py")
 
             os.remove(".env")
             for container in containers:
@@ -507,7 +510,7 @@ def fromscratch():
 
 
 def help(argv):
-    print("Usage: " + argv[0] + " [-start|-stop|-build|-backupDB|-destroy|-updateEnv|-exportInstance|-importInstance FILE_NAME|-help]")
+    print("Usage: " + argv[0] + " [-start|-stop|-build|-backupDB|-destroy|-fromScratch|-updateEnv|-exportInstance|-importInstance FILE_NAME|-help]")
             
 def main(argv):
     # if script parameter is destroy
@@ -521,6 +524,8 @@ def main(argv):
         start(docker_option = ["--build"])
     elif len(argv)==2 and argv[1] == "-destroy":
         destroy()
+    elif len(argv)==2 and argv[1] == "-fromScratch":
+        fromScratch()
     elif len(argv)==2 and argv[1] == "-updateEnv":
         updateEnv()
     elif len(argv)==2 and argv[1] == "-exportInstance":

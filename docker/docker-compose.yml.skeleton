@@ -11,8 +11,8 @@ services:
         command: --mysql-native-password=ON
         environment:
             - MYSQL_DATABASE=${MYSQL_DB}
-            # - MYSQL_USER=${MYSQL_USER_LOGIN}
-            # - MYSQL_PASSWORD=${MYSQL_USER_PASSWORD}
+            - MYSQL_USER=${MYSQL_USER_LOGIN}
+            - MYSQL_PASSWORD=${MYSQL_USER_PASSWORD}
             - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
         volumes:
             - ../db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
@@ -72,6 +72,19 @@ services:
         volumes:
             - ../webappnext:/app
             - ../webappnext/node_modules:/app/node_modules
+        depends_on:
+            - phpbackend_${INSTANCE_NAME}
+    mobility_${INSTANCE_NAME}:
+        container_name: learnagement_mobility_${INSTANCE_NAME}
+        build: ./mobility_map
+        restart: always
+        networks:
+              - learnagement_front_${INSTANCE_NAME}
+        ports:
+            - "${INSTANCE_NUMBER}5173:5173"
+        volumes:
+            - ../mobility_map:/app
+            - ../mobility_map/node_modules:/app/node_modules
         depends_on:
             - phpbackend_${INSTANCE_NAME}
     python_web_server_${INSTANCE_NAME}:
