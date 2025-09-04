@@ -123,7 +123,8 @@ def update_table_sequence(user_id, selected_module, selected_seance_type):
         # ],
         style_cell_conditional=[
             {'if': {'column_id': 'id_sequence', },
-             'display': 'None', }],
+             'display': 'None', }
+        ],
     )
     return [table_sequence]
 

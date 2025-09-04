@@ -105,7 +105,7 @@ def __mainConfiguration__():
             file.write("#########################################################################" + "\n")
             file.write("" + "\n")
 
-            # Refactor XXX_URL (not XXX_DOCKER_URL) must be XXX_PUBLIC_URL
+            # ToDo Refactor XXX_URL (not XXX_DOCKER_URL) must be XXX_PUBLIC_URL, remove url with "localhost"
 
             file.write("PHP_BACKEND_URL=http://localhost:" + str(instance_number) + "0081" + "\n")
             file.write("PHP_BACKEND_DOCKER_URL=http://learnagement_phpbackend_" + instance_name + "\n")
