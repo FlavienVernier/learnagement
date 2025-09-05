@@ -1,7 +1,7 @@
 # learnagement
 Learnagement (Learning management) est un outil d'intégration de données de l'enseignement, il a pour but de faire le pont entre étudiants, enseignants et administratifs. Il est principalement développé par les étudiants de l'USMB, ceux de la filière IDU de Polytech Annecy dans le cadre d'un apprentissage par projet et ceux de Licence de l'UFR SCEM dans le cadre de projets. 
 
-L'App Web s'organise autour de différents objectifs enrichis par les axes de développement choisi par les étudiants et enseignants : la gestion du planning prévisionnel des enseignants, la cohérence entre le MCCC le prévisionnel et la planification réelle, et la gestion des absences des étudiants...
+L'App Web s'organise autour de différents objectifs enrichis par les axes de développement choisi par les étudiants et enseignants : la gestion du planning prévisionnel des enseignants, la cohérence entre le MCCC, le prévisionnel et la planification réelle, et la gestion des absences des étudiants...
 
 ## Prérequis
 OS Unix ou Windows

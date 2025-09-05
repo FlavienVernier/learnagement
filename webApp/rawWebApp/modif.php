@@ -6,7 +6,7 @@
     require_once("config.php");
 
 if(isset($_SESSION['loggedin'])){
-    if (isset($_SESSION['start']) && (time() - $_SESSION['start'] > $session_timeout)) {
+    if (isset($_SESSION['start']) && (time() - $_SESSION['start'] > $_ENV["SESSION_TIMEOUT"])) {
        session_unset(); 
        session_destroy(); 
        echo "you were disconnected due to a session timeout"; 
