@@ -143,26 +143,27 @@ def update_table_students_without_internship():
     )
     return table_students_without_stage
 
+def update_pie_chart():
+    # Compter les étudiants avec et sans stage
+    #avec_stage_avec_tuteur = df_stages_with_supervisor().shape[0]
+    #avec_stage_sans_tuteur = df_stages_without_supervisor().shape[0]
+    #sans_stage = df_students_without_stage().shape[0]
+    avec_stage_avec_tuteur = len(get_internship_with_supervisor())
+    avec_stage_sans_tuteur = len(get_internship_without_supervisor())
+    sans_stage = len(get_students_without_internship())
 
-# Compter les étudiants avec et sans stage
-#avec_stage_avec_tuteur = df_stages_with_supervisor().shape[0]
-#avec_stage_sans_tuteur = df_stages_without_supervisor().shape[0]
-#sans_stage = df_students_without_stage().shape[0]
-avec_stage_avec_tuteur = len(get_internship_with_supervisor())
-avec_stage_sans_tuteur = len(get_internship_without_supervisor())
-sans_stage = len(get_students_without_internship())
+    # Données pour le pie chart
+    fig_labels = ['Avec Stage et tuteur', 'Avec Stage, sans tuteur', 'Sans Stage']
+    fig_values = [avec_stage_avec_tuteur, avec_stage_sans_tuteur, sans_stage]
 
-# Données pour le pie chart
-fig_labels = ['Avec Stage et tuteur', 'Avec Stage, sans tuteur', 'Sans Stage']
-fig_values = [avec_stage_avec_tuteur, avec_stage_sans_tuteur, sans_stage]
+    # Création du pie chart
+    fig = go.Figure(data=[go.Pie(labels=fig_labels, values=fig_values, hole=.3)])
 
-# Création du pie chart
-fig = go.Figure(data=[go.Pie(labels=fig_labels, values=fig_values, hole=.3)])
+    # Personnalisation du pie chart
+    fig.update_traces(marker=dict(colors=['#00FF00', '#0000FF', '#FF0000']))
+    fig.update_layout(title_text="Répartition des étudiants avec ou sans stage")
 
-# Personnalisation du pie chart
-fig.update_traces(marker=dict(colors=['#007BFF', '#FF8400']))
-fig.update_layout(title_text="Répartition des étudiants avec ou sans stage")
-
+    return dcc.Graph(id='pie_chart', figure=fig)
 
 
 # Définition de la mise en page de l'application
@@ -221,10 +222,13 @@ app10_administratif_layout = html.Div(children=[
             dbc.Button("Save the data", id="submit-button", color="primary", outline=True, disabled=False)],
             className="mb-3")
     ]),
+    html.Br(),
     html.Div(
+       id="div_pie_chart",
        style={'display': 'inline-block', 'verticalAlign': 'top',}, 
        children=[ 
-            dcc.Graph(id='pie-chart', figure=fig) ]), 
+            update_pie_chart()]),
+    html.Br(),
     html.Div(
         style={'display': 'inline-block', 'verticalAlign': 'top',}, 
         children=[ 
@@ -281,6 +285,7 @@ def register_callbacks(app):
 
     @app.callback(
         Output(component_id='submit-button', component_property='children', allow_duplicate=True),
+        Output(component_id='div_pie_chart', component_property='children', allow_duplicate=True),
         Output(component_id='div_stages_with_supervisor', component_property='children', allow_duplicate=True),
         Output(component_id='div_stages_without_supervisor', component_property='children', allow_duplicate=True),
         Output(component_id='div_students_without_stage', component_property='children', allow_duplicate=True),
@@ -304,13 +309,14 @@ def register_callbacks(app):
                 entreprise = new_entreprise
             save_status = app10_stage_tools.add_stage(entreprise, sujet, mission, ville, start_date, end_date, id_etudiant, id_enseignant)
             print(save_status, flush=True)
-            return save_status, update_table_stages_with_supervisor(), update_table_stages_without_supervisor(), update_table_students_without_internship()
+            return save_status, [update_pie_chart()], update_table_stages_with_supervisor(), update_table_stages_without_supervisor(), update_table_students_without_internship()
         else:
             raise PreventUpdate
 
     @app.callback(
         Output(component_id='submit-button', component_property='children'),
-        Input(component_id='submit-button', component_property='children')
+        Input(component_id='submit-button', component_property='children'),
+        prevent_initial_call=True,
     )
     def button_text(text):
         sleep(1)
@@ -318,15 +324,29 @@ def register_callbacks(app):
 
     # set internship advisor
     @app.callback(
+        Output(component_id='div_pie_chart', component_property='children', allow_duplicate=True),
         Output(component_id='div_stages_with_supervisor', component_property='children',allow_duplicate=True),
         Output(component_id='div_stages_without_supervisor', component_property='children',allow_duplicate=True),
         Input('table_stages_without_supervisor', 'data_previous'),
         State('table_stages_without_supervisor', 'data'),
-            prevent_initial_call=True,
+        prevent_initial_call=True,
     )
     def cb_set_internship_supervisor(previous, current):
-        if previous is None or current is None or len(previous) != len(current):
-            return update_table_stages_with_supervisor(), update_table_stages_without_supervisor()
+        if previous is None or current is None:
+            return [update_pie_chart()], update_table_stages_with_supervisor(), update_table_stages_without_supervisor()
+        elif len(previous) > len(current):  # else row updated
+            to_remove = [row for row in previous if row not in current][0]
+            # df = app5_module_tools.get_moduleSequencageByEnseignantId(user_id)
+            # # print('toRemove', to_remove, flush=True)
+            # id_to_remove = df[(df['nombre'] == to_remove['nombre'])
+            #                   & (df['type'] == to_remove['type'])
+            #                   & (df['duree_h'] == to_remove['duree_h'])
+            #                   & (df['groupe_type'] == to_remove['groupe_type'])][['id_module_sequencage']].iat[0, 0]
+            # print('id_toRemove', id_to_remove, flush=True)
+            id_to_remove = to_remove['id_stage']
+            app10_stage_tools.remove_stage(id_to_remove)
+            #return [update_pie_chart()]
+            #return [update_pie_chart()], update_table_stages_with_supervisor(), update_table_stages_without_supervisor()
         else:
             row_changed = [row for row in current if row not in previous]
             if len(row_changed) > 0:  # else callback invoked by data deleted
@@ -339,7 +359,7 @@ def register_callbacks(app):
                     #                    & (df['duree_h'] == row_changed['duree_h'])
                     #                    & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0]
                     ret = app10_stage_tools.set_internship_supervisor(id_stage, new_supervisor_id)
-                    return update_table_stages_with_supervisor(), update_table_stages_without_supervisor()
+        return [update_pie_chart()], update_table_stages_with_supervisor(), update_table_stages_without_supervisor()
 
         # reset internship advisor
     @app.callback(
@@ -350,9 +370,7 @@ def register_callbacks(app):
         prevent_initial_call=True,
     )
     def cb_reset_internship_supervisor(previous, current):
-        if previous is None or current is None or len(previous) != len(current):
-            return update_table_stages_with_supervisor(), update_table_stages_without_supervisor()
-        else:
+        if previous is not None and current is not None and len(previous) == len(current):
             row_changed = [row for row in current if row not in previous]
             if len(row_changed) > 0:  # else callback invoked by data deleted
                 # df = app5_module_tools.get_moduleSequenceByEnseignantId(user_id)
@@ -364,20 +382,17 @@ def register_callbacks(app):
                 #                    & (df['duree_h'] == row_changed['duree_h'])
                 #                    & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0]
                 ret = app10_stage_tools.set_internship_supervisor(id_stage, new_supervisor_id)
-                return update_table_stages_with_supervisor(), update_table_stages_without_supervisor()
+        return update_table_stages_with_supervisor(), update_table_stages_without_supervisor()
 
     # Remove stage with supervisor
     @app.callback(
-        # Output('sequencage_info_status', 'children'),
+        Output(component_id='div_pie_chart', component_property='children', allow_duplicate=True),
         Input('table_stages_with_supervisor', 'data_previous'),
         State('table_stages_with_supervisor', 'data'),
         prevent_initial_call=True,
     )
-    def cb_remove_sequencag(previous, current):
-        if previous is None:
-            print("Kaboum", flush=True)
-            # return "Kaboum"
-        elif len(previous) > len(current):  # else row updated
+    def cb_remove_stage_with(previous, current):
+        if previous is not None and current is not None and len(previous) > len(current):  # else row updated
             to_remove = [row for row in previous if row not in current][0]
             # df = app5_module_tools.get_moduleSequencageByEnseignantId(user_id)
             # # print('toRemove', to_remove, flush=True)
@@ -388,26 +403,28 @@ def register_callbacks(app):
             # print('id_toRemove', id_to_remove, flush=True)
             id_to_remove = to_remove['id_stage']
             app10_stage_tools.remove_stage(id_to_remove)
+        return [update_pie_chart()]
 
     # Remove stage without supervisor
-    @app.callback(
-        # Output('sequencage_info_status', 'children'),
-        Input('table_stages_without_supervisor', 'data_previous'),
-        State('table_stages_without_supervisor', 'data'),
-        prevent_initial_call=True,
-    )
-    def cb_remove_sequencag(previous, current):
-        if previous is None:
-            print("Kaboum", flush=True)
-            # return "Kaboum"
-        elif len(previous) > len(current):  # else row updated
-            to_remove = [row for row in previous if row not in current][0]
-            # df = app5_module_tools.get_moduleSequencageByEnseignantId(user_id)
-            # # print('toRemove', to_remove, flush=True)
-            # id_to_remove = df[(df['nombre'] == to_remove['nombre'])
-            #                   & (df['type'] == to_remove['type'])
-            #                   & (df['duree_h'] == to_remove['duree_h'])
-            #                   & (df['groupe_type'] == to_remove['groupe_type'])][['id_module_sequencage']].iat[0, 0]
-            # print('id_toRemove', id_to_remove, flush=True)
-            id_to_remove = to_remove['id_stage']
-            app10_stage_tools.remove_stage(id_to_remove)
+    # @app.callback(
+    #     Output(component_id='div_pie_chart', component_property='children', allow_duplicate=True),
+    #     Input('table_stages_without_supervisor', 'data_previous'),
+    #     State('table_stages_without_supervisor', 'data'),
+    #     prevent_initial_call=True,
+    # )
+    # def cb_remove_stage_without(previous, current):
+    #     if previous is None:
+    #         print("Kaboum", flush=True)
+    #         # return "Kaboum"
+    #     elif len(previous) > len(current):  # else row updated
+    #         to_remove = [row for row in previous if row not in current][0]
+    #         # df = app5_module_tools.get_moduleSequencageByEnseignantId(user_id)
+    #         # # print('toRemove', to_remove, flush=True)
+    #         # id_to_remove = df[(df['nombre'] == to_remove['nombre'])
+    #         #                   & (df['type'] == to_remove['type'])
+    #         #                   & (df['duree_h'] == to_remove['duree_h'])
+    #         #                   & (df['groupe_type'] == to_remove['groupe_type'])][['id_module_sequencage']].iat[0, 0]
+    #         # print('id_toRemove', id_to_remove, flush=True)
+    #         id_to_remove = to_remove['id_stage']
+    #         app10_stage_tools.remove_stage(id_to_remove)
+    #         return [update_pie_chart()]
