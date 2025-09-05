@@ -19,7 +19,7 @@ WORKDIR /app
 
 # Data directory
 # ToDo must be remove so that data will accessed via db
-RUN mkdir /data/
+#RUN mkdir /data/
 
 # Rum app
 CMD ["python", "./main.py"] 

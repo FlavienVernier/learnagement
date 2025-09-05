@@ -100,23 +100,49 @@ services:
             - ../visualisation/data/:/data/
         depends_on:
             - mysql_${INSTANCE_NAME}
-
-    vllm-openai_INSTANCE_NAME:
-        image: vllm/vllm-openai:latest
-        #runtime: nvidia
+    llm_server_api_${INSTANCE_NAME}:
+        container_name: learnagement_llm_server_api_${INSTANCE_NAME}
+        build:
+            context: ./llm_server_api/
+            dockerfile: Dockerfile
         environment:
-            - NVIDIA_VISIBLE_DEVICES=all
-            - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN}
+            - PORT=8081
+            - LOG_LEVEL=INFO
+        env_file:
+            - .env
+        restart: always
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 10s
+        networks:
+              - learnagement_front_${INSTANCE_NAME}
         ports:
-            - "${INSTANCE_NUMBER}8000:8000"
-        ipc: host
+            - "${INSTANCE_NUMBER}6626:8081" # Beginning of Planck constant
         volumes:
-            - ./vllm-openai/huggingface:/root/.cache/huggingface
-        command: >
-            --model mistralai/Mistral-NeMo-Instruct-2407
-            --tokenizer_mode mistral
-            --load_format mistral
-            --config_format mistral
+            - ../appLLM/:/app/
+            #- ../appLLM/data/:/data/
+
+    #vllm-openai_INSTANCE_NAME:
+    #    image: vllm/vllm-openai:latest
+    #    #runtime: nvidia
+    #    environment:
+    #        - NVIDIA_VISIBLE_DEVICES=all
+    #        - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN}
+    #    ports:
+    #        - "${INSTANCE_NUMBER}8000:8000"
+    #    ipc: host
+    #    volumes:
+    #        - ./vllm-openai/huggingface:/root/.cache/huggingface
+    #    command: >
+    #        --model mistralai/Mistral-NeMo-Instruct-2407
+    #        --tokenizer_mode mistral
+    #        --load_format mistral
+    #        --config_format mistral
 volumes:
     learnagement_persistent_db_${INSTANCE_NAME}:
 networks:

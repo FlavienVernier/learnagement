@@ -69,7 +69,9 @@ def __mainConfiguration__():
             file.write("SESSION_TIMEOUT=" + "900" + "\n")
             file.write("DOCKER_COMMAND=docker" + "\n")
             file.write("DOCKER_COMPOSE_COMMAND=docker compose" + "\n")
-            file.write("HF_TOKEN=" + input("Give your Hugging Face Token: ") + "\n")
+            #file.write("HF_TOKEN=" + input("Give your Hugging Face Token: ") + "\n")
+            file.write("LLM_BASE_URL=http://model-runner.docker.internal/engines/llama.cpp/v1" + "\n")
+            file.write("LLM_MODEL_NAME=ai/llama3.2:1B-Q8_0" + "\n")
 
             file.write("" + "\n")
             file.write("#########################################################################" + "\n")
@@ -129,6 +131,12 @@ def __mainConfiguration__():
             file.write("" + "\n")
 
             file.write("MOBILITY_PORT=" + str(instance_number) + "5173" + "\n")
+
+            file.write("" + "\n")
+            file.write("#########################################################################" + "\n")
+            file.write("" + "\n")
+
+            file.write("LLM_PORT=" + str(instance_number) + "6626" + "\n")
 
         print(f".env générated")
 
