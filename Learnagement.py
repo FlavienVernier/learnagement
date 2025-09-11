@@ -499,8 +499,11 @@ def fromScratch():
             if os.name == 'nt':
                 prog = subprocess.Popen(DOCKER_COMMAND + ['volume', 'rm', os.environ["COMPOSE_PROJECT_NAME"] + '_learnagement_persistent_db_' + os.environ["INSTANCE_NAME"]])
                 prog.communicate()
+                subprocess.run(DOCKER_COMMAND + ["volume", "rm", os.environ["COMPOSE_PROJECT_NAME"] + "_qdrant_data_" + os.environ["INSTANCE_NAME"]], check=True)
             else:
                 subprocess.run(DOCKER_COMMAND + ["volume", "rm", os.environ["COMPOSE_PROJECT_NAME"] + "_learnagement_persistent_db_" + os.environ["INSTANCE_NAME"]], check=True)
+                subprocess.run(DOCKER_COMMAND + ["volume", "rm", os.environ["COMPOSE_PROJECT_NAME"] + "_qdrant_data_" + os.environ["INSTANCE_NAME"]], check=True)
+
 
             shutil.rmtree(os.path.join("db", "data"), ignore_errors=True)
             shutil.rmtree(os.path.join("db", "docker-entrypoint-initdb.d"), ignore_errors=True)

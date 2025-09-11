@@ -9,6 +9,8 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_swagger_ui import get_swaggerui_blueprint
 
+import initQdrant
+
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 
 # Configure cache
@@ -148,13 +150,24 @@ def chat_api():
 
 @cache.memoize(timeout=300)
 def call_llm_api(user_message):
+    print("user_message: ", user_message, flush=True)
+    doc = initQdrant.get_doc(user_message)
+    print("doc: ", doc, flush=True)
+    context=""
+    for point in doc:
+        print("ID:", point.id)
+        print("Score:", point.score)
+        print("Metadata:", point.metadata)
+        context = context + " " + point.metadata['document']
+    print("context: ", context, flush=True)
     """Calls the LLM API and returns the response with caching"""
     chat_request = {
         "model": get_model_name(),
         "messages": [
             {
                 "role": "system",
-                "content": "You are a helpful assistant. Please provide structured responses using markdown formatting. Use headers (# for main points), bullet points (- for lists), bold (**text**) for emphasis, and code blocks (```code```) for code examples. Organize your responses with clear sections and concise explanations."
+                #"content": "You are a helpful assistant. Please provide structured responses using markdown formatting. Use headers (# for main points), bullet points (- for lists), bold (**text**) for emphasis, and code blocks (```code```) for code examples. Organize your responses with clear sections and concise explanations. "
+                "content": "You are a helpful assistant. Please provide structured responses using markdown formatting. Use headers (# for main points), bullet points (- for lists), bold (**text**) for emphasis, and code blocks (```code```) for code examples. Organize your responses with clear sections and concise explanations. " + context
             },
             {
                 "role": "user",
@@ -196,6 +209,8 @@ def add_security_headers(response):
     return response
 
 if __name__ == '__main__':
+    initQdrant.initQdrant()
+
     # Configure logging
     configure_logging()
     
