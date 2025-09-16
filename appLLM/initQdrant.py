@@ -1,4 +1,34 @@
+import os
+
 from qdrant_client import QdrantClient
+from sympy.multipledispatch.dispatcher import source
+
+import dotenv
+
+def load_documents():
+    client = QdrantClient("http://learnagement_qdrant_llm:6333")
+    dotenv.load_dotenv()
+    def load_dir(dir_path, i):
+        for racine, sub_dir, documents in os.walk(dir_path):
+            print("load_dir", racine, sub_dir, documents, flush=True)
+            for document in documents:
+                documentPath = os.path.join(racine, document)
+                with open(documentPath, 'r') as file:
+                    documentContent = file.read()
+
+                    client.add(
+                        collection_name="documents",
+                        documents=documentContent,
+                        metadata=[{"source": documentPath}],
+                        ids=[i]
+                    )
+                    i+=1
+            for dir in sub_dir:
+                i=load_dir(dir, i)
+    i=0
+    documentsPath = os.environ["DOCUMENTS_PATH"]
+    print("documentsPath", documentsPath, flush=True)
+    load_dir(documentsPath, i)
 
 def initQdrant():
     # Initialize Qdrant client
@@ -43,8 +73,17 @@ def initQdrant():
     client.add(
         collection_name="wines6",
         documents=wines_with_descriptions,
+        metadata=
+        #[{"source": "raw_data"}],
+        [{"source": "raw_data_"+str(i)} for i in range(0, len(wines_with_descriptions))],
+        #[
+        #    {"source": "Langchain-docs"},
+        #    {"source": "Linkedin-docs"},
+        #],
         ids=[i for i in range(0, len(wines_with_descriptions))]
     )
+
+    #load_documents()
 
     # search_result = client.query(
     #     collection_name="wines6",

@@ -158,7 +158,8 @@ def call_llm_api(user_message):
         print("ID:", point.id)
         print("Score:", point.score)
         print("Metadata:", point.metadata)
-        context = context + " " + point.metadata['document']
+        #context = context + " Source " + point.metadata['source'] + ": " + point.metadata['document'] +  "\n"
+        context = context + point.metadata['document'] + "(Source: " + point.metadata['source'] + ")\n"
     print("context: ", context, flush=True)
     """Calls the LLM API and returns the response with caching"""
     chat_request = {

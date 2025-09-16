@@ -72,6 +72,7 @@ def __mainConfiguration__():
             #file.write("HF_TOKEN=" + input("Give your Hugging Face Token: ") + "\n")
             file.write("LLM_BASE_URL=http://model-runner.docker.internal/engines/llama.cpp/v1" + "\n")
             file.write("LLM_MODEL_NAME=ai/llama3.2:1B-Q8_0" + "\n")
+            file.write("DOCUMENTS_PATH=document" + "\n")
 
             file.write("" + "\n")
             file.write("#########################################################################" + "\n")

@@ -6,7 +6,7 @@ export DEBUG=${DEBUG:-false}
 export LOG_LEVEL=${LOG_LEVEL:-INFO}
 
 # Print configuration
-echo "Starting Hello-GenAI Python application"
+echo "Starting LNM assistant application"
 echo "Port: $PORT"
 echo "Debug mode: $DEBUG"
 echo "Log level: $LOG_LEVEL"
