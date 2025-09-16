@@ -32,14 +32,14 @@ function updateLNM_stage($conn, $id, $entreprise, $intitule, $description, $vill
   }
 }
 
-function deleteLNM_stage($conn,  $id)
+function deleteLNM_stage($conn,  $id_stage, $user_id)
 {
-  if(action_allowed('DELETE', 'LNM_stage', $id)){
-    $sql = "DELETE FROM `LNM_stage` WHERE `id`=$id";
+  if(action_allowed('DELETE', 'LNM_stage', $user_id)){
+    $sql = "DELETE FROM `LNM_stage` WHERE `id_stage`=$id_stage";
     $res = mysqli_query($conn, $sql);
     return $res;
   }else{
-    return ['No permission to DELETE $id line from LNM_stage'];
+    return ['No permission to DELETE $id_stage line from LNM_stage'];
   }
 }
 
@@ -68,14 +68,21 @@ function listLNM_stageByStudentId($conn, $student_id) {
 }
 
 function listLNM_stageWithSupervisorId($conn){
-    $sql = "SELECT * FROM `LNM_stage` WHERE `id_enseignant` IS NOT NULL;";
+    $sql = 'SELECT LNM_stage.`id_stage`, CONCAT(LNM_etudiant.nom, " ", LNM_etudiant.prenom) AS "étudiant", LNM_stage.`entreprise`, LNM_stage.`intitulé`, LNM_stage.`description`, LNM_stage.`ville`, LNM_stage.`date_debut`, LNM_stage.`date_fin`, LNM_stage.`nature`, CONCAT(LNM_enseignant.nom, " ", LNM_enseignant.prenom) AS enseignant
+FROM `LNM_stage` 
+JOIN LNM_etudiant ON LNM_etudiant.id_etudiant = LNM_stage.id_etudiant
+JOIN LNM_enseignant ON LNM_enseignant.id_enseignant = LNM_stage.id_enseignant
+WHERE LNM_stage.`id_enseignant` IS NOT NULL;';
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);
     return $rs;
 }
 
 function listLNM_stageWithoutSupervisorId($conn){
-    $sql = "SELECT * FROM `LNM_stage` WHERE `id_enseignant` IS NULL;";
+    $sql = 'SELECT LNM_stage.`id_stage`, CONCAT(LNM_etudiant.nom, " ", LNM_etudiant.prenom) AS "étudiant", LNM_stage.`entreprise`,LNM_stage.`intitulé`,LNM_stage.`description`,LNM_stage.`ville`,LNM_stage.`date_debut`,LNM_stage.`date_fin`,`nature`
+FROM `LNM_stage` 
+JOIN LNM_etudiant ON LNM_etudiant.id_etudiant = LNM_stage.id_etudiant
+WHERE LNM_stage.`id_enseignant` IS NULL;';
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);
     return $rs;
@@ -85,4 +92,16 @@ function listLNM_stageStudentsWithoutStage($conn){
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);
     return $rs;
+}
+
+function setLNM_stage_enseignant($conn, $id_stage,  $id_enseignant){
+    $sql = "UPDATE LNM_stage
+            SET id_enseignant = '$id_enseignant'
+            WHERE id_stage = '$id_stage'";
+
+    if(mysqli_query($conn, $sql)){
+        return "Data Updated";
+    }else{
+        return "Updat Failed";
+    }
 }

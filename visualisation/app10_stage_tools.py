@@ -87,16 +87,33 @@ def get_students_without_stage():
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
 def add_stage(entreprise, sujet, mission, ville, start_date, end_date, id_etudiant, id_enseignant):
-    print(id_etudiant, entreprise, sujet, mission, start_date, end_date, id_enseignant, flush=True)
+    #print(id_etudiant, entreprise, sujet, mission, start_date, end_date, id_enseignant, flush=True)
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/create/createStage.php'
     resp = requests.post(url, data={'entreprise':entreprise,
-                                    'sujet':entreprise,
-                                    'mission':entreprise,
+                                    'sujet':sujet,
+                                    'mission':mission,
                                     'ville':ville,
                                     'start_date':start_date,
                                     'end_date':end_date,
                                     'id_etudiant': id_etudiant,
                                     'id_enseignant':id_enseignant}, headers=headers)
+    urlData = resp.content
+    return urlData.decode('utf-8')
+
+
+def set_internship_supervisor(id_stage, new_supervisor_id):
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/update/setStageSupervisor.php'
+    resp = requests.post(url, data={'id_stage':id_stage,
+                                    'id_enseignant':new_supervisor_id}, headers=headers)
+    urlData = resp.content
+    return urlData.decode('utf-8')
+
+
+def remove_stage(id_stage):
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/delete/deleteStage.php'
+    resp = requests.post(url, data={'id_stage':id_stage}, headers=headers)
     urlData = resp.content
     return urlData.decode('utf-8')

@@ -6,7 +6,7 @@
 # data and backup directories store private data, NEVER PUT IN ON GIT 
 **/data
 **/backup
-
+db/docker-entrypoint-initdb.d
 
 __pycache__
 .*
@@ -19,3 +19,4 @@ docker/docker-compose.yml
 
 # don't add js modules on git
 webappnext/node_modules/
+mobility_map/node_modules/

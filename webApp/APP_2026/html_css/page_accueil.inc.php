@@ -21,6 +21,7 @@
             echo "<li><a href='?page=accueil&section=dashboard_administration' class='btn_menu'>Tableau de bord</a></li>";
         }
         ?>
+        <li><a href="?page=accueil&section=mobility_map" class="btn_menu ">Mobility Map</a></li>
         <li><a href="?page=accueil&section=liste_personnel" class="btn_menu ">Liste</a></li>
         <li><a href="?page=accueil&section=ressources" class="btn_menu ">Ressources</a></li>
         <li><br><br></li>
