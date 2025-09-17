@@ -17,6 +17,12 @@ app14_administratif_layout = html.Div(children=[
         children=[
             dcc.Input(id='fake', value='0', type='hidden'),
             html.Div(id='table_modules_sans_ue')]),
+    html.H1(children='Modules sans AC'),
+    html.Div(
+        style={'display': 'inline-block', 'verticalAlign': 'top',},
+        children=[
+            dcc.Input(id='fake', value='0', type='hidden'),
+            html.Div(id='table_modules_sans_ac')]),
 ])
 
 def register_callbacks(app):
@@ -50,3 +56,19 @@ def register_callbacks(app):
             hover=True,
         )
         return [table_modules_sans_ue]
+
+
+    @app.callback(
+        Output(component_id='table_modules_sans_ac', component_property='children'),
+        Input(component_id='fake', component_property='value')
+    )
+    def display_table(user_id_fake):
+        df_stages = app14_check_tools.check_module_without_learning_unit()
+        table_modules_sans_ac = dbc.Table.from_dataframe(
+            df_stages,
+            # Key styling options:
+            striped=True,
+            bordered=True,
+            hover=True,
+        )
+        return [table_modules_sans_ac]
