@@ -11,5 +11,13 @@ def get_list_enseignants_responsabilites():
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listEnseignantResponsabilite.php'
     resp = requests.post(url, data={}, headers=headers)
     urlData = resp.content
-    print(urlData, flush=True)
+    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+
+def get_list_modules_m2c3(id_filiere, id_statut):
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/getModulesM2C3.php'
+    resp = requests.post(url, data={'id_filiere':id_filiere,
+                                    'id_statut':id_statut},
+                            headers=headers)
+    urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
