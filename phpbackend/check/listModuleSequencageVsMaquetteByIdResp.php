@@ -11,13 +11,16 @@
     include("../crud/function_rs_to_table.php");
     include("../crud/function_action_allowed.php");
 
-
-    try{
-        $rsModules =  checkMAQUETTE_moduleSequencageVsMaquuette($conn);
+    if (isset($_POST['id_enseignant'])) {
+      try{
+        $id_responsable = $_POST['id_enseignant'];
+        $rsModules =  checkMAQUETTE_moduleSequencageVsMaquuetteByIdResp($conn, $id_responsable);
 
         echo json_encode($rsModules);
-    }catch (Exception $e) {
-	    echo json_encode($e->getMessage());
+      }catch (Exception $e) {
+	echo json_encode($e->getMessage());
+      }
+    }else{
+        echo json_encode("Error id_enseignant undefined");
     }
-
 

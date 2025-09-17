@@ -102,3 +102,21 @@ WHERE MAQUETTE_module.id_responsable = '$id';";
     $rs = rs_to_table($res);
     return $rs;
 }
+
+function checkMAQUETTE_moduleSequencageVsMaquuette($conn) {
+    $sql="SELECT 
+            `MAQUETTE_module`.`code_module`, 
+            IFNULL(`hCM`,0) + IFNULL(`hTD`,0) + IFNULL(`hTP`,0) + IFNULL(`hTPTD`,0) + IFNULL(`hPROJ`,0) AS `hMCCC`, 
+            `hCequenced`, 
+            IFNULL(`hCM`,0) + IFNULL(`hTD`,0) + IFNULL(`hTP`,0) + IFNULL(`hTPTD`,0) + IFNULL(`hPROJ`,0) - `hCequenced` AS `Reste à planifier`
+        FROM `MAQUETTE_module`
+        JOIN (
+            SELECT `code_module`, SUM(`duree_h`) as hCequenced
+            FROM `MAQUETTE_module_sequencage` 
+            JOIN `MAQUETTE_module_sequence` ON `MAQUETTE_module_sequence`.id_module_sequencage = `MAQUETTE_module_sequencage`.id_module_sequencage
+            JOIN `MAQUETTE_module` ON `MAQUETTE_module`.`id_module` = `MAQUETTE_module_sequencage`.`id_module`
+            GROUP BY `code_module`) sequenced ON  sequenced.`code_module` = `MAQUETTE_module`.`code_module`;";
+    $res = mysqli_query($conn, $sql);
+    $rs = rs_to_table($res);
+    return $rs;
+}
