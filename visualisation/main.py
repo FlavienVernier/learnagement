@@ -48,6 +48,8 @@ def import_apps():
     from app10_stage_administratif import app10_administratif_layout, register_callbacks as register_callbacks_app10_administratif
     from app10_stage_enseignant import app10_enseignant_layout, register_callbacks as register_callbacks_app10_enseignant
     from app10_stage_etudiant import app10_etudiant_layout, register_callbacks as register_callbacks_app10_etudiant
+    from app13_mccc_administratif import app13_administratif_layout, register_callbacks as register_callbacks_app13_administratif
+    from app14_check_administratif import app14_administratif_layout, register_callbacks as register_callbacks_app14_administratif
     return {
         'app1': (app1_layout, register_callbacks_app1),
         'app2': (app2_layout, register_callbacks_app2),
@@ -63,7 +65,9 @@ def import_apps():
         'app9': (app9_layout, register_callbacks_app9),
         'app10_administratif': (app10_administratif_layout, register_callbacks_app10_administratif),
         'app10_enseignant': (app10_enseignant_layout, register_callbacks_app10_enseignant),
-        'app10_etudiant': (app10_etudiant_layout, register_callbacks_app10_etudiant)
+        'app10_etudiant': (app10_etudiant_layout, register_callbacks_app10_etudiant),
+        'app13_administratif': (app13_administratif_layout, register_callbacks_app13_administratif),
+        'app14_administratif': (app14_administratif_layout, register_callbacks_app14_administratif),
     }
 
 LOGO = "https://placehold.co/100x100"
@@ -73,7 +77,9 @@ apps = import_apps()
 menu_items = {
     'administratif': [
         ('Absences', 'app3_administratif'),
-        ('Gestion des stages', 'app10_administratif')
+        ('Gestion des stages', 'app10_administratif'),
+        ('MCCC', 'app13_administratif'),
+        ('Check', 'app14_administratif')
     ],
     'enseignant': [
         ('Carte des Universités', 'app1'),
