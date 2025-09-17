@@ -144,3 +144,12 @@ function listMAQUETTE_module_with_learning_unit($conn, $id)
     return $rs;
 }
 
+function checkMAQUETTE_moduleWithoutLearningUnit($conn)
+{
+    $sql = "SELECT `code_module`, `nom`
+            FROM `MAQUETTE_module`
+            WHERE `id_module` NOT IN (SELECT `id_module` FROM MAQUETTE_module_as_learning_unit);";
+    $res = mysqli_query($conn, $sql);
+    $rs = rs_to_table($res);
+    return $rs;
+}

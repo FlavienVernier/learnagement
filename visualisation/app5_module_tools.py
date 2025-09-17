@@ -55,7 +55,7 @@ def set_intervenant_principal_sequencage(id_sequencage, id_intervenant_principal
 
 def check_moduleSequencage(id_enseignant):
     headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/check/listModuleSequencageVsMaquette.php'
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/check/listModuleSequencageVsMaquetteByIdResp.php'
     resp = requests.post(url, data={'id_enseignant': id_enseignant}, headers=headers)
     urlData = resp.content
     #print(urlData, flush=True)
