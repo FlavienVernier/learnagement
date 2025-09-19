@@ -8,11 +8,14 @@ import time
 import socket
 import datetime
 import dotenv
+import re
 #from dotenv import load_dotenv
 from getpass import getpass
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes
 from pathlib import Path
+
+from exceptiongroup import catch
 
 # Couleurs pour les messages (non directement nécessaires dans Python mais émulation via ANSI codes)
 RED = "\033[0;31m"
@@ -28,15 +31,34 @@ INSTANCE_NAME=None
 INSTANCE_NUMBER=None
 DOCKER_COMMAND=[]
 DOCKER_COMPOSE_COMMAND=[]
+ENV={}
 
 containers = ["docker", "phpbackend", "webApp", "visualisation", "webappnext", ]
 
+# ToDo problem of management of dynamic env changes
 def load_dotenv():
     dotenv.load_dotenv()
-    global DOCKER_COMMAND
-    DOCKER_COMMAND=os.environ["DOCKER_COMMAND"].split(' ')
-    global DOCKER_COMPOSE_COMMAND
-    DOCKER_COMPOSE_COMMAND=os.environ["DOCKER_COMPOSE_COMMAND"].split(' ')
+    global ENV
+    ENV=dict(os.environ)
+
+    try:
+        global DOCKER_COMMAND
+        DOCKER_COMMAND=os.environ["DOCKER_COMMAND"].split(' ')
+        ENV["DOCKER_COMMAND"] = os.environ["DOCKER_COMMAND"].split(' ')
+    except:
+        print(f"{YELLOW}Environment variables not set, your .env is obsolete{NC}")
+    try:
+        global DOCKER_COMPOSE_COMMAND
+        DOCKER_COMPOSE_COMMAND=os.environ["DOCKER_COMPOSE_COMMAND"].split(' ')
+        ENV["DOCKER_COMPOSE_COMMAND"] =  os.environ["DOCKER_COMPOSE_COMMAND"].split(' ')
+    except:
+        print(f"{YELLOW}Environment variables not set, your .env is obsolete{NC}")
+
+    try:
+        if os.environ["AI"] == "NONE":
+            ENV["AI"] = None
+    except:
+        print(f"{YELLOW}Environment variables not set, your .env is obsolete{NC}")
 
 #def generate_nextauth_secret(base_secret: str) -> bytes:
 def __generate_secret__() -> bytes:
@@ -69,10 +91,17 @@ def __mainConfiguration__():
             file.write("SESSION_TIMEOUT=" + "900" + "\n")
             file.write("DOCKER_COMMAND=docker" + "\n")
             file.write("DOCKER_COMPOSE_COMMAND=docker compose" + "\n")
+            ai="?"
+            while ai!="n" and ai!="y":
+                ai=input("Do you have an AI system? (y/n): ")
+            if ai=="n":
+                file.write("AI=NONE" + "\n") # if NONE AI (LLM, RAG...) docker are not launched
+            else:
+                file.write("AI=YES" + "\n")
             #file.write("HF_TOKEN=" + input("Give your Hugging Face Token: ") + "\n")
-            file.write("LLM_BASE_URL=http://model-runner.docker.internal/engines/llama.cpp/v1" + "\n")
+            file.write("LLM_BASE_URL=http://model-runner.docker.internal/" + "\n")
             file.write("LLM_MODEL_NAME=ai/llama3.2:1B-Q8_0" + "\n")
-            file.write("DOCUMENTS_PATH=document" + "\n")
+            file.write("RAG_DOCUMENTS_PATH=document" + "\n")
 
             file.write("" + "\n")
             file.write("#########################################################################" + "\n")
@@ -235,9 +264,16 @@ def __dockerConfiguration__():
     
     if not os.path.exists("docker-compose.yml"):
         shutil.copy("docker-compose.yml.skeleton", "docker-compose.yml")
-        __searchReplaceInFile__("docker-compose.yml", "${INSTANCE_NAME}", os.environ["INSTANCE_NAME"])
-        __searchReplaceInFile__("docker-compose.yml", "${INSTANCE_NUMBER}", str(os.environ["INSTANCE_NUMBER"]))
+        __searchReplaceInFile__("docker-compose.yml", r"\$\{INSTANCE_NAME\}", os.environ["INSTANCE_NAME"])
+        __searchReplaceInFile__("docker-compose.yml", r"\$\{INSTANCE_NUMBER\}", str(os.environ["INSTANCE_NUMBER"]))
         #searchReplaceInFile("docker-compose.yml", "MYSQL_ROOT_PASSWORD", os.environ["MYSQL_ROOT_PASSWORD"])
+        print('ENV["AI"]', ENV["AI"], flush=True)
+        if ENV["AI"]:
+            __searchReplaceInFile__("docker-compose.yml", r"\$\{IF AI\}", "")
+            __searchReplaceInFile__("docker-compose.yml", r"\$\{FI AI\}", "")
+        else:
+            __searchReplaceInFile__("docker-compose.yml", r" *\$\{IF AI\}(([^\$]*)\n)* *\$\{FI AI\}", "")
+
     elif(os.path.getmtime("docker-compose.yml.skeleton") > os.path.getmtime("docker-compose.yml")):
         print(f"{YELLOW}WARNING: docker-compose.yml.skeleton has been updated, your docker-compose.yml can be deprecated{NC}")
     
@@ -301,13 +337,14 @@ def __filecmp__(file1, file2):
     with open(file1, "r") as f1, open(file2, "r") as f2:
         return f1.read() == f2.read()
 
-def __searchReplaceInFile__(fileName, patern, value):
+def __searchReplaceInFile__(fileName, pattern, value):
     # Read in the file
     with open(fileName, 'r') as file:
         filedata = file.read()
 
     # Replace the target string
-    filedata = filedata.replace(patern, value)
+    #filedata = filedata.replace(pattern, value)
+    filedata = re.sub(pattern, value, filedata)
     
     # Write the file out again
     with open(fileName, 'w') as file:
@@ -496,29 +533,42 @@ def fromScratch():
 
 
     if "YES" == input("Are you sure (YES/NO)? NO INITIAL DATA OR CUSTOMIZED CONFIGURATION CAN BE RECOVERED! ") and "YES" == input("Are you realy sure(YES/NO)? don't cry if you've lost anything! "):
-        try:
-            if os.name == 'nt':
-                prog = subprocess.Popen(DOCKER_COMMAND + ['volume', 'rm', os.environ["COMPOSE_PROJECT_NAME"] + '_learnagement_persistent_db_' + os.environ["INSTANCE_NAME"]])
-                prog.communicate()
-                subprocess.run(DOCKER_COMMAND + ["volume", "rm", os.environ["COMPOSE_PROJECT_NAME"] + "_qdrant_data_" + os.environ["INSTANCE_NAME"]], check=True)
-            else:
+
+        if os.name == 'nt':
+            prog = subprocess.Popen(DOCKER_COMMAND + ['volume', 'rm', os.environ["COMPOSE_PROJECT_NAME"] + '_learnagement_persistent_db_' + os.environ["INSTANCE_NAME"]])
+            prog.communicate()
+            subprocess.run(DOCKER_COMMAND + ["volume", "rm", os.environ["COMPOSE_PROJECT_NAME"] + "_qdrant_data_" + os.environ["INSTANCE_NAME"]], check=True)
+        else:
+            try:
                 subprocess.run(DOCKER_COMMAND + ["volume", "rm", os.environ["COMPOSE_PROJECT_NAME"] + "_learnagement_persistent_db_" + os.environ["INSTANCE_NAME"]], check=True)
+            except subprocess.CalledProcessError as e:
+                print(e.output)
+            try:
                 subprocess.run(DOCKER_COMMAND + ["volume", "rm", os.environ["COMPOSE_PROJECT_NAME"] + "_qdrant_data_" + os.environ["INSTANCE_NAME"]], check=True)
+            except subprocess.CalledProcessError as e:
+                print(e.output)
 
-
+        try:
             shutil.rmtree(os.path.join("db", "data"), ignore_errors=True)
+        except FileNotFoundError:
+            print("no data found")
+        try:
             shutil.rmtree(os.path.join("db", "docker-entrypoint-initdb.d"), ignore_errors=True)
+        except FileNotFoundError:
+            print("no docker-entrypoint-init found")
+        try:
             os.remove(os.path.join("docker", "docker-compose.yml"))
-
+        except FileNotFoundError:
+            print("no docker-compose.yml found")
+        try:
             os.remove(".env")
             for container in containers:
                 target_path = os.path.join(container, ".env")
                 os.remove(target_path)
+        except FileNotFoundError:
+            print("no .env found")
+        print(f"{GREEN}The application was reset to its initial state.{NC}")
 
-            print(f"{GREEN}The application was reset to its initial state.{NC}")
-        except subprocess.CalledProcessError as e:
-            print(e.output)
-            print(f"{RED}The application was not reset to its initial state.{NC}")
 
 
 def help(argv):
