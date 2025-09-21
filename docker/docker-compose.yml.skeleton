@@ -102,6 +102,10 @@ services:
             - mysql_${INSTANCE_NAME}
 
 ${IF AI}
+    #ai_service_${INSTANCE_NAME}:
+    #    image: app
+    #    models:
+    #        - ai_model_${INSTANCE_NAME}
     llm_server_api_${INSTANCE_NAME}:
         container_name: learnagement_llm_server_api_${INSTANCE_NAME}
         build:
@@ -128,6 +132,8 @@ ${IF AI}
         volumes:
             - ../appLLM/:/app/
             - ../appLLM/document/:/document/
+        models:
+            - ai_model_${INSTANCE_NAME}
         depends_on:
             - qdrant_${INSTANCE_NAME}
 ${FI AI}
@@ -154,4 +160,9 @@ networks:
     learnagement_back_${INSTANCE_NAME}:
         name: learnagement_back_${INSTANCE_NAME}
         driver: bridge
+${IF AI}
+models:
+  ai_model_${INSTANCE_NAME}:
+    model: ai/llama3.2:latest
+${FI AI}
     

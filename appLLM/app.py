@@ -59,6 +59,7 @@ def configure_logging():
 def get_llm_endpoint():
     """Returns the complete LLM API endpoint URL"""
     base_url = os.getenv("LLM_BASE_URL", "")
+    # https://docs.docker.com/ai/model-runner/api-reference/
     return f"{base_url}/chat/completions"
 
 def get_model_name():
@@ -75,7 +76,7 @@ def validate_environment():
     
     if not llm_model_name:
         app.logger.warning("LLM_MODEL_NAME is not set. Using default model.")
-    
+    #app.logger.info("LLM_MODEL_NAME is set. Using model: " + llm_base_url + " " + llm_model_name)
     return llm_base_url and llm_model_name
 
 @app.route('/')
@@ -178,7 +179,8 @@ def call_llm_api(user_message):
     }
     
     headers = {"Content-Type": "application/json"}
-    
+
+    print("End Point: ", get_llm_endpoint(), flush=True)
     # Send request to LLM API
     response = requests.post(
         get_llm_endpoint(),

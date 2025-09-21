@@ -99,8 +99,8 @@ def __mainConfiguration__():
             else:
                 file.write("AI=YES" + "\n")
             #file.write("HF_TOKEN=" + input("Give your Hugging Face Token: ") + "\n")
-            file.write("LLM_BASE_URL=http://model-runner.docker.internal/" + "\n")
-            file.write("LLM_MODEL_NAME=ai/llama3.2:1B-Q8_0" + "\n")
+            file.write("LLM_BASE_URL=http://model-runner.docker.internal/engines/llama.cpp/v1" + "\n")
+            file.write("LLM_MODEL_NAME=ai/llama3.2:latest" + "\n")
             file.write("RAG_DOCUMENTS_PATH=document" + "\n")
 
             file.write("" + "\n")
@@ -267,7 +267,7 @@ def __dockerConfiguration__():
         __searchReplaceInFile__("docker-compose.yml", r"\$\{INSTANCE_NAME\}", os.environ["INSTANCE_NAME"])
         __searchReplaceInFile__("docker-compose.yml", r"\$\{INSTANCE_NUMBER\}", str(os.environ["INSTANCE_NUMBER"]))
         #searchReplaceInFile("docker-compose.yml", "MYSQL_ROOT_PASSWORD", os.environ["MYSQL_ROOT_PASSWORD"])
-        print('ENV["AI"]', ENV["AI"], flush=True)
+        #print('ENV["AI"]', ENV["AI"], flush=True)
         if ENV["AI"]:
             __searchReplaceInFile__("docker-compose.yml", r"\$\{IF AI\}", "")
             __searchReplaceInFile__("docker-compose.yml", r"\$\{FI AI\}", "")
