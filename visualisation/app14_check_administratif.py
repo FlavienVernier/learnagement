@@ -23,6 +23,24 @@ app14_administratif_layout = html.Div(children=[
         children=[
             dcc.Input(id='fake', value='0', type='hidden'),
             html.Div(id='table_modules_sans_ac')]),
+    html.H1(children='Enseignant sans cours'),
+    html.Div(
+        style={'display': 'inline-block', 'verticalAlign': 'top',},
+        children=[
+            dcc.Input(id='fake', value='0', type='hidden'),
+            html.Div(id='div_enseignant_sans_cours')]),
+    html.H1(children='Session sans enseignant'),
+    html.Div(
+        style={'display': 'inline-block', 'verticalAlign': 'top',},
+        children=[
+            dcc.Input(id='fake', value='0', type='hidden'),
+            html.Div(id='div_session_sans_enseignant')]),
+    html.H1(children='Poids ECTS'),
+    html.Div(
+        style={'display': 'inline-block', 'verticalAlign': 'top',},
+        children=[
+            dcc.Input(id='fake', value='0', type='hidden'),
+            html.Div(id='div_modules_ects')]),
 ])
 
 def register_callbacks(app):
@@ -72,3 +90,51 @@ def register_callbacks(app):
             hover=True,
         )
         return [table_modules_sans_ac]
+
+
+    @app.callback(
+        Output(component_id='div_enseignant_sans_cours', component_property='children'),
+        Input(component_id='fake', component_property='value')
+    )
+    def display_table(user_id_fake):
+        df = app14_check_tools.check_enseignant_sans_cours()
+        table_enseignant_sans_cours = dbc.Table.from_dataframe(
+            df,
+            # Key styling options:
+            striped=True,
+            bordered=True,
+            hover=True,
+        )
+        return [table_enseignant_sans_cours]
+
+
+    @app.callback(
+        Output(component_id='div_session_sans_enseignant', component_property='children'),
+        Input(component_id='fake', component_property='value')
+    )
+    def display_table(user_id_fake):
+        df = app14_check_tools.check_session_sans_enseignant()
+        table_session_sans_enseignant = dbc.Table.from_dataframe(
+            df,
+            # Key styling options:
+            striped=True,
+            bordered=True,
+            hover=True,
+        )
+        return [table_session_sans_enseignant]
+
+
+    @app.callback(
+        Output(component_id='div_modules_ects', component_property='children'),
+        Input(component_id='fake', component_property='value')
+    )
+    def display_table(user_id_fake):
+        df = app14_check_tools.check_module_ects()
+        table_modules_ects = dbc.Table.from_dataframe(
+            df,
+            # Key styling options:
+            striped=True,
+            bordered=True,
+            hover=True,
+        )
+        return [table_modules_ects]

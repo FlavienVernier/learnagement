@@ -179,3 +179,25 @@ function checkMAQUETTE_moduleWithoutApprentissageCritique($conn)
     $rs = rs_to_table($res);
     return $rs;
 }
+
+function checkMAQUETTE_moduleECTS($conn)
+{
+    $sql = "SELECT 
+                `MAQUETTE_module`.`code_module` AS `code_module`, 
+                `MAQUETTE_module`.`nom` AS `nom`, 
+                `MAQUETTE_module`.`ECTS` AS `ECTS`,
+                `MAQUETTE_module`.`hCM` AS `hCM`, 
+                `MAQUETTE_module`.`hTD` AS `hTD`, 
+                `MAQUETTE_module`.`hTP` AS `hTP`, 
+                `MAQUETTE_module`.`hTPTD` AS `hTPTD`, 
+                `MAQUETTE_module`.`hPROJ` AS `hPROJ`, 
+                `MAQUETTE_module`.`hPersonnelle` AS `hPersonnelle`, 
+                ROUND((ifnull(`MAQUETTE_module`.`hCM`, 0) + ifnull(`MAQUETTE_module`.`hTD`, 0) + ifnull(`MAQUETTE_module`.`hTP`, 0) + ifnull(`MAQUETTE_module`.`hTPTD`, 0)) / `MAQUETTE_module`.`ECTS`, 2) AS `h/ECTS`,
+                ROUND(`MAQUETTE_module`.`ECTS` / (ifnull(`MAQUETTE_module`.`hCM`, 0) + ifnull(`MAQUETTE_module`.`hTD`, 0) + ifnull(`MAQUETTE_module`.`hTP`, 0) + ifnull(`MAQUETTE_module`.`hTPTD`, 0)), 3) AS `ECTS/h`
+                FROM `MAQUETTE_module` 
+                GROUP BY `MAQUETTE_module`.`id_module`
+                ORDER BY `MAQUETTE_module`.`code_module`;";
+    $res = mysqli_query($conn, $sql);
+    $rs = rs_to_table($res);
+    return $rs;
+}
