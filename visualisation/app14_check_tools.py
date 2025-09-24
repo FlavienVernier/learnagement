@@ -28,3 +28,25 @@ def check_module_without_apprentissage_critique():
     resp = requests.post(url, data={}, headers=headers)
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+
+def check_module_ects():
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/check/listModuleECTS.php'
+    resp = requests.post(url, data={}, headers=headers)
+    urlData = resp.content
+    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+
+def check_enseignant_sans_cours():
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/check/listEnseignantSansCours.php'
+    resp = requests.post(url, data={}, headers=headers)
+    urlData = resp.content
+    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+
+
+def check_session_sans_enseignant():
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/check/listSessionSansEnseignant.php'
+    resp = requests.post(url, data={}, headers=headers)
+    urlData = resp.content
+    return pd.read_json(io.StringIO(urlData.decode('utf-8')))

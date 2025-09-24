@@ -7,13 +7,13 @@
     session_start();
 
     include("../db_connection/connectDB.php");
-    include("../crud/MAQUETTE_module_sequencage.crud.php");
+    include("../crud/LNM_enseignant.crud.php");
     include("../crud/function_rs_to_table.php");
     include("../crud/function_action_allowed.php");
 
 
     try{
-        $rsModules =  checkMAQUETTE_moduleSequencageHVsMaquuetteH($conn);
+        $rsModules =  checkLNM_enseignant_sans_cours($conn);
 
         echo json_encode($rsModules);
     }catch (Exception $e) {

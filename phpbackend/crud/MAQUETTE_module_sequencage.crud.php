@@ -103,19 +103,75 @@ WHERE MAQUETTE_module.id_responsable = '$id';";
     return $rs;
 }
 
-function checkMAQUETTE_moduleSequencageVsMaquuette($conn) {
+function checkMAQUETTE_moduleSequencageHVsMaquuetteH($conn) {
     $sql="SELECT 
             `MAQUETTE_module`.`code_module`, 
-            IFNULL(`hCM`,0) + IFNULL(`hTD`,0) + IFNULL(`hTP`,0) + IFNULL(`hTPTD`,0) + IFNULL(`hPROJ`,0) AS `hMCCC`, 
+            IFNULL(`MAQUETTE_module`.`hCM`,0) + IFNULL(`MAQUETTE_module`.`hTD`,0) + IFNULL(`MAQUETTE_module`.`hTP`,0) + IFNULL(`MAQUETTE_module`.`hTPTD`,0) + IFNULL(`MAQUETTE_module`.`hPROJ`,0) AS `hMCCC`, 
             `hCequenced`, 
-            IFNULL(`hCM`,0) + IFNULL(`hTD`,0) + IFNULL(`hTP`,0) + IFNULL(`hTPTD`,0) + IFNULL(`hPROJ`,0) - `hCequenced` AS `Reste à planifier`
+            IFNULL(`MAQUETTE_module`.`hCM`,0) AS `CM à planifier`,
+            IFNULL(`MAQUETTE_module`.`hTD`,0) AS `TD à planifier`,
+            IFNULL(`MAQUETTE_module`.`hTP`,0) AS `TP à planifier`,
+            IFNULL(`MAQUETTE_module`.`hTPTD`,0) AS `TPTD à planifier`,
+            IFNULL(`MAQUETTE_module`.`hPROJ`,0) AS `PROJ à planifier`,
+            IFNULL(`MAQUETTE_module`.`hCM`,0) + IFNULL(`MAQUETTE_module`.`hTD`,0) + IFNULL(`MAQUETTE_module`.`hTP`,0) + IFNULL(`MAQUETTE_module`.`hTPTD`,0) + IFNULL(`MAQUETTE_module`.`hPROJ`,0) - `hCequenced` AS `Reste à planifier`
         FROM `MAQUETTE_module`
         JOIN (
             SELECT `code_module`, SUM(`duree_h`) as hCequenced
             FROM `MAQUETTE_module_sequencage` 
             JOIN `MAQUETTE_module_sequence` ON `MAQUETTE_module_sequence`.id_module_sequencage = `MAQUETTE_module_sequencage`.id_module_sequencage
             JOIN `MAQUETTE_module` ON `MAQUETTE_module`.`id_module` = `MAQUETTE_module_sequencage`.`id_module`
-            GROUP BY `code_module`) sequenced ON  sequenced.`code_module` = `MAQUETTE_module`.`code_module`;";
+            GROUP BY `code_module`) sequenced ON  sequenced.`code_module` = `MAQUETTE_module`.`code_module`
+            HAVING `Reste à planifier` != 0;";
+    $sql="SELECT DISTINCT
+    MAQUETTE_module.id_module, 
+    MAQUETTE_module.code_module, 
+    IFNULL(hCM,0) - IFNULL(hCMCequenced,0) AS 'ecart_CM',  IFNULL(hTD,0)  - IFNULL(hTDCequenced,0) AS 'ecart_TD', IFNULL(hTP,0)  - IFNULL(hTPCequenced,0) AS 'ecart_TP',  IFNULL(hTPTD,0) - IFNULL(hTPTDCequenced,0) AS 'ecart_TPTD',  IFNULL(hPROJ,0) - IFNULL(hPROJCequenced,0) AS 'ecart_PROJ'
+FROM MAQUETTE_module
+LEFT JOIN (
+    SELECT code_module, SUM(nombre * duree_h) as hCMCequenced
+    FROM MAQUETTE_module_sequencage 
+    JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module
+    JOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+    JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
+    WHERE LNM_seanceType.type = 'CM' AND LNM_groupe_type.groupe_type = 'PROMO' OR LNM_seanceType.type = 'Exam' AND LNM_groupe_type.groupe_type = 'PROMO' 
+    GROUP BY code_module) CMsequenced ON  CMsequenced.code_module = MAQUETTE_module.code_module
+LEFT JOIN (
+    SELECT code_module, SUM(nombre * duree_h) as hTDCequenced
+    FROM MAQUETTE_module_sequencage 
+    JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module
+    JOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+    JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
+    WHERE LNM_seanceType.type = 'TD' AND LNM_groupe_type.groupe_type = 'TD'
+    GROUP BY code_module) TDsequenced ON  TDsequenced.code_module = MAQUETTE_module.code_module
+LEFT JOIN (
+    SELECT code_module, SUM(nombre * duree_h) as hTPCequenced
+    FROM MAQUETTE_module_sequencage 
+    JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module
+    JOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+    JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
+    WHERE LNM_seanceType.type = 'TP' AND LNM_groupe_type.groupe_type = 'TP'
+    GROUP BY code_module) TPsequenced ON  TPsequenced.code_module = MAQUETTE_module.code_module
+LEFT JOIN (
+    SELECT code_module, SUM(nombre * duree_h) as hTPTDCequenced
+    FROM MAQUETTE_module_sequencage 
+    JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module
+    JOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+    JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
+    WHERE LNM_seanceType.type = 'TP' AND LNM_groupe_type.groupe_type = 'TD'
+    GROUP BY code_module) TPTDsequenced ON  TPTDsequenced.code_module = MAQUETTE_module.code_module
+LEFT JOIN (
+    SELECT code_module, SUM(nombre * duree_h) as hPROJCequenced
+    FROM MAQUETTE_module_sequencage 
+    JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module
+    JOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+    JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
+    WHERE LNM_seanceType.type = 'PROJ' AND LNM_groupe_type.groupe_type = 'PROMO'
+    GROUP BY code_module) PROJsequenced ON  PROJsequenced.code_module = MAQUETTE_module.code_module
+WHERE IFNULL(hCM,0) - IFNULL(hCMCequenced,0) != 0 
+    OR  IFNULL(hTD,0)  - IFNULL(hTDCequenced,0) !=0 
+    OR IFNULL(hTP,0)  - IFNULL(hTPCequenced,0) !=0 
+    OR  IFNULL(hTPTD,0) - IFNULL(hTPTDCequenced,0) !=0 
+    OR  IFNULL(hPROJ,0) - IFNULL(hPROJCequenced,0) !=0;";
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);
     return $rs;
