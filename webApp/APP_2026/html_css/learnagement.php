@@ -55,6 +55,9 @@ if (!isset($_SESSION)){
             echo "Non connecté - ";
         }
         ?>
-        Polytech Annecy-Chambéry - APP - Learnagement</footer>
+        <a href="https://www.univ-smb.fr/polytech/formation/informatique-donnees-usages/" target="_blank">IDU Polytech Annecy-Chambéry</a> /
+            <a href="https://www.univ-smb.fr/scem/formations/departement-dinformatique/" target="_blank">Info SCEM</a>
+            - APP -
+            <a href="https://github.com/FlavienVernier/learnagement" target="_blank">Learnagement</a></footer>
         </div>
 </body>
