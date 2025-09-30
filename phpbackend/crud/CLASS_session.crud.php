@@ -15,15 +15,25 @@ function listCLASS_sessionByStudentId($conn, $id_etudiant){
 }
 
 function listCLASS_sessionByIdResp($conn, $id) {
-    $sql = "SELECT CLASS_session.id_session, CLASS_session.id_groupe, LNM_groupe.nom_groupe, LNM_promo.id_promo, 'ExplicitSecondaryPromoKs not yet generated' as promo,
-MAQUETTE_module_sequence.numero_ordre, MAQUETTE_module_sequence.id_intervenant_principal, MAQUETTE_module_sequence.commentaire,
-                    MAQUETTE_module_sequencage.id_module, MAQUETTE_module_sequencage.id_seance_type, MAQUETTE_module_sequencage.duree_h,
-                    MAQUETTE_module.code_module, 
-                    LNM_seanceType.type, 
-                    ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK as intervenant
-            FROM CLASS_session
+    $sql = "SELECT
+	            CLASS_session.id_session,
+                CLASS_session.id_groupe,
+                LNM_groupe.nom_groupe,
+                LNM_promo.id_promo,
+                ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK as promo,
+                MAQUETTE_module_sequence.numero_ordre,
+                MAQUETTE_module_sequence.id_intervenant_principal,
+                MAQUETTE_module_sequence.commentaire,
+                MAQUETTE_module_sequencage.id_module,
+                MAQUETTE_module_sequencage.id_seance_type,
+                MAQUETTE_module_sequencage.duree_h,
+                MAQUETTE_module.code_module,
+                LNM_seanceType.type,
+                ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK as intervenant
+			FROM CLASS_session
             	LEFT JOIN LNM_groupe ON LNM_groupe.id_groupe = CLASS_session.id_groupe
                 LEFT JOIN LNM_promo ON LNM_promo.id_promo = LNM_groupe.id_promo
+                LEFT JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_promo.id_promo
             	LEFT JOIN MAQUETTE_module_sequence ON MAQUETTE_module_sequence.id_module_sequence = CLASS_session.id_module_sequence
             	LEFT JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage
                 LEFT JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module
@@ -36,15 +46,23 @@ MAQUETTE_module_sequence.numero_ordre, MAQUETTE_module_sequence.id_intervenant_p
     return $rs;
 }
 function listCLASS_sessionByIdIntervenant($conn, $id) {
-    $sql = "SELECT CLASS_session.id_groupe, LNM_groupe.nom_groupe, LNM_promo.id_promo, 'ExplicitSecondaryPromoKs not yet generated' as promo,
-MAQUETTE_module_sequence.numero_ordre, MAQUETTE_module_sequence.id_intervenant_principal, MAQUETTE_module_sequence.commentaire,
-                    MAQUETTE_module_sequencage.id_module, MAQUETTE_module_sequencage.id_seance_type, MAQUETTE_module_sequencage.duree_h,
-                    MAQUETTE_module.code_module, MAQUETTE_module.nom as nom_module,
-                    LNM_seanceType.type,
-                    LNM_semestre.semestre
+    $sql = "SELECT
+                CLASS_session.id_groupe,
+                LNM_groupe.nom_groupe,
+                LNM_promo.id_promo,
+                ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK as promo,
+                MAQUETTE_module_sequence.numero_ordre,
+                MAQUETTE_module_sequence.id_intervenant_principal,
+                MAQUETTE_module_sequence.commentaire,
+                MAQUETTE_module_sequencage.id_module,
+                MAQUETTE_module_sequencage.id_seance_type, MAQUETTE_module_sequencage.duree_h,
+                MAQUETTE_module.code_module, MAQUETTE_module.nom as nom_module,
+                LNM_seanceType.type,
+                LNM_semestre.semestre
             FROM CLASS_session
             	LEFT JOIN LNM_groupe ON LNM_groupe.id_groupe = CLASS_session.id_groupe
                 LEFT JOIN LNM_promo ON LNM_promo.id_promo = LNM_groupe.id_promo
+                LEFT JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_promo.id_promo
             	LEFT JOIN MAQUETTE_module_sequence ON MAQUETTE_module_sequence.id_module_sequence = CLASS_session.id_module_sequence
             	LEFT JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage
                 LEFT JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module
@@ -61,15 +79,25 @@ MAQUETTE_module_sequence.numero_ordre, MAQUETTE_module_sequence.id_intervenant_p
 }
 
 function checkCLASS_sessionWithoutIntervenant($conn) {
-    $sql = "SELECT CLASS_session.id_groupe, LNM_groupe.nom_groupe, LNM_promo.id_promo, 'ExplicitSecondaryPromoKs not yet generated' as promo,
-MAQUETTE_module_sequence.numero_ordre, MAQUETTE_module_sequence.id_intervenant_principal, MAQUETTE_module_sequence.commentaire,
-                    MAQUETTE_module_sequencage.id_module, MAQUETTE_module_sequencage.id_seance_type, MAQUETTE_module_sequencage.duree_h,
-                    MAQUETTE_module.code_module, MAQUETTE_module.nom as nom_module,
-                    LNM_seanceType.type,
-                    LNM_semestre.semestre
+    $sql = "SELECT
+                CLASS_session.id_groupe,
+                LNM_groupe.nom_groupe,
+                LNM_promo.id_promo,
+                ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK as promo,
+                MAQUETTE_module_sequence.numero_ordre,
+                MAQUETTE_module_sequence.id_intervenant_principal,
+                MAQUETTE_module_sequence.commentaire,
+                MAQUETTE_module_sequencage.id_module,
+                MAQUETTE_module_sequencage.id_seance_type,
+                MAQUETTE_module_sequencage.duree_h,
+                MAQUETTE_module.code_module,
+                MAQUETTE_module.nom as nom_module,
+                LNM_seanceType.type,
+                LNM_semestre.semestre
             FROM CLASS_session
             	LEFT JOIN LNM_groupe ON LNM_groupe.id_groupe = CLASS_session.id_groupe
                 LEFT JOIN LNM_promo ON LNM_promo.id_promo = LNM_groupe.id_promo
+                LEFT JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_promo.id_promo
             	LEFT JOIN MAQUETTE_module_sequence ON MAQUETTE_module_sequence.id_module_sequence = CLASS_session.id_module_sequence
             	LEFT JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage
                 LEFT JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module

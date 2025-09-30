@@ -36,7 +36,7 @@ services:
     backend_python_${INSTANCE_NAME}:
         container_name: learnagement_backend_python_${INSTANCE_NAME}
         build: ./backend_python/
-        restart: always
+        restart: no
         networks:
               - learnagement_back_${INSTANCE_NAME}
         volumes:
