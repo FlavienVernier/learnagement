@@ -24,13 +24,15 @@ def get_entreprises():
 
 def get_teachers():
     # liste des enseignants
-    df_enseignants = app_tools.get_list_enseignants()
-    enseignants = []
-    if "nom" in df_enseignants.columns.tolist() :
-        enseignants = df_enseignants["nom"].map(str) + " " + df_enseignants["prenom"].map(str)
-        enseignants = enseignants.tolist()
-    return enseignants
-
+    # df_enseignants = app_tools.get_list_enseignants()
+    # enseignants = []
+    # if "nom" in df_enseignants.columns.tolist() :
+    #     enseignants = df_enseignants["nom"].map(str) + " " + df_enseignants["prenom"].map(str)
+    #     enseignants = enseignants.tolist()
+    # return enseignants
+    dfi = app_tools.get_explicit_keys("LNM_enseignant")
+    intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in dfi.iterrows()]
+    return intervenant_options
 
 
 def get_internship_with_supervisor():
@@ -156,7 +158,7 @@ def update_table_students_without_internship(nom_promo):
     )
     return table_students_without_stage
 
-def update_pie_chart(nom_promo):
+def update_pie_chart(nom_promo=None):
     # Compter les étudiants avec et sans stage
     #avec_stage_avec_tuteur = df_stages_with_supervisor().shape[0]
     #avec_stage_sans_tuteur = df_stages_without_supervisor().shape[0]
@@ -210,7 +212,7 @@ app10_administratif_layout = html.Div(children=[
        id="div_pie_chart",
        style={'display': 'inline-block', 'verticalAlign': 'top',},
        children=[
-            update_pie_chart(None)]),
+            update_pie_chart()]),
     html.Br(),
     html.Div([
         html.H2(children='Nouveau stage'),
@@ -258,7 +260,8 @@ app10_administratif_layout = html.Div(children=[
         dbc.Row([
             dbc.Label("Tuteur", html_for="tuteur_input", width=2),
             dbc.Col(dcc.Dropdown(id="tuteur_input",
-                                 options=[{'label': "Please select tuteur", 'value': "NULL"}] + [{'label': v, 'value': v} for v in get_teachers()],
+                                 #options=[{'label': "Please select tuteur", 'value': "NULL"}] + [{'label': v, 'value': v} for v in get_teachers()],
+                                 options=get_teachers(),
                                  placeholder="Please select tuteur",
                                  value=""), width=8),
         ], className="mb-3",),
