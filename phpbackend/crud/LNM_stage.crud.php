@@ -52,7 +52,19 @@ function listLNM_stage($conn)
 }
 
 function listLNM_stageBy($conn, $field, $value){
-    $sql = "SELECT * FROM `LNM_stage` WHERE `$field`='$value';";
+    $sql = "SELECT CONCAT(LNM_etudiant.prenom, ' ', LNM_etudiant.nom) AS 'etudiant', 
+                LNM_stage.entreprise, 
+                LNM_stage.`intitulé`, 
+                LNM_stage.description, 
+                LNM_stage.ville, 
+                LNM_stage.date_debut, 
+                LNM_stage.date_fin, 
+                LNM_stage.nature, 
+                CONCAT(LNM_enseignant.prenom, ' ', LNM_enseignant.nom) AS 'enseignant'
+        FROM `LNM_stage` 
+        JOIN LNM_enseignant ON LNM_enseignant.id_enseignant = LNM_stage.id_enseignant
+        JOIN LNM_etudiant ON LNM_etudiant.id_etudiant = LNM_stage.id_etudiant
+        WHERE $field='$value';";
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);
     return $rs;
@@ -60,11 +72,11 @@ function listLNM_stageBy($conn, $field, $value){
 
 
 function listLNM_stageBySupervisorId($conn, $supervisor_id) {
-  return listLNM_stageBy($conn, "id_enseignant", $supervisor_id);
+  return listLNM_stageBy($conn, "LNM_enseignant.id_enseignant", $supervisor_id);
 }
 
 function listLNM_stageByStudentId($conn, $student_id) {
-  return listLNM_stageBy($conn, "id_etudiant", $student_id);
+  return listLNM_stageBy($conn, "LNM_etudiant.id_etudiant", $student_id);
 }
 
 function listLNM_stageWithSupervisorId($conn){
