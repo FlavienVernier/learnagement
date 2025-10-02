@@ -220,14 +220,14 @@ app10_administratif_layout = html.Div(children=[
         dbc.Row([
             dbc.Label("Etudiant", html_for="etudiant_input", width=2),
             dbc.Col(dcc.Dropdown(id="etudiant_input",
-                                 options=[{'label': k, 'value': v} for k, v in get_students_without_internship().items()],
+                                 options=[],
                                  placeholder="Please select student"), width=8),
 
         ], className="mb-3",),
         dbc.Row([
             dbc.Label("Entreprise", html_for="entreprise_input", width=2),
             dbc.Col(dcc.Dropdown(id="entreprise_input",
-                                 options=[{'label': v, 'value': v} for v in get_entreprises()],
+                                 options=[],
                                  placeholder="Please enter the entreprise name",
                                  search_value='',
                                  clearable=True,
@@ -261,7 +261,7 @@ app10_administratif_layout = html.Div(children=[
             dbc.Label("Tuteur", html_for="tuteur_input", width=2),
             dbc.Col(dcc.Dropdown(id="tuteur_input",
                                  #options=[{'label': "Please select tuteur", 'value': "NULL"}] + [{'label': v, 'value': v} for v in get_teachers()],
-                                 options=get_teachers(),
+                                 options=[],
                                  placeholder="Please select tuteur",
                                  value=""), width=8),
         ], className="mb-3",),
@@ -303,13 +303,18 @@ def register_callbacks(app):
     # Mise à jour du filtre des promo en fonction du module selectionné
     @app.callback(
         Output('app10_filtre_promo', 'options'),
+        Output('etudiant_input', 'options'),
+        Output('entreprise_input', 'options'),
+        Output('tuteur_input', 'options'),
         Input('user_id', 'data'),
     )
-    def update_filter_promo_option(user_id):
+    def update_options(user_id):
         df = app_tools.get_list_promo()
-        options = [{'label': row['promo'], 'value': row['promo']} for _, row in
+        promo_options = [{'label': row['promo'], 'value': row['promo']} for _, row in
                    df[['promo']].iterrows()]
-        return options
+        etudiant_options = [{'label': k, 'value': v} for k, v in get_students_without_internship().items()]
+        entreprise_options = [{'label': v, 'value': v} for v in get_entreprises()]
+        return promo_options, etudiant_options, entreprise_options, get_teachers()
 
     @app.callback(
         Output(component_id='div_stages_with_supervisor', component_property='children'),
