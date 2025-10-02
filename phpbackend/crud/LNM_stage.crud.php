@@ -68,10 +68,11 @@ function listLNM_stageByStudentId($conn, $student_id) {
 }
 
 function listLNM_stageWithSupervisorId($conn){
-    $sql = 'SELECT LNM_stage.`id_stage`, CONCAT(LNM_etudiant.nom, " ", LNM_etudiant.prenom) AS "étudiant", LNM_stage.`entreprise`, LNM_stage.`intitulé`, LNM_stage.`description`, LNM_stage.`ville`, LNM_stage.`date_debut`, LNM_stage.`date_fin`, LNM_stage.`nature`, CONCAT(LNM_enseignant.nom, " ", LNM_enseignant.prenom) AS enseignant
+    $sql = 'SELECT LNM_stage.`id_stage`, CONCAT(LNM_etudiant.nom, " ", LNM_etudiant.prenom) AS "étudiant", ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK AS "promo", LNM_stage.`entreprise`, LNM_stage.`intitulé`, LNM_stage.`description`, LNM_stage.`ville`, LNM_stage.`date_debut`, LNM_stage.`date_fin`, LNM_stage.`nature`, CONCAT(LNM_enseignant.nom, " ", LNM_enseignant.prenom) AS enseignant
 FROM `LNM_stage` 
 JOIN LNM_etudiant ON LNM_etudiant.id_etudiant = LNM_stage.id_etudiant
 JOIN LNM_enseignant ON LNM_enseignant.id_enseignant = LNM_stage.id_enseignant
+JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_etudiant.id_promo
 WHERE LNM_stage.`id_enseignant` IS NOT NULL;';
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);
@@ -79,16 +80,24 @@ WHERE LNM_stage.`id_enseignant` IS NOT NULL;';
 }
 
 function listLNM_stageWithoutSupervisorId($conn){
-    $sql = 'SELECT LNM_stage.`id_stage`, CONCAT(LNM_etudiant.nom, " ", LNM_etudiant.prenom) AS "étudiant", LNM_stage.`entreprise`,LNM_stage.`intitulé`,LNM_stage.`description`,LNM_stage.`ville`,LNM_stage.`date_debut`,LNM_stage.`date_fin`,`nature`
+    $sql = '
+
+SELECT LNM_stage.`id_stage`, CONCAT(LNM_etudiant.nom, " ", LNM_etudiant.prenom) AS "étudiant", ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK AS "promo", LNM_stage.`entreprise`,LNM_stage.`intitulé`,LNM_stage.`description`,LNM_stage.`ville`,LNM_stage.`date_debut`,LNM_stage.`date_fin`,`nature`
 FROM `LNM_stage` 
 JOIN LNM_etudiant ON LNM_etudiant.id_etudiant = LNM_stage.id_etudiant
+JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_etudiant.id_promo
 WHERE LNM_stage.`id_enseignant` IS NULL;';
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);
     return $rs;
 }
 function listLNM_stageStudentsWithoutStage($conn){
-    $sql = "SELECT `LNM_etudiant`.`id_etudiant`, `LNM_etudiant`.`nom`,`LNM_etudiant`.`prenom` FROM `LNM_etudiant` WHERE `LNM_etudiant`.`id_etudiant` NOT IN ( SELECT `LNM_stage`.`id_etudiant` FROM `LNM_stage` WHERE 1);";
+    $sql = 'SELECT `LNM_etudiant`.`id_etudiant`, `LNM_etudiant`.`nom`,`LNM_etudiant`.`prenom`, ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK AS "promo"
+FROM `LNM_etudiant` 
+JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_etudiant.id_promo
+WHERE `LNM_etudiant`.`id_etudiant` 
+NOT IN ( SELECT `LNM_stage`.`id_etudiant` FROM `LNM_stage` WHERE 1);
+';
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);
     return $rs;

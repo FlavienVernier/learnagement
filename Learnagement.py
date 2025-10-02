@@ -33,7 +33,7 @@ DOCKER_COMMAND=[]
 DOCKER_COMPOSE_COMMAND=[]
 ENV={}
 
-containers = ["docker", "phpbackend", "webApp", "visualisation", "webappnext", ]
+containers = ["docker", "phpbackend", "backend_python", "webApp", "visualisation", "webappnext", ]
 
 # ToDo problem of management of dynamic env changes
 def load_dotenv():
