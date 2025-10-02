@@ -33,6 +33,16 @@ services:
             - ./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
         depends_on:
             - mysql_${INSTANCE_NAME}
+    backend_python_${INSTANCE_NAME}:
+        container_name: learnagement_backend_python_${INSTANCE_NAME}
+        build: ./backend_python/
+        restart: no
+        networks:
+              - learnagement_back_${INSTANCE_NAME}
+        volumes:
+            - ../backend_python/:/app/
+        depends_on:
+            - mysql_${INSTANCE_NAME}
     phpbackend_${INSTANCE_NAME}:
         container_name: learnagement_phpbackend_${INSTANCE_NAME}
         build: ./phpbackend/
