@@ -27,6 +27,13 @@ def get_list_statuts():
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
+def get_list_promo():
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listPromo.php'
+    resp = requests.post(url, data={}, headers=headers)
+    urlData = resp.content
+    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+
 def get_explicit_keys(table):
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/explicitSecondaryKeys.php'
