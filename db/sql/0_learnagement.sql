@@ -145,6 +145,7 @@ CREATE TABLE `ETU_classical_evaluation` (
   `date` datetime NOT NULL,
   `id_module` int NOT NULL,
   PRIMARY KEY (`id_classical_evaluation`),
+  UNIQUE KEY `SECONDARY` (`id_etudiant`,`evaluation`,`date`,`id_module`) USING BTREE,
   KEY `FK_id_etudiant` (`id_etudiant`),
   KEY `FK_evaluation_type` (`id_evaluation_type`),
   KEY `FK_classical_evaluation_as_module` (`id_module`),
@@ -252,12 +253,15 @@ CREATE TABLE `LNM_etudiant` (
   `password` varchar(100) NOT NULL,
   `password_updated` int NOT NULL DEFAULT '0',
   `id_promo` int NOT NULL,
+  `id_origine` int DEFAULT NULL,
   PRIMARY KEY (`id_etudiant`),
   UNIQUE KEY `SECONDARY` (`nom`,`prenom`) USING BTREE,
   UNIQUE KEY `mail` (`mail`),
   KEY `FK_etudiant_as_promo` (`id_promo`),
+  KEY `FK_etudiant_as_origine` (`id_origine`),
+  CONSTRAINT `FK_etudiant_as_origine` FOREIGN KEY (`id_origine`) REFERENCES `LNM_origine` (`id_origine`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_etudiant_as_promo` FOREIGN KEY (`id_promo`) REFERENCES `LNM_promo` (`id_promo`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=540 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=541 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `LNM_etudiant_as_groupe`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -326,6 +330,18 @@ CREATE TABLE `LNM_groupe_type` (
   `commentaire` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id_groupe_type`),
   UNIQUE KEY `SECONDARY` (`groupe_type`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `LNM_origine`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `LNM_origine` (
+  `id_origine` int NOT NULL AUTO_INCREMENT,
+  `nom_etablissement` varchar(50) NOT NULL,
+  `nom_formation` varchar(50) DEFAULT NULL,
+  `mail` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id_origine`),
+  UNIQUE KEY `SECONDARY` (`nom_etablissement`,`nom_formation`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `LNM_promo`;
@@ -432,7 +448,7 @@ CREATE TABLE `LNM_stage` (
   KEY `FK_stage_as_enseignant` (`id_enseignant`),
   CONSTRAINT `FK_stage_as_enseignant` FOREIGN KEY (`id_enseignant`) REFERENCES `LNM_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_stage_as_etudiant` FOREIGN KEY (`id_etudiant`) REFERENCES `LNM_etudiant` (`id_etudiant`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `LNM_statut`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -466,6 +482,7 @@ CREATE TABLE `MAQUETTE_dependance_sequence` (
   `id_sequence_prev` int NOT NULL,
   `id_sequence_next` int NOT NULL,
   PRIMARY KEY (`id_sequence_prev`,`id_sequence_next`),
+  UNIQUE KEY `SECONDARY` (`id_sequence_prev`,`id_sequence_next`) USING BTREE,
   KEY `FK_dependance_sequence_as_module_sequencage_next` (`id_sequence_next`),
   CONSTRAINT `FK_dependance_sequence_as_module_sequencage_next` FOREIGN KEY (`id_sequence_next`) REFERENCES `MAQUETTE_module_sequence` (`id_module_sequence`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_dependance_sequence_as_module_sequencage_prev` FOREIGN KEY (`id_sequence_prev`) REFERENCES `MAQUETTE_module_sequence` (`id_module_sequence`) ON DELETE RESTRICT ON UPDATE RESTRICT
@@ -627,7 +644,7 @@ CREATE TABLE `VIEW_parameters_of_views` (
   `id_filiere` int DEFAULT NULL,
   `id_statut` int DEFAULT NULL,
   PRIMARY KEY (`id_parameters_of_views`),
-  UNIQUE KEY `sessionId` (`sessionId`),
+  UNIQUE KEY `SECONDARY` (`sessionId`) USING BTREE,
   KEY `FK_parameters_of_views_as_semestre` (`id_semestre`),
   KEY `FK_parameters_of_views_as_module` (`id_module`),
   KEY `FK_parameters_of_views_as_enseignant` (`id_enseignant`),
@@ -640,7 +657,7 @@ CREATE TABLE `VIEW_parameters_of_views` (
   CONSTRAINT `FK_parameters_of_views_as_module` FOREIGN KEY (`id_module`) REFERENCES `MAQUETTE_module` (`id_module`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_parameters_of_views_as_semestre` FOREIGN KEY (`id_semestre`) REFERENCES `LNM_semestre` (`id_semestre`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_parameters_of_views_as_status` FOREIGN KEY (`id_statut`) REFERENCES `LNM_statut` (`id_statut`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `VIEW_updatable`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

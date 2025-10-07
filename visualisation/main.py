@@ -48,6 +48,7 @@ def import_apps():
     from app10_stage_administratif import app10_administratif_layout, register_callbacks as register_callbacks_app10_administratif
     from app10_stage_enseignant import app10_enseignant_layout, register_callbacks as register_callbacks_app10_enseignant
     from app10_stage_etudiant import app10_etudiant_layout, register_callbacks as register_callbacks_app10_etudiant
+    from app11_dag_dependance import app11_enseignant_layout, register_callbacks as register_callbacks_app11_enseignant
     from app13_mccc_administratif import app13_administratif_layout, register_callbacks as register_callbacks_app13_administratif
     from app14_check_administratif import app14_administratif_layout, register_callbacks as register_callbacks_app14_administratif
     return {
@@ -66,6 +67,7 @@ def import_apps():
         'app10_administratif': (app10_administratif_layout, register_callbacks_app10_administratif),
         'app10_enseignant': (app10_enseignant_layout, register_callbacks_app10_enseignant),
         'app10_etudiant': (app10_etudiant_layout, register_callbacks_app10_etudiant),
+        'app11_enseignant': (app11_enseignant_layout, register_callbacks_app11_enseignant),
         'app13_administratif': (app13_administratif_layout, register_callbacks_app13_administratif),
         'app14_administratif': (app14_administratif_layout, register_callbacks_app14_administratif),
     }
@@ -85,10 +87,11 @@ menu_items = {
         ('Carte des Universités', 'app1'),
         ('Vue modules', 'app5_enseignant_view'),
         ('MaJ modules', 'app5_enseignant_edit'),
+        ('Dépendance Séances', 'app11_enseignant'),
         ('Absences', 'app3_enseignant'),
         ('Notes', 'app4_enseignant'),
         ('Charge de travail', 'app7_enseignant'),
-        ('Tutorat stages', 'app10_enseignant')
+        ('Tutorat stages', 'app10_enseignant'),
     ],
     'etudiant': [
         ('Carte des Universités', 'app1'),
