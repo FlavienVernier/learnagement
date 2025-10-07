@@ -149,7 +149,7 @@ def compute_graph(id_module):
 
     return node_x, node_y, node_text, node_color_values, node_hovertext, node_text, dark_node_color_values, edge_trace, annotations
 
-app11_enseignant_layout = html.Div([
+app11_layout = html.Div([
     html.H1("Dépendance des cours",
             style={'font-family': 'verdana'}
             ),
@@ -170,9 +170,13 @@ def register_callbacks(app):
     @app.callback(
         Output('app11_filtre_module', 'options'),
         Input('user_id', 'data'),
+        Input('role', 'data'),
     )
-    def update_filter_sequencage_option(user_id):
-        df = app5_module_tools.get_moduleByEnseignantId(user_id)
+    def update_filter_sequencage_option(user_id, role):
+        if role == "enseignant":
+            df = app5_module_tools.get_moduleByEnseignantId(user_id)
+        elif role == "etudiant":
+            df = app5_module_tools.get_moduleByEtudiantId(user_id)
         options = [{'label': row['code_module'], 'value': row['id_module']} for _, row in
                    df[['id_module', 'code_module']].drop_duplicates().iterrows()]
         return options
