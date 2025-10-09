@@ -84,13 +84,14 @@ function listMAQUETTE_moduleByIdEtudiant($conn, $id) {
     return $rs;
 }
 function listMAQUETTE_moduleChargeBuIdEnseignant($conn, $id) {
-    $sql = "SELECT session.schedule, sequencage.duree_h, module.nom 
-            FROM CLASS_session as session 
-                JOIN LNM_enseignant as ens ON ens.id_enseignant=session.id_enseignant 
-                JOIN MAQUETTE_module_sequence as sequence ON session.id_module_sequence=sequence.id_module_sequence 
-                JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage 
-                JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module 
-            WHERE ens.id_enseignant = '$id'";
+    $sql = "SELECT CLASS_session.schedule, MAQUETTE_module_sequencage.duree_h, MAQUETTE_module.nom, MAQUETTE_module.id_semestre, LNM_seanceType.type
+            FROM CLASS_session
+                JOIN LNM_enseignant ON LNM_enseignant.id_enseignant=CLASS_session.id_enseignant 
+                JOIN MAQUETTE_module_sequence ON CLASS_session.id_module_sequence=MAQUETTE_module_sequence.id_module_sequence 
+                JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequence.id_module_sequencage=MAQUETTE_module_sequencage.id_module_sequencage 
+                JOIN MAQUETTE_module ON MAQUETTE_module_sequencage.id_module=MAQUETTE_module.id_module 
+                JOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+            WHERE LNM_enseignant.id_enseignant = '$id'";
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);
     return $rs;

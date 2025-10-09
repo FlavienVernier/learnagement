@@ -42,6 +42,7 @@ def import_apps():
     from app4_notes_eleve import app4_etudiant_layout, register_callbacks as register_callbacks_app4_etudiant
     from app5_module_enseignant_view import app5_enseignant_view_layout, register_callbacks_view as register_callbacks_app5_enseignant_view
     from app5_module_enseignant_edit import app5_enseignant_edit_layout, register_callbacks_edit as register_callbacks_app5_enseignant_edit
+    from app7_charge_administratif import app7_administratif_layout, register_callbacks as register_callbacks_app7_administratif
     from app7_charge_enseignant import app7_enseignant_layout, register_callbacks as register_callbacks_app7_enseignant
     from app7_charge_etudiant import app7_etudiant_layout, register_callbacks as register_callbacks_app7_etudiant
     from app9_rendus_etudiant import app9_layout, register_callbacks as register_callbacks_app9
@@ -61,6 +62,7 @@ def import_apps():
         'app4_etudiant': (app4_etudiant_layout, register_callbacks_app4_etudiant),
         'app5_enseignant_view': (app5_enseignant_view_layout, register_callbacks_app5_enseignant_view),
         'app5_enseignant_edit': (app5_enseignant_edit_layout, register_callbacks_app5_enseignant_edit),
+        'app7_administratif': (app7_administratif_layout, register_callbacks_app7_administratif),
         'app7_enseignant': (app7_enseignant_layout, register_callbacks_app7_enseignant),
         'app7_etudiant': (app7_etudiant_layout, register_callbacks_app7_etudiant),
         'app9': (app9_layout, register_callbacks_app9),
@@ -81,7 +83,8 @@ menu_items = {
         ('Absences', 'app3_administratif'),
         ('Gestion des stages', 'app10_administratif'),
         ('MCCC', 'app13_administratif'),
-        ('Check', 'app14_administratif')
+        ('Check', 'app14_administratif'),
+        ('Charge enseignant', 'app7_administratif'),
     ],
     'enseignant': [
         ('Carte des Universités', 'app1'),
