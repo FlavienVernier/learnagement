@@ -9,7 +9,7 @@ import app5_module_tools
 import app_tools
 
 app5_enseignant_edit_layout = html.Div([
-    html.H1(children='Séquençage'),
+    html.H1(id="app5_ens_edit_title", children='Séquençage'),
     dcc.Dropdown(
         id='filtre_module',
         options=[],
@@ -184,6 +184,19 @@ def register_callbacks_edit(app):
         df = app5_module_tools.get_moduleByEnseignantId(user_id)
         options = [{'label': row['code_module'], 'value': row['id_module']} for _, row in df[['id_module', 'code_module']].drop_duplicates().iterrows()]
         return options
+
+    @app.callback(
+        Output('app5_ens_edit_title', 'children'),
+        Input('filtre_module', 'value'),
+        State('user_id', 'data'),
+        prevent_initial_call=True
+    )
+    def update_title(id_module, user_id):
+        nom_module = ""
+        df = app5_module_tools.get_moduleByEnseignantId(user_id)
+        if id_module and not df.empty:
+            nom_module = df[df['id_module']==id_module][['nom_module']].drop_duplicates().iloc[0]['nom_module']
+        return 'Séquençage: ' + nom_module
 
     # Création de la ligne d'ajout de séquençage
     @app.callback(
