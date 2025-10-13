@@ -57,6 +57,14 @@ function listMAQUETTE_module($conn) {
     return $rs;
 }
 
+function setMAQUETTE_moduleResponsable($conn, $id_module, $id_resp) {
+    $sql = "UPDATE MAQUETTE_module
+            SET id_responsable = '$id_resp'
+            WHERE id_module = '$id_module';";
+    $res = mysqli_query($conn, $sql);
+    $rs = rs_to_table($res);
+    return $rs;
+}
 function listMAQUETTE_moduleByIdResp($conn, $id) {
     $sql = "SELECT MAQUETTE_module.id_module, MAQUETTE_module.code_module, MAQUETTE_module.nom as nom_module, LNM_semestre.semestre, MAQUETTE_module.hCM, MAQUETTE_module.hTD, MAQUETTE_module.hTP, MAQUETTE_module.hTPTD, MAQUETTE_module.hPROJ, MAQUETTE_module.hPersonnelle, MAQUETTE_module.commentaire, LNM_enseignant.nom, LNM_enseignant.prenom
             FROM `MAQUETTE_module` 
@@ -147,13 +155,14 @@ function listMAQUETTE_module_with_learning_unit($conn, $id)
 
 function getMAQUETTE_moduleM2C3($conn, $id_filiere, $id_statut)
 {
-    $sql = "SELECT MAQUETTE_module.id_module, MAQUETTE_module.code_module, MAQUETTE_module.nom, MAQUETTE_module.ECTS, MAQUETTE_module.hCM, MAQUETTE_module.hTD, MAQUETTE_module.hTP, MAQUETTE_module.hTPTD, MAQUETTE_module.hPROJ, MAQUETTE_module.hPersonnelle, MAQUETTE_learning_unit.learning_unit_code,LNM_filiere.nom_filiere, LNM_promo.annee, LNM_statut.nom_statut
+    $sql = "SELECT MAQUETTE_module.id_module, MAQUETTE_module.code_module, MAQUETTE_module.nom, MAQUETTE_module.ECTS, MAQUETTE_module.hCM, MAQUETTE_module.hTD, MAQUETTE_module.hTP, MAQUETTE_module.hTPTD, MAQUETTE_module.hPROJ, MAQUETTE_module.hPersonnelle, MAQUETTE_learning_unit.learning_unit_code,LNM_filiere.nom_filiere, LNM_promo.annee, LNM_statut.nom_statut, ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK
             FROM `MAQUETTE_module` 
             JOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module
             JOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_learning_unit = MAQUETTE_module_as_learning_unit.id_learning_unit
             JOIN LNM_promo ON LNM_promo.id_promo = MAQUETTE_learning_unit.id_promo
             JOIN LNM_filiere ON LNM_filiere.id_filiere = LNM_promo.id_filiere
             JOIN LNM_statut ON LNM_statut.id_statut = LNM_promo.id_statut
+            JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = MAQUETTE_module.id_responsable
             WHERE LNM_filiere.id_filiere = '$id_filiere' AND LNM_statut.id_statut='$id_statut';";
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);

@@ -56,7 +56,7 @@ def set_intervenant_principal_sequencage(id_sequencage, id_intervenant_principal
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/update/setSequencageIntervenantPrincipal.php'
     resp = requests.post(url, data={'id_module_sequencage': id_sequencage, 'id_intervenant_principal': id_intervenant_principal }, headers=headers)
     urlData = resp.content
-    print(urlData, flush=True)
+    #print(urlData, flush=True)
     return io.StringIO(urlData.decode('utf-8'))
 
 
@@ -84,7 +84,7 @@ def set_intervenant_principal_sequence(id_sequence, id_intervenant_principal):
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/update/setSequenceIntervenantPrincipal.php'
     resp = requests.post(url, data={'id_module_sequence': id_sequence, 'id_intervenant_principal': id_intervenant_principal }, headers=headers)
     urlData = resp.content
-    print(urlData, flush=True)
+    #print(urlData, flush=True)
     return io.StringIO(urlData.decode('utf-8'))
 
 ######################
@@ -102,7 +102,7 @@ def set_intervenant_session(id_session, id_enseignant):
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/update/setSessionIntervenant.php'
     resp = requests.post(url, data={'id_session': id_session, 'id_enseignant': id_enseignant}, headers=headers)
     urlData = resp.content
-    print(urlData, flush=True)
+    #print(urlData, flush=True)
     return io.StringIO(urlData.decode('utf-8'))
 #
 # def headers(df : pd.DataFrame) -> list:
