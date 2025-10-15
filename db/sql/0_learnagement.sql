@@ -436,7 +436,10 @@ CREATE TABLE `LNM_stage` (
   `entreprise` varchar(100) NOT NULL,
   `intitulé` varchar(50) NOT NULL,
   `description` text NOT NULL,
-  `ville` varchar(50) NOT NULL,
+  `adresse` varchar(190) DEFAULT NULL COMMENT '5x38 caractères selon norme postale Afnor RNVP',
+  `ville` varchar(38) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '38 caractères selon norme postale Afnor RNVP',
+  `code_postal` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '10 caractères correspond à la longueur maximal de zip-code connu',
+  `pays` varchar(38) DEFAULT NULL COMMENT '38 caractères selon norme postale Afnor RNVP',
   `date_debut` date NOT NULL,
   `date_fin` date NOT NULL,
   `nature` varchar(50) NOT NULL,
@@ -657,7 +660,7 @@ CREATE TABLE `VIEW_parameters_of_views` (
   CONSTRAINT `FK_parameters_of_views_as_module` FOREIGN KEY (`id_module`) REFERENCES `MAQUETTE_module` (`id_module`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_parameters_of_views_as_semestre` FOREIGN KEY (`id_semestre`) REFERENCES `LNM_semestre` (`id_semestre`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_parameters_of_views_as_status` FOREIGN KEY (`id_statut`) REFERENCES `LNM_statut` (`id_statut`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `VIEW_updatable`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
