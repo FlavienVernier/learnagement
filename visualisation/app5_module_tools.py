@@ -41,7 +41,7 @@ def remove_moduleSequencage(id_sequencage):
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/delete/deleteSequencage.php'
     resp = requests.post(url, data={'id_module_sequencage': id_sequencage}, headers=headers)
     urlData = resp.content
-    #print(urlData, flush=True)
+    print(urlData, flush=True)
     return io.StringIO(urlData.decode('utf-8'))
 
 def set_intervenant_principal_sequencage(id_sequencage, id_intervenant_principal):
