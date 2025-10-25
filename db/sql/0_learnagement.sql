@@ -487,8 +487,8 @@ CREATE TABLE `MAQUETTE_dependance_sequence` (
   PRIMARY KEY (`id_sequence_prev`,`id_sequence_next`),
   UNIQUE KEY `SECONDARY` (`id_sequence_prev`,`id_sequence_next`) USING BTREE,
   KEY `FK_dependance_sequence_as_module_sequencage_next` (`id_sequence_next`),
-  CONSTRAINT `FK_dependance_sequence_as_module_sequencage_next` FOREIGN KEY (`id_sequence_next`) REFERENCES `MAQUETTE_module_sequence` (`id_module_sequence`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `FK_dependance_sequence_as_module_sequencage_prev` FOREIGN KEY (`id_sequence_prev`) REFERENCES `MAQUETTE_module_sequence` (`id_module_sequence`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT `FK_dependance_sequence_as_module_sequencage_next` FOREIGN KEY (`id_sequence_next`) REFERENCES `MAQUETTE_module_sequence` (`id_module_sequence`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `FK_dependance_sequence_as_module_sequencage_prev` FOREIGN KEY (`id_sequence_prev`) REFERENCES `MAQUETTE_module_sequence` (`id_module_sequence`) ON DELETE CASCADE ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `MAQUETTE_discipline`;
