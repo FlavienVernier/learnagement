@@ -1,6 +1,6 @@
 import MapView from "./MapView";
 
-export default function MapPage({ universities, onAddUniv, popupFields, selectedSemester, selectedSpecialty }) {
+export default function MapPage({ universities, onAddUniv, popupFields, selectedSemester, selectedSpecialty, sidebarVisible }) {
   return (
     <div>
       <MapView 
@@ -9,6 +9,7 @@ export default function MapPage({ universities, onAddUniv, popupFields, selected
         popupFields={popupFields} 
         selectedSemester={selectedSemester}   
         selectedSpecialty={selectedSpecialty} 
+        sidebarVisible={sidebarVisible}
       />
     </div>
   );

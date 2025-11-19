@@ -249,6 +249,7 @@ function App() {
           popupFields={popupFields}
           selectedSemester={selectedSemester}
           selectedSpecialty={selectedSpecialty}
+          sidebarVisible={sidebarVisible}
         />}
         {activePage === "comparison" && <ComparisonPage selectedUnivs={selectedUnivs} />}
         {activePage === "wish" && 

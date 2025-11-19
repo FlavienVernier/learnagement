@@ -82,9 +82,9 @@ function ClusterMarkers({ universities, onAddUniv, popupFields, selectedSemester
 }
 
 
-export default function MapView({ universities, onAddUniv, popupFields, selectedSemester, selectedSpecialty }) {
+export default function MapView({ universities, onAddUniv, popupFields, selectedSemester, selectedSpecialty, sidebarVisible }) {
   return (
-    <div className="h-[100vh] w-full fixed">
+    <div className={`h-[100vh] ${sidebarVisible ? 'w-[78vw]' : 'w-[100vw]'} fixed`}>
       <MapContainer center={[48.85, 2.35]} zoom={4} scrollWheelZoom className="h-full w-full">
         <TileLayer
           attribution="&copy; OpenStreetMap"
