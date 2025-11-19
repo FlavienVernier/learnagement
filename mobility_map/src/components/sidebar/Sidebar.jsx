@@ -50,10 +50,10 @@ export default function Sidebar({
   const [popupFieldsSelectorOpen, setpopupFieldsSelectorOpen] = useState(true);
   
   return (
-    <div className="bg-[#009bda] px-[2vh] max-w-[20vw] min-w-min pt-[32px]">
-      <Box display="flex" alignItems="center" gap={1}>
-        <GlobeAltIcon style={{ height: 48, width: 48, color: '#ffffff' }} />
-        <Typography variant="h3" 
+    <div className="bg-[#009bda] px-[2vh] max-w-[20vw] min-w-min pt-[32px]" style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+      <Box display="flex" alignItems="center" justifyContent="center" gap={1} m={2} style={{ width: '100%' }}>
+        <GlobeAltIcon style={{ height: 30, width: 30, color: '#ffffff' }} />
+        <Typography variant="h2" fontSize={25}
           sx={{ 
             fontFamily: 'Roboto, sans-serif', 
             color: '#ffffff' 
@@ -75,7 +75,7 @@ export default function Sidebar({
         active={activePage === "wish"}
       />
 
-      <InputFileUpload onFileUpload={onFileUpload} />
+      <InputFileUpload onFileUpload={onFileUpload} style={{ width: '100%' }} />
       <UnivSelection
         selectedUnivs={selectedUnivs}
         setSelectedUnivs={setSelectedUnivs}
@@ -89,6 +89,7 @@ export default function Sidebar({
           color: '#009bda',
           textTransform: 'none',
           marginY: '2vh',
+          width: '100%',
           '&:hover': {
             backgroundColor: '#8d8d8d',
             color: '#ffffff'
@@ -104,6 +105,7 @@ export default function Sidebar({
             selectedSemester={selectedSemester}
             setSelectedSemester={setSelectedSemester}
           />
+          <br />
           <SpecialtyFilter
             selectedSpecialty={selectedSpecialty}
             setSelectedSpecialty={setSelectedSpecialty}
@@ -123,6 +125,7 @@ export default function Sidebar({
               backgroundColor:'#ffffff',
               color: '#009bda',
               textTransform: 'none',
+              width: '100%',
               '&:hover': {
                 backgroundColor: '#8d8d8d',
                 color: '#ffffff'
@@ -131,26 +134,27 @@ export default function Sidebar({
           >
             Réinitialiser les filtres
           </Button>
+          <Button
+          onClick={() => setpopupFieldsSelectorOpen(prev => !prev)}
+          sx={{
+            boxShadow: 'none',
+            backgroundColor:'#ffffff',
+            color: '#009bda',
+            textTransform: 'none',
+            marginY: '2vh',
+            width: '100%',
+            '&:hover': {
+              backgroundColor: '#8d8d8d',
+              color: '#ffffff'
+            },
+          }}
+          >
+            {popupFieldsSelectorOpen ? "Masquer les filtres des popups" : "Afficher les filtres des popups"}
+          </Button>
+          {popupFieldsSelectorOpen && (
+            <PopupFieldSelector selectedFields={popupFields} onChange={setPopupFields} />
+          )}
         </div>
-      )}
-      <Button
-        onClick={() => setpopupFieldsSelectorOpen(prev => !prev)}
-        sx={{
-          boxShadow: 'none',
-          backgroundColor:'#ffffff',
-          color: '#009bda',
-          textTransform: 'none',
-          marginY: '2vh',
-          '&:hover': {
-            backgroundColor: '#8d8d8d',
-            color: '#ffffff'
-          },
-        }}
-      >
-        {popupFieldsSelectorOpen ? "Masquer les filtres des popups" : "Afficher les filtres des popups"}
-      </Button>
-      {popupFieldsSelectorOpen && (
-        <PopupFieldSelector selectedFields={popupFields} onChange={setPopupFields} />
       )}
     </div>
   );

@@ -87,6 +87,7 @@ export default function UnivSelection({ selectedUnivs, reorderUnivs }) {
     >
       <Typography 
         variant="h5"
+        fontSize={20}
         sx={{
           color: '#009bda',
           paddingBottom: '2vh'

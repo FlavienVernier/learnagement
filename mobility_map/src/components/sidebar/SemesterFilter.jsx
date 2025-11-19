@@ -10,7 +10,7 @@ export default function SemesterFilter({ selectedSemester, setSelectedSemester }
     justifyContent: "space-between",
   };
   return (
-    <FormControl style={style} component="fieldset" sx={{ color: '#009bda' }}>
+    <FormControl style={style} component="fieldset" sx={{ color: '#009bda' }} >
       <FormLabel sx={{ color: '#009bda' }}>Semestre</FormLabel>
       <RadioGroup
         row

@@ -1,4 +1,4 @@
-import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import { FormControl, FormLabel, Select, MenuItem } from '@mui/material';
 
 const specialties = ["MM", "MC", "SNI", "BAT", "EIT", "IDU"];
 
@@ -12,27 +12,23 @@ export default function SpecialtyFilter({ selectedSpecialty, setSelectedSpecialt
     justifyContent: "space-between",
   };
   return (
-    <FormControl style={style} component="fieldset" sx={{ color: '#009bda', marginTop: 2 }}>
+    <FormControl style={style} sx={{ color: '#009bda', marginTop: 2 }}>
       <FormLabel sx={{ color: '#009bda' }}>Spécialité</FormLabel>
-      <RadioGroup
-        row
+      <Select
         value={selectedSpecialty}
         onChange={(e) => setSelectedSpecialty(e.target.value)}
+        displayEmpty
+        sx={{ color: '#009bda' }}
       >
+        <MenuItem value="">
+          <em>Toutes</em>
+        </MenuItem>
         {specialties.map((spec) => (
-          <FormControlLabel
-            key={spec}
-            value={spec}
-            control={<Radio sx={{ color: '#009bda' }} />}
-            label={spec}
-          />
+          <MenuItem key={spec} value={spec}>
+            {spec}
+          </MenuItem>
         ))}
-        <FormControlLabel
-          value=""
-          control={<Radio sx={{ color: '#009bda' }} />}
-          label="Toutes"
-        />
-      </RadioGroup>
+      </Select>
     </FormControl>
   );
 }
