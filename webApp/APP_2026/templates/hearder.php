@@ -13,7 +13,7 @@
 </head>
 <body class="flex flex-col min-h-screen">
     <header class="bg-primary text-on-primary">
-        <nav aria-label="Global" class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
+        <nav aria-label="Global" class="flex items-center justify-between p-6 lg:px-8">
             <div class="flex lg:flex-1 gap-2">
                 <a href="<?= router() ?>" class="h-10 w-30">
                     <?php include "assets/Logo_Polytech_Annecy_Chambery.svg"; ?>
