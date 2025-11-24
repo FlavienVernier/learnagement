@@ -18,6 +18,12 @@ services:
             - ../db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
             - ./mysql/conf.d:/etc/mysql/conf.d
             - learnagement_persistent_db_${INSTANCE_NAME}:/var/lib/mysql
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u$MYSQL_USER_LOGIN", "-p$MYSQL_USER_PASSWORD"]
+            start_period: 5s
+            interval: 5s
+            timeout: 5s
+            retries: 55
     phpmyadmin_${INSTANCE_NAME}:
         container_name: learnagement_phpmyadmin_${INSTANCE_NAME}
         image: phpmyadmin
@@ -32,7 +38,8 @@ services:
         volumes:
             - ./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
         depends_on:
-            - mysql_${INSTANCE_NAME}
+            mysql_${INSTANCE_NAME}:
+                condition: service_healthy
     backend_python_${INSTANCE_NAME}:
         container_name: learnagement_backend_python_${INSTANCE_NAME}
         build: ./backend_python/
@@ -42,7 +49,8 @@ services:
         volumes:
             - ../backend_python/:/app/
         depends_on:
-            - mysql_${INSTANCE_NAME}
+            mysql_${INSTANCE_NAME}:
+                condition: service_healthy
     phpbackend_${INSTANCE_NAME}:
         container_name: learnagement_phpbackend_${INSTANCE_NAME}
         build: ./phpbackend/
@@ -56,7 +64,8 @@ services:
             - ../phpbackend:/var/www/html
             - ./log/phpbackend:/var/log/apache2
         depends_on:
-            - mysql_${INSTANCE_NAME}
+            mysql_${INSTANCE_NAME}:
+                condition: service_healthy
     php_${INSTANCE_NAME}:
         container_name: learnagement_php_${INSTANCE_NAME}
         build: ./php/
@@ -69,8 +78,8 @@ services:
             - ../webApp:/var/www/html
             - ./log/php:/var/log/apache2
         depends_on:
-            - mysql_${INSTANCE_NAME}
-            - python_web_server_${INSTANCE_NAME}
+            mysql_${INSTANCE_NAME}:
+                condition: service_healthy
     nextjs_${INSTANCE_NAME}:
         container_name: learnagement_nextjs_${INSTANCE_NAME}
         build: ./webappnext
@@ -109,7 +118,8 @@ services:
             - ../visualisation/:/app/
             - ../visualisation/data/:/data/
         depends_on:
-            - mysql_${INSTANCE_NAME}
+            mysql_${INSTANCE_NAME}:
+                condition: service_healthy
 volumes:
     learnagement_persistent_db_${INSTANCE_NAME}:
 networks:
