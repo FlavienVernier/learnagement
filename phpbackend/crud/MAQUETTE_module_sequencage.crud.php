@@ -4,12 +4,16 @@ function createMAQUETE_module_sequencage($conn, $id_module, $nombre, $id_seance_
 {
     if($id_intervenant_principal == "NULL"){
         $sql = "INSERT INTO `MAQUETTE_module_sequencage` (`id_module`, `nombre`, `id_seance_type`, `id_groupe_type`, `duree_h`) 
-                             VALUES ('$id_module', '$nombre', '$id_seance_type', '$id_groupe_type', '$duree_h')";
+                             VALUES (?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("iiiid", $id_module, $nombre, $id_seance_type, $id_groupe_type, $duree_h);
     }else {
         $sql = "INSERT INTO `MAQUETTE_module_sequencage` (`id_module`, `nombre`, `id_seance_type`, `id_groupe_type`, `duree_h`, `id_intervenant_principal`) 
-                             VALUES ('$id_module', '$nombre', '$id_seance_type', '$id_groupe_type', '$duree_h', '$id_intervenant_principal')";
+                             VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("iiiidi", $id_module, $nombre, $id_seance_type, $id_groupe_type, $duree_h, $id_intervenant_principal);
     };
-    if(mysqli_query($conn, $sql)){
+    if($stmt->execute()){
         return "Data Inserted";
     }else{
         return "Insertion Failed";
@@ -22,12 +26,17 @@ function createMAQUETE_module_sequencage($conn, $id_module, $nombre, $id_seance_
 function deleteMAQUETE_module_sequencage($conn, $id_module_sequencage)
 {
     $sql = "DELETE FROM MAQUETTE_module_sequencage
-            WHERE id_module_sequencage = '$id_module_sequencage'";
+            WHERE id_module_sequencage = ?";
+    $stmt = $conn->prepare($sql);
+    if($stmt->bind_param("i", $id_module_sequencage)) {
 
-    if(mysqli_query($conn, $sql)){
-        return "Data Deleted";
+        if ($stmt->execute()) {
+            return "Data Deleted";
+        } else {
+            return "Delete Failed";
+        }
     }else{
-        return "Delete Failed";
+        return "Parameter Error";
     }
     //}else{
     //  return ['No permission to INSERT into MAQUETE_module_sequencage'];

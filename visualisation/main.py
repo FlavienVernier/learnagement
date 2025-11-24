@@ -42,12 +42,14 @@ def import_apps():
     from app4_notes_eleve import app4_etudiant_layout, register_callbacks as register_callbacks_app4_etudiant
     from app5_module_enseignant_view import app5_enseignant_view_layout, register_callbacks_view as register_callbacks_app5_enseignant_view
     from app5_module_enseignant_edit import app5_enseignant_edit_layout, register_callbacks_edit as register_callbacks_app5_enseignant_edit
+    from app7_charge_administratif import app7_administratif_layout, register_callbacks as register_callbacks_app7_administratif
     from app7_charge_enseignant import app7_enseignant_layout, register_callbacks as register_callbacks_app7_enseignant
     from app7_charge_etudiant import app7_etudiant_layout, register_callbacks as register_callbacks_app7_etudiant
     from app9_rendus_etudiant import app9_layout, register_callbacks as register_callbacks_app9
     from app10_stage_administratif import app10_administratif_layout, register_callbacks as register_callbacks_app10_administratif
     from app10_stage_enseignant import app10_enseignant_layout, register_callbacks as register_callbacks_app10_enseignant
     from app10_stage_etudiant import app10_etudiant_layout, register_callbacks as register_callbacks_app10_etudiant
+    from app11_dag_dependance import app11_layout, register_callbacks as register_callbacks_app11
     from app13_mccc_administratif import app13_administratif_layout, register_callbacks as register_callbacks_app13_administratif
     from app14_check_administratif import app14_administratif_layout, register_callbacks as register_callbacks_app14_administratif
     return {
@@ -60,12 +62,14 @@ def import_apps():
         'app4_etudiant': (app4_etudiant_layout, register_callbacks_app4_etudiant),
         'app5_enseignant_view': (app5_enseignant_view_layout, register_callbacks_app5_enseignant_view),
         'app5_enseignant_edit': (app5_enseignant_edit_layout, register_callbacks_app5_enseignant_edit),
+        'app7_administratif': (app7_administratif_layout, register_callbacks_app7_administratif),
         'app7_enseignant': (app7_enseignant_layout, register_callbacks_app7_enseignant),
         'app7_etudiant': (app7_etudiant_layout, register_callbacks_app7_etudiant),
         'app9': (app9_layout, register_callbacks_app9),
         'app10_administratif': (app10_administratif_layout, register_callbacks_app10_administratif),
         'app10_enseignant': (app10_enseignant_layout, register_callbacks_app10_enseignant),
         'app10_etudiant': (app10_etudiant_layout, register_callbacks_app10_etudiant),
+        'app11': (app11_layout, register_callbacks_app11),
         'app13_administratif': (app13_administratif_layout, register_callbacks_app13_administratif),
         'app14_administratif': (app14_administratif_layout, register_callbacks_app14_administratif),
     }
@@ -79,22 +83,25 @@ menu_items = {
         ('Absences', 'app3_administratif'),
         ('Gestion des stages', 'app10_administratif'),
         ('MCCC', 'app13_administratif'),
-        ('Check', 'app14_administratif')
+        ('Check', 'app14_administratif'),
+        ('Charge enseignant', 'app7_administratif'),
     ],
     'enseignant': [
         ('Carte des Universités', 'app1'),
         ('Vue modules', 'app5_enseignant_view'),
         ('MaJ modules', 'app5_enseignant_edit'),
+        ('Dépendance Séances', 'app11'),
         ('Absences', 'app3_enseignant'),
         ('Notes', 'app4_enseignant'),
         ('Charge de travail', 'app7_enseignant'),
-        ('Tutorat stages', 'app10_enseignant')
+        ('Tutorat stages', 'app10_enseignant'),
     ],
     'etudiant': [
         ('Carte des Universités', 'app1'),
         ('Compétences', 'app2'),
         ('Absences', 'app3_etudiant'),
         ('Notes', 'app4_etudiant'),
+        ('Dépendance Séances', 'app11'),
         ('Charge de travail', 'app7_etudiant'),
         ('Avancement rendus', 'app9'),
         ('Stages', 'app10_etudiant')
@@ -132,6 +139,7 @@ def render_sidebar(section, token_arg, status):
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     dcc.Store(id='user_id', storage_type="memory", data='0'),
+    dcc.Store(id='role', storage_type="memory", data='none'),
     dcc.Store(id='status', storage_type="memory", data='not connected'),
     html.Div(id='sidebar'),
     html.Div(id='page-content', className='content')
@@ -146,6 +154,7 @@ def prout():
 
 @app.callback(
     Output('user_id', 'data'),
+    Output('role', 'data'),
     Output('status', 'data'),
     Input('url', 'href')
 )
@@ -157,7 +166,7 @@ def check_auth_token(url):
     #if not session.get("token") or not token:
     if not token:
         #print("no token", flush=True)
-        return "-1", "no token"
+        return "-1", "none", "no token"
     try:
         payload_b64, signature = token.split('.')
         payload_json = base64.b64decode(payload_b64 + '=' * (-len(payload_b64) % 4)).decode()
@@ -165,28 +174,28 @@ def check_auth_token(url):
 
         if not hmac.compare_digest(signature, expected_sig):
             #print("Signature mismatch", flush=True)
-            return "-1", "Signature mismatch"
+            return "-1", "none", "Signature mismatch"
 
         payload = json.loads(payload_json)
         if payload['expires'] < time.time():
             #print("time out", flush=True)
-            return "-1", "time out"
+            return "-1", "none", "time out"
             
         #print("done", flush=True)
         # Attach user info to the Flask global context
         if 'id_enseignant' in payload:
-            return payload['id_enseignant'], "Connected"
+            return payload['id_enseignant'], "enseignant", "Connected"
         elif 'id_etudiant' in payload:
-            return payload['id_etudiant'], "Connected"
+            return payload['id_etudiant'], "etudiant", "Connected"
         elif 'id_administratif' in payload:
-            return payload['id_administratif'], "Connected"
+            return payload['id_administratif'], "administratif", "Connected"
         else:
             raise Exception("Unknown user class")
     
     except Exception as e:
         print(e)
         print(traceback.format_exc())
-        return "-1", "Exception"
+        return "-1", "none", "Exception"
 
 
 

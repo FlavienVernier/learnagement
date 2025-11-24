@@ -120,7 +120,8 @@ def update_table_session(user_id, selected_module, selected_seance_type, selecte
         },
     )
     return [table_session]
-#
+
+################################################
 # CallBack
 #
 def register_callbacks_view(app):

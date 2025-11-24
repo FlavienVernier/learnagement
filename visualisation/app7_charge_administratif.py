@@ -4,6 +4,8 @@ from dash import html, dcc, Input, Output
 import dash_bootstrap_components as dbc
 from datetime import date, datetime
 import app7_charge_tools
+import app_tools
+
 
 # Fonction pour calculer le numéro de la semaine
 def calculer_semaine(date_cours, format_date='%Y-%m-%d'):
@@ -42,8 +44,16 @@ def get_semester():
     return semester
 
 # Layout de l'application
-app7_enseignant_layout = html.Div([
+app7_administratif_layout = html.Div([
     html.H1("Visualisation de la charge de travail des enseignants"),
+    dbc.Row([
+        dbc.Label("Enseignant", html_for="enseignant_input", width=2),
+        dbc.Col(dcc.Dropdown(id="enseignant_input_administratif",
+                             #options=[{'label': "Please select tuteur", 'value': "NULL"}] + [{'label': v, 'value': v} for v in get_teachers()],
+                             options=[],
+                             placeholder="Please select enseignant",
+                             value=""), width=8),
+    ]),
     
     # Dropdown pour sélectionner le filtre de période
     dcc.Dropdown(
@@ -59,19 +69,29 @@ app7_enseignant_layout = html.Div([
     ),
     
     # Graphique
-    dcc.Graph(id='graphique-charge_enseignant'),
-    html.Div(id='summary_div'),
-    html.Div(id='total_div')
+    dcc.Graph(id='graphique-charge_administratif'),
+    html.Div(id='summary_div_administratif'),
+    html.Div(id='total_div_administratif')
 ])
 
 def register_callbacks(app):
+    @app.callback(
+        Output('enseignant_input_administratif', 'options'),
+        Input('user_id', 'data'),
+    )
+    def update_options(user_id):
+        dfi = app_tools.get_explicit_keys("LNM_enseignant")
+        intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in dfi.iterrows()]
+        return intervenant_options
     # Callback pour mettre à jour le graphique
     @app.callback(
-        Output('graphique-charge_enseignant', 'figure'),
+        Output('graphique-charge_administratif', 'figure'),
         Input('filtre-periode', 'value'),
-        Input('user_id', 'data')
+        Input('enseignant_input_administratif', 'value'),
+        prevent_initial_call=True
     )
     def update_graph(filtre_periode, user_id):
+        print(filtre_periode, user_id, flush=True)
         df = app7_charge_tools.get_chargeByEnseignantId(user_id)
 
 
@@ -113,12 +133,14 @@ def register_callbacks(app):
 
     # Callback pour mettre à jour le graphique
     @app.callback(
-        Output('summary_div', 'children'),
-        Output('total_div', 'children'),
+        Output('summary_div_administratif', 'children'),
+        Output('total_div_administratif', 'children'),
         Input('filtre-periode', 'value'),
-        Input('user_id', 'data')
+        Input('enseignant_input_administratif', 'value'),
+        prevent_initial_call=True
     )
     def display_table(period, user_id):
+        print(period, user_id, flush=True)
         df = app7_charge_tools.get_chargeByEnseignantId(user_id)
         if period == 'all':
             df = df[['type', 'duree_h']].groupby(['type']).sum().reset_index()
