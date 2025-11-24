@@ -1,146 +1,306 @@
-import evenements from './fakedata.js';
+// ----------------------------------------------------------
+// CONFIG
+// ----------------------------------------------------------
+const API_URL = "http://127.0.0.1:5000";
 
-document.addEventListener('DOMContentLoaded', () => {
-    const calendarWrapper = document.getElementById('calendar-wrapper');
-    const prevWeekButton = document.getElementById('prev-week');
-    const nextWeekButton = document.getElementById('next-week');
-    const currentMonthElement = document.getElementById('current-month');
+// Start week at Monday
+let currentWeekStart = getMonday(new Date());
 
-    let currentDate = new Date();
+// Color palette for events
+const EVENT_COLORS = [
+    '#4CAF50', '#2196F3', '#FF9800', '#9C27B0', 
+    '#F44336', '#00BCD4', '#E91E63', '#3F51B5'
+];
 
-    function renderCalendar(date) {
-        calendarWrapper.innerHTML = '';
-    
-        const timeScale = document.createElement('div');
-        timeScale.id = 'time-scale';
-    
-        // Ajouter l'en-tête de l'échelle de temps
-        const timeScaleHeader = document.createElement('div');
-        timeScaleHeader.id = 'time-scale-header';
-        timeScaleHeader.textContent = 'Heures';
-        timeScale.appendChild(timeScaleHeader);
+// ----------------------------------------------------------
+// INIT
+// ----------------------------------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+    renderTimeScale();
+    renderWeekColumns(currentWeekStart);
+    loadEventsForWeek(currentWeekStart);
 
-        // Colonne des heures
-        const timeScaleColumn = document.createElement('div');
-        timeScaleColumn.id = 'time-scale-column';
-        timeScale.appendChild(timeScaleColumn);
-    
-        for (let hour = 0; hour < 24; hour++) {
-            const timeSlot = document.createElement('div');
-            timeSlot.className = 'time-slot';
-            timeSlot.textContent = `${String(hour).padStart(2, '0')}:00`;
-            timeScaleColumn.appendChild(timeSlot);
-        }
-        calendarWrapper.appendChild(timeScale);
-    
-        const startOfWeek = new Date(date);
-        startOfWeek.setDate(date.getDate() - (date.getDay() === 0 ? 6 : date.getDay() - 1));
-    
-        updateCurrentMonth(startOfWeek);
-
-        for (let i = 0; i < 7; i++) {
-            const dayDate = new Date(startOfWeek);
-            dayDate.setDate(startOfWeek.getDate() + i);
-    
-            const isCurrentDay = (dayDate.toDateString() === new Date().toDateString());
-    
-            const dayColumn = document.createElement('div');
-            dayColumn.className = `day-column ${isCurrentDay ? 'current' : ''}`;
-            dayColumn.id = getDayName(i).toLowerCase();
-    
-            const dayHeader = document.createElement('div');
-            dayHeader.className = `day-header ${isCurrentDay ? 'current' : ''}`;
-            dayHeader.innerHTML = `
-                <div class="day-name">${getDayName(i)}</div>
-                <div class="date-number">${dayDate.getDate()}</div>
-            `;
-            dayColumn.appendChild(dayHeader);
-    
-            const dayContent = document.createElement('div');
-            dayContent.className = 'day-content';
-    
-            // Ajouter les lignes horaires
-            for (let hour = 0; hour < 24; hour++) {
-                const hourLine = document.createElement('div');
-                hourLine.className = 'hour-line';
-                hourLine.style.top = `${(hour / 24) * 100}%`;
-                dayContent.appendChild(hourLine);
-            }
-    
-            dayContent.innerHTML += renderEvents(dayDate);
-            dayColumn.appendChild(dayContent);
-    
-            calendarWrapper.appendChild(dayColumn);
-        }
-    }
-    
-
-    function getDayName(index) {
-        const days = ['LUN.', 'MAR.', 'MER.', 'JEU.', 'VEN.', 'SAM.', 'DIM.'];
-        return days[index];
-    }
-
-    function renderEvents(date) {
-        const dayEvents = evenements.filter(event => {
-            const eventDate = new Date(event.date.split('-').reverse().join('-'));
-            return eventDate.toDateString() === date.toDateString();
-        });
-    
-        return dayEvents.map(event => {
-            const startHour = parseInt(event.heure.split(':')[0]);
-            const startMinute = parseInt(event.heure.split(':')[1]);
-            const durationInMinutes = event.duree_h * 60;
-            const topPosition = (startHour * 60 + startMinute) / (24 * 60) * 100;
-            const eventHeight = durationInMinutes / (24 * 60) * 100;
-    
-            const eventContent = event.type === "Examen - Tiers-temps" ? "<div class='tiers-temps'>Tiers-temps</div>" : `<b>${event.module}</b><br>${event.type}`;
-            const eventDetails = event.type === "Examen - Tiers-temps" ? "" : `<br>(${event.salle})<br>${event.enseignant}`;
-    
-            return `
-                <div class="event" style="top: ${topPosition}%; height: ${eventHeight}%; border-left: 5px solid ${event.couleur};" 
-                    onmouseover="showTooltip(event, '${eventContent}', '${eventDetails}')" 
-                    onmouseout="hideTooltip()">
-                    ${eventContent}
-                </div>
-            `;
-        }).join('');
-    }
-    
-    function showTooltip(e, content, details) {
-        const tooltip = document.getElementById('tooltip');
-        tooltip.innerHTML = `${content}<br>${details}`;
-        tooltip.style.display = 'block';
-        tooltip.style.left = `${e.pageX + 10}px`;
-        tooltip.style.top = `${e.pageY + 10}px`;
-    }
-    
-    function hideTooltip() {
-        const tooltip = document.getElementById('tooltip');
-        tooltip.style.display = 'none';
-    }
-
-    window.showTooltip = showTooltip;
-    window.hideTooltip = hideTooltip
-
-    function updateCurrentMonth(date) {
-        const dateCopy = new Date(date);
-        const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-        const startMonth = monthNames[dateCopy.getMonth()];
-        const endMonth = monthNames[new Date(dateCopy.setDate(dateCopy.getDate() + 6)).getMonth()];
-
-        currentMonthElement.textContent = (startMonth === endMonth) ? startMonth : `${startMonth} - ${endMonth}`;
-    }
-
-
-    prevWeekButton.addEventListener('click', () => {
-        currentDate.setDate(currentDate.getDate() - 7);
-        renderCalendar(currentDate);
+    document.getElementById("prev-week").addEventListener("click", () => {
+        currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+        renderWeekColumns(currentWeekStart);
+        loadEventsForWeek(currentWeekStart);
     });
 
-    nextWeekButton.addEventListener('click', () => {
-        currentDate.setDate(currentDate.getDate() + 7);
-        renderCalendar(currentDate);
+    document.getElementById("next-week").addEventListener("click", () => {
+        currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+        renderWeekColumns(currentWeekStart);
+        loadEventsForWeek(currentWeekStart);
     });
-
-    renderCalendar(currentDate);
 });
+
+// ----------------------------------------------------------
+// FETCH EVENTS FROM FLASK
+// ----------------------------------------------------------
+async function loadEventsForWeek(monday) {
+    const start = formatDate(monday);
+    const end = formatDate(addDays(monday, 7));
+
+    const url = `${API_URL}/events.json?start=${start}&end=${end}`;
+
+    console.log(`Fetching events from: ${url}`);
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Flask API error: ${response.status}`);
+
+        const events = await response.json();
+        console.log(`Loaded ${events.length} events:`, events);
+        
+        clearEvents();
+        placeEvents(events);
+
+    } catch (err) {
+        console.error("Failed to fetch from Flask API:", err);
+        // Show error message in UI
+        showError("Impossible de charger les événements. Vérifiez que le serveur Flask est actif.");
+    }
+}
+
+// ----------------------------------------------------------
+// RENDER TIME SCALE (06:00 → 22:00)
+// ----------------------------------------------------------
+function renderTimeScale() {
+    const timeScale = document.getElementById("time-scale");
+    timeScale.innerHTML = "";
+
+    for (let hour = 6; hour <= 22; hour++) {
+        const slot = document.createElement("div");
+        slot.className = "time-slot";
+        slot.textContent = hour.toString().padStart(2, "0") + ":00";
+        timeScale.appendChild(slot);
+    }
+}
+
+// ----------------------------------------------------------
+// RENDER WEEK COLUMNS
+// ----------------------------------------------------------
+function renderWeekColumns(monday) {
+    const wrapper = document.getElementById("calendar-wrapper");
+
+    // Remove previous columns but keep time-scale
+    wrapper.querySelectorAll(".day-column").forEach(e => e.remove());
+
+    const days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+
+    for (let i = 0; i < 7; i++) {
+        const date = addDays(monday, i);
+        const dayCol = document.createElement("div");
+        dayCol.className = "day-column";
+        dayCol.dataset.day = formatDate(date);
+
+        const header = document.createElement("div");
+        header.className = "day-header";
+        
+        // Highlight today
+        const today = new Date();
+        if (formatDate(date) === formatDate(today)) {
+            header.classList.add("today");
+        }
+        
+        header.textContent = `${days[i]} ${date.getDate()}/${date.getMonth() + 1}`;
+
+        const content = document.createElement("div");
+        content.className = "day-content";
+
+        dayCol.appendChild(header);
+        dayCol.appendChild(content);
+        wrapper.appendChild(dayCol);
+    }
+
+    document.getElementById("current-month").textContent =
+        `${monday.toLocaleString("fr-FR", { month: "long" })} ${monday.getFullYear()}`;
+}
+
+// ----------------------------------------------------------
+// PLACE EVENTS IN THE CALENDAR
+// ----------------------------------------------------------
+function placeEvents(events) {
+    if (!events || events.length === 0) {
+        console.log("No events to display");
+        return;
+    }
+
+    events.forEach((ev, index) => {
+        try {
+            const start = new Date(ev.start);
+            const end = new Date(ev.end);
+
+            // Validate dates
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                console.warn("Invalid date for event:", ev);
+                return;
+            }
+
+            const dayString = formatDate(start);
+            const column = document.querySelector(`.day-column[data-day="${dayString}"] .day-content`);
+            
+            if (!column) {
+                console.log(`No column found for date: ${dayString}`);
+                return;
+            }
+
+            const div = document.createElement("div");
+            div.className = "event-block";
+            div.textContent = ev.title || "Sans titre";
+
+            // Use backgroundColor from event data, or fallback to color palette
+            const eventColor = ev.backgroundColor || EVENT_COLORS[hashString(ev.title || "") % EVENT_COLORS.length];
+            div.style.backgroundColor = eventColor;
+            div.style.borderLeft = `4px solid ${darkenColor(eventColor)}`;
+
+            // Position inside the column (adjusted for 6 AM start)
+            const startHour = start.getHours() + start.getMinutes() / 60;
+            const endHour = end.getHours() + end.getMinutes() / 60;
+            const duration = endHour - startHour;
+
+            // Adjust position relative to 6 AM (0 position = 6 AM)
+            const adjustedStart = startHour - 6;
+            
+            div.style.top = `${adjustedStart * 60}px`; // 60px per hour, starting from 6 AM
+            div.style.height = `${Math.max(duration * 60, 20)}px`; // Minimum 20px height
+
+            // Add time to event text if event is short
+            if (duration < 1) {
+                div.innerHTML = `<strong>${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}</strong> ${ev.title || "Sans titre"}`;
+            }
+
+            // Tooltip on hover
+            div.addEventListener("mouseenter", (e) => showTooltip(ev, div, e));
+            div.addEventListener("mouseleave", hideTooltip);
+
+            // Click to go to event detail (if you have event IDs)
+            if (ev.id) {
+                div.style.cursor = "pointer";
+                div.addEventListener("click", () => {
+                    window.location.href = `/event/${ev.id}`;
+                });
+            }
+
+            column.appendChild(div);
+
+        } catch (err) {
+            console.error("Error placing event:", ev, err);
+        }
+    });
+}
+
+// ----------------------------------------------------------
+// EVENT CLEANUP
+// ----------------------------------------------------------
+function clearEvents() {
+    document.querySelectorAll(".event-block").forEach(e => e.remove());
+}
+
+// ----------------------------------------------------------
+// TOOLTIP
+// ----------------------------------------------------------
+function showTooltip(ev, target, mouseEvent) {
+    const tooltip = document.getElementById("tooltip");
+    tooltip.style.display = "block";
+    
+    const start = new Date(ev.start);
+    const end = new Date(ev.end);
+    
+    const formatTime = (date) => {
+        return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    };
+
+    tooltip.innerHTML = `
+        <strong>${ev.title || "Sans titre"}</strong><br>
+        📅 ${formatDate(start)}<br>
+        🕐 ${formatTime(start)} - ${formatTime(end)}<br>
+        ${ev.location ? `📍 ${ev.location}<br>` : ''}
+        ${ev.description ? `<br>${ev.description.substring(0, 100)}${ev.description.length > 100 ? '...' : ''}` : ''}
+    `;
+
+    // Position tooltip near mouse cursor
+    const rect = target.getBoundingClientRect();
+    tooltip.style.top = (mouseEvent.clientY - 10) + "px";
+    tooltip.style.left = (rect.right + 10) + "px";
+
+    // Check if tooltip goes off screen
+    setTimeout(() => {
+        const tooltipRect = tooltip.getBoundingClientRect();
+        if (tooltipRect.right > window.innerWidth) {
+            tooltip.style.left = (rect.left - tooltipRect.width - 10) + "px";
+        }
+        if (tooltipRect.bottom > window.innerHeight) {
+            tooltip.style.top = (window.innerHeight - tooltipRect.height - 10) + "px";
+        }
+    }, 0);
+}
+
+function hideTooltip() {
+    document.getElementById("tooltip").style.display = "none";
+}
+
+// ----------------------------------------------------------
+// ERROR DISPLAY
+// ----------------------------------------------------------
+function showError(message) {
+    const wrapper = document.getElementById("calendar-wrapper");
+    const errorDiv = document.createElement("div");
+    errorDiv.className = "error-message";
+    errorDiv.textContent = message;
+    errorDiv.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #f44336;
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        font-size: 16px;
+        z-index: 1000;
+    `;
+    wrapper.appendChild(errorDiv);
+}
+
+// ----------------------------------------------------------
+// UTILITY FUNCTIONS
+// ----------------------------------------------------------
+
+// Hash string to get consistent color for same event titles
+function hashString(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+}
+
+// Darken color for border
+function darkenColor(color) {
+    const hex = color.replace('#', '');
+    const r = Math.max(0, parseInt(hex.substr(0, 2), 16) - 40);
+    const g = Math.max(0, parseInt(hex.substr(2, 2), 16) - 40);
+    const b = Math.max(0, parseInt(hex.substr(4, 2), 16) - 40);
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+function getMonday(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = (day === 0 ? -6 : 1) - day; // Monday = 1
+    d.setDate(d.getDate() + diff);
+    d.setHours(0, 0, 0, 0); // Reset time
+    return d;
+}
+
+function formatDate(date) {
+    return date.toISOString().split("T")[0];
+}
+
+function addDays(date, days) {
+    const d = new Date(date);
+    d.setDate(d.getDate() + days);
+    return d;
+}
