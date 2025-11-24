@@ -1,0 +1,21 @@
+@layer utilities {
+    /* backgrounds */
+    .bg-primary   { background-color: var(--primary); }
+    .bg-secondary { background-color: var(--secondary); }
+    .bg-accent    { background-color: var(--accent); }
+    .bg-warning   { background-color: var(--warning); }
+    .bg-error     { background-color: var(--error); }
+
+    /* text contextual */
+    .text-primary   { color: var(--primary); }
+    .text-secondary { color: var(--secondary); }
+    .text-accent    { color: var(--accent); }
+    .text-warning   { color: var(--warning); }
+    .text-error     { color: var(--error); }
+
+    .text-on-primary   { color: var(--on-primary); }
+    .text-on-secondary { color: var(--on-secondary); }
+    .text-on-accent    { color: var(--on-accent); }
+    .text-on-warning   { color: var(--on-warning); }
+    .text-on-error     { color: var(--on-error); }
+}
