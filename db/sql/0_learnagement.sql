@@ -472,11 +472,37 @@ CREATE TABLE `LNM_universite` (
   `nom` varchar(250) NOT NULL,
   `nom_court` varchar(50) NOT NULL,
   `ville` varchar(50) NOT NULL,
+  `adresse` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `pays` varchar(50) NOT NULL,
+  `site_web` varchar(150) DEFAULT NULL,
+  `latitude` double DEFAULT NULL,
+  `longitude` double DEFAULT NULL,
+  `langues` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `commentaire` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `critere_academique` int NOT NULL DEFAULT '0',
+  `integration_et_vie_sociale` int NOT NULL DEFAULT '0',
+  `logement_et_vie_quotidienne` int NOT NULL DEFAULT '0',
+  `organisation_et_demarches` int NOT NULL DEFAULT '0',
+  `experience_globale` int NOT NULL DEFAULT '0',
+  `nombre_d_evaluations` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id_universite`),
   UNIQUE KEY `SECONDARY` (`nom_court`) USING BTREE,
   UNIQUE KEY `nom` (`nom`)
 ) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `LNM_universite_as_promo`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `LNM_universite_as_promo` (
+  `id_universite` int NOT NULL,
+  `id_promo` int NOT NULL,
+  `nombre_places` int NOT NULL,
+  PRIMARY KEY (`id_universite`,`id_promo`),
+  UNIQUE KEY `SECONDARY` (`id_universite`,`id_promo`,`nombre_places`),
+  KEY `FK_universite_as_promo_as_promo` (`id_promo`),
+  CONSTRAINT `FK_universite_as_promo_as_promo` FOREIGN KEY (`id_promo`) REFERENCES `LNM_promo` (`id_promo`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `FK_universite_as_promo_as_universite` FOREIGN KEY (`id_universite`) REFERENCES `LNM_universite` (`id_universite`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `MAQUETTE_dependance_sequence`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -660,7 +686,7 @@ CREATE TABLE `VIEW_parameters_of_views` (
   CONSTRAINT `FK_parameters_of_views_as_module` FOREIGN KEY (`id_module`) REFERENCES `MAQUETTE_module` (`id_module`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_parameters_of_views_as_semestre` FOREIGN KEY (`id_semestre`) REFERENCES `LNM_semestre` (`id_semestre`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_parameters_of_views_as_status` FOREIGN KEY (`id_statut`) REFERENCES `LNM_statut` (`id_statut`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `VIEW_updatable`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
