@@ -20,6 +20,7 @@ def get_entreprises():
         entreprises = entreprises + df_stages_with_supervisor["entreprise"].tolist()
     if "entreprise" in df_stages_without_supervisor.columns.tolist() :
         entreprises = entreprises + df_stages_without_supervisor["entreprise"].tolist()
+    entreprises.sort()
     return entreprises
 
 def get_teachers():
