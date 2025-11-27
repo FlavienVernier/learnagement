@@ -60,6 +60,8 @@ def update_table_stages_with_supervisor(nom_promo):
         columns=[{"name": i, "id": i}
                  for i in df.columns] + [{"name": 'nouveau_tuteur', "id": 'nouveau_tuteur', "editable": True, "presentation": "dropdown", }],
         editable=True,
+        sort_action="native",
+        sort_mode="multi",
         data=df.to_dict('records'),
         row_deletable=True,
         dropdown={
@@ -103,6 +105,8 @@ def update_table_stages_without_supervisor(nom_promo):
         columns=[{"name": i, "id": i}
                  for i in df.columns] + [{"name": 'nouveau_tuteur', "id": 'nouveau_tuteur', "editable": True, "presentation": "dropdown", }],
         editable=True,
+        sort_action="native",
+        sort_mode="multi",
         data=df.to_dict('records'),
         row_deletable=True,
         dropdown={
@@ -120,7 +124,7 @@ def update_table_stages_without_supervisor(nom_promo):
 
 def get_students_without_internship():
     df_students_without_stage = app10_stage_tools.get_students_without_stage()
-
+    df_students_without_stage.sort_values(by=['nom'], ascending=True, inplace=True)
     # liste des étudiants sans stage
     etudiants_sans_stage = {}
     if "nom" in df_students_without_stage.columns.tolist() :
@@ -149,6 +153,8 @@ def update_table_students_without_internship(nom_promo):
         columns=[{"name": i, "id": i}
                  for i in df.columns],
         editable=False,
+        sort_action="native",
+        sort_mode="multi",
         data=df.to_dict('records'),
         row_deletable=False,
         style_cell_conditional=[
