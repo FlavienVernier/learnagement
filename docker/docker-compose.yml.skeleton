@@ -6,7 +6,8 @@ services:
         image: mysql:8.4
         restart: always
         networks:
-            - learnagement_back_${INSTANCE_NAME}
+            - learnagement_data_${INSTANCE_NAME}
+            - learnagement_back_${INSTANCE_NAME} # ToDo remove when all dependencies, except CRUD backend, will be removed
             - learnagement_front_${INSTANCE_NAME}  # ToDo remove when all dependencies, except CRUD backend, will be removed
         command: --mysql-native-password=ON
         environment:
@@ -45,7 +46,8 @@ services:
         build: ./backend_python/
         restart: no
         networks:
-              - learnagement_back_${INSTANCE_NAME}
+            - learnagement_data_${INSTANCE_NAME}
+            - learnagement_back_${INSTANCE_NAME}
         ports:
             - ${INSTANCE_NUMBER}4000:4000
         volumes:
@@ -53,7 +55,7 @@ services:
         depends_on:
             mysql_${INSTANCE_NAME}:
                 condition: service_healthy
-    phpbackend_${INSTANCE_NAME}:
+    phpbackend_${INSTANCE_NAME}:  # ToDo remove when python backend will be operational
         container_name: learnagement_phpbackend_${INSTANCE_NAME}
         build: ./phpbackend/
         restart: always
@@ -125,10 +127,16 @@ services:
 volumes:
     learnagement_persistent_db_${INSTANCE_NAME}:
 networks:
+    # network to access to fronts (access to the apps, only fronts on this network)
     learnagement_front_${INSTANCE_NAME}:
         name: learnagement_front_${INSTANCE_NAME}
         driver: bridge
+    # network to access to back (only fronts and backs on this network)
     learnagement_back_${INSTANCE_NAME}:
+        name: learnagement_back_${INSTANCE_NAME}
+        driver: bridge
+    # network to access to data (only baks and data storages on this network)
+    learnagement_data_${INSTANCE_NAME}:
         name: learnagement_back_${INSTANCE_NAME}
         driver: bridge
     

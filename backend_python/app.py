@@ -1,13 +1,16 @@
 from fastapi import Depends, FastAPI
 import uvicorn
 
-from dependencies import get_query_token, get_token_header
-from system import authenticate
+from system import authenticate, check
+from user import LNM_enseignant
 
 #app = FastAPI(dependencies=[Depends(get_query_token)])
 app = FastAPI()
 
 app.include_router(authenticate.router)
+app.include_router(check.router)
+app.include_router(LNM_enseignant.router)
+
 # app.include_router(
 #     authenticate.router,
 #     prefix="/authenticate",
