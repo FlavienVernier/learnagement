@@ -46,6 +46,8 @@ services:
         restart: no
         networks:
               - learnagement_back_${INSTANCE_NAME}
+        ports:
+            - ${INSTANCE_NUMBER}4000:4000
         volumes:
             - ../backend_python/:/app/
         depends_on:
