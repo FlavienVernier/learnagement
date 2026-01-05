@@ -11,7 +11,7 @@ function create_session() {
     _session_start();
 
     if (!isset($_SESSION["connecte"])){
-        add_session("connect", false);
+        add_session("connecte", false);
         add_session("email", null);
         add_session("type", null); //etudiant ou enseignant ou administration
     }

@@ -31,7 +31,7 @@ try {
     $_SESSION["email"] = $email;
     $_SESSION["type"] = $type;
     $_SESSION["id"] = $id;
-    redirect("dashboad");
+    redirect("home");
   } else if ($password_updated && $encrypt_password == $password){
     $_SESSION["type"] = $type;
     $_SESSION["id"] = $id;
