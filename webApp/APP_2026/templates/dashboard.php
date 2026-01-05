@@ -10,7 +10,7 @@
         array_push($routes, [ "link" => "rendus_". $_SESSION["type"], "label" => "Mes Rendus", "img" => "./assets/icons/user-circle.svg" ]);
 ?>
 
-<?= render("components/hearder", ["title" => "Learnagement", "routes" => $routes]) ?>
+<?= render("components/header", ["title" => "Learnagement", "routes" => $routes]) ?>
 
 <main class="grow flex flex-col">
     <div class="grow flex lg:mx-4 lg:mt-4 lg:gap-4">

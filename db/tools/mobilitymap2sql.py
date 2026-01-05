@@ -83,6 +83,7 @@ with CSV.open(newline='', encoding='utf-8') as f_in, OUT.open('w', encoding='utf
         rows.append("(" + ",".join(vals) + ")")
 
     if rows:
+        f_out.write("SET NAMES utf8mb4;\n")
         f_out.write("LOCK TABLES `MOB_partner_university` WRITE;\n")
         f_out.write("INSERT INTO `MOB_partner_university` (" + ",".join(cols) + ") VALUES\n")
         f_out.write(",\n".join(rows) + ";\n")
