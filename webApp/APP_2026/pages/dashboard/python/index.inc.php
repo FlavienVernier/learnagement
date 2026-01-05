@@ -5,7 +5,7 @@
     $type = $_SESSION['type'];
 
     $payload = [
-        'id_' . $type => $_SESSION['id_' . $type],
+        'id_' . $type => $_SESSION['id'],
         'expires' => time() + 300 // 5 minutes
     ];
 
