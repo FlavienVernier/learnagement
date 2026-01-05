@@ -126,9 +126,6 @@ def __mainConfiguration__():
 
             file.write("" + "\n")
             file.write("#########################################################################" + "\n")
-            file.write("" + "\n")
-
-            file.write("MOBILITY_PORT=" + str(instance_number) + "5173" + "\n")
 
         print(f".env générated")
 

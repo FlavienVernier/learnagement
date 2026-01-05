@@ -31,7 +31,6 @@ app.layout = html.Div([
         dbc.Col(
             dbc.Nav(
                 [
-                    dbc.NavLink("Carte des Universités", href="/app1", id="link-app1", className="menu-item"),
                     dbc.NavLink("Compétences", href="/app2", id="link-app2", className="menu-item"),
                     dbc.NavLink("Absences", href="/app3", id="link-app3", className="menu-item"),
                     dbc.NavLink("Notes (élèves)", href="/app4", id="link-app4", className="menu-item"),
@@ -66,9 +65,7 @@ app.layout = html.Div([
     [Input('url', 'pathname')]
 )
 def display_page(pathname):
-    if pathname == '/app1':
-        return app1_layout  # Graphique de l'app1
-    elif pathname == '/app2':
+    if pathname == '/app2':
         return app2_layout  # Graphique de l'app2
     elif pathname == '/app3':
         return app3_layout  # Graphique de l'app3
