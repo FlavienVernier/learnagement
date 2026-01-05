@@ -15,13 +15,13 @@
 <main class="grow flex flex-col">
     <div class="grow flex lg:mx-4 lg:mt-4 lg:gap-4">
         <div class="hidden lg:flex items-center">
-            <div class="bg-primary text-on-primary rounded-lg flex flex-col h-full gap-6 p-4 sticky group">
+            <div class="bg-primary text-on-primary rounded-lg flex flex-col h-full gap-6 p-4 sticky group transition-all duration-200 ease-linear w-14 hover:w-48">
                 <?php foreach ($routes as $route) { ?>
-                    <a href="<?= router("home", ["section" => $route["link"]]) ?>" class="flex items-center gap-3">
-                        <div class="w-6 h-6">
+                    <a href="<?= router("home", ["section" => $route["link"]]) ?>" class="flex items-center gap-3 overflow-hidden whitespace-nowrap">
+                        <div class="w-6 h-6 min-w-[1.5rem]">
                             <?php include($route["img"]) ?>
                         </div>
-                        <p class="hidden group-hover:block"><?= $route["label"] ?></p>
+                        <p class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-50"><?= $route["label"] ?></p>
                     </a>
                 <?php } ?>
             </div>
