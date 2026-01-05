@@ -7,7 +7,7 @@
         [ "link" => "ressources", "label" => "Ressources", "img" => "./assets/icons/user-circle.svg" ],
     ];
     if ($_SESSION['type'] != 'administratif')
-        array_push($routes, [ "link" => "rendus_". $_SESSION["type"], "label" => "Mes Rendus", "img" => "./assets/icons/user-circle.svg" ]);
+        array_push($routes, [ "link" => "rendus", "label" => "Mes Rendus", "img" => "./assets/icons/user-circle.svg" ]);
 ?>
 
 <?= render("components/hearder", ["title" => "Learnagement", "routes" => $routes]) ?>
