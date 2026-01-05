@@ -39,14 +39,6 @@ app.layout = html.Div([
             figure=app2_spyder_plot_competences.app.layout.children[1].figure  # Récupérer la figure de `spyder_plot_competences.py`
         )
     ]),
-    html.Hr(),
-    html.Div([
-        html.H2("Graphique 3 : Carte des mobilités"),
-        dcc.Graph(
-            id='university-map',
-            figure=app1_map_generation.app.layout.children[1].figure  # Récupérer la figure de `map_generation.py`
-        )
-    ])
 ])
 
 # Lancer l'application Dash principale

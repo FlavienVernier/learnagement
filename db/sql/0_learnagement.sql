@@ -595,6 +595,45 @@ CREATE TABLE `MAQUETTE_module_sequence` (
   CONSTRAINT `FK_module_sequence_as_module_sequencage` FOREIGN KEY (`id_module_sequencage`) REFERENCES `MAQUETTE_module_sequencage` (`id_module_sequencage`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=812 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `MOB_partner_university`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `MOB_partner_university` (
+  `id_partner_university` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(250) NOT NULL,
+  `code` VARCHAR(50) DEFAULT NULL,
+  `country` VARCHAR(100) NOT NULL,
+  `address` VARCHAR(190) DEFAULT NULL,
+  `latitude` DECIMAL(9,6) NOT NULL,
+  `longitude` DECIMAL(9,6) NOT NULL,
+  `website` VARCHAR(255) DEFAULT NULL,
+  `languages` VARCHAR(100) DEFAULT NULL,
+  `S8_total_places` INT DEFAULT NULL,
+  `S8_MM` INT DEFAULT NULL,
+  `S8_MC` INT DEFAULT NULL,
+  `S8_MMT` INT DEFAULT NULL,
+  `S8_SNI` INT DEFAULT NULL,
+  `S8_BAT` INT DEFAULT NULL,
+  `S8_EIT` INT DEFAULT NULL,
+  `S8_IDU` INT DEFAULT NULL,
+  `S8_ESB` INT DEFAULT NULL,
+  `S8_AM` INT DEFAULT NULL,
+  `S9_total_places` INT DEFAULT NULL,
+  `S9_MM` INT DEFAULT NULL,
+  `S9_MC` INT DEFAULT NULL,
+  `S9_MMT` INT DEFAULT NULL,
+  `S9_SNI` INT DEFAULT NULL,
+  `S9_BAT` INT DEFAULT NULL,
+  `S9_EIT` INT DEFAULT NULL,
+  `S9_IDU` INT DEFAULT NULL,
+  `S9_ESB` INT DEFAULT NULL,
+  `S9_AM` INT DEFAULT NULL,
+  `note_min` DECIMAL(4,2) DEFAULT NULL,
+  `type` VARCHAR(50) DEFAULT NULL,
+  PRIMARY KEY (`id_partner_university`),
+  UNIQUE KEY `ux_name_country` (`name`,`country`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `MRDBF_system_request`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;

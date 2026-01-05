@@ -1,4 +1,4 @@
-<?= render("components/hearder", ["title" => "Learnagement", "routes" => []]) ?>
+<?= render("components/header", ["title" => "Learnagement", "routes" => []]) ?>
 
 <main class="grow flex flex-col">
     <?php if (file_exists("pages/$page/index.inc.php")) : ?>
