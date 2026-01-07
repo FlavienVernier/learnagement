@@ -1,7 +1,8 @@
 <?php
     $routes = [
         [ "link" => $_SESSION["type"], "label" => "Mon compte", "img" => "./assets/icons/user-circle.svg" ],
-        [ "link" => "dashboard", "label" => "Tableau de bord", "img" => "./assets/icons/user-circle.svg" ],
+        [ "link" => "dashboard", "label" => "Acceuil", "img" => "./assets/icons/user-circle.svg" ],
+        [ "link" => "python", "label" => "Tableau de bord", "img" => "./assets/icons/user-circle.svg" ],
         [ "link" => "mobility_map", "label" => "Mobility Map", "img" => "./assets/icons/user-circle.svg" ],
         [ "link" => "liste_personnel", "label" => "Liste", "img" => "./assets/icons/user-circle.svg" ],
         [ "link" => "ressources", "label" => "Ressources", "img" => "./assets/icons/user-circle.svg" ],
