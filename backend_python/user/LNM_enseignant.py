@@ -4,16 +4,16 @@ from fastapi import APIRouter, Depends
 from typing import Annotated
 from pydantic import BaseModel
 
-from dependencies import db_request, get_current_active_user
+from dependencies import db_request, get_current_active_user, User
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-class User(BaseModel):
-    prenom: str
-    nom: str
-    mail: str | None = None
+# class User(BaseModel):
+#     prenom: str
+#     nom: str
+#     mail: str | None = None
 
 @router.post("/enseignant/",
             tags=["user", "request", "enseignant"],
