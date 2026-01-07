@@ -1,14 +1,15 @@
 <?php
     $routes = [
-        [ "link" => $_SESSION["type"], "label" => "Mon compte", "img" => "./assets/icons/user-circle.svg" ],
-        [ "link" => "dashboard", "label" => "Acceuil", "img" => "./assets/icons/user-circle.svg" ],
-        [ "link" => "python", "label" => "Tableau de bord", "img" => "./assets/icons/user-circle.svg" ],
-        [ "link" => "mobility_map", "label" => "Mobility Map", "img" => "./assets/icons/user-circle.svg" ],
-        [ "link" => "liste_personnel", "label" => "Liste", "img" => "./assets/icons/user-circle.svg" ],
-        [ "link" => "ressources", "label" => "Ressources", "img" => "./assets/icons/user-circle.svg" ],
+        [ "link" => "home", "label" => "Acceuil", "img" => "./assets/icons/home.svg" ],
+        [ "link" => "mobility_map", "label" => "Mobility Map", "img" => "./assets/icons/map.svg" ],
+        [ "link" => "liste_personnel", "label" => "Liste", "img" => "./assets/icons/list.svg" ],
+        [ "link" => "ressources", "label" => "Ressources", "img" => "./assets/icons/info.svg" ],
+        [ "link" => "python", "label" => "Tableau de bord", "img" => "./assets/icons/console.svg" ],
     ];
     if ($_SESSION['type'] != 'administratif')
-        array_push($routes, [ "link" => "rendus", "label" => "Mes Rendus", "img" => "./assets/icons/user-circle.svg" ]);
+        array_push($routes, [ "link" => "rendus", "label" => "Mes Rendus", "img" => "./assets/icons/file.svg" ]);
+    if ($_SESSION['type'] == 'etudiant')
+        array_push($routes, [ "link" => $_SESSION["type"], "label" => "Mon compte", "img" => "./assets/icons/user-circle.svg" ]);
 ?>
 
 <?= render("components/header", ["title" => "Learnagement", "routes" => $routes]) ?>

@@ -7,7 +7,7 @@
     create_session();
     $defaultPage = $_SESSION["connecte"] ? "home" : "login";
     $page = !isset($_GET["page"]) ? $defaultPage : $_GET["page"];
-    $section = !isset($_GET["section"]) ? "python" : $_GET["section"];
+    $section = !isset($_GET["section"]) ? "home" : $_GET["section"];
 
     // You can switch template here
     echo("<!-- Rendering page: $page, section: $section -->");
