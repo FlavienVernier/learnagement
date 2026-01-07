@@ -89,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (filtres.includes(texte.toLowerCase()) || texte.trim() === '') return;
             // (\D+) = capture tout ce qui n'est pas un chiffre
             // (\d+) = capture les chiffres
+            texte = texte.replace(/\s+/g, '');
             const resultat1 = texte.match(/(\D+)(\d+)/);
             const resultat2 = texte.match(/(\d+)(\D+)/);
             if (!resultat1 && !resultat2) {
