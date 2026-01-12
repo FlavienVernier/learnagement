@@ -37,6 +37,10 @@ class User(BaseModel):
 class UserInDB(User):
     password: str
 
+class SQLRequest(BaseModel):
+    request: str
+    allowedRolesRequester: list[str]
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 async def get_token_header(x_token: Annotated[str, Header()]):
@@ -131,18 +135,22 @@ def get_etudiant(user_login: str):
 
 def get_user(user_login: str):
     administratif = get_administratif(user_login)
+    user = None
     if administratif is not None:
-        return get_administratif(user_login)
+        user = get_administratif(user_login)
 
     enseignant = get_enseignant(user_login)
     if enseignant is not None:
-        return get_enseignant(user_login)
+        user = get_enseignant(user_login)
 
     etudiant = get_etudiant(user_login)
     if etudiant is not None:
-        return get_etudiant(user_login)
-
-    return None
+        user = get_etudiant(user_login)
+    if user is not None:
+        logger.info(f"User {user_login} logged as {user}")
+    else:
+        logger.error(f"Logging error with login: {user_login}")
+    return user
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     credentials_exception = HTTPException(
@@ -150,6 +158,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         userlogin = payload.get("sub")
@@ -179,12 +188,15 @@ def has_role(role_required: str):
 
     return check_role
 
-def db_request(sql_request):
+def db_request(requester: User, request: SQLRequest):
+    # check if there is no intersection between requester roles and request allowed roles
+    if not bool(set(requester.roles) & set(request.allowedRolesRequester)):
+        raise HTTPException(status_code=403, detail="Unauthorized access")
     rows = []
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)
-        cursor.execute(sql_request)
+        cursor.execute(request.request)
         rows = cursor.fetchall()
         connection.commit()
         connection.close()
