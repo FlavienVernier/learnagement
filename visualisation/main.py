@@ -16,7 +16,6 @@ server = app.server
 registered_callbacks = set()
 
 icon_map = {
-    'app1': 'fa-solid fa-map',
     'app2': 'fa-solid fa-chart-pie',
     'app3': 'fa-solid fa-user-minus',
     'app4': 'fa-solid fa-user-graduate',
@@ -33,7 +32,6 @@ icon_map = {
     
 # Importer les layouts des différentes applications
 def import_apps():
-    from app1_map_generation import app1_layout, register_callbacks as register_callbacks_app1
     from app2_spyder_plot_competences import app2_layout, register_callbacks as register_callbacks_app2
     from app3_absenteisme_administratif import app3_administratif_layout, register_callbacks as register_callbacks_app3_administratif
     from app3_absenteisme_enseignant import app3_enseignant_layout, register_callbacks as register_callbacks_app3_enseignant
@@ -53,7 +51,6 @@ def import_apps():
     from app13_mccc_administratif import app13_administratif_layout, register_callbacks as register_callbacks_app13_administratif
     from app14_check_administratif import app14_administratif_layout, register_callbacks as register_callbacks_app14_administratif
     return {
-        'app1': (app1_layout, register_callbacks_app1),
         'app2': (app2_layout, register_callbacks_app2),
         'app3_administratif': (app3_administratif_layout, register_callbacks_app3_administratif),
         'app3_enseignant': (app3_enseignant_layout, register_callbacks_app3_enseignant),
@@ -87,7 +84,6 @@ menu_items = {
         ('Charge enseignant', 'app7_administratif'),
     ],
     'enseignant': [
-        ('Carte des Universités', 'app1'),
         ('Vue modules', 'app5_enseignant_view'),
         ('MaJ modules', 'app5_enseignant_edit'),
         ('Dépendance Séances', 'app11'),
@@ -97,7 +93,6 @@ menu_items = {
         ('Tutorat stages', 'app10_enseignant'),
     ],
     'etudiant': [
-        ('Carte des Universités', 'app1'),
         ('Compétences', 'app2'),
         ('Absences', 'app3_etudiant'),
         ('Notes', 'app4_etudiant'),
@@ -232,7 +227,7 @@ def render_page_content(url, pathname):
     #print('token',token_arg)
     if not pathname or pathname == '/':
         return html.Div()
-    parts = pathname.strip('/').split('/')  # ['enseignant', 'app1'] ou ['etudiant','app7'] ou ['enseignant'] etc.
+    parts = pathname.strip('/').split('/')  # ['enseignant', 'app2'] ou ['etudiant','app7'] ou ['enseignant'] etc.
     if len(parts) == 1:
         # page section landing
         return html.Div([
