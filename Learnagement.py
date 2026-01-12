@@ -490,20 +490,28 @@ def fromScratch():
                 prog.communicate()
             else:
                 subprocess.run(DOCKER_COMMAND + ["volume", "rm", os.environ["COMPOSE_PROJECT_NAME"] + "_learnagement_persistent_db_" + os.environ["INSTANCE_NAME"]], check=True)
+        except subprocess.CalledProcessError as e:
+            print(e.output)
 
+        try:
             shutil.rmtree(os.path.join("db", "data"), ignore_errors=True)
             shutil.rmtree(os.path.join("db", "docker-entrypoint-initdb.d"), ignore_errors=True)
             os.remove(os.path.join("docker", "docker-compose.yml"))
-
+        except FileNotFoundError as e:
+            print(e)
+        try:
             os.remove(".env")
-            for container in containers:
+        except FileNotFoundError as e:
+            print(e)
+
+        for container in containers:
+            try:
                 target_path = os.path.join(container, ".env")
                 os.remove(target_path)
+            except FileNotFoundError as e:
+                print(e)
 
-            print(f"{GREEN}The application was reset to its initial state.{NC}")
-        except subprocess.CalledProcessError as e:
-            print(e.output)
-            print(f"{RED}The application was not reset to its initial state.{NC}")
+        print(f"{GREEN}The application was reset to its initial state.{NC}")
 
 
 def help(argv):

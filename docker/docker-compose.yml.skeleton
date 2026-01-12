@@ -124,6 +124,6 @@ networks:
         driver: bridge
     # network to access to data (only baks and data storages on this network)
     learnagement_data_${INSTANCE_NAME}:
-        name: learnagement_back_${INSTANCE_NAME}
+        name: learnagement_data_${INSTANCE_NAME}
         driver: bridge
     
