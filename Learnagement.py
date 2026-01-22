@@ -105,14 +105,19 @@ def __mainConfiguration__():
             file.write("#########################################################################" + "\n")
             file.write("" + "\n")
 
-            # ToDo Refactor XXX_URL (not XXX_DOCKER_URL) must be XXX_PUBLIC_URL, remove url with "localhost"
+            # ToDo Refactor XXX_URL (not XXX_DOCKER_URL) must be XXX_PUBLIC_URL,
+            # ToDo remove url with "localhost"
 
             file.write("PHP_BACKEND_URL=http://localhost:" + str(instance_number) + "0081" + "\n")
             file.write("PHP_BACKEND_DOCKER_URL=http://learnagement_phpbackend_" + instance_name + "\n")
 
+            file.write("PYTHON_BACKEND_DOCKER_URL=http://learnagement_backend_python_" + instance_name + "\n")
+            file.write("PYTHON_BACKEND_DOCKER_PORT=4000\n")
+
             file.write("" + "\n")
             file.write("#########################################################################" + "\n")
             file.write("" + "\n")
+
 
             file.write("DASH_SERVER=learnagement_python_web_server_" + instance_name + "\n")
             file.write("DASH_PORT=" + str(instance_number) + "8050" + "\n")
@@ -122,6 +127,7 @@ def __mainConfiguration__():
             file.write("" + "\n")
 
             file.write("NEXTAUTH_URL=http://localhost:" + str(instance_number) + "3000" + "\n")
+            file.write("NEXTAUTH_PUBLIC_PORT=" + str(instance_number) + "3000" + "\n")
             file.write("NEXTAUTH_DOCKER_URL=http://learnagement_nextjs_" + instance_name + "\n")
 
             file.write("" + "\n")

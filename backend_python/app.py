@@ -3,6 +3,8 @@ import uvicorn
 
 from system import authenticate, check
 from user import LNM_enseignant
+from user import LNM_university
+from user import APC_competence
 
 #app = FastAPI(dependencies=[Depends(get_query_token)])
 app = FastAPI()
@@ -10,6 +12,8 @@ app = FastAPI()
 app.include_router(authenticate.router)
 app.include_router(check.router)
 app.include_router(LNM_enseignant.router)
+app.include_router(LNM_university.router)
+app.include_router(APC_competence.router)
 
 # app.include_router(
 #     authenticate.router,

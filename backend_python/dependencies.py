@@ -163,12 +163,15 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         userlogin = payload.get("sub")
         if userlogin is None:
+            logger.error(f"Login error with payload: {payload}")
             raise credentials_exception
         token_data = TokenData(mail=userlogin)
     except InvalidTokenError:
+        logger.error(f"Invalid token with payload: {payload}")
         raise credentials_exception
     user = get_user(token_data.mail)
     if user is None:
+        logger.error(f"Login error with payload: {payload}")
         raise credentials_exception
     return user
 
@@ -184,6 +187,7 @@ def has_role(role_required: str):
         current_user: Annotated[User, Depends(get_current_user)],
     ):
         if role_required not in current_user.roles:
+            logger.error(f"User {current_user.id} has no role {role_required}")
             raise HTTPException(status_code=403, detail="Unauthorized access")
 
     return check_role
@@ -191,6 +195,7 @@ def has_role(role_required: str):
 def db_request(requester: User, request: SQLRequest):
     # check if there is no intersection between requester roles and request allowed roles
     if not bool(set(requester.roles) & set(request.allowedRolesRequester)):
+        logger.error(f"User {requester.id} has no role {request.allowedRolesRequester}")
         raise HTTPException(status_code=403, detail="Unauthorized access")
     rows = []
     try:
