@@ -79,7 +79,22 @@
     }).addTo(map);
 
     const markers = L.markerClusterGroup();
+
     const universities = <?= json_encode($universities) ?>;
+    // ToDo refactoring to access data throw api, not with direct sql request
+    // ToDo Token management required
+    /*const url = process.env.PYTHON_BACKEND_DOCKER_URL + ":" + process.env.PYTHON_BACKEND_DOCKER_PORT + "/university/"
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+
+        const universities = await response.json();
+        console.log(universities);
+    } catch (error) {
+        console.error(error.message);
+    }*/
 
     function updateMap() {
         markers.clearLayers();

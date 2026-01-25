@@ -29,10 +29,12 @@ class TokenData(BaseModel):
     mail: str | None = None
 
 class User(BaseModel):
+    id: int
     prenom: str
     nom: str
     mail: str | None = None
     roles: list = []
+    password2update: bool = False
 
 class UserInDB(User):
     password: str
@@ -70,7 +72,7 @@ def get_administratif(user_login: str):
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM LNM_administratif WHERE mail = %s", (user_login,))
+        cursor.execute("SELECT LNM_administratif.id_administratif AS id, LNM_administratif.* FROM LNM_administratif WHERE mail = %s", (user_login,))
         users = cursor.fetchall()
     except Exception as e:
         logger.exception(e)
@@ -96,7 +98,7 @@ def get_enseignant(user_login: str):
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM LNM_enseignant WHERE mail = %s", (user_login,))
+        cursor.execute("SELECT LNM_enseignant.id_enseignant AS id, LNM_enseignant.*  FROM LNM_enseignant WHERE mail = %s", (user_login,))
         users = cursor.fetchall()
     except Exception as e:
         logger.exception(e)
@@ -123,7 +125,7 @@ def get_etudiant(user_login: str):
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM LNM_etudiant WHERE mail = %s", (user_login,))
+        cursor.execute("SELECT LNM_etudiant.id_etudiant AS id, LNM_etudiant.* FROM LNM_etudiant WHERE mail = %s", (user_login,))
         users = cursor.fetchall()
     except Exception as e:
         logger.exception(e)

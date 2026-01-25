@@ -1,5 +1,5 @@
 <footer class="flex flex-col lg:flex-row place-items-center justify-between gap-4 p-4">
-    <p class="hidden lg:block">© <?= date("Y") ?> Polytech Annecy Chambery, All rights reserved.</p>
+    <p class="hidden lg:block">© <?= date("Y") ?> USMB / Polytech Annecy Chambery / SCEM Info, All rights reserved.</p>
     <div class="flex justify-center gap-4">
         <!-- Add some other link (Insta ...) -->
         <a href="https://github.com/FlavienVernier/learnagement" target="_blank" class="flex align-center gap-2 h-5">
