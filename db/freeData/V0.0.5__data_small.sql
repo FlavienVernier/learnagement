@@ -2960,8 +2960,8 @@ INSERT INTO `MAQUETTE_module` VALUES (49,'PROJ631','Projet Algorithmique',4.0,1,
 INSERT INTO `MAQUETTE_module` VALUES (50,'DATA731','Modélisation Stochastique',3.0,1,7,12,NULL,24,NULL,NULL,NULL,24,NULL);
 INSERT INTO `MAQUETTE_module` VALUES (51,'INFO731_IDU','Sécurité et Cryptographie',3.0,1,7,13.5,10.5,4,12,NULL,NULL,16,NULL);
 INSERT INTO `MAQUETTE_module` VALUES (52,'INFO732','Comportement et Modélisation Dynamique',2.5,1,7,7.5,6,24,NULL,NULL,NULL,8,NULL);
-INSERT INTO `MAQUETTE_module` VALUES (53,'PROJ731','Analyse et visualisation de données',2.0,1,7,NULL,NULL,NULL,20,NULL,NULL,8,NULL);
-INSERT INTO `MAQUETTE_module` VALUES (54,'DATA732','Analyse et visualisation de données',3.0,1,7,12,7.5,NULL,16,NULL,NULL,8,NULL);
+INSERT INTO `MAQUETTE_module` VALUES (53,'PROJ731','Analyse et front_DashPlotly de données',2.0,1,7,NULL,NULL,NULL,20,NULL,NULL,8,NULL);
+INSERT INTO `MAQUETTE_module` VALUES (54,'DATA732','Analyse et front_DashPlotly de données',3.0,1,7,12,7.5,NULL,16,NULL,NULL,8,NULL);
 INSERT INTO `MAQUETTE_module` VALUES (55,'INFO734','Développement Full Stack',3.0,1,7,12,NULL,NULL,24,NULL,NULL,14,NULL);
 INSERT INTO `MAQUETTE_module` VALUES (56,'ISOC731','Économie et gouvernance de la donnée',3.0,1,7,15,9,4,12,NULL,NULL,16,NULL);
 INSERT INTO `MAQUETTE_module` VALUES (57,'DATA831','Big Data',1.0,1,8,7.5,NULL,12,NULL,NULL,NULL,15,NULL);

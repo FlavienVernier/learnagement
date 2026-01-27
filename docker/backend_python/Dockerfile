@@ -13,6 +13,6 @@ RUN chmod +x /entrypoint.sh
 EXPOSE 80
 
 # Commande par défaut pour Docker Compose
-#CMD ["/bin/sh","-c","/startup.sh"]
+#CMD ["/bin/sh","-c","/entrypoint.sh"]
 # IMPORTANT: use entrypoint, not command
 ENTRYPOINT ["/entrypoint.sh"]

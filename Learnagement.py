@@ -29,7 +29,7 @@ INSTANCE_NUMBER=None
 DOCKER_COMMAND=[]
 DOCKER_COMPOSE_COMMAND=[]
 
-containers = ["docker", "phpbackend", "backend_python", "webApp", "visualisation", "front_NextJS", ]
+containers = ["docker", "phpbackend", "backend_python", "webApp", "front_DashPlotly", "front_NextJS", ]
 
 def load_dotenv():
     dotenv.load_dotenv()

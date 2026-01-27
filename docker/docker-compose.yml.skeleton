@@ -83,7 +83,7 @@ services:
         depends_on:
             mysql_${INSTANCE_NAME}:
                 condition: service_healthy
-    nextjs_${INSTANCE_NAME}:
+    front_nextjs_${INSTANCE_NAME}:
         container_name: learnagement_nextjs_${INSTANCE_NAME}
         build: ./front_NextJS
         restart: always
@@ -96,17 +96,17 @@ services:
             - ../front_NextJS/node_modules:/app/node_modules
         depends_on:
             - phpbackend_${INSTANCE_NAME}
-    python_web_server_${INSTANCE_NAME}:
+    front_dashplotly_${INSTANCE_NAME}:
         container_name: learnagement_python_web_server_${INSTANCE_NAME}
-        build: ./python_web_server/
+        build: ./front_DashPlotly/
         restart: always
         networks:
               - learnagement_front_${INSTANCE_NAME}
         ports:
             - "${INSTANCE_NUMBER}8050:8050"
         volumes:
-            - ../visualisation/:/app/
-            - ../visualisation/data/:/data/
+            - ../front_DashPlotly/:/app/
+            - ../front_DashPlotly/data/:/data/
         depends_on:
             mysql_${INSTANCE_NAME}:
                 condition: service_healthy

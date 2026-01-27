@@ -5,11 +5,11 @@ import dash_bootstrap_components as dbc
 import importlib
 
 # Importer les fichiers dash existants
-import visualisation.visus.app3_taux_absenteisme as app3_taux_absenteisme  # Ce fichier contient l'application Dash pour 
-import visualisation.visus.app2_spyder_plot_competences as app2_spyder_plot_competences
-import visualisation.visus.app1_map_generation as app1_map_generation
+import front_DashPlotly.visus.app3_taux_absenteisme as app3_taux_absenteisme  # Ce fichier contient l'application Dash pour
+import front_DashPlotly.visus.app2_spyder_plot_competences as app2_spyder_plot_competences
+import front_DashPlotly.visus.app1_map_generation as app1_map_generation
 
-import visualisation.visus.app6_graph_avancement
+import front_DashPlotly.visus.app6_graph_avancement
 
 # Créer l'application principale Dash
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
