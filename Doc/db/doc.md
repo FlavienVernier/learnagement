@@ -1,4 +1,4 @@
-# [General Normalization and spécific Normalisations](../Norm.md)
+# [General Normalization and spécific Normalisations](../doc.md)
 
 ## DB Normalization
 
@@ -47,4 +47,4 @@ La description débute par :
 
 **ATTENTION** : un fichier ```.sql``` ne doit **jamais** être modifié, toute modification de la BD implique un nouveau fichier ```.sql``` 
 
-[Back](../Norm.md)
+[Back](../doc.md)

@@ -66,4 +66,4 @@ python Learnagement -stop
 python Learnagement -fromScratch
 ```
 
-[ToDo Lists](./ToDo/ToDo.md) - [Norm](./Norm/Norm.md) - [CRediT](./CREDITS.md)
+[Doc](Doc/doc.md) - [ToDo Lists](./ToDo/ToDo.md) - [CRediT](./CREDITS.md)
