@@ -10,7 +10,7 @@
     - Architecture PHP traditionnelle
     - Gestion des données via des fichiers PHP
     - Système de CRUD (Create, Read, Update, Delete)
-2. **Frontend (webappnext)**
+2. **Frontend (NextJS)**
     - Framework Next.js
     - Styling avec Tailwind CSS
     - Typage avec TypeScript
@@ -33,7 +33,7 @@ webApp/
 ### Structure des Dossiers
 
 ```
-webappnext/
+front_NextJS/
 ├── app/               # Pages et composants Next.js
 ├── lib/               # Bibliothèques utilitaires
 ├── public/            # Assets statiques (icones, logos etc...)

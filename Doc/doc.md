@@ -7,10 +7,10 @@
 - Doc dyrectory architechture contains only Norm.md files
 
 
-## [Dockers](./docker/doc.md)
+## [Docker](./docker/doc.md)
 
 ## [DB](db/doc.md)
 
-## [WebAppNext](webappnext/doc.md)
+## [Front NextJS](front_NextJS/doc.md)
 
 [Back](../README.md)
