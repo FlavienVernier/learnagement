@@ -521,7 +521,7 @@ def fromScratch():
 
 
 def help(argv):
-    print("Usage: " + argv[0] + " [-start|-stop|-build|-backupDB|-destroy|-fromScratch|-updateEnv|-exportInstance|-importInstance FILE_NAME|-help]")
+    print("Usage: " + argv[0] + " [-start|-stop|-build|-backupDB|-fromScratch|-updateEnv|-exportInstance|-importInstance FILE_NAME|-help]")
             
 def main(argv):
     # if script parameter is destroy
@@ -533,8 +533,6 @@ def main(argv):
         stop()
     elif len(argv)==2 and argv[1] == "-build":
         start(docker_option = ["--build"])
-    elif len(argv)==2 and argv[1] == "-destroy":
-        destroy()
     elif len(argv)==2 and argv[1] == "-fromScratch":
         fromScratch()
     elif len(argv)==2 and argv[1] == "-updateEnv":

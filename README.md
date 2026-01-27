@@ -34,7 +34,7 @@ en remplaçant ```i``` par votre numéro d'instance.
 
 Lors du 1e lancement il vous sera demandé si vous souhaitez charger des données. 
 Si vous avez chargé le jeu de données libres "small", vous trouverez via PhPMyAdmin un ensemble d'utilisateurs de test dont :
-- un enseignant : FABRICE.LE_SAINT@truc.com / toto
+- un enseignant : AMELIE.CODRON@truc.com / toto
 - un étudiant : LAURENT.BONNIFAIT@machin.com / toto
 - un administratif : pierre.tartampion@truc.com / toto
 

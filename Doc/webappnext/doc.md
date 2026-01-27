@@ -6,11 +6,11 @@
 
 ### Vue d’ensemble
 
-1. **Backend (webApp)**
+1. **Backend PhP (deprecated)**
     - Architecture PHP traditionnelle
     - Gestion des données via des fichiers PHP
     - Système de CRUD (Create, Read, Update, Delete)
-2. **Frontend (webappnext**
+2. **Frontend (webappnext)**
     - Framework Next.js
     - Styling avec Tailwind CSS
     - Typage avec TypeScript
