@@ -217,6 +217,19 @@ CREATE TABLE `LNM_administratif` (
   UNIQUE KEY `SECONDARY` (`nom`,`prenom`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `LNM_administratif_as_role`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `LNM_administratif_as_role` (
+  `id_administratif` int NOT NULL,
+  `id_role` int NOT NULL,
+  PRIMARY KEY (`id_administratif`,`id_role`),
+  UNIQUE KEY `SECONDARY` (`id_administratif`,`id_role`),
+  KEY `FK_administratif_as_role_as_role` (`id_role`),
+  CONSTRAINT `FK_administratif_as_role_as_administratif` FOREIGN KEY (`id_administratif`) REFERENCES `LNM_administratif` (`id_administratif`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `FK_administratif_as_role_as_role` FOREIGN KEY (`id_role`) REFERENCES `LNM_role` (`id_role`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `LNM_enseignant`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -241,6 +254,19 @@ CREATE TABLE `LNM_enseignant` (
   KEY `FK_enseignant_as_discipline` (`id_discipline`),
   CONSTRAINT `FK_enseignant_as_discipline` FOREIGN KEY (`id_discipline`) REFERENCES `MAQUETTE_discipline` (`id_discipline`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=66 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `LNM_enseignant_as_role`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `LNM_enseignant_as_role` (
+  `id_enseignant` int NOT NULL,
+  `id_role` int NOT NULL,
+  PRIMARY KEY (`id_enseignant`,`id_role`),
+  UNIQUE KEY `SECONDARY` (`id_enseignant`,`id_role`),
+  KEY `FK_enseignant_as_role_as_role` (`id_role`),
+  CONSTRAINT `FK_enseignant_as_role_as_enseignant` FOREIGN KEY (`id_enseignant`) REFERENCES `LNM_enseignant` (`id_enseignant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `FK_enseignant_as_role_as_role` FOREIGN KEY (`id_role`) REFERENCES `LNM_role` (`id_role`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `LNM_etudiant`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -405,6 +431,16 @@ CREATE TABLE `LNM_rendu_module_as_etudiant` (
   KEY `FK_rendu_module_as_etudiant_as_etudiant` (`id_etudiant`),
   CONSTRAINT `FK_rendu_module_as_etudiant_as_etudiant` FOREIGN KEY (`id_etudiant`) REFERENCES `LNM_etudiant` (`id_etudiant`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_rendu_module_as_etudiant_as_rendu_module` FOREIGN KEY (`id_rendu_module`) REFERENCES `LNM_rendu_module` (`id_rendu_module`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `LNM_role`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `LNM_role` (
+  `id_role` int NOT NULL AUTO_INCREMENT,
+  `role` varchar(50) NOT NULL,
+  PRIMARY KEY (`id_role`),
+  UNIQUE KEY `SECONDARY` (`role`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `LNM_seanceType`;
@@ -625,40 +661,40 @@ DROP TABLE IF EXISTS `MOB_partner_university`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `MOB_partner_university` (
-  `id_partner_university` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(250) NOT NULL,
-  `code` VARCHAR(50) DEFAULT NULL,
-  `country` VARCHAR(100) NOT NULL,
-  `address` VARCHAR(190) DEFAULT NULL,
-  `latitude` DECIMAL(9,6) NOT NULL,
-  `longitude` DECIMAL(9,6) NOT NULL,
-  `website` VARCHAR(255) DEFAULT NULL,
-  `languages` VARCHAR(100) DEFAULT NULL,
-  `S8_total_places` INT DEFAULT NULL,
-  `S8_MM` INT DEFAULT NULL,
-  `S8_MC` INT DEFAULT NULL,
-  `S8_MMT` INT DEFAULT NULL,
-  `S8_SNI` INT DEFAULT NULL,
-  `S8_BAT` INT DEFAULT NULL,
-  `S8_EIT` INT DEFAULT NULL,
-  `S8_IDU` INT DEFAULT NULL,
-  `S8_ESB` INT DEFAULT NULL,
-  `S8_AM` INT DEFAULT NULL,
-  `S9_total_places` INT DEFAULT NULL,
-  `S9_MM` INT DEFAULT NULL,
-  `S9_MC` INT DEFAULT NULL,
-  `S9_MMT` INT DEFAULT NULL,
-  `S9_SNI` INT DEFAULT NULL,
-  `S9_BAT` INT DEFAULT NULL,
-  `S9_EIT` INT DEFAULT NULL,
-  `S9_IDU` INT DEFAULT NULL,
-  `S9_ESB` INT DEFAULT NULL,
-  `S9_AM` INT DEFAULT NULL,
-  `note_min` DECIMAL(4,2) DEFAULT NULL,
-  `type` VARCHAR(50) DEFAULT NULL,
+  `id_partner_university` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(250) NOT NULL,
+  `code` varchar(50) DEFAULT NULL,
+  `country` varchar(100) NOT NULL,
+  `address` varchar(190) DEFAULT NULL,
+  `latitude` decimal(9,6) NOT NULL,
+  `longitude` decimal(9,6) NOT NULL,
+  `website` varchar(255) DEFAULT NULL,
+  `languages` varchar(100) DEFAULT NULL,
+  `S8_total_places` int DEFAULT NULL,
+  `S8_MM` int DEFAULT NULL,
+  `S8_MC` int DEFAULT NULL,
+  `S8_MMT` int DEFAULT NULL,
+  `S8_SNI` int DEFAULT NULL,
+  `S8_BAT` int DEFAULT NULL,
+  `S8_EIT` int DEFAULT NULL,
+  `S8_IDU` int DEFAULT NULL,
+  `S8_ESB` int DEFAULT NULL,
+  `S8_AM` int DEFAULT NULL,
+  `S9_total_places` int DEFAULT NULL,
+  `S9_MM` int DEFAULT NULL,
+  `S9_MC` int DEFAULT NULL,
+  `S9_MMT` int DEFAULT NULL,
+  `S9_SNI` int DEFAULT NULL,
+  `S9_BAT` int DEFAULT NULL,
+  `S9_EIT` int DEFAULT NULL,
+  `S9_IDU` int DEFAULT NULL,
+  `S9_ESB` int DEFAULT NULL,
+  `S9_AM` int DEFAULT NULL,
+  `note_min` decimal(4,2) DEFAULT NULL,
+  `type` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id_partner_university`),
   UNIQUE KEY `ux_name_country` (`name`,`country`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=91 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `MRDBF_system_request`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
