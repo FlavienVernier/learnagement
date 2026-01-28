@@ -219,7 +219,7 @@ def register_callbacks_edit(app):
         groupe_type_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in df.iterrows()]
         df = app_tools.get_explicit_keys("LNM_enseignant")
         intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in df.iterrows()]
-        df = app_tools.get_explicit_keys("LNM_seanceType")
+        df = app_tools.get_explicit_keys("LNM_seance_type")
         seance_type_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in df.iterrows()]
 
         table_intervenants = dash_table.DataTable(
@@ -326,7 +326,7 @@ def register_callbacks_edit(app):
     def cb_check_sequencage_vs_maquette(data, id_module, user_id):
         df = app5_module_tools.check_moduleSequencage(user_id)
         if id_module:
-            df = df[df['id_module'] == id_module][['code_module', 'ecart_CM', 'ecart_TD', 'ecart_TP', 'ecart_TPTD']]
+            df = df[df['id_module'] == id_module][['code_module', 'ecart_CM', 'ecart_TD', 'ecart_TP']]
 
         table_check = dash_table.DataTable(
             id='check_table',

@@ -8,7 +8,6 @@ type ModuleInfos = {
     hCM?: number,
     hTD?: number,
     hTP?: number,
-    hTPTD?: number,
     hproj?: number,
     hPersonnelle?: number,
     id_responsable?: number,

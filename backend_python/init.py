@@ -29,7 +29,7 @@ class bcolors:
 requests = {"check": {}, "struct": {}, "api": {}}
 
 ''' 
-Return table without secndary key, that's prohibited by the framework
+Return table without secondary key, that's prohibited by the framework
 '''
 requests["check"]["table_without_secondary_K"] = f"""
     SELECT DISTINCT `TABLE_NAME` 
@@ -43,7 +43,7 @@ requests["check"]["table_without_secondary_K"] = f"""
 
 ''' 
 Return table with error in there primary key name. 
-According to the framework the table XXXX_name has id_name as primary key.
+According to the framework, the table XXXX_name has id_name as primary key.
 '''
 requests["check"]["primaryK_namming_error"] = f"""
     SELECT DISTINCT TABLE_NAME, COLUMN_NAME, TRIM( SUBSTR(TABLE_NAME, LOCATE('_', TABLE_NAME)) ), TRIM( SUBSTR(COLUMN_NAME, LOCATE('_', COLUMN_NAME)) )
@@ -58,6 +58,12 @@ requests["check"]["primaryK_namming_error"] = f"""
             GROUP BY TABLE_NAME
             HAVING COUNT(*)=1)
                 AND TRIM( SUBSTR(TABLE_NAME, LOCATE('_', TABLE_NAME)) ) != TRIM( SUBSTR(COLUMN_NAME, LOCATE('_', COLUMN_NAME)) );"""
+
+'''
+Return table with error in there foreign key name. 
+According to the framework, a foreign key name is FK_[CURENT TABLE NAME]_2_[FOREIGN TABLE NAME]
+'''
+# ToDo ...
 
 ''' 
 Return transition tables, according to the framwork table that primary keys are composed by 2 attributs
@@ -125,7 +131,7 @@ requests["api"]["secondary_key"] = f"""
 
 def request(query, param=()):
 
-    print("query/param: ", query, param, flush=True)
+    #print("query/param: ", query, param, flush=True)
 
     conn = mysql.connector.connect(
         host=HOST,
@@ -301,7 +307,7 @@ def build_secondary_key_request(conn, table):
     # build the final SQL query
     secondary_key_request = f"""
         CREATE OR REPLACE VIEW ExplicitSecondaryKs_{table} AS
-        SELECT {primary_key_field} AS id,
+        SELECT {table}.{primary_key_field} AS id,
                CONCAT_WS(' ', {select_fields}) AS ExplicitSecondaryK,
                {select_prim_fields}
         FROM {from_clause}
@@ -327,11 +333,15 @@ if __name__ == '__main__':
     for table in tables:
         print(bcolors.WARNING + "Warning: " + table + " has wrong primary key naming!" + bcolors.ENDC)
 
-    tables = request(requests["struct"]["linked_table"])
-    #print("Tables: ", tables, flush=True)
+    linked_tables = request(requests["struct"]["linked_table"])
+    #print("Linked Tables: ", linked_tables, flush=True)
+    leaf_tables = request(requests["struct"]["leaf_table"])
+    #print("Leaf Tables: ", leaf_tables, flush=True)
+    tables = linked_tables + leaf_tables
     #print("Table", build_secondary_key_request(conn, tables[0]), flush=True)
 
     for table in tables:
+        #print(table)
         query = build_secondary_key_request(conn, table)
         #print("Table", query, flush=True)
         cursor = conn.cursor()

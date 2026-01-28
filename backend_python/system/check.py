@@ -102,7 +102,7 @@ def  checkCLASS_sessionWithoutIntervenant(
                 MAQUETTE_module_sequencage.duree_h,
                 MAQUETTE_module.code_module,
                 MAQUETTE_module.nom as nom_module,
-                LNM_seanceType.type,
+                LNM_seance_type.type,
                 LNM_semestre.semestre
             FROM CLASS_session
             	LEFT JOIN LNM_groupe ON LNM_groupe.id_groupe = CLASS_session.id_groupe
@@ -114,7 +114,7 @@ def  checkCLASS_sessionWithoutIntervenant(
                 LEFT JOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module
                 LEFT JOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_learning_unit = MAQUETTE_module_as_learning_unit.id_learning_unit AND MAQUETTE_learning_unit.id_promo = LNM_promo.id_promo
                 LEFT JOIN LNM_semestre ON LNM_semestre.id_semestre = MAQUETTE_module.id_semestre
-                LEFT JOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+                LEFT JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
                 LEFT JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
             WHERE CLASS_session.id_enseignant IS NULL;""",
         "allowedRolesRequester" : ["administratif"],

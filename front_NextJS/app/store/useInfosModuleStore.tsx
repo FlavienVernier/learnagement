@@ -11,7 +11,6 @@ export const useInfosModuleStore = create<Module>()((set) => ({
         hCM: -1,
         hTD: -1,
         hTP: -1,
-        hTPTD: -1,
         hproj: -1,
         hPersonnelle: -1,
         id_responsable: -1,

@@ -27,7 +27,7 @@ def tree_competence(
                                APC_apprentissage_critique.libelle_apprentissage, MAQUETTE_module.code_module, MAQUETTE_module.nom, 
                                CAST(MAQUETTE_module.ECTS AS DOUBLE) AS 'ects',
                                IFNULL(MAQUETTE_module.hCM,0) AS 'hCM', 
-                               IFNULL(MAQUETTE_module.hTD,0) + IFNULL(MAQUETTE_module.hTPTD,0) AS 'hTD', 
+                               IFNULL(MAQUETTE_module.hTD,0) AS 'hTD', 
                                IFNULL(MAQUETTE_module.hTP,0) AS 'hTP', 
                                IFNULL(MAQUETTE_module.hPROJ,0)
                         FROM `APC_competence` 

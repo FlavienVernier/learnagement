@@ -148,7 +148,7 @@ def register_callbacks_view(app):
         Input('filtre_semestre', 'value'),
     )
     def update_table_modules(user_id, selected_semestre):
-        df = app5_module_tools.get_moduleByEnseignantId(user_id)[['code_module', 'nom_module', 'semestre', 'hCM', 'hTD', 'hTP', 'hTPTD', 'hPROJ', 'hPersonnelle', 'commentaire']].drop_duplicates()
+        df = app5_module_tools.get_moduleByEnseignantId(user_id)[['code_module', 'nom_module', 'semestre', 'hCM', 'hTD', 'hTP', 'hPROJ', 'hPersonnelle', 'commentaire']].drop_duplicates()
         if selected_semestre != 'all':
             df = df[df['semestre'] == selected_semestre]
 

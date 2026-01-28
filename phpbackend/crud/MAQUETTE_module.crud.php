@@ -26,7 +26,7 @@ function selectMAQUETTE_module($conn, $code_module) {
         JOIN `MAQUETTE_module_sequence` previousSequences ON previousSequences.`id_module_sequence` = `MAQUETTE_dependance_sequence`.`id_sequence_prev` 
         JOIN `MAQUETTE_module_sequencage` previousSequencages ON previousSequencages.`id_module_sequencage` = previousSequences.`id_module_sequencage`
         JOIN `MAQUETTE_module` previousModule ON previousModule.`id_module` = previousSequencages.`id_module` 
-        JOIN `LNM_seanceType` previousSeanceType ON previousSeanceType.id_seance_type = previousSequencages.`id_seance_type`
+        JOIN `LNM_seance_type` previousSeanceType ON previousSeanceType.id_seance_type = previousSequencages.`id_seance_type`
         
         JOIN `MAQUETTE_module` ON `MAQUETTE_module`.`id_module` = previousModule.`id_module`
         JOIN `LNM_semestre` ON `LNM_semestre`.`id_semestre` = `MAQUETTE_module`.`id_semestre`
@@ -34,7 +34,7 @@ function selectMAQUETTE_module($conn, $code_module) {
         JOIN `MAQUETTE_module_sequence` nextSequences ON nextSequences.`id_module_sequence` = `MAQUETTE_dependance_sequence`.`id_sequence_next`  
         JOIN `MAQUETTE_module_sequencage` nextSequencages ON nextSequencages.`id_module_sequencage` = nextSequences.`id_module_sequencage`
         JOIN `MAQUETTE_module` nextModule ON nextModule.`id_module` = nextSequencages.`id_module` 
-        JOIN `LNM_seanceType` nextSeanceType ON nextSeanceType.id_seance_type = nextSequencages.`id_seance_type`
+        JOIN `LNM_seance_type` nextSeanceType ON nextSeanceType.id_seance_type = nextSequencages.`id_seance_type`
         
         JOIN `MAQUETTE_module_as_learning_unit` ON `MAQUETTE_module_as_learning_unit`.`id_module` = `MAQUETTE_module`.`id_module`
         JOIN `MAQUETTE_learning_unit` ON `MAQUETTE_learning_unit`.`id_learning_unit` = `MAQUETTE_module_as_learning_unit`.`id_learning_unit`
@@ -66,7 +66,7 @@ function setMAQUETTE_moduleResponsable($conn, $id_module, $id_resp) {
     return $rs;
 }
 function listMAQUETTE_moduleByIdResp($conn, $id) {
-    $sql = "SELECT MAQUETTE_module.id_module, MAQUETTE_module.code_module, MAQUETTE_module.nom as nom_module, LNM_semestre.semestre, MAQUETTE_module.hCM, MAQUETTE_module.hTD, MAQUETTE_module.hTP, MAQUETTE_module.hTPTD, MAQUETTE_module.hPROJ, MAQUETTE_module.hPersonnelle, MAQUETTE_module.commentaire, LNM_enseignant.nom, LNM_enseignant.prenom
+    $sql = "SELECT MAQUETTE_module.id_module, MAQUETTE_module.code_module, MAQUETTE_module.nom as nom_module, LNM_semestre.semestre, MAQUETTE_module.hCM, MAQUETTE_module.hTD, MAQUETTE_module.hTP, MAQUETTE_module.hPROJ, MAQUETTE_module.hPersonnelle, MAQUETTE_module.commentaire, LNM_enseignant.nom, LNM_enseignant.prenom
             FROM `MAQUETTE_module` 
                 LEFT JOIN LNM_semestre ON LNM_semestre.id_semestre = MAQUETTE_module.id_semestre
                 LEFT JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module = MAQUETTE_module.id_module
@@ -92,13 +92,13 @@ function listMAQUETTE_moduleByIdEtudiant($conn, $id) {
     return $rs;
 }
 function listMAQUETTE_moduleChargeBuIdEnseignant($conn, $id) {
-    $sql = "SELECT CLASS_session.schedule, MAQUETTE_module_sequencage.duree_h, MAQUETTE_module.nom, MAQUETTE_module.id_semestre, LNM_seanceType.type
+    $sql = "SELECT CLASS_session.schedule, MAQUETTE_module_sequencage.duree_h, MAQUETTE_module.nom, MAQUETTE_module.id_semestre, LNM_seance_type.type
             FROM CLASS_session
                 JOIN LNM_enseignant ON LNM_enseignant.id_enseignant=CLASS_session.id_enseignant 
                 JOIN MAQUETTE_module_sequence ON CLASS_session.id_module_sequence=MAQUETTE_module_sequence.id_module_sequence 
                 JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequence.id_module_sequencage=MAQUETTE_module_sequencage.id_module_sequencage 
                 JOIN MAQUETTE_module ON MAQUETTE_module_sequencage.id_module=MAQUETTE_module.id_module 
-                JOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+                JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
             WHERE LNM_enseignant.id_enseignant = '$id'";
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);
@@ -121,15 +121,15 @@ function listMAQUETTE_moduleChargeBuIdEtudiant($conn, $id) {
 }
 
 
-/*function createMAQUETTE_module($conn, $id_module, $code_module, $nom, $ECTS, $id_discipline, $id_semestre, $hCM, $hTD, $hTP, $hTPTD, $hPROJ, $hPersonnelle, $id_responsable, $id_etat_module, $commentaire, $modifiable) {
-    $sql = "INSERT INTO `MAQUETTE_module` (`id_module`, `code_module`, `nom`, `ECTS`, `id_discipline`, `id_semestre`, `hCM`, `hTD`, `hTP`, `hTPTD`, `hPROJ`, `hPersonnelle`, `id_responsable`, `id_etat_module`, `commentaire`, `modifiable`) VALUES ('$id_module', '$code_module', '$nom', '$ECTS', '$id_discipline', '$id_semestre', '$hCM', '$hTD', '$hTP', '$hTPTD', '$hPROJ', '$hPersonnelle', '$id_responsable', '$id_etat_module', '$commentaire', '$modifiable')";
+/*function createMAQUETTE_module($conn, $id_module, $code_module, $nom, $ECTS, $id_discipline, $id_semestre, $hCM, $hTD, $hTP, $hPROJ, $hPersonnelle, $id_responsable, $id_etat_module, $commentaire, $modifiable) {
+    $sql = "INSERT INTO `MAQUETTE_module` (`id_module`, `code_module`, `nom`, `ECTS`, `id_discipline`, `id_semestre`, `hCM`, `hTD`, `hTP`, `hPROJ`, `hPersonnelle`, `id_responsable`, `id_etat_module`, `commentaire`, `modifiable`) VALUES ('$id_module', '$code_module', '$nom', '$ECTS', '$id_discipline', '$id_semestre', '$hCM', '$hTD', '$hTP', '$hPROJ', '$hPersonnelle', '$id_responsable', '$id_etat_module', '$commentaire', '$modifiable')";
     $res = mysqli_query($conn, $sql);
     return $res;
 }$/
 
-/*function updateMAQUETTE_module($conn, $id,$id_module, $code_module, $nom, $ECTS, $id_discipline, $id_semestre, $hCM, $hTD, $hTP, $hTPTD, $hPROJ, $hPersonnelle, $id_responsable, $id_etat_module, $commentaire, $modifiable)
+/*function updateMAQUETTE_module($conn, $id,$id_module, $code_module, $nom, $ECTS, $id_discipline, $id_semestre, $hCM, $hTD, $hTP, $hPROJ, $hPersonnelle, $id_responsable, $id_etat_module, $commentaire, $modifiable)
 {
-    $sql = "UPDATE `MAQUETTE_module` SET `id_module`='$id_module', `code_module`='$code_module', `nom`='$nom', `ECTS`='$ECTS', `id_discipline`='$id_discipline', `id_semestre`='$id_semestre', `hCM`='$hCM', `hTD`='$hTD', `hTP`='$hTP', `hTPTD`='$hTPTD', `hPROJ`='$hPROJ', `hPersonnelle`='$hPersonnelle', `id_responsable`='$id_responsable', `id_etat_module`='$id_etat_module', `commentaire`='$commentaire', `modifiable`='$modifiable' WHERE `id` = $id";
+    $sql = "UPDATE `MAQUETTE_module` SET `id_module`='$id_module', `code_module`='$code_module', `nom`='$nom', `ECTS`='$ECTS', `id_discipline`='$id_discipline', `id_semestre`='$id_semestre', `hCM`='$hCM', `hTD`='$hTD', `hTP`='$hTP', `hPROJ`='$hPROJ', `hPersonnelle`='$hPersonnelle', `id_responsable`='$id_responsable', `id_etat_module`='$id_etat_module', `commentaire`='$commentaire', `modifiable`='$modifiable' WHERE `id` = $id";
     $res = mysqli_query($conn, $sql);
     return $res;
 }*/
@@ -155,7 +155,7 @@ function listMAQUETTE_module_with_learning_unit($conn, $id)
 
 function getMAQUETTE_moduleM2C3($conn, $id_filiere, $id_statut)
 {
-    $sql = "SELECT MAQUETTE_module.id_module, MAQUETTE_module.code_module, MAQUETTE_module.nom, MAQUETTE_module.ECTS, MAQUETTE_module.hCM, MAQUETTE_module.hTD, MAQUETTE_module.hTP, MAQUETTE_module.hTPTD, MAQUETTE_module.hPROJ, MAQUETTE_module.hPersonnelle, MAQUETTE_learning_unit.learning_unit_code,LNM_filiere.nom_filiere, LNM_promo.annee, LNM_statut.nom_statut, ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK
+    $sql = "SELECT MAQUETTE_module.id_module, MAQUETTE_module.code_module, MAQUETTE_module.nom, MAQUETTE_module.ECTS, MAQUETTE_module.hCM, MAQUETTE_module.hTD, MAQUETTE_module.hTP, MAQUETTE_module.hPROJ, MAQUETTE_module.hPersonnelle, MAQUETTE_learning_unit.learning_unit_code,LNM_filiere.nom_filiere, LNM_promo.annee, LNM_statut.nom_statut, ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK
             FROM `MAQUETTE_module` 
             JOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module
             JOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_learning_unit = MAQUETTE_module_as_learning_unit.id_learning_unit
@@ -198,12 +198,11 @@ function checkMAQUETTE_moduleECTS($conn)
                 `MAQUETTE_module`.`ECTS` AS `ECTS`,
                 `MAQUETTE_module`.`hCM` AS `hCM`, 
                 `MAQUETTE_module`.`hTD` AS `hTD`, 
-                `MAQUETTE_module`.`hTP` AS `hTP`, 
-                `MAQUETTE_module`.`hTPTD` AS `hTPTD`, 
+                `MAQUETTE_module`.`hTP` AS `hTP`,
                 `MAQUETTE_module`.`hPROJ` AS `hPROJ`, 
                 `MAQUETTE_module`.`hPersonnelle` AS `hPersonnelle`, 
-                ROUND((ifnull(`MAQUETTE_module`.`hCM`, 0) + ifnull(`MAQUETTE_module`.`hTD`, 0) + ifnull(`MAQUETTE_module`.`hTP`, 0) + ifnull(`MAQUETTE_module`.`hTPTD`, 0)) / `MAQUETTE_module`.`ECTS`, 2) AS `h/ECTS`,
-                ROUND(`MAQUETTE_module`.`ECTS` / (ifnull(`MAQUETTE_module`.`hCM`, 0) + ifnull(`MAQUETTE_module`.`hTD`, 0) + ifnull(`MAQUETTE_module`.`hTP`, 0) + ifnull(`MAQUETTE_module`.`hTPTD`, 0)), 3) AS `ECTS/h`
+                ROUND((ifnull(`MAQUETTE_module`.`hCM`, 0) + ifnull(`MAQUETTE_module`.`hTD`, 0) + ifnull(`MAQUETTE_module`.`hTP`, 0)) / `MAQUETTE_module`.`ECTS`, 2) AS `h/ECTS`,
+                ROUND(`MAQUETTE_module`.`ECTS` / (ifnull(`MAQUETTE_module`.`hCM`, 0) + ifnull(`MAQUETTE_module`.`hTD`, 0) + ifnull(`MAQUETTE_module`.`hTP`, 0)), 3) AS `ECTS/h`
                 FROM `MAQUETTE_module` 
                 GROUP BY `MAQUETTE_module`.`id_module`
                 ORDER BY `MAQUETTE_module`.`code_module`;";
