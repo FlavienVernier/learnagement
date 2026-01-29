@@ -28,7 +28,7 @@ function listCLASS_sessionByIdResp($conn, $id) {
                 MAQUETTE_module_sequencage.id_seance_type,
                 MAQUETTE_module_sequencage.duree_h,
                 MAQUETTE_module.code_module,
-                LNM_seanceType.type,
+                LNM_seance_type.type,
                 ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK as intervenant
 			FROM CLASS_session
             	LEFT JOIN LNM_groupe ON LNM_groupe.id_groupe = CLASS_session.id_groupe
@@ -37,7 +37,7 @@ function listCLASS_sessionByIdResp($conn, $id) {
             	LEFT JOIN MAQUETTE_module_sequence ON MAQUETTE_module_sequence.id_module_sequence = CLASS_session.id_module_sequence
             	LEFT JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage
                 LEFT JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module
-                LEFT JOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+                LEFT JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
                 LEFT JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
                 LEFT JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = CLASS_session.id_enseignant
             WHERE MAQUETTE_module.id_responsable = '$id'";
@@ -57,7 +57,7 @@ function listCLASS_sessionByIdIntervenant($conn, $id) {
                 MAQUETTE_module_sequencage.id_module,
                 MAQUETTE_module_sequencage.id_seance_type, MAQUETTE_module_sequencage.duree_h,
                 MAQUETTE_module.code_module, MAQUETTE_module.nom as nom_module,
-                LNM_seanceType.type,
+                LNM_seance_type.type,
                 LNM_semestre.semestre
             FROM CLASS_session
             	LEFT JOIN LNM_groupe ON LNM_groupe.id_groupe = CLASS_session.id_groupe
@@ -69,7 +69,7 @@ function listCLASS_sessionByIdIntervenant($conn, $id) {
                 LEFT JOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module
                 LEFT JOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_learning_unit = MAQUETTE_module_as_learning_unit.id_learning_unit AND MAQUETTE_learning_unit.id_promo = LNM_promo.id_promo
                 LEFT JOIN LNM_semestre ON LNM_semestre.id_semestre = MAQUETTE_module.id_semestre
-                LEFT JOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+                LEFT JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
                 LEFT JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
                 LEFT JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = CLASS_session.id_enseignant
             WHERE CLASS_session.id_enseignant = '$id'";
@@ -92,7 +92,7 @@ function checkCLASS_sessionWithoutIntervenant($conn) {
                 MAQUETTE_module_sequencage.duree_h,
                 MAQUETTE_module.code_module,
                 MAQUETTE_module.nom as nom_module,
-                LNM_seanceType.type,
+                LNM_seance_type.type,
                 LNM_semestre.semestre
             FROM CLASS_session
             	LEFT JOIN LNM_groupe ON LNM_groupe.id_groupe = CLASS_session.id_groupe
@@ -104,7 +104,7 @@ function checkCLASS_sessionWithoutIntervenant($conn) {
                 LEFT JOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module
                 LEFT JOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_learning_unit = MAQUETTE_module_as_learning_unit.id_learning_unit AND MAQUETTE_learning_unit.id_promo = LNM_promo.id_promo
                 LEFT JOIN LNM_semestre ON LNM_semestre.id_semestre = MAQUETTE_module.id_semestre
-                LEFT JOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+                LEFT JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
                 LEFT JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
             WHERE CLASS_session.id_enseignant IS NULL;";
     $res = mysqli_query($conn, $sql);

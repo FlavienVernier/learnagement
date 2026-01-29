@@ -96,7 +96,6 @@ function ShowCreateCrud($conn, $name, $table, $columns)
 //    "hCM",
 //    "hTD",
 //    "hTP",
-//    "hTPTD",
 //    "hPROJ",
 //    "hPersonnelle",
 //    "id_responsable",

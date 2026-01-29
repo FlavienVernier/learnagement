@@ -9,7 +9,7 @@ function viewSeance($conn, $input, $code_module)
     $type = $matches[1];
     $nombre = intval($matches[2]);
 
-    $stmt = $conn->prepare("SELECT id_seance_type FROM LNM_seanceType WHERE type = ?");
+    $stmt = $conn->prepare("SELECT id_seance_type FROM LNM_seance_type WHERE type = ?");
     $stmt->bind_param("s", $type);
     $stmt->execute();
     $result = $stmt->get_result();

@@ -1,5 +1,9 @@
 # Credits
-
+- Learnangement V1
+  - [Flavien Vernier][1]:  
+  Author of Learnagement and main dev manager
+  - First Last:
+  Student dev during IDU Project Base Learning (2024-2027)
 - Learnangement V0
   - [Flavien Vernier][1]:  
   Author of Learnagement and main dev manager

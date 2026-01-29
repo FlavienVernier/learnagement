@@ -18,6 +18,12 @@ services:
             - ../db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
             - ./mysql/conf.d:/etc/mysql/conf.d
             - learnagement_persistent_db_${INSTANCE_NAME}:/var/lib/mysql
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u$MYSQL_USER_LOGIN", "-p$MYSQL_USER_PASSWORD"]
+            start_period: 5s
+            interval: 5s
+            timeout: 5s
+            retries: 55
     phpmyadmin_${INSTANCE_NAME}:
         container_name: learnagement_phpmyadmin_${INSTANCE_NAME}
         image: phpmyadmin
@@ -32,18 +38,29 @@ services:
         volumes:
             - ./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
         depends_on:
-            - mysql_${INSTANCE_NAME}
+            mysql_${INSTANCE_NAME}:
+                condition: service_healthy
     backend_python_${INSTANCE_NAME}:
         container_name: learnagement_backend_python_${INSTANCE_NAME}
         build: ./backend_python/
         restart: no
         networks:
-              - learnagement_back_${INSTANCE_NAME}
+            - learnagement_back_${INSTANCE_NAME}
+            - learnagement_front_${INSTANCE_NAME}
+        ports:
+            - ${INSTANCE_NUMBER}4000:4000
         volumes:
             - ../backend_python/:/app/
         depends_on:
-            - mysql_${INSTANCE_NAME}
-    phpbackend_${INSTANCE_NAME}:
+            mysql_${INSTANCE_NAME}:
+                condition: service_healthy
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://127.0.0.1:4000/health"]
+            start_period: 10s
+            interval: 5s
+            timeout: 5s
+            retries: 55
+    phpbackend_${INSTANCE_NAME}:  # ToDo remove when python backend will be operational
         container_name: learnagement_phpbackend_${INSTANCE_NAME}
         build: ./phpbackend/
         restart: always
@@ -56,7 +73,14 @@ services:
             - ../phpbackend:/var/www/html
             - ./log/phpbackend:/var/log/apache2
         depends_on:
-            - mysql_${INSTANCE_NAME}
+            mysql_${INSTANCE_NAME}:
+                condition: service_healthy
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://127.0.0.1:80/health.php"]
+            start_period: 10s
+            interval: 5s
+            timeout: 5s
+            retries: 55
     php_${INSTANCE_NAME}:
         container_name: learnagement_php_${INSTANCE_NAME}
         build: ./php/
@@ -69,53 +93,51 @@ services:
             - ../webApp:/var/www/html
             - ./log/php:/var/log/apache2
         depends_on:
-            - mysql_${INSTANCE_NAME}
-            - python_web_server_${INSTANCE_NAME}
-    nextjs_${INSTANCE_NAME}:
+            phpbackend_${INSTANCE_NAME}:
+                condition: service_healthy
+            backend_python_${INSTANCE_NAME}:
+                condition: service_healthy
+
+    front_nextjs_${INSTANCE_NAME}:
         container_name: learnagement_nextjs_${INSTANCE_NAME}
-        build: ./webappnext
+        build: ./front_NextJS
         restart: always
         networks:
               - learnagement_front_${INSTANCE_NAME}
         ports:
             - "${INSTANCE_NUMBER}3000:3000"
         volumes:
-            - ../webappnext:/app
-            - ../webappnext/node_modules:/app/node_modules
+            - ../front_NextJS:/app
+            - ../front_NextJS/node_modules:/app/node_modules
         depends_on:
-            - phpbackend_${INSTANCE_NAME}
-    mobility_${INSTANCE_NAME}:
-        container_name: learnagement_mobility_${INSTANCE_NAME}
-        build: ./mobility_map
-        restart: always
-        networks:
-              - learnagement_front_${INSTANCE_NAME}
-        ports:
-            - "${INSTANCE_NUMBER}5173:5173"
-        volumes:
-            - ../mobility_map:/app
-            - ../mobility_map/node_modules:/app/node_modules
-        depends_on:
-            - phpbackend_${INSTANCE_NAME}
-    python_web_server_${INSTANCE_NAME}:
+            phpbackend_${INSTANCE_NAME}:
+                condition: service_healthy
+            backend_python_${INSTANCE_NAME}:
+                condition: service_healthy
+    front_dashplotly_${INSTANCE_NAME}:
         container_name: learnagement_python_web_server_${INSTANCE_NAME}
-        build: ./python_web_server/
+        build: ./front_DashPlotly/
         restart: always
         networks:
               - learnagement_front_${INSTANCE_NAME}
         ports:
             - "${INSTANCE_NUMBER}8050:8050"
         volumes:
-            - ../visualisation/:/app/
-            - ../visualisation/data/:/data/
+            - ../front_DashPlotly/:/app/
+            - ../front_DashPlotly/data/:/data/
         depends_on:
-            - mysql_${INSTANCE_NAME}
+            phpbackend_${INSTANCE_NAME}:
+                condition: service_healthy
+            backend_python_${INSTANCE_NAME}:
+                condition: service_healthy
 volumes:
     learnagement_persistent_db_${INSTANCE_NAME}:
 networks:
+    # network to access to fronts (only fronts and backends on this network)
     learnagement_front_${INSTANCE_NAME}:
         name: learnagement_front_${INSTANCE_NAME}
         driver: bridge
+    # network to access to back (only backends and data storages on this network)
     learnagement_back_${INSTANCE_NAME}:
         name: learnagement_back_${INSTANCE_NAME}
         driver: bridge

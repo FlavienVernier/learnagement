@@ -12,7 +12,7 @@
     <main>
       <h1>Choose your app</h1>
       <a href="./rawWebApp">Raw Web App</a></br>
-      <a href="./APP_2026/html_css/learnagement.php">APP 2026</a></br>
+      <a href="./APP_2026/learnagement.php">APP 2026</a></br>
         <?php
             require_once("config.php");
             loadEnv(".");

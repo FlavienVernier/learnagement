@@ -18,5 +18,5 @@ docker/docker-compose.yml
 
 
 # don't add js modules on git
-webappnext/node_modules/
+front_NextJS/node_modules/
 mobility_map/node_modules/
