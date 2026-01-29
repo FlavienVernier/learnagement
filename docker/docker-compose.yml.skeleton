@@ -54,6 +54,12 @@ services:
         depends_on:
             mysql_${INSTANCE_NAME}:
                 condition: service_healthy
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://${PYTHON_BACKEND_DOCKER_URL}:${PYTHON_BACKEND_DOCKER_PORT}/health"]
+            start_period: 10s
+            interval: 5s
+            timeout: 5s
+            retries: 55
     phpbackend_${INSTANCE_NAME}:  # ToDo remove when python backend will be operational
         container_name: learnagement_phpbackend_${INSTANCE_NAME}
         build: ./phpbackend/
@@ -69,6 +75,12 @@ services:
         depends_on:
             mysql_${INSTANCE_NAME}:
                 condition: service_healthy
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://${PHP_BACKEND_DOCKER_URL}:80/health.php"]
+            start_period: 10s
+            interval: 5s
+            timeout: 5s
+            retries: 55
     php_${INSTANCE_NAME}:
         container_name: learnagement_php_${INSTANCE_NAME}
         build: ./php/
@@ -81,8 +93,11 @@ services:
             - ../webApp:/var/www/html
             - ./log/php:/var/log/apache2
         depends_on:
-            mysql_${INSTANCE_NAME}:
+            phpbackend_${INSTANCE_NAME}:
                 condition: service_healthy
+            backend_python_${INSTANCE_NAME}:
+                condition: service_healthy
+
     front_nextjs_${INSTANCE_NAME}:
         container_name: learnagement_nextjs_${INSTANCE_NAME}
         build: ./front_NextJS
@@ -95,7 +110,10 @@ services:
             - ../front_NextJS:/app
             - ../front_NextJS/node_modules:/app/node_modules
         depends_on:
-            - phpbackend_${INSTANCE_NAME}
+            phpbackend_${INSTANCE_NAME}:
+                condition: service_healthy
+            backend_python_${INSTANCE_NAME}:
+                condition: service_healthy
     front_dashplotly_${INSTANCE_NAME}:
         container_name: learnagement_python_web_server_${INSTANCE_NAME}
         build: ./front_DashPlotly/
@@ -108,7 +126,9 @@ services:
             - ../front_DashPlotly/:/app/
             - ../front_DashPlotly/data/:/data/
         depends_on:
-            mysql_${INSTANCE_NAME}:
+            phpbackend_${INSTANCE_NAME}:
+                condition: service_healthy
+            backend_python_${INSTANCE_NAME}:
                 condition: service_healthy
 volumes:
     learnagement_persistent_db_${INSTANCE_NAME}:

@@ -23,10 +23,12 @@ app.include_router(APC_competence.router)
 #     responses={418: {"description": "I'm a teapot"}},
 # )
 
-
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 @app.get("/")
 async def root():
-    return {"message": "Hello Bigger Applications!"}
+    return {"message": "Hello, I'm Learnagement BackEnd!"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=4000)
