@@ -7,7 +7,23 @@ from user import LNM_enseignant
 from user import LNM_university
 from user import APC_competence
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 access_logger = logging.getLogger("uvicorn.access")
+class HealthFilter(logging.Filter):
+    def filter(self, record):
+        return "/health" not in record.getMessage()
+
+access_logger.addFilter(HealthFilter())
 
 #app = FastAPI(dependencies=[Depends(get_query_token)])
 app = FastAPI()
@@ -35,9 +51,12 @@ def health():
 @app.middleware("http")
 async def silence_health_logs(request: Request, call_next):
     if request.url.path == "/health":
+        previous_state = access_logger.disabled
         access_logger.disabled = True
-        response = await call_next(request)
-        access_logger.disabled = False
+        try:
+            response = await call_next(request)
+        finally:
+            access_logger.disabled = previous_state
         return response
     return await call_next(request)
 @app.get("/")
@@ -45,4 +64,5 @@ async def root():
     return {"message": "Hello, I'm Learnagement BackEnd!"}
 
 if __name__ == "__main__":
+    print(bcolors.OKGREEN + "Start backend Python..." + bcolors.ENDC)
     uvicorn.run(app, host="0.0.0.0", port=4000)

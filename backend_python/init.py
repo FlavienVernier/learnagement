@@ -355,3 +355,4 @@ if __name__ == '__main__':
             cursor.close()
 
     conn.close()
+    print(bcolors.OKGREEN + "Init BD Framework requirement done (Check previous Warning)!" + bcolors.ENDC)

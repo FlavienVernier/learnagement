@@ -6,18 +6,7 @@ RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
 
 COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
 
-#WORKDIR /var/www/html
-#COPY composer.json composer.json
-#COPY composer.lock composer.lock
-#RUN composer install \
-#    --no-interaction \
-#    --no-plugins \
-#    --no-scripts \
-#    --no-dev \
-#    --prefer-dist
-
-#RUN composer dump-autoload
-
+WORKDIR /var/www/html
 
 RUN a2enmod rewrite
 RUN a2enmod ssl
@@ -27,7 +16,8 @@ WORKDIR /var/www/html
 
 # Copy entrypoint
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /entrypoint.sh \
+    && sed -i 's/\r$//' /entrypoint.sh
 
 EXPOSE 80
 
