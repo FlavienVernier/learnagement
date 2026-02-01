@@ -14,16 +14,28 @@ app5_enseignant_view_layout = html.Div([
         value='all',  # Valeur par défaut
     ),
     html.Div([
+        html.Br(),
         html.Label("Mes modules :"),
         html.Div(id='modules_div'),
+        html.Br(),
     ]),
     html.Div([
+        html.Br(),
         html.Label("Résumé de mes intervenants :"),
         html.Div(id='intervenants_div'),
+        html.Br(),
     ]),
     html.Div([
+        html.Br(),
         html.Label("Résumé de mes interventions :"),
+        html.Div(id='interventions_summary_div'),
+        html.Br(),
+    ]),
+    html.Div([
+        html.Br(),
+        html.Label("Détail de mes interventions :"),
         html.Div(id='interventions_div'),
+        html.Br(),
     ]),
 ])
 
@@ -182,6 +194,35 @@ def register_callbacks_view(app):
         )
         return [table_intervenants]
 
+    # Création de la table résumée des interventions selon l'utilisateur et le semestre sélectionné
+
+    @app.callback(
+        Output('interventions_summary_div', 'children'),
+        State('user_id', 'data'),
+        Input('filtre_semestre', 'value'),
+    )
+    def update_table_interventions_summary(user_id, selected_semestre):
+        df = app5_module_tools.get_moduleByIntervenantId(user_id)[
+            ['semestre', 'code_module', 'nom_module', 'nom_groupe', 'type', 'numero_ordre', 'duree_h']].drop_duplicates().replace([None], [''], regex=True).sort_values(by=['semestre', 'code_module'])
+        if selected_semestre != 'all':
+            df = df[df['semestre'] == selected_semestre]
+
+        # ToDo Compute summary
+        dfs = df[['type','duree_h']].groupby('type').sum().reset_index()
+
+
+        table_interventions_summary = dbc.Table.from_dataframe(
+            dfs,
+            # Key styling options:
+            striped=True,
+            bordered=True,
+            hover=True,
+        )
+
+        sum = df['duree_h'].sum()
+
+        return [table_interventions_summary,html.Label("Total face à face : " + str(sum) + "h"),]
+
     # Création de la table des interventions selon l'utilisateur et le semestre sélectionné
 
     @app.callback(
@@ -189,18 +230,18 @@ def register_callbacks_view(app):
         State('user_id', 'data'),
         Input('filtre_semestre', 'value'),
     )
-    def update_table_intervenants(user_id, selected_semestre):
+    def update_table_interventions(user_id, selected_semestre):
         df = app5_module_tools.get_moduleByIntervenantId(user_id)[
             ['semestre', 'code_module', 'nom_module', 'nom_groupe', 'type', 'numero_ordre', 'duree_h']].drop_duplicates().replace([None], [''], regex=True).sort_values(by=['semestre', 'code_module'])
         if selected_semestre != 'all':
             df = df[df['semestre'] == selected_semestre]
         #df = df.groupby(['code_module', 'nom_module']).apply(','.join).to_frame().reset_index(level=[0, 1])
 
-        table_intervenants = dbc.Table.from_dataframe(
+        table_interventions = dbc.Table.from_dataframe(
             df,
             # Key styling options:
             striped=True,
             bordered=True,
             hover=True,
         )
-        return [table_intervenants]
+        return [table_interventions]
