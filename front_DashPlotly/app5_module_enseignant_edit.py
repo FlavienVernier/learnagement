@@ -185,7 +185,9 @@ def register_callbacks_edit(app):
     )
     def update_filter_sequencage_option(user_id):
         df = app5_module_tools.get_moduleByEnseignantId(user_id)
-        options = [{'label': row['code_module'], 'value': row['id_module']} for _, row in df[['id_module', 'code_module']].drop_duplicates().iterrows()]
+        options = []
+        if not df.empty:
+            options = [{'label': row['code_module'], 'value': row['id_module']} for _, row in df[['id_module', 'code_module']].drop_duplicates().iterrows()]
         return options
 
     @app.callback(

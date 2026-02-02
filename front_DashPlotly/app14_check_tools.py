@@ -93,10 +93,10 @@ def check_session_corruption(token):
 
         # Parser la réponse en DataFrame
         json_string = resp.content.decode('utf-8')
-        print(json_string, flush=True)
+        #print(json_string, flush=True)
         if json_string != "[]":
             url_data = json.loads(json_string)
-            print(url_data, flush=True)
+            #print(url_data, flush=True)
             return pd.read_json(io.StringIO(url_data))
         else:
             return pd.DataFrame()

@@ -4,15 +4,33 @@ import pandas as pd
 import requests
 import io
 
+import app_tools
+
 load_dotenv()
 
 
 def get_moduleByEnseignantId(id_enseignant):
-    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listModulesResponsable.php'
-    resp = requests.post(url, data={'id_enseignant': id_enseignant}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+
+    df1 = app_tools.get_endpoint(
+        url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listModulesResponsable.php',
+        data = {'id_enseignant': id_enseignant}
+    )
+    # headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
+    # url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listModulesResponsable.php'
+    # resp = requests.post(url, data={'id_enseignant': id_enseignant}, headers=headers)
+    # urlData = resp.content
+    # df2 = pd.read_json(io.StringIO(urlData.decode('utf-8')))
+    #
+    # print("df1 shape:", df1.shape)
+    # print("df1 columns:", df1.columns)
+    # print("df1 dtypes:\n", df1.dtypes)
+    #
+    # print("df2 shape:", df2.shape)
+    # print("df2 columns:", df2.columns)
+    # print("df2 dtypes:\n", df2.dtypes)
+
+    return df1
+    #return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
 def get_moduleByEtudiantId(id_etudiant):
     headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
@@ -29,9 +47,18 @@ def get_moduleByIntervenantId(id_enseignant):
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
 def get_moduleSequencageByEnseignantId(id_enseignant):
+    # return app_tools.get_endpoint(
+    #     url=os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listModuleSequencage.php',
+    #     data={'id_enseignant': id_enseignant},
+    # )
     headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listModuleSequencage.php'
-    resp = requests.post(url, data={'id_enseignant': id_enseignant}, headers=headers)
+    resp = requests.post(
+        url,
+        data={'id_enseignant': id_enseignant},
+        headers=headers
+    )
+
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
@@ -40,7 +67,6 @@ def add_moduleSequencage(data):
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/create/createSequencage.php'
     resp = requests.post(url, data=data, headers=headers)
     urlData = resp.content
-    print(urlData, flush=True)
     return io.StringIO(urlData.decode('utf-8'))
 
 def remove_moduleSequencage(id_sequencage):
@@ -104,12 +130,3 @@ def set_intervenant_session(id_session, id_enseignant):
     urlData = resp.content
     #print(urlData, flush=True)
     return io.StringIO(urlData.decode('utf-8'))
-#
-# def headers(df : pd.DataFrame) -> list:
-#     return [ft.DataColumn(ft.Text(header)) for header in df.columns]
-#
-# def rows(df : pd.DataFrame) -> list:
-#     rows = []
-#     for index, row in df.iterrows():
-#         rows.append(ft.DataRow(cells = [ft.DataCell(ft.Text(row[header])) for header in df.columns]))
-#     return rows
