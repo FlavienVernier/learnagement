@@ -136,10 +136,13 @@ def update_table_session(user_id, selected_module, selected_seance_type, selecte
     if selected_seance_type and selected_promotion:
         df = df[(df['id_module'] == selected_module) &
                 (df['id_seance_type'] == selected_seance_type) &
-                (df['id_promotion'] == selected_promotion)][['id_session', 'type', 'duree_h', 'nom_groupe', 'numero_ordre', 'intervenant', 'commentaire']].sort_values(by=['type', 'numero_ordre'], ascending=[False, False])
+                (df['id_promo'] == selected_promotion)][['id_session', 'type', 'duree_h', 'nom_groupe', 'numero_ordre', 'intervenant', 'commentaire']].sort_values(by=['type', 'numero_ordre'], ascending=[False, False])
     elif selected_seance_type:
         df = df[(df['id_module'] == selected_module) &
                 (df['id_seance_type'] == selected_seance_type)][['id_session', 'type', 'numero_ordre', 'duree_h', 'nom_groupe', 'intervenant', 'commentaire']].sort_values(by=['type', 'numero_ordre'], ascending=[False, False])
+    elif selected_promotion:
+        df = df[(df['id_module'] == selected_module) &
+                (df['id_promo'] == selected_promotion)][['id_session', 'type', 'duree_h', 'nom_groupe', 'numero_ordre', 'intervenant', 'commentaire']].sort_values(by=['type', 'numero_ordre'], ascending=[False, False])
     else:
         df = df[(df['id_module'] == selected_module)][
             ['id_session', 'type', 'numero_ordre', 'duree_h', 'nom_groupe', 'intervenant', 'commentaire']].sort_values(by=['type', 'numero_ordre'], ascending=[False, False])
