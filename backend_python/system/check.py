@@ -120,3 +120,21 @@ def  checkCLASS_sessionWithoutIntervenant(
         "allowedRolesRequester" : ["administratif"],
     }
     return db_request(current_user, SQLRequest(**request))
+
+
+@router.post("/session_reference_corruption/", tags=["check"])
+def checkCLASS_sessionReferenceCoruption(
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request": """
+            SELECT
+                CLASS_session.`id_session`,
+                CLASS_session.`id_module_sequence`,
+                MAQUETTE_module_sequence.id_module_sequence
+            FROM CLASS_session
+            LEFT JOIN MAQUETTE_module_sequence ON MAQUETTE_module_sequence.id_module_sequence = CLASS_session.id_module_sequence
+            WHERE MAQUETTE_module_sequence.id_module_sequence IS NULL;""",
+        "allowedRolesRequester" : ["administratif"],
+    }
+    return db_request(current_user, SQLRequest(**request))

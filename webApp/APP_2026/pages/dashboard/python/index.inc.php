@@ -13,5 +13,8 @@
     $token = base64_encode(json_encode($payload)) . '.' . hash_hmac('sha256', json_encode($payload), $secret);
 ?>
 
-<iframe src="<?= 'http://'. $_SERVER['SERVER_NAME'] . ':' . $_ENV['DASH_PORT'] . '/'. $type . '/?auth_token='. urlencode($token) ?>"
+<iframe src="<?= 'http://'. $_SERVER['SERVER_NAME'] . ':' . $_ENV['DASH_PORT'] . '/'. $type . '/' .
+        '?auth_old_token=' . urlencode($token) .
+        '&jwt_token=' . $_SESSION["jwt_token"]
+        ?>"
     class="h-full w-full" style="border:none;"></iframe>

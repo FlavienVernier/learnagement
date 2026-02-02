@@ -73,6 +73,7 @@ try {
     $_SESSION["email"] = $decoded->email;
     $_SESSION["type"] = array_values(array_intersect($decoded->roles,$types))[0];
     $_SESSION["id"] = $decoded->id;
+    $_SESSION["jwt_token"] = $jwt;
     redirect("home");
   } else if (boolval($decoded->password2update)){
     $_SESSION["type"] = array_values(array_intersect($decoded->roles,$types))[0];

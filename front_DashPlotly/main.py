@@ -5,7 +5,9 @@ import dash_bootstrap_components as dbc
 from dash import Input, Output, dcc, html, State
 import json, base64, hmac, hashlib, time
 import traceback
-import urllib.parse
+
+from urllib.parse import urlparse
+from urllib.parse import parse_qs
 
 load_dotenv()
 
@@ -133,9 +135,10 @@ def render_sidebar(section, token_arg, status):
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
+    dcc.Store(id='token', storage_type="memory", data='none'),
     dcc.Store(id='user_id', storage_type="memory", data='0'),
     dcc.Store(id='role', storage_type="memory", data='none'),
-    dcc.Store(id='status', storage_type="memory", data='not connected'),
+    dcc.Store(id='status', storage_type="memory", data='not connected'), #deprecated
     html.Div(id='sidebar'),
     html.Div(id='page-content', className='content')
 ])
@@ -148,15 +151,20 @@ def prout():
 '''
 
 @app.callback(
+    Output('token', 'data'),
     Output('user_id', 'data'),
     Output('role', 'data'),
     Output('status', 'data'),
     Input('url', 'href')
 )
 def check_auth_token(url):
-    #print(url)
-    token = urllib.parse.unquote(url.strip().split('=')[1])#.decode('utf8')
-    #print(token)
+    #print(url, flush=True)
+    parsed_url = urlparse(url)
+    token = parse_qs(parsed_url.query)['auth_old_token'][0]
+    #print(token, flush=True)
+    jwt_token = parse_qs(parsed_url.query)['jwt_token'][0]
+    #print(jwt_token, flush=True)
+
 
     #if not session.get("token") or not token:
     if not token:
@@ -179,11 +187,11 @@ def check_auth_token(url):
         #print("done", flush=True)
         # Attach user info to the Flask global context
         if 'id_enseignant' in payload:
-            return payload['id_enseignant'], "enseignant", "Connected"
+            return jwt_token, payload['id_enseignant'], "enseignant", "Connected"
         elif 'id_etudiant' in payload:
-            return payload['id_etudiant'], "etudiant", "Connected"
+            return jwt_token, payload['id_etudiant'], "etudiant", "Connected"
         elif 'id_administratif' in payload:
-            return payload['id_administratif'], "administratif", "Connected"
+            return jwt_token, payload['id_administratif'], "administratif", "Connected"
         else:
             raise Exception("Unknown user class")
     

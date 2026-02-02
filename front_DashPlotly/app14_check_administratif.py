@@ -1,5 +1,5 @@
 from dash import html, dcc
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import app14_check_tools
 
@@ -41,6 +41,12 @@ app14_administratif_layout = html.Div(children=[
         children=[
             dcc.Input(id='fake', value='0', type='hidden'),
             html.Div(id='div_modules_ects')]),
+    html.H1(children='Corruption d\'intégrité référentielle dans la table session'),
+    html.Div(
+        style={'display': 'inline-block', 'verticalAlign': 'top',},
+        children=[
+            dcc.Input(id='fake', value='0', type='hidden'),
+            html.Div(id='div_session_corruption')]),
 ])
 
 def register_callbacks(app):
@@ -138,3 +144,21 @@ def register_callbacks(app):
             hover=True,
         )
         return [table_modules_ects]
+
+    @app.callback(
+        Output(component_id='div_session_corruption', component_property='children'),
+        Input(component_id='fake', component_property='value'),
+        State(component_id='token', component_property='data')
+    )
+    def display_table(user_id_fake, token):
+        df = app14_check_tools.check_session_corruption(token)
+        if not df.empty:
+            table_session_corruption = dbc.Table.from_dataframe(
+                df,
+                # Key styling options:
+                striped=True,
+                bordered=True,
+                hover=True,
+            )
+            return [table_session_corruption]
+        return [html.Label("No data available")]
