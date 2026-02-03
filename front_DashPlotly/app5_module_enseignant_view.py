@@ -180,10 +180,17 @@ def register_callbacks_view(app):
         Input('filtre_semestre', 'value'),
     )
     def update_table_intervenants(user_id, selected_semestre):
-        df = app5_module_tools.get_moduleByEnseignantId(user_id)[['code_module', 'nom_module', 'semestre', 'nom']].drop_duplicates().replace([None], [''], regex=True)
-        if selected_semestre != 'all':
-            df = df[df['semestre'] == selected_semestre]
-        df = df.groupby(['code_module', 'nom_module'])['nom'].apply(','.join).to_frame().reset_index(level=[0,1])
+        df = app5_module_tools.get_moduleByEnseignantId(user_id)
+        if df.empty:
+            df = pd.DataFrame(columns=['code_module', 'nom_module', 'semestre', 'nom'])
+        else:
+            df = df[['code_module', 'nom_module', 'semestre', 'nom']].drop_duplicates().replace([None], [''], regex=True)
+            if selected_semestre != 'all':
+                df = df[df['semestre'] == selected_semestre]
+            try:
+                df = df.groupby(['code_module', 'nom_module'])['nom'].apply(','.join).to_frame().reset_index(level=[0,1])
+            except:
+                df = pd.DataFrame(columns=['code_module', 'nom_module', 'nom'])
 
         table_intervenants = dbc.Table.from_dataframe(
             df,
@@ -202,8 +209,10 @@ def register_callbacks_view(app):
         Input('filtre_semestre', 'value'),
     )
     def update_table_interventions_summary(user_id, selected_semestre):
-        df = app5_module_tools.get_moduleByIntervenantId(user_id)[
-            ['semestre', 'code_module', 'nom_module', 'nom_groupe', 'type', 'numero_ordre', 'duree_h']].drop_duplicates().replace([None], [''], regex=True).sort_values(by=['semestre', 'code_module'])
+        df = app5_module_tools.get_moduleByIntervenantId(user_id)
+        if df.empty:
+            df = pd.DataFrame(columns=['semestre', 'code_module', 'nom_module', 'nom_groupe', 'type', 'numero_ordre', 'duree_h'])
+        df = df[['semestre', 'code_module', 'nom_module', 'nom_groupe', 'type', 'numero_ordre', 'duree_h']].drop_duplicates().replace([None], [''], regex=True).sort_values(by=['semestre', 'code_module'])
         if selected_semestre != 'all':
             df = df[df['semestre'] == selected_semestre]
 
@@ -231,8 +240,10 @@ def register_callbacks_view(app):
         Input('filtre_semestre', 'value'),
     )
     def update_table_interventions(user_id, selected_semestre):
-        df = app5_module_tools.get_moduleByIntervenantId(user_id)[
-            ['semestre', 'code_module', 'nom_module', 'nom_groupe', 'type', 'numero_ordre', 'duree_h']].drop_duplicates().replace([None], [''], regex=True).sort_values(by=['semestre', 'code_module'])
+        df = app5_module_tools.get_moduleByIntervenantId(user_id)
+        if df.empty:
+            df = pd.DataFrame(columns=['semestre', 'code_module', 'nom_module', 'nom_groupe', 'type', 'numero_ordre', 'duree_h'])
+        df = df[['semestre', 'code_module', 'nom_module', 'nom_groupe', 'type', 'numero_ordre', 'duree_h']].drop_duplicates().replace([None], [''], regex=True).sort_values(by=['semestre', 'code_module'])
         if selected_semestre != 'all':
             df = df[df['semestre'] == selected_semestre]
         #df = df.groupby(['code_module', 'nom_module']).apply(','.join).to_frame().reset_index(level=[0, 1])
