@@ -221,8 +221,9 @@ def register_callbacks_edit(app):
     def add_table_sequencage(user_id,selected_module):
         if not selected_module:
             return []
-        df = app5_module_tools.get_moduleSequencageByEnseignantId(user_id)[['nombre', 'type', 'duree_h', 'groupe_type', 'intervenant_principal']]
+        df = app5_module_tools.get_moduleSequencageByEnseignantId(user_id)
         if not df.empty:
+            df = df[['nombre', 'type', 'duree_h', 'groupe_type', 'intervenant_principal']]
             columns = [{"name": i, "id": i, "editable": True, "presentation": "dropdown"}
                          if  i in ["intervenant_principal", "type", "groupe_type"]
                          else {"name": i, "id": i, "editable": True}
