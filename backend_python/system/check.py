@@ -138,3 +138,61 @@ def checkCLASS_sessionReferenceCoruption(
         "allowedRolesRequester" : ["administratif"],
     }
     return db_request(current_user, SQLRequest(**request))
+
+# ToDo to finished
+@router.post("/maquette_vs_session/",
+            tags=["check"],
+            summary="Session hours Vs Program",
+            description="Check whether the number of session hours corresponds to the program.")
+def list_universities(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request" : """
+                        SELECT hMaquette.ExplicitSecondaryK, 
+                               hMaquette.code_module,
+                               hMaquette.hCM - hSession.hCM AS hCM_maquette_vs_session,
+                            hMaquette.hTD - hSession.hTD AS hTD_maquette_vs_session,
+                            hMaquette.hTP - hSession.hTP AS hTP_maquette_vs_session,
+                            hMaquette.hProj - hSession.hProj AS hProj_maquette_vs_session
+                        FROM
+                            (SELECT ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK, 
+                                   MAQUETTE_module.code_module, 
+                                   SUM(LNM_promo.nbGroupeCM * IFNULL(MAQUETTE_module.hCM, 0)) AS hCM, 
+                                   SUM(LNM_promo.nbGroupeTD * IFNULL(MAQUETTE_module.hTD, 0)) AS hTD, 
+                                   SUM(LNM_promo.nbGroupeTP * IFNULL(MAQUETTE_module.hTP, 0)) AS hTP,
+                                   SUM(LNM_promo.nbGroupeCM * IFNULL(MAQUETTE_module.hProj, 0)) AS hProj
+                            FROM `MAQUETTE_module` 
+                            JOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module
+                            JOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_learning_unit = MAQUETTE_module_as_learning_unit.id_learning_unit
+                            JOIN LNM_promo ON LNM_promo.id_promo = MAQUETTE_learning_unit.id_promo
+                            JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_promo.id_promo
+                            GROUP BY ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK, 
+                                     MAQUETTE_module.code_module
+                            ) AS hMaquette
+                        LEFT JOIN    
+                            (SELECT ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK, 
+                                    MAQUETTE_module.code_module,
+                                    LNM_seance_type.type,
+                                    SUM(CASE WHEN type = 'CM' THEN MAQUETTE_module_sequencage.duree_h ELSE 0 END) AS hCM,
+                                    SUM(CASE WHEN type = 'TD' THEN MAQUETTE_module_sequencage.duree_h ELSE 0 END) AS hTD,
+                                    SUM(CASE WHEN type = 'TP' THEN MAQUETTE_module_sequencage.duree_h ELSE 0 END) AS hTP,
+                                    SUM(CASE WHEN type = 'PROJ' THEN MAQUETTE_module_sequencage.duree_h ELSE 0 END) AS hPROJ
+                            FROM `MAQUETTE_module` 
+                            JOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module
+                            JOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_learning_unit = MAQUETTE_module_as_learning_unit.id_learning_unit
+                            JOIN LNM_promo ON LNM_promo.id_promo = MAQUETTE_learning_unit.id_promo
+                            JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_promo.id_promo
+                            JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module = MAQUETTE_module.id_module
+                            JOIN MAQUETTE_module_sequence ON MAQUETTE_module_sequence.id_module_sequencage = MAQUETTE_module_sequencage.id_module_sequencage
+                            JOIN CLASS_session ON CLASS_session.id_module_sequence = MAQUETTE_module_sequence.id_module_sequence
+                            JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+                            GROUP BY ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK, 
+                                    MAQUETTE_module.code_module,
+                                    LNM_seance_type.type
+                            ) AS hSession
+                        ON hMaquette.code_module = hSession.code_module AND hMaquette.ExplicitSecondaryK = hSession.ExplicitSecondaryK
+                    """,
+        "allowedRolesRequester" : ["user"],
+    }
+    return db_request(current_user, SQLRequest(**request))

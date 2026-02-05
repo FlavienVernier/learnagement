@@ -45,3 +45,23 @@ def listLNM_enseignant_responsabilite(
         "allowedRolesRequester" : ["user"],
     }
     return db_request(current_user, SQLRequest(**request))
+
+@router.post("/charge_enseignants/",
+             tags=["user", "request", "enseignant"],
+             summary="Teachers responsibilities",
+             description="Return the list of teachers' responsibilities")
+def listLNM_enseignant_responsabilite(
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request" : """
+                        SELECT LNM_enseignant.prenom, LNM_enseignant.nom, sum(MAQUETTE_module_sequencage.duree_h)
+                        FROM CLASS_session
+                        JOIN LNM_enseignant ON LNM_enseignant.id_enseignant = CLASS_session.id_enseignant
+                        JOIN MAQUETTE_module_sequence ON MAQUETTE_module_sequence.id_module_sequence = CLASS_session.id_module_sequence
+                        JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage
+                        GROUP BY LNM_enseignant.prenom, LNM_enseignant.nom;
+                    """,
+        "allowedRolesRequester": ["administratif"],
+    }
+    return db_request(current_user, SQLRequest(**request))
