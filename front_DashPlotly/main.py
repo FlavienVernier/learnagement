@@ -1,19 +1,32 @@
+from datetime import timedelta
+import logging
+from logging import exception
+
 from dotenv import load_dotenv
 import os
-import dash
+import jwt
 import dash_bootstrap_components as dbc
+from flask import session, jsonify
 from dash import Input, Output, dcc, html, State
-import json, base64, hmac, hashlib, time
-import traceback
+
 
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
 
+from auth import FlaskAuth, decode_token
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s:%(funcName)s:%(lineno)d - %(message)s')
+
 load_dotenv()
 
-app = dash.Dash(__name__, suppress_callback_exceptions=True,
-                external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME])
+
+
+# Utilisation
+app = FlaskAuth(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME])
+
 server = app.server
+server.secret_key = os.getenv('INSTANCE_SECRET')
+time_out = int(os.getenv('SESSION_TIMEOUT'))
 
 registered_callbacks = set()
 
@@ -105,7 +118,7 @@ menu_items = {
     ]
 }
 
-SECRET_KEY = os.getenv("INSTANCE_SECRET").encode()
+#SECRET_KEY = os.getenv("INSTANCE_SECRET").encode()
 
 def render_sidebar(section, token_arg, status):
     links = []
@@ -139,67 +152,10 @@ app.layout = html.Div([
     dcc.Store(id='user_id', storage_type="memory", data='0'),
     dcc.Store(id='role', storage_type="memory", data='none'),
     dcc.Store(id='status', storage_type="memory", data='not connected'), #deprecated
+    dcc.Location(id="url-redirect", refresh=True),
     html.Div(id='sidebar'),
     html.Div(id='page-content', className='content')
 ])
-
-'''
-@app.server.before_request
-def prout():
-    token = request.args.get('auth_token')
-    #print("t",token,  type(token))
-'''
-
-@app.callback(
-    Output('token', 'data'),
-    Output('user_id', 'data'),
-    Output('role', 'data'),
-    Output('status', 'data'),
-    Input('url', 'href')
-)
-def check_auth_token(url):
-    #print(url, flush=True)
-    parsed_url = urlparse(url)
-    token = parse_qs(parsed_url.query)['auth_old_token'][0]
-    #print(token, flush=True)
-    jwt_token = parse_qs(parsed_url.query)['jwt_token'][0]
-    #print(jwt_token, flush=True)
-
-
-    #if not session.get("token") or not token:
-    if not token:
-        #print("no token", flush=True)
-        return "-1", "none", "no token"
-    try:
-        payload_b64, signature = token.split('.')
-        payload_json = base64.b64decode(payload_b64 + '=' * (-len(payload_b64) % 4)).decode()
-        expected_sig = hmac.new(SECRET_KEY, payload_json.encode(), hashlib.sha256).hexdigest()
-
-        if not hmac.compare_digest(signature, expected_sig):
-            #print("Signature mismatch", flush=True)
-            return "-1", "none", "Signature mismatch"
-
-        payload = json.loads(payload_json)
-        if payload['expires'] < time.time():
-            #print("time out", flush=True)
-            return "-1", "none", "time out"
-            
-        #print("done", flush=True)
-        # Attach user info to the Flask global context
-        if 'id_enseignant' in payload:
-            return jwt_token, payload['id_enseignant'], "enseignant", "Connected"
-        elif 'id_etudiant' in payload:
-            return jwt_token, payload['id_etudiant'], "etudiant", "Connected"
-        elif 'id_administratif' in payload:
-            return jwt_token, payload['id_administratif'], "administratif", "Connected"
-        else:
-            raise Exception("Unknown user class")
-    
-    except Exception as e:
-        print(e)
-        print(traceback.format_exc())
-        return "-1", "none", "Exception"
-
 
 
 # Callback pour mettre à jour la sidebar
@@ -210,6 +166,7 @@ def check_auth_token(url):
     Input('status', 'data')
 )
 def update_sidebar(url, pathname, status):
+    logging.info("update_sidebar")
     token_arg = url.strip().split('?')[1]
     if pathname and pathname.startswith('/enseignant'):
         return render_sidebar('enseignant', token_arg, status)
@@ -224,17 +181,65 @@ def update_sidebar(url, pathname, status):
             html.P("Veuillez sélectionner une section valide dans l'URL.")
         ], className='p-3')
 
+
+
 # Callback pour rendre le bon contenu
 @app.callback(
     Output('page-content', 'children'),
+    Output('token', 'data'),
+    Output('user_id', 'data'), # ToDo must be moved to session
+    Output('role', 'data'), # ToDo must be moved to session
+    Output('status', 'data'), # ToDo must be moved to session
     Input('url', 'href'),
-    Input('url', 'pathname')
+    Input('url', 'pathname'),
+    State('token', 'data')
 )
-def render_page_content(url, pathname):
-    token_arg = url.strip().split('?')[1]
-    #print('token',token_arg)
-    if not pathname or pathname == '/':
-        return html.Div()
+
+def render_page(url, pathname, token):
+    try:
+        jwt_token, user_id, main_role, status = check_auth_token(url) # if token is none, check_auth_token will get it
+        page_content = render_page_content(url, pathname, jwt_token)
+        return page_content, jwt_token, user_id, main_role, status
+    except Exception as e:
+        logging.exception(e)
+        return html.Div(
+            [html.A(href="http://localhost:40080/APP_2026/learnagement.php?page=logout", target="_top",
+                    children="Session closed, connection required.")]), "-1", "none", "none", "no token"
+
+
+def check_auth_token(url):
+    logging.info("check_auth_token")
+    # print(url, flush=True)
+    parsed_url = urlparse(url)
+
+    jwt_token = parse_qs(parsed_url.query)['jwt_token'][0]
+    # print(jwt_token, flush=True)
+
+    session['token'] = jwt_token
+
+    # if not session.get("token") or not token:
+    if not jwt_token:
+        logging.info("no token")
+        app.layout = html.Div([html.A(href="http://localhost:40080/APP_2026/learnagement.php?page=logout", target="_top", children="No Token, session closed, connection required.")])
+        return "-1", "none", "none", "no token"
+    #try:
+    payload = decode_token(jwt_token)
+    print(payload, flush=True)
+    # Attach user info to the Flask global context
+    if 'enseignant' in payload["roles"]:
+        return jwt_token, payload['id'], "enseignant", "Connected"
+    elif 'etudiant' in payload["roles"]:
+        return jwt_token, payload['id'], "etudiant", "Connected"
+    elif 'administratif' in payload["roles"]:
+        return jwt_token, payload['id'], "administratif", "Connected"
+    else:
+        logging.exception("Unknown user class")
+        raise Exception("Unknown user class")
+
+
+def render_page_content(url, pathname, token):
+    logging.info("render_page_content " + token)
+
     parts = pathname.strip('/').split('/')  # ['enseignant', 'app2'] ou ['etudiant','app7'] ou ['enseignant'] etc.
     if len(parts) == 1:
         # page section landing

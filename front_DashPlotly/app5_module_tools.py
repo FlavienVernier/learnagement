@@ -11,7 +11,7 @@ load_dotenv()
 
 def get_moduleByEnseignantId(id_enseignant):
 
-    df1 = app_tools.get_endpoint(
+    df1 = app_tools.get_endpoint_data(
         url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listModulesResponsable.php',
         data = {'id_enseignant': id_enseignant}
     )

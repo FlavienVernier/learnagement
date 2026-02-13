@@ -2,6 +2,7 @@ from dash import html, dcc
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import app14_check_tools
+import pandas as pd
 
 # Définition de la mise en page de l'application
 app14_administratif_layout = html.Div(children=[
@@ -14,13 +15,30 @@ app14_administratif_layout = html.Div(children=[
     ),
     dbc.Collapse(
         html.Div(
-                 className="collapsible_content",
                  style={'display': 'inline-block', 'verticalAlign': 'top',},
                  children=[
                     dcc.Input(id='fake', value='0', type='hidden'),
                      html.Div(id='table_sequencage_vs_maquette')]
              ),
         id="collapse1",
+        is_open=False,
+    ),
+    html.Br(),
+    dbc.Button(
+        'Session VS Maquette',
+            id="collapse_button_session_vs_maquette",
+            className="mb-3",
+            color="primary",
+            n_clicks=0,
+    ),
+    dbc.Collapse(
+        html.Div(
+                 style={'display': 'inline-block', 'verticalAlign': 'top',},
+                 children=[
+                    dcc.Input(id='fake', value='0', type='hidden'),
+                     html.Div(id='table_session_vs_maquette')]
+             ),
+        id="collapse_session_vs_maquette",
         is_open=False,
     ),
     html.Br(),
@@ -151,6 +169,16 @@ def register_callbacks(app):
         return is_open
 
     @app.callback(
+        Output("collapse_session_vs_maquette", "is_open"),
+        [Input("collapse_button_session_vs_maquette", "n_clicks")],
+        [State("collapse_session_vs_maquette", "is_open")],
+    )
+    def toggle_collapse(n, is_open):
+        if n:
+            return not is_open
+        return is_open
+
+    @app.callback(
         Output("collapse2", "is_open"),
         [Input("collapse-button2", "n_clicks")],
         [State("collapse2", "is_open")],
@@ -215,9 +243,9 @@ def register_callbacks(app):
         Input(component_id='fake', component_property='value')
     )
     def display_table(user_id_fake):
-        df_stages = app14_check_tools.check_sequencage_vs_maquette()
+        df = app14_check_tools.check_sequencage_vs_maquette()
         table_sequencage_vs_maquette = dbc.Table.from_dataframe(
-            df_stages,
+            df,
             # Key styling options:
             striped=True,
             bordered=True,
@@ -225,15 +253,33 @@ def register_callbacks(app):
         )
         return [table_sequencage_vs_maquette]
 
+    @app.callback(
+        Output(component_id='table_session_vs_maquette', component_property='children'),
+        Input(component_id='fake', component_property='value'),
+        State(component_id='token', component_property='data')
+    )
+    def display_table(user_id_fake, token):
+        df = app14_check_tools.check_session_vs_maquette(token)
+        if df.empty:
+            df = pd.DataFrame(columns=['truc', 'bidule'])
+        table_session_vs_maquette = dbc.Table.from_dataframe(
+            df,
+            # Key styling options:
+            striped=True,
+            bordered=True,
+            hover=True,
+        )
+        return [table_session_vs_maquette]
+
 
     @app.callback(
         Output(component_id='table_modules_sans_ue', component_property='children'),
         Input(component_id='fake', component_property='value')
     )
     def display_table(user_id_fake):
-        df_stages = app14_check_tools.check_module_without_learning_unit()
+        df = app14_check_tools.check_module_without_learning_unit()
         table_modules_sans_ue = dbc.Table.from_dataframe(
-            df_stages,
+            df,
             # Key styling options:
             striped=True,
             bordered=True,
@@ -247,9 +293,9 @@ def register_callbacks(app):
         Input(component_id='fake', component_property='value')
     )
     def display_table(user_id_fake):
-        df_stages = app14_check_tools.check_module_without_learning_unit()
+        df = app14_check_tools.check_module_without_learning_unit()
         table_modules_sans_ac = dbc.Table.from_dataframe(
-            df_stages,
+            df,
             # Key styling options:
             striped=True,
             bordered=True,

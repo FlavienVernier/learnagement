@@ -5,16 +5,19 @@ import requests
 from requests.exceptions import HTTPError, Timeout, RequestException
 import io
 import json
+import app_tools
 
 load_dotenv()
 
 def check_sequencage_vs_maquette():
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/check/listModuleSequencageVsMaquette.php'
-    resp = requests.post(url, data={}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+    url = app_tools.get_php_backend_url("/check/listModuleSequencageVsMaquette.php")
+    df = app_tools.get_endpoint_data(url)
+    return df
 
+def check_session_vs_maquette(token):
+    url = app_tools.get_python_backend_url("/maquette_vs_session/")
+    df = app_tools.get_endpoint_data(url, token=token)
+    return df
 
 def check_module_without_learning_unit():
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
@@ -61,7 +64,7 @@ def check_session_corruption(token):
         token: Token d'authentification (JWT)
 
     Returns:
-        DataFrame avec les résultats de la requête
+        DataFrame avec les résultats de la requête or empty dataframe if exception
 
     Raises:
         HTTPError: Si le token est invalide (401) ou accès refusé (403)
@@ -84,9 +87,11 @@ def check_session_corruption(token):
 
         # Gérer les erreurs HTTP immédiatement après la requête
         if resp.status_code == 401:
-            raise HTTPError("Token invalide ou expiré", response=resp)
+            return pd.DataFrame()
+            #raise HTTPError("Token invalide ou expiré", response=resp)
         elif resp.status_code == 403:
-            raise HTTPError("Accès refusé - L'utilisateur n'a pas le rôle 'administratif'", response=resp)
+            return pd.DataFrame()
+            #raise HTTPError("Accès refusé - L'utilisateur n'a pas le rôle 'administratif'", response=resp)
 
         # Gérer les erreurs HTTP
         resp.raise_for_status()

@@ -21,7 +21,7 @@ dotenv.load_dotenv(".env")
 
 SECRET_KEY = os.getenv("INSTANCE_SECRET")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("SESSION_TIMEOUT"))
+ACCESS_TOKEN_EXPIRE_SECONDS = int(os.getenv("SESSION_TIMEOUT"))
 
 router = APIRouter()
 
@@ -75,8 +75,8 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-
+    access_token_expires = timedelta(seconds=ACCESS_TOKEN_EXPIRE_SECONDS)
+    print(access_token_expires, flush=True)
     access_token = create_access_token(
         data={"id": user.id,
               "email": user.mail,
