@@ -61,7 +61,7 @@ def update_module(
     id_module: int,
     current_user: Annotated[User, Depends(get_current_active_user)],
     data: Dict[str, Any],):
-    print(type(data), flush=True)
+
     if 'id_responsable' in data.keys():
         request = {
             # ToDo use following with SQLAlchemy

@@ -6,8 +6,8 @@ import app13_mccc_tools
 
 def update_table_m2c3(token, id_filiere, id_statut):
     df = app13_mccc_tools.get_list_modules_m2c3(token, id_filiere, id_statut)
-    dfi = app_tools.get_explicit_keys("LNM_enseignant")
-    intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in
+    dfi = app_tools.get_enseignants(token)
+    intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id_enseignant']} for _, row in
                            dfi.iterrows()]
     table_m2c3 = dash_table.DataTable(
         id='table_m2c3',
@@ -57,21 +57,23 @@ app13_administratif_layout = html.Div(children=[
 def register_callbacks(app):
     @app.callback(
         Output(component_id='filiere_input', component_property='options'),
-        Input(component_id='fake', component_property='value')
+        Input(component_id='fake', component_property='value'),
+        State(component_id='token',component_property='data')
     )
-    def update_filiere_input_options(value):
+    def update_filiere_input_options(value, token):
         options = []
-        df = app_tools.get_list_filieres()
+        df = app_tools.get_filieres(token)
         options = [{'label': row['nom_filiere'], 'value': row['id_filiere']} for _, row in df.iterrows()]
         return options
 
     @app.callback(
         Output(component_id='statut_input', component_property='options'),
-        Input(component_id='fake', component_property='value')
+        Input(component_id='fake', component_property='value'),
+        State(component_id='token',component_property='data')
     )
-    def update_statut_input_options(value):
+    def update_statut_input_options(value, token):
         options = []
-        df = app_tools.get_list_statuts()
+        df = app_tools.get_statuts(token)
         options = [{'label': row['nom_statut'], 'value': row['id_statut']} for _, row in df.iterrows()]
         return options
 

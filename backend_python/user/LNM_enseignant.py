@@ -10,16 +10,20 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-@router.get("/enseignant/",
+@router.get("/enseignants/",
             tags=["user", "enseignant"],
             summary="Teachers",
             description="Return the list of teachers")
-def list_enseignant(
+def enseignants(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     request = {
         "request" : """
-                        SELECT * FROM LNM_enseignant ORDER BY nom, prenom
+                        SELECT LNM_enseignant.*, 
+                               ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK
+                        FROM LNM_enseignant 
+                        JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = LNM_enseignant.id_enseignant
+                        ORDER BY ExplicitSecondaryK;
                     """,
         "allowedRolesRequester" : ["user"],
     }
@@ -46,11 +50,11 @@ def enseignants_responsabilities(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/charge_enseignants/",
+@router.get("/enseignants/charge/",
              tags=["user", "enseignant"],
              summary="Teachers load",
              description="Return the list of teachers load")
-def enseignants_loads(
+def enseignants_load(
         current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     request = {
@@ -62,6 +66,38 @@ def enseignants_loads(
                         JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage
                         GROUP BY LNM_enseignant.prenom, LNM_enseignant.nom;
                     """,
+
+        "allowedRolesRequester": ["administratif"],
+    }
+    return db_request(current_user, SQLRequest(**request))
+
+@router.get("/enseignants/{id_enseignant}/charge/",
+             tags=["user", "enseignant"],
+             summary="Teachers load",
+             description="Return the list of teachers load")
+def enseignants_load(
+    id_enseignant: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        # ToDo convert parameters to be SQLAlchemy Core compatible when it is up
+        "request" : f"""SELECT 
+                            DATE_FORMAT(CLASS_session.schedule, '%Y-%m-%dT%H:%i') AS schedule, 
+                            CAST(MAQUETTE_module_sequencage.duree_h AS FLOAT) AS duree_h, 
+                            MAQUETTE_module.code_module,
+                            MAQUETTE_module.nom, 
+                            MAQUETTE_module.id_semestre, 
+                            LNM_seance_type.type
+            FROM CLASS_session
+                JOIN LNM_enseignant ON LNM_enseignant.id_enseignant=CLASS_session.id_enseignant 
+                JOIN MAQUETTE_module_sequence ON CLASS_session.id_module_sequence=MAQUETTE_module_sequence.id_module_sequence 
+                JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequence.id_module_sequencage=MAQUETTE_module_sequencage.id_module_sequencage 
+                JOIN MAQUETTE_module ON MAQUETTE_module_sequencage.id_module=MAQUETTE_module.id_module 
+                JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+            WHERE LNM_enseignant.id_enseignant = %(id_enseignant)s""",
+        "params": {
+            "id_enseignant": id_enseignant,
+        },
         "allowedRolesRequester": ["administratif"],
     }
     return db_request(current_user, SQLRequest(**request))

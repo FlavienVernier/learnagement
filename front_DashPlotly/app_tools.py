@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import os
+from warnings import deprecated
 import pandas as pd
 import requests
 import io
@@ -139,7 +140,7 @@ def get_PHP_endpoint_data(url, data):
     # print("json_data", json_data)
     # print("df", df, flush=True)
     return df
-
+@deprecated("Use get_enseignants instead")
 def get_list_enseignants():
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listEnseignant.php'
@@ -147,6 +148,12 @@ def get_list_enseignants():
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
+def get_enseignants(token):
+    url = get_python_backend_url("/enseignants/")
+    df = get_endpoint_data(url, token=token)
+    return df
+
+@deprecated("Use get_filieres instead")
 def get_list_filieres():
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listAllFilieres.php'
@@ -154,12 +161,25 @@ def get_list_filieres():
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
+def get_filieres(token):
+    url = get_python_backend_url("/filieres/")
+    df = get_endpoint_data(url, token=token)
+    return df
+
+@deprecated("Use get_statut instead")
 def get_list_statuts():
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStatut.php'
     resp = requests.post(url, data={}, headers=headers)
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+
+def get_statuts(token):
+    url = get_python_backend_url("/statuts/")
+    df = get_endpoint_data(url, token=token)
+    return df
+
+
 
 def get_list_promo():
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
@@ -168,6 +188,7 @@ def get_list_promo():
     urlData = resp.content
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
+@deprecated("Don't use anymore")
 def get_explicit_keys(table):
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/explicitSecondaryKeys.php'

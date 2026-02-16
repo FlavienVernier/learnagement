@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.express as px
-from dash import html, dcc, Input, Output
+from dash import html, dcc, Input, Output, State
 import dash_bootstrap_components as dbc
 from datetime import date, datetime
 import app7_charge_tools
@@ -28,6 +28,7 @@ def update_df(df):
     df_calcule = df.groupby(['nom'], as_index=False).agg({
         'duree_h': 'sum',
         'nom': 'first',
+        'code_module': 'first',
         'schedule': 'first',
         'jour_semaine': 'first',  # Conserver le jour de la semaine
         'mois': 'first',           # Conserver le mois
@@ -61,8 +62,8 @@ app7_administratif_layout = html.Div([
         options=[
             {'label': 'Tous les jours', 'value': 'all'},
             {'label': 'Ce Semestre', 'value': 'semester'},
-            {'label': 'Ce mois', 'value': 'this_month'},
-            {'label': "Aujourd'hui", 'value': 'today'}
+            #{'label': 'Ce mois', 'value': 'this_month'},
+            #{'label': "Aujourd'hui", 'value': 'today'}
         ],
         value='all',  # Valeur par défaut
         placeholder="Sélectionnez une période",
@@ -74,25 +75,31 @@ app7_administratif_layout = html.Div([
     html.Div(id='total_div_administratif')
 ])
 
+############################
+# Call Back
+############################
+
 def register_callbacks(app):
     @app.callback(
         Output('enseignant_input_administratif', 'options'),
         Input('user_id', 'data'),
+        State('token', 'data'),
     )
-    def update_options(user_id):
-        dfi = app_tools.get_explicit_keys("LNM_enseignant")
-        intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in dfi.iterrows()]
+    def update_options(user_id, token):
+        dfi = app_tools.get_enseignants(token)
+        intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id_enseignant']} for _, row in dfi.iterrows()]
         return intervenant_options
     # Callback pour mettre à jour le graphique
     @app.callback(
         Output('graphique-charge_administratif', 'figure'),
         Input('filtre-periode', 'value'),
         Input('enseignant_input_administratif', 'value'),
+        State('token', 'data'),
         prevent_initial_call=True
     )
-    def update_graph(filtre_periode, user_id):
+    def update_graph(filtre_periode, user_id, token):
         print(filtre_periode, user_id, flush=True)
-        df = app7_charge_tools.get_chargeByEnseignantId(user_id)
+        df = app7_charge_tools.get_chargeByEnseignantId(token, user_id)
 
 
         today = datetime.today().date()  # Date d'aujourd'hui
@@ -137,11 +144,12 @@ def register_callbacks(app):
         Output('total_div_administratif', 'children'),
         Input('filtre-periode', 'value'),
         Input('enseignant_input_administratif', 'value'),
+        State('token', 'data'),
         prevent_initial_call=True
     )
-    def display_table(period, user_id):
+    def display_table(period, user_id, token):
         print(period, user_id, flush=True)
-        df = app7_charge_tools.get_chargeByEnseignantId(user_id)
+        df = app7_charge_tools.get_chargeByEnseignantId(token, user_id)
         if period == 'all':
             df = df[['type', 'duree_h']].groupby(['type']).sum().reset_index()
         elif    period == 'semester':
