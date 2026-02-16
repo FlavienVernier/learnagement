@@ -4,8 +4,8 @@ import dash_bootstrap_components as dbc
 import app_tools
 import app13_mccc_tools
 
-def update_table_m2c3(id_filiere, id_statut):
-    df = app13_mccc_tools.get_list_modules_m2c3(id_filiere, id_statut)
+def update_table_m2c3(token, id_filiere, id_statut):
+    df = app13_mccc_tools.get_list_modules_m2c3(token, id_filiere, id_statut)
     dfi = app_tools.get_explicit_keys("LNM_enseignant")
     intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in
                            dfi.iterrows()]
@@ -77,10 +77,11 @@ def register_callbacks(app):
 
     @app.callback(
         Output(component_id='table_responsabilites', component_property='children'),
-        Input(component_id='fake', component_property='value')
+        Input(component_id='fake', component_property='value'),
+        State(component_id='token', component_property='data')
     )
-    def display_table_responsabilites(user_id_fake):
-        df_stages = app13_mccc_tools.get_list_enseignants_responsabilites()
+    def display_table_responsabilites(user_id_fake, token):
+        df_stages = app13_mccc_tools.get_list_enseignants_responsabilites(token)
         table_responsabilites = dbc.Table.from_dataframe(
             df_stages,
             # Key styling options:
@@ -95,11 +96,12 @@ def register_callbacks(app):
         Output(component_id='div_table_m2c3', component_property='children'),
         Input(component_id='filiere_input', component_property='value'),
         Input(component_id='statut_input', component_property='value'),
+        State(component_id='token', component_property='data'),
         prevent_initial_call=True
     )
-    def display_table_m2c3(id_filiere, id_statut):
+    def display_table_m2c3(id_filiere, id_statut, token):
         if id_filiere and id_statut :
-            table_m2c3 = update_table_m2c3(id_filiere, id_statut)
+            table_m2c3 = update_table_m2c3(token, id_filiere, id_statut)
         else :
             table_m2c3 = dbc.Table()
         return [table_m2c3]
@@ -112,14 +114,15 @@ def register_callbacks(app):
         State('table_m2c3', 'data'),
         State(component_id='filiere_input', component_property='value'),
         State(component_id='statut_input', component_property='value'),
+        State(component_id='token', component_property='data'),
         prevent_initial_call=True,
     )
-    def cb_change_intervenant_sequencage(previous, current, id_filiere, id_statut):
+    def cb_change_intervenant_sequencage(previous, current, id_filiere, id_statut, token):
         if previous is not None:
             row_changed = [row for row in current if row not in previous]
             if len(row_changed) > 0:  # else callback invoked by data deleted
                 row_changed = row_changed[0]
                 new_intervenant_id = row_changed['nouveau_responsable']
                 id_module = row_changed['id_module']
-                ret = app13_mccc_tools.set_modules_responsable(id_module, new_intervenant_id)
-        return update_table_m2c3(id_filiere, id_statut)
+                ret = app13_mccc_tools.set_modules_responsable(token, id_module, new_intervenant_id)
+        return update_table_m2c3(token, id_filiere, id_statut)

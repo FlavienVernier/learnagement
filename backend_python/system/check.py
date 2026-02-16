@@ -15,7 +15,10 @@ router = APIRouter()
 ##################
 # Enseignant
 ##################
-@router.post("/enseignant_sans_cours/", tags=["check"])
+@router.get("/enseignant_sans_cours/",
+             tags=["check"],
+            summary="Teacher without session",
+            description="Check teacher without session.")
 def checkLNM_enseignant_sans_cours(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
@@ -33,7 +36,10 @@ def checkLNM_enseignant_sans_cours(
 #########################
 # Module
 #########################
-@router.post("/module_sans_unite_d_enseignement/", tags=["check"])
+@router.get("/module_sans_unite_d_enseignement/",
+             tags=["check"],
+            summary="Module without learning unit",
+            description="Check module not link to a learning unit.")
 def  checkMAQUETTE_moduleWithoutLearningUnit(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
@@ -45,35 +51,41 @@ def  checkMAQUETTE_moduleWithoutLearningUnit(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.post("/module_sans_apprentissage_critique/", tags=["check"])
-def checkMAQUETTE_moduleWithoutApprentissageCritique(
+@router.get("/module_sans_apprentissage_critique/",
+             tags=["check"],
+            summary="Module without apprentissage critique",
+            description="Check module without apprentissage critique.")
+def module_sans_apprentissage_critique(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     request = {
         "request" : """SELECT `code_module`, `nom`
-            FROM `MAQUETTE_module` 
+            FROM `MAQUETTE_module`
             WHERE `id_module` NOT IN (SELECT id_module FROM APC_apprentissage_critique_as_module);""",
         "allowedRolesRequester" : ["administratif"],
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.post("/module_detail_ects/", tags=["check"])
-def  checkMAQUETTE_moduleECTS(
+@router.get("/module_detail_ects/",
+             tags=["check"],
+            summary="ECTs weight",
+            description="Check ratio hours ECTs.")
+def  module_detail_ects(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     request = {
-        "request" : """SELECT 
-                `MAQUETTE_module`.`code_module` AS `code_module`, 
-                `MAQUETTE_module`.`nom` AS `nom`, 
-                `MAQUETTE_module`.`ECTS` AS `ECTS`,
-                `MAQUETTE_module`.`hCM` AS `hCM`, 
-                `MAQUETTE_module`.`hTD` AS `hTD`, 
-                `MAQUETTE_module`.`hTP` AS `hTP`, 
-                `MAQUETTE_module`.`hPROJ` AS `hPROJ`, 
-                `MAQUETTE_module`.`hPersonnelle` AS `hPersonnelle`, 
+        "request" : """SELECT
+                `MAQUETTE_module`.`code_module` AS `code_module`,
+                `MAQUETTE_module`.`nom` AS `nom`,
+                CAST(`MAQUETTE_module`.`ECTS` AS FLOAT) AS `ECTS`,
+                `MAQUETTE_module`.`hCM` AS `hCM`,
+                `MAQUETTE_module`.`hTD` AS `hTD`,
+                `MAQUETTE_module`.`hTP` AS `hTP`,
+                `MAQUETTE_module`.`hPROJ` AS `hPROJ`,
+                `MAQUETTE_module`.`hPersonnelle` AS `hPersonnelle`,
                 ROUND((ifnull(`MAQUETTE_module`.`hCM`, 0) + ifnull(`MAQUETTE_module`.`hTD`, 0) + ifnull(`MAQUETTE_module`.`hTP`, 0)) / `MAQUETTE_module`.`ECTS`, 2) AS `h/ECTS`,
                 ROUND(`MAQUETTE_module`.`ECTS` / (ifnull(`MAQUETTE_module`.`hCM`, 0) + ifnull(`MAQUETTE_module`.`hTD`, 0) + ifnull(`MAQUETTE_module`.`hTP`, 0)), 3) AS `ECTS/h`
-                FROM `MAQUETTE_module` 
+                FROM `MAQUETTE_module`
                 GROUP BY `MAQUETTE_module`.`id_module`
                 ORDER BY `MAQUETTE_module`.`code_module`;""",
         "allowedRolesRequester" : ["administratif"],
@@ -84,8 +96,11 @@ def  checkMAQUETTE_moduleECTS(
 # Class
 ########################
 
-@router.post("/session_sans_intervenant/", tags=["check"])
-def  checkCLASS_sessionWithoutIntervenant(
+@router.get("/session_sans_intervenant/",
+             tags=["check"],
+            summary="Session without teacher",
+            description="Check session without teacher.")
+def  session_sans_intervenant(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     request = {
@@ -99,7 +114,7 @@ def  checkCLASS_sessionWithoutIntervenant(
                 MAQUETTE_module_sequence.commentaire,
                 MAQUETTE_module_sequencage.id_module,
                 MAQUETTE_module_sequencage.id_seance_type,
-                MAQUETTE_module_sequencage.duree_h,
+                CAST(MAQUETTE_module_sequencage.duree_h AS FLOAT) AS duree_h,
                 MAQUETTE_module.code_module,
                 MAQUETTE_module.nom as nom_module,
                 LNM_seance_type.type,
@@ -122,8 +137,11 @@ def  checkCLASS_sessionWithoutIntervenant(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.post("/session_reference_corruption/", tags=["check"])
-def checkCLASS_sessionReferenceCoruption(
+@router.get("/session_reference_corruption/",
+             tags=["check"],
+            summary="Session foreign K coruption",
+            description="Check session not linked to module.")
+def session_reference_corruption(
         current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     request = {
@@ -140,21 +158,21 @@ def checkCLASS_sessionReferenceCoruption(
     return db_request(current_user, SQLRequest(**request))
 
 # ToDo to finished
-@router.post("/maquette_vs_session/",
+@router.get("/maquette_vs_sequencage/",
             tags=["check"],
             summary="Session hours Vs Program",
-            description="Check whether the number of session hours corresponds to the program.")
-def list_universities(
+            description="Check whether the number of sequencage hours corresponds to the program.")
+def maquette_vs_sequencage(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     request = {
         "request" : """
                         SELECT hMaquette.ExplicitSecondaryK, 
                                hMaquette.code_module,
-                               hMaquette.hCM - hSession.hCM AS hCM_maquette_vs_session,
-                            hMaquette.hTD - hSession.hTD AS hTD_maquette_vs_session,
-                            hMaquette.hTP - hSession.hTP AS hTP_maquette_vs_session,
-                            hMaquette.hProj - hSession.hProj AS hProj_maquette_vs_session
+                               hMaquette.hCM - hSession.hCM AS hCM_maquette_vs_sequencage,
+                            hMaquette.hTD - hSession.hTD AS hTD_maquette_vs_sequencage,
+                            hMaquette.hTP - hSession.hTP AS hTP_maquette_vs_sequencage,
+                            hMaquette.hProj - hSession.hProj AS hProj_maquette_vs_sequencage
                         FROM
                             (SELECT ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK, 
                                    MAQUETTE_module.code_module, 

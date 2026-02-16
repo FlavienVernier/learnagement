@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-@router.post("/competence/",
+@router.get("/competence/",
             tags=["user", "request", "university"],
             summary="Universities",
             description="Return the list of partner universities")

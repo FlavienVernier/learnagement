@@ -24,6 +24,11 @@ function listLNM_enseignant_responsabilite($conn)
     return $rs;
 }
 
+/**
+ * @deprecated
+ *
+ * @return $this
+ */
 function checkLNM_enseignant_sans_cours($conn)
 {
     $sql = "SELECT `prenom`, `nom`, `mail`, `statut`, `composante`

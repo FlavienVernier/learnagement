@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-@router.post("/enseignant/",
-            tags=["user", "request", "enseignant"],
+@router.get("/enseignant/",
+            tags=["user", "enseignant"],
             summary="Teachers",
             description="Return the list of teachers")
 def list_enseignant(
@@ -25,11 +25,11 @@ def list_enseignant(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.post("/enseignant_responsabilite/",
-             tags=["user", "request", "enseignant"],
+@router.get("/enseignant_responsabilite/",
+             tags=["user", "enseignant"],
              summary="Teachers responsibilities",
              description="Return the list of teachers' responsibilities")
-def listLNM_enseignant_responsabilite(
+def enseignants_responsabilities(
         current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     request = {
@@ -46,11 +46,11 @@ def listLNM_enseignant_responsabilite(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.post("/charge_enseignants/",
-             tags=["user", "request", "enseignant"],
-             summary="Teachers responsibilities",
-             description="Return the list of teachers' responsibilities")
-def listLNM_enseignant_responsabilite(
+@router.get("/charge_enseignants/",
+             tags=["user", "enseignant"],
+             summary="Teachers load",
+             description="Return the list of teachers load")
+def enseignants_loads(
         current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     request = {

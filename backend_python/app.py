@@ -3,9 +3,7 @@ import uvicorn
 import logging
 
 from system import authenticate, check
-from user import LNM_enseignant
-from user import LNM_university
-from user import APC_competence
+from user import MAQUETTE_module, LNM_enseignant, CLASS_abscence, LNM_university, APC_competence
 
 class bcolors:
     HEADER = '\033[95m'
@@ -30,7 +28,9 @@ app = FastAPI()
 
 app.include_router(authenticate.router)
 app.include_router(check.router)
+app.include_router(MAQUETTE_module.router)
 app.include_router(LNM_enseignant.router)
+app.include_router(CLASS_abscence.router)
 app.include_router(LNM_university.router)
 app.include_router(APC_competence.router)
 

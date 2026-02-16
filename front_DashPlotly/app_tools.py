@@ -13,7 +13,7 @@ def get_endpoint_data(url, data=None, token=None):
     if data is None:
         data = {}
     if token:
-        return get_python_endpoint_data(url, data, token)
+        return get_endpoint(url, data, token)
     else:
         return get_PHP_endpoint_data(url, data)
 
@@ -23,7 +23,13 @@ def get_python_backend_url(endpoint):
     url = f"{base_url}:{port}/{endpoint}"
     return url
 
-def get_python_endpoint_data(url, data, token):
+def get_endpoint(url, data, token):
+    return get_python_endpoint_data('get', url, data, token)
+
+def patch_endpoint(url, data, token):
+    return get_python_endpoint_data('patch', url, data, token)
+
+def get_python_endpoint_data(method, url, data, token):
     """
     Appel de l'API FastAPI
 
@@ -39,23 +45,29 @@ def get_python_endpoint_data(url, data, token):
     """
 
     try:
-        headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': f'Bearer {token}'
-        }
 
-        #base_url = os.getenv("PYTHON_BACKEND_DOCKER_URL")
-        #port = os.getenv("PYTHON_BACKEND_DOCKER_PORT")
-        #url = f"{base_url}:{port}/session_reference_corruption/"
 
         # Appel au "endpoint" (pas besoin de body car tout est dans la dépendance)
-        resp = requests.post(url, headers=headers, timeout=30)
+        if method == 'get':
+            headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': f'Bearer {token}'
+            }
+            resp = requests.get(url, headers=headers, params=data, timeout=30)
+        elif method == 'patch':
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {token}'
+            }
+            resp = requests.patch(url, headers=headers, json=data, timeout=30)
+        else:
+            return pd.DataFrame()
 
         # Gérer les erreurs HTTP immédiatement après la requête
         if resp.status_code == 401:
             raise HTTPError("Token invalide ou expiré", response=resp)
         elif resp.status_code == 403:
-            raise HTTPError("Accès refusé - L'utilisateur n'a pas le rôle 'administratif'", response=resp)
+            raise HTTPError("Accès refusé - L'utilisateur n'a pas le rôle requis", response=resp)
 
         # Gérer les erreurs HTTP
         resp.raise_for_status()

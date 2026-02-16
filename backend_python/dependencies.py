@@ -3,6 +3,7 @@ import dotenv
 import logging
 import json
 
+import sqlalchemy
 import mysql.connector
 
 from typing import Annotated
@@ -41,6 +42,7 @@ class UserInDB(User):
 
 class SQLRequest(BaseModel):
     request: str
+    params: dict | None = None
     allowedRolesRequester: list[str]
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -196,21 +198,35 @@ def has_role(role_required: str):
 
     return check_role
 
+
+
 def db_request(requester: User, request: SQLRequest):
     # check if there is no intersection between requester roles and request allowed roles
     if not bool(set(requester.roles) & set(request.allowedRolesRequester)):
         logger.error(f"User {requester.id} has no role {request.allowedRolesRequester}")
         raise HTTPException(status_code=403, detail="Unauthorized access")
     rows = []
+    logger.info(f"User {requester.id} has role {requester.roles} requests {request}")
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)
-        cursor.execute(request.request)
+
+        if request.params:
+            cursor.execute(request.request, request.params)
+            #cursor.execute(sqlalchemy.text(request.request), request.params)
+        else:
+            cursor.execute(request.request)
+            #cursor.execute(sqlalchemy.text(request.request))
+
         rows = cursor.fetchall()
         connection.commit()
         connection.close()
     except Exception as e:
         logger.exception(e)
+
+    finally:
+        cursor.close()
+        connection.close()
     return json.dumps([dict(ix) for ix in rows])
 
 def main():
