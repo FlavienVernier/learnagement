@@ -2,8 +2,10 @@ from fastapi import Depends, FastAPI, Request
 import uvicorn
 import logging
 
+import init
+
 from system import authenticate, check
-from user import APC_competence, CLASS_abscence, LNM_enseignant, LNM_filiere,  LNM_university, MAQUETTE_module
+from user import APC_competence, CLASS_abscence, LNM_enseignant, LNM_etudiant, LNM_filiere,  LNM_university, MAQUETTE_module
 
 class bcolors:
     HEADER = '\033[95m'
@@ -30,6 +32,7 @@ app.include_router(authenticate.router)
 app.include_router(check.router)
 app.include_router(CLASS_abscence.router)
 app.include_router(LNM_enseignant.router)
+app.include_router(LNM_etudiant.router)
 app.include_router(LNM_university.router)
 app.include_router(LNM_filiere.router)
 app.include_router(MAQUETTE_module.router)
@@ -65,5 +68,7 @@ async def root():
     return {"message": "Hello, I'm Learnagement BackEnd!"}
 
 if __name__ == "__main__":
+    print(bcolors.OKGREEN + "Init BD framework..." + bcolors.ENDC)
+    init.init()
     print(bcolors.OKGREEN + "Start backend Python..." + bcolors.ENDC)
     uvicorn.run(app, host="0.0.0.0", port=4000)

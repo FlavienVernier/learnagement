@@ -15,6 +15,8 @@ from fastapi import Header, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s:%(funcName)s:%(lineno)d - %(message)s')
+
 logger = logging.getLogger(__name__)
 
 dotenv.load_dotenv(".env")
@@ -34,6 +36,7 @@ class User(BaseModel):
     prenom: str
     nom: str
     mail: str | None = None
+    ExplicitSecondaryK: str
     roles: list = []
     password2update: bool = False
 
@@ -74,13 +77,18 @@ def get_administratif(user_login: str):
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT LNM_administratif.id_administratif AS id, LNM_administratif.* FROM LNM_administratif WHERE mail = %s", (user_login,))
+        cursor.execute("""SELECT LNM_administratif.id_administratif AS id, 
+                                 LNM_administratif.*, 
+                                 ExplicitSecondaryKs_LNM_administratif.ExplicitSecondaryK
+                          FROM LNM_administratif 
+                          JOIN ExplicitSecondaryKs_LNM_administratif ON ExplicitSecondaryKs_LNM_administratif.id_administratif = LNM_administratif.id_administratif
+                          WHERE mail = %s""", (user_login,))
         users = cursor.fetchall()
     except Exception as e:
         logger.exception(e)
     if len(users) != 0:
         user_dict = users[0]
-        user_dict["roles"] = ["user", "administratif"]
+        user_dict["roles"] = ["user", "administratif", users[0]['ExplicitSecondaryK']]
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor()
         cursor.execute(
@@ -100,13 +108,20 @@ def get_enseignant(user_login: str):
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT LNM_enseignant.id_enseignant AS id, LNM_enseignant.*  FROM LNM_enseignant WHERE mail = %s", (user_login,))
+        cursor.execute("""
+                       SELECT LNM_enseignant.id_enseignant AS id, 
+                              LNM_enseignant.*,
+                              ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK
+                       FROM LNM_enseignant 
+                       JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = LNM_enseignant.id_enseignant
+                       WHERE mail = %s""",
+                       (user_login,))
         users = cursor.fetchall()
     except Exception as e:
         logger.exception(e)
     if len(users) != 0:
         user_dict = users[0]
-        user_dict["roles"] = ["user", "enseignant"]
+        user_dict["roles"] = ["user", "enseignant", users[0]['ExplicitSecondaryK']]
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor()
         cursor.execute(
@@ -127,13 +142,19 @@ def get_etudiant(user_login: str):
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT LNM_etudiant.id_etudiant AS id, LNM_etudiant.* FROM LNM_etudiant WHERE mail = %s", (user_login,))
+        cursor.execute("""SELECT LNM_etudiant.id_etudiant AS id, 
+                                 LNM_etudiant.*,
+                                 ExplicitSecondaryKs_LNM_etudiant.ExplicitSecondaryK
+                          FROM LNM_etudiant 
+                          JOIN ExplicitSecondaryKs_LNM_etudiant ON ExplicitSecondaryKs_LNM_etudiant.id_etudiant = LNM_etudiant.id_etudiant
+                          WHERE mail = %s""",
+                       (user_login,))
         users = cursor.fetchall()
     except Exception as e:
         logger.exception(e)
     if len(users) != 0:
         user_dict = users[0]
-        user_dict["roles"] = ["user", "etudiant"]
+        user_dict["roles"] = ["user", "etudiant", users[0]['ExplicitSecondaryK']]
         return UserInDB(**user_dict)
     return None
 
@@ -219,11 +240,11 @@ def db_request(requester: User, request: SQLRequest):
             #cursor.execute(sqlalchemy.text(request.request))
 
         rows = cursor.fetchall()
+        logger.info(f"User {requester.id} has {rows}")
         connection.commit()
         connection.close()
     except Exception as e:
         logger.exception(e)
-
     finally:
         cursor.close()
         connection.close()

@@ -315,7 +315,7 @@ def build_secondary_key_request(conn, table):
 
     return secondary_key_request
 
-if __name__ == '__main__':
+def init():
 
     conn = mysql.connector.connect(
         host=HOST,
@@ -356,3 +356,6 @@ if __name__ == '__main__':
 
     conn.close()
     print(bcolors.OKGREEN + "Init BD Framework requirement done (Check previous Warning)!" + bcolors.ENDC)
+
+if __name__ == '__main__':
+    init()

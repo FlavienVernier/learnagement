@@ -5,7 +5,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from dependencies import get_user, Token
+from dependencies import logger, get_user, Token
 
 from datetime import datetime, timedelta, timezone
 import jwt
@@ -15,7 +15,6 @@ from typing import Annotated
 
 import mysql.connector
 
-logger = logging.getLogger(__name__)
 
 dotenv.load_dotenv(".env")
 
@@ -76,7 +75,7 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(seconds=ACCESS_TOKEN_EXPIRE_SECONDS)
-    print(access_token_expires, flush=True)
+    logger.info(f"Token timeout {access_token_expires}")
     access_token = create_access_token(
         data={"id": user.id,
               "email": user.mail,
@@ -86,6 +85,7 @@ async def login_for_access_token(
               "password2update" : user.password2update
               }, expires_delta=access_token_expires
     )
+    logger.info(f"User {user.mail} connected with roles {user.roles}")
     return Token(access_token=access_token, token_type="bearer")
 
 @router.post("/logout",
