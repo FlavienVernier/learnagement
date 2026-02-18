@@ -1,21 +1,16 @@
-FROM python:3.13
-# Or any preferred Python version.
-
+FROM python:3
 
 # Define container app directory
 RUN mkdir /app
-WORKDIR /app
-
-# Data directory
-# ToDo must be remove so that data will accessed via db
-#RUN mkdir /data/
-
+WORKDIR /app/
 
 # Copy entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh \
     && sed -i 's/\r$//' /entrypoint.sh
 
+EXPOSE 8050
 
-# Rum app
+# IMPORTANT: use entrypoint, not command
 ENTRYPOINT ["/entrypoint.sh"]
+# CMD ["python", "main.py"]
