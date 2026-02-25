@@ -30,6 +30,9 @@ def get_endpoint(url, data, token):
 def patch_endpoint(url, data, token):
     return get_python_endpoint_data('patch', url, data, token)
 
+def post_endpoint(url, data, token):
+    return get_python_endpoint_data('post', url, data, token)
+
 def get_python_endpoint_data(method, url, data, token):
     """
     Appel de l'API FastAPI
@@ -61,6 +64,12 @@ def get_python_endpoint_data(method, url, data, token):
                 'Authorization': f'Bearer {token}'
             }
             resp = requests.patch(url, headers=headers, json=data, timeout=30)
+        elif method == 'post':
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {token}'
+            }
+            resp = requests.post(url, headers=headers, json=data, timeout=30)
         else:
             return pd.DataFrame()
 
@@ -140,6 +149,7 @@ def get_PHP_endpoint_data(url, data):
     # print("json_data", json_data)
     # print("df", df, flush=True)
     return df
+
 @deprecated("Use get_enseignants instead")
 def get_list_enseignants():
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}

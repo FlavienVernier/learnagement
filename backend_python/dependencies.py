@@ -240,7 +240,7 @@ def db_request(requester: User, request: SQLRequest):
             #cursor.execute(sqlalchemy.text(request.request))
 
         rows = cursor.fetchall()
-        logger.info(f"User {requester.id} has {rows}")
+        #logger.info(f"User {requester.id} has {rows}")
         connection.commit()
         connection.close()
     except Exception as e:

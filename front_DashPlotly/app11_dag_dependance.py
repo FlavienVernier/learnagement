@@ -6,7 +6,7 @@ import networkx as nx
 import colorsys
 import matplotlib.colors as mcolors#
 from dash import dcc, html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 
 import app11_dag_dependance_tools
 import app5_module_tools
@@ -171,12 +171,13 @@ def register_callbacks(app):
         Output('app11_filtre_module', 'options'),
         Input('user_id', 'data'),
         Input('role', 'data'),
+        State('token', 'data'),
     )
-    def update_filter_sequencage_option(user_id, role):
+    def update_filter_sequencage_option(user_id, role, token):
         if role == "enseignant":
-            df = app5_module_tools.get_moduleByEnseignantId(user_id)
+            df = app5_module_tools.get_moduleByEnseignantId(token, user_id)
         elif role == "etudiant":
-            df = app5_module_tools.get_moduleByEtudiantId(user_id)
+            df = app5_module_tools.get_moduleByEtudiantId(token, user_id)
         options = [{'label': row['code_module'], 'value': row['id_module']} for _, row in
                    df[['id_module', 'code_module']].drop_duplicates().iterrows()]
         return options

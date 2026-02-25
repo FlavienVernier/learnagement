@@ -211,6 +211,68 @@ def maquette_vs_sequencage(
                             ) AS hSession
                         ON hMaquette.code_module = hSession.code_module AND hMaquette.ExplicitSecondaryK = hSession.ExplicitSecondaryK
                     """,
-        "allowedRolesRequester" : ["user"],
+        "allowedRolesRequester" : ["administratif", "responsable_etudes"],
     }
+    return db_request(current_user, SQLRequest(**request))
+
+
+@router.get("/maquette_vs_sequencage/{id_responsable}/",
+            tags=["check"],
+            summary="Session hours Vs Program",
+            description="Check whether the number of sequencage hours corresponds to the program.")
+def maquette_vs_sequencage_by_idResp(
+        id_responsable: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request": """
+                    SELECT DISTINCT
+                        MAQUETTE_module.id_module,
+                        MAQUETTE_module.code_module,
+                        CONCAT(IFNULL(hCM,0) - IFNULL(hCMCequenced,0), " / ", IFNULL(hCM,0))  AS 'CM_to_plan',
+                        CONCAT(IFNULL(hTD,0)  - IFNULL(hTDCequenced,0), " / ", IFNULL(hTD,0)) AS 'TD_to_plan',
+                        CONCAT(IFNULL(hTP,0)  - IFNULL(hTPCequenced,0), " / ", IFNULL(hTP,0)) AS 'TP_to_plan',
+                        CONCAT(IFNULL(hPROJ,0)  - IFNULL(hPROJCequenced,0), " / ", IFNULL(hPROJ,0)) AS 'Proj_to_plan'
+                    FROM MAQUETTE_module
+                    LEFT JOIN (
+                        SELECT code_module, SUM(nombre * duree_h) as hCMCequenced
+                        FROM MAQUETTE_module_sequencage
+                        JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module
+                        JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+                        JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
+                        WHERE LNM_seance_type.type = 'CM' AND LNM_groupe_type.groupe_type = 'PROMO' OR LNM_seance_type.type = 'Exam' AND LNM_groupe_type.groupe_type = 'PROMO'
+                        GROUP BY code_module) CMsequenced ON  CMsequenced.code_module = MAQUETTE_module.code_module
+                    LEFT JOIN (
+                        SELECT code_module, SUM(nombre * duree_h) as hTDCequenced
+                        FROM MAQUETTE_module_sequencage
+                        JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module
+                        JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+                        JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
+                        WHERE LNM_seance_type.type = 'TD' AND LNM_groupe_type.groupe_type = 'TD'
+                        GROUP BY code_module) TDsequenced ON  TDsequenced.code_module = MAQUETTE_module.code_module
+                    LEFT JOIN (
+                        SELECT code_module, SUM(nombre * duree_h) as hTPCequenced
+                        FROM MAQUETTE_module_sequencage
+                        JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module
+                        JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+                        JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
+                        WHERE LNM_seance_type.type = 'TP' AND LNM_groupe_type.groupe_type = 'TP'
+                        GROUP BY code_module) TPsequenced ON  TPsequenced.code_module = MAQUETTE_module.code_module
+                    LEFT JOIN (
+                        SELECT code_module, SUM(nombre * duree_h) as hPROJCequenced
+                        FROM MAQUETTE_module_sequencage
+                        JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module
+                        JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+                        JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
+                        WHERE LNM_seance_type.type = 'PROJ' AND LNM_groupe_type.groupe_type = 'Promo'
+                        GROUP BY code_module) PROJsequenced ON  PROJsequenced.code_module = MAQUETTE_module.code_module
+                    WHERE MAQUETTE_module.id_responsable = %(id_responsable)s
+                    """,
+        "params": {
+            "id_responsable": id_responsable,
+        },
+        "allowedRolesRequester": ["administratif", "responsable_etudes"],
+    }
+    if current_user.id == id_responsable:
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))

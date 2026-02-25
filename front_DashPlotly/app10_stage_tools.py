@@ -4,6 +4,8 @@ import pandas as pd
 import requests
 import io
 
+import app_tools
+
 load_dotenv()
 
 # def get_etudiants_by_promo(cur, id_promo) :
@@ -35,19 +37,19 @@ load_dotenv()
 #
 #     return stages
 
-def get_eleves_sans(stages, noms):
-    eleves_sans=[]
-    for i in range (0, len(noms)):
-        if (stages[i] == 0):
-            eleves_sans.append(noms[i])
-    return eleves_sans
+# def get_eleves_sans(stages, noms):
+#     eleves_sans=[]
+#     for i in range (0, len(noms)):
+#         if (stages[i] == 0):
+#             eleves_sans.append(noms[i])
+#     return eleves_sans
 
-def get_stages():
-    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStages.php'
-    resp = requests.post(url, data={}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+# def get_stages():
+#     headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
+#     url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStages.php'
+#     resp = requests.post(url, data={}, headers=headers)
+#     urlData = resp.content
+#     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
 
 def get_stages_by_supervisorId(supervisorId):
@@ -65,26 +67,26 @@ def get_stages_by_studentId(studentId):
     return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
 
-def get_stages_with_supervisorId():
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStagesWithSupervisor.php'
-    resp = requests.post(url, data={}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+def get_stages_with_supervisorId(token):
+    df = app_tools.get_endpoint_data(
+        url = app_tools.get_python_backend_url("/etudiants/stages"),
+        token = token)
+    df = df.dropna()
+    #df = df[df.notnull().any(axis=1)]
+    return df
 
-def get_stages_without_supervisorId():
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStagesWithoutSupervisor.php'
-    resp = requests.post(url, data={}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+def get_stages_without_supervisorId(token):
+    df = app_tools.get_endpoint_data(
+        url = app_tools.get_python_backend_url("/etudiants/stages"),
+        token=token)
+    df = df[df.isnull().any(axis=1)]
+    return df
 
-def get_students_without_stage():
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStagesStudentsWithoutStage.php'
-    resp = requests.post(url, data={}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+def get_students_without_stage(token):
+    df = app_tools.get_endpoint_data(
+        url = app_tools.get_python_backend_url("/etudiants/without_stage"),
+        token = token)
+    return df
 
 def add_stage(entreprise, sujet, mission, ville, start_date, end_date, id_etudiant, id_enseignant):
     #print(id_etudiant, entreprise, sujet, mission, start_date, end_date, id_enseignant, flush=True)
@@ -111,9 +113,15 @@ def set_internship_supervisor(id_stage, new_supervisor_id):
     return urlData.decode('utf-8')
 
 
-def remove_stage(id_stage):
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/delete/deleteStage.php'
-    resp = requests.post(url, data={'id_stage':id_stage}, headers=headers)
-    urlData = resp.content
-    return urlData.decode('utf-8')
+def remove_stage(token, id_etudiant, id_stage):
+    df = app_tools.get_endpoint_data(
+        url = app_tools.get_python_backend_url(f"/etudiants/{id_etudiant}/without_stage"),
+        data = {'id_stage':id_stage},
+        token = token)
+    return df
+
+    # headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    # url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/delete/deleteStage.php'
+    # resp = requests.post(url, data={'id_stage':id_stage}, headers=headers)
+    # urlData = resp.content
+    # return urlData.decode('utf-8')
