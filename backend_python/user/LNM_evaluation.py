@@ -43,12 +43,42 @@ def tree_competence(
     }
     return db_request(current_user, SQLRequest(**request))
 
+@router.get("/evaluations/apc/etudiants/{id_etudiant}",
+            tags=["user"],
+            summary="Universities",
+            description="Return the list of partner universities")
+def get_apc_etudiant_evaluation(
+        id_etudiant: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request": """
+                   SELECT eval.id_etudiant, 
+                           eval.evaluation, 
+                           ac.libelle_apprentissage, 
+                           niveau.libelle_niveau, 
+                           competence.libelle_competence, 
+                           competence.id_competence 
+                   FROM ETU_competence_evaluation as eval 
+                        INNER JOIN APC_apprentissage_critique as ac ON eval.id_apprentissage_critique=ac.id_apprentissage_critique 
+                        INNER JOIN APC_niveau as niveau ON ac.id_niveau=niveau.id_niveau 
+                        INNER JOIN APC_competence as competence ON niveau.id_competence=competence.id_competence 
+                   WHERE eval.id_etudiant = %(id_etudiant)s
+                   """,
+            "params": {
+                "id_etudiant": id_etudiant,
+            },
+            "allowedRolesRequester" : [],
+        }
+    if current_user.id == id_etudiant:
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    return db_request(current_user, SQLRequest(**request))
 
 @router.get("/evaluations/classical/etudiants/{id_etudiant}",
             tags=["user"],
             summary="Universities",
             description="Return the list of partner universities")
-def tree_competence(
+def get_classical_etudiant_evaluation(
         id_etudiant: int,
         current_user: Annotated[User, Depends(get_current_active_user)],
 ):
@@ -138,7 +168,7 @@ def tree_competence(
                    SELECT ETU_classical_evaluation.evaluation, 
                           concat(LNM_etudiant.nom, ' ', LNM_etudiant.prenom) as etudiant, 
                           MAQUETTE_module.nom,  
-                          DATE_FORMAT(ETU_classical_evaluation.date , '%Y-%m-%dT%H:%i') AS 'date'  , 
+                          DATE_FORMAT(ETU_classical_evaluation.date , '%Y-%m-%dT%H:%i') AS 'date'  ,
                           concat(LNM_filiere.nom_filiere, '_', LNM_promo.annee, '_', LNM_statut.nom_statut) AS 'promo'
                    FROM ETU_classical_evaluation
                             JOIN MAQUETTE_module ON ETU_classical_evaluation.id_module = MAQUETTE_module.id_module 

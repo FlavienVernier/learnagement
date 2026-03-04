@@ -224,7 +224,7 @@ def has_role(role_required: str):
 def db_request(requester: User, request: SQLRequest):
     # check if there is no intersection between requester roles and request allowed roles
     if not bool(set(requester.roles) & set(request.allowedRolesRequester)):
-        logger.error(f"User {requester.id} has no role {request.allowedRolesRequester}")
+        logger.error(f"User {requester.id} hasn't role {request.allowedRolesRequester}")
         raise HTTPException(status_code=403, detail="Unauthorized access")
     rows = []
     logger.info(f"User {requester.id} has role {requester.roles} requests {request}")

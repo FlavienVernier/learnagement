@@ -1,4 +1,4 @@
-from dash import dcc, html, Input, Output
+from dash import dcc, html, Input, Output, State
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
@@ -34,11 +34,12 @@ app2_layout = html.Div([
 def register_callbacks(app):
     @app.callback(
         Output("spyder_competence_globale", "figure"),
-        Input('user_id', 'data')  # Réagit au clic sur le premier graphique
+        Input('user_id', 'data'),  # Réagit au clic sur le premier graphique
+        State('token', 'data'),
     )
 
-    def create_chart(user_id):
-        data = app2_spyder_plot_competences_tools.get_evaluation_apprentissage_critique_by_studentId(user_id)
+    def create_spyder(user_id, token):
+        data = app2_spyder_plot_competences_tools.get_evaluation_apprentissage_critique_by_studentId(token, user_id)
         figure=px.line_polar(
             data,
             r="evaluation",
@@ -65,12 +66,13 @@ def register_callbacks(app):
     @app.callback(
         Output("niveau_apprentissage_critique", "figure"),  # Met à jour le second Spyder Chart
         Input("spyder_competence_globale", "clickData"),
-        Input('user_id', 'data')  # Réagit au clic sur le premier graphique
+        Input('user_id', 'data'),  # Réagit au clic sur le premier graphique
+        State('token', 'data'),
     )
         
-    def update_chart(click_data, user_id):
+    def update_chart(click_data, user_id, token):
         if click_data and "points" in click_data:
-            data = app2_spyder_plot_competences_tools.get_evaluation_apprentissage_critique_by_studentId(user_id)
+            data = app2_spyder_plot_competences_tools.get_evaluation_apprentissage_critique_by_studentId(token, user_id)
             # Extraire le libellé de la compétence (theta)
             points = click_data["points"][0]
             clicked_theta = points.get("theta")  # Compétence cliquée

@@ -19,7 +19,7 @@ router = APIRouter()
 ######################################################
 
 @router.get("/etudiants/",
-            tags=["user", "request", "university"],
+            tags=["student"],
             summary="Students",
             description="Return the list of students")
 def get_etudiants(
@@ -43,15 +43,17 @@ def get_etudiants(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/etudiants/absences",
-            tags=["user"],
+@router.get("/etudiants/absences/",
+            tags=["student",  "absence",],
             summary="Students",
             description="Return the list of students")
 def get_etudiants_absences(
     current_user: Annotated[User, Depends(get_current_active_user)],
+    id_responsable: int = -1,
+    id_enseignant: int = -1,
 ):
     request = {
-        "request" : """SELECT ExplicitSecondaryKs_LNM_etudiant.ExplicitSecondaryK as etudiant, 
+        "request" : f"""SELECT ExplicitSecondaryKs_LNM_etudiant.ExplicitSecondaryK as etudiant, 
                               ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK as promo, 
                               MAQUETTE_module.code_module, 
                               DATE_FORMAT(CLASS_session.schedule, '%Y-%m-%dT%H:%i') AS schedule
@@ -69,11 +71,28 @@ def get_etudiants_absences(
                     """,
         "allowedRolesRequester": ["responsable_etudes"],
     }
+
+    # if id_responsable filter is set
+    if id_responsable == current_user.id:
+        request["request"] += f""" WHERE MAQUETTE_module.id_responsable = %(id_responsable)s"""
+        request["params"] = {
+            "id_responsable": id_responsable,
+        }
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        
+    # if id_enseignant filter is set
+    elif id_enseignant == current_user.id:
+        request["request"]  += f""" WHERE CLASS_session.id_enseignant = %(id_enseignant)s"""
+        request["params"] = {
+            "id_enseignant": id_enseignant,
+        }
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+
     return db_request(current_user, SQLRequest(**request))
 
 
 @router.get("/etudiants/stages",
-            tags=["user"],
+            tags=["student",  "internship",],
             summary="Students",
             description="Return the list of students")
 def get_etudiants_stages(
@@ -105,7 +124,7 @@ def get_etudiants_stages(
 
 
 @router.get("/etudiants/without_stage",
-            tags=["user"],
+            tags=["student", "internship"],
             summary="Students",
             description="Return the list of students")
 def get_etudiants_stages(
@@ -134,7 +153,7 @@ def get_etudiants_stages(
 ######################################################
 
 @router.get("/etudiants/{id_etudiant:int}",
-            tags=["user"],
+            tags=["student",],
             summary="Students",
             description="Return the list of students")
 def get_etudiant(
@@ -162,7 +181,7 @@ def get_etudiant(
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/etudiants/{id_etudiant:int}/absences",
-            tags=["user"],
+            tags=["student", "absence",],
             summary="Students",
             description="Return the list of students")
 def get_etudiant_absences(
@@ -191,7 +210,7 @@ def get_etudiant_absences(
     return db_request(current_user, SQLRequest(**request))
 
 @router.post("/etudiants/{id_etudiant:int}/stage",
-            tags=["user"],
+            tags=["student", "internship",],
             summary="Students",
             description="Return the list of students")
 def post_etudiant_stage(
@@ -222,7 +241,7 @@ def post_etudiant_stage(
 
 
 @router.patch("/etudiants/{id_etudiant:int}/stage",
-             tags=["user"],
+             tags=["student", "internship",],
              summary="Students",
              description="Return the list of students")
 def patch_etudiant_stage(
@@ -248,7 +267,7 @@ def patch_etudiant_stage(
 
 
 @router.delete("/etudiants/{id_etudiant:int}/stage",
-              tags=["user"],
+              tags=["student", "internship",],
               summary="Students",
               description="Return the list of students")
 def delete_etudiant_stage(
