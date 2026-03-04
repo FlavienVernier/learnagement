@@ -13,6 +13,48 @@ router = APIRouter()
 
 
 #####################################
+# Private functions
+#####################################
+
+def __get_module_responsible_id(id_module: int,
+                                current_user: Annotated[User, Depends(get_current_active_user)], ):
+    request = {
+        "request" : f"""
+            SELECT  MAQUETTE_module.id_responsable
+            FROM MAQUETTE_module
+            WHERE MAQUETTE_module.id_module = %(id_module)s
+        """,
+        "params": {
+            "id_module": id_module,
+        },
+        "allowedRolesRequester": ["user"],
+    }
+    return json.loads(db_request(current_user, SQLRequest(**request)))
+
+def __participate(id_module: int, id_etudiant: int, current_user: Annotated[User, Depends(get_current_active_user)], ):
+    request = {
+        "request" : f"""
+            SELECT  MAQUETTE_module.id_module, LNM_etudiant.id_etudiant
+            FROM MAQUETTE_module
+            JOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module
+            JOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_learning_unit = MAQUETTE_module_as_learning_unit.id_learning_unit
+            JOIN LNM_promo ON LNM_promo.id_promo = MAQUETTE_learning_unit.id_promo
+            JOIN LNM_etudiant ON LNM_etudiant.id_promo = LNM_promo.id_promo
+            WHERE MAQUETTE_module.id_module = %(id_module)s
+            AND LNM_etudiant.id_etudiant = %(id_etudiant)s;
+        """,
+        "params": {
+            "id_module": id_module,
+            "id_etudiant": id_etudiant,
+        },
+        "allowedRolesRequester": ["user"],
+    }
+    res = json.loads(db_request(current_user, SQLRequest(**request)))
+    print(("res", res), flush=True)
+    return True
+
+
+#####################################
 # Get
 #####################################
 
@@ -132,14 +174,12 @@ def get_modules_responsable(
             tags=["module"],
             summary="Get modules by responsible",
             description="Get all modules of a responsible")
-def get_modules_intervenant(
-
+def get_modules_intervenants(
         current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     request = {
         "request" : f"""
-
-SELECT
+            SELECT
                 CLASS_session.id_groupe,
                 LNM_groupe.nom_groupe,
                 LNM_promo.id_promo,
@@ -224,7 +264,7 @@ SELECT
             tags=["module"],
             summary="Get modules by responsible",
             description="Get all modules of a responsible")
-def get_modules_intervenant(
+def get_modules_etudiant(
         id_etudiant: int,
         current_user: Annotated[User, Depends(get_current_active_user)],
 ):
@@ -246,8 +286,6 @@ def get_modules_intervenant(
         "allowedRolesRequester": ["user"],
     }
     return db_request(current_user, SQLRequest(**request))
-
-
 
 @router.get("/modules/sequencages/{id_responsable}/",
             tags=["module"],
@@ -281,20 +319,89 @@ def get_modules_intervenant(
     }
     return db_request(current_user, SQLRequest(**request))
 
-def get_module_responsible_id(id_module: int,
-                           current_user: Annotated[User, Depends(get_current_active_user)], ):
+
+@router.get("/modules/sequences/{id_responsable}/",
+            tags=["module"],
+            summary="Get modules by responsible",
+            description="Get all modules of a responsible")
+def get_modules_intervenant(
+        id_responsable: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
     request = {
         "request" : f"""
-            SELECT  MAQUETTE_module.id_responsable
-            FROM MAQUETTE_module
-            WHERE MAQUETTE_module.id_module = %(id_module)s
+            SELECT  MAQUETTE_module_sequence.id_module_sequence AS id_sequence, 
+                    MAQUETTE_module_sequence.numero_ordre, 
+                    MAQUETTE_module_sequence.id_intervenant_principal, 
+                    MAQUETTE_module_sequence.commentaire,
+                    MAQUETTE_module_sequencage.id_module, 
+                    MAQUETTE_module_sequencage.id_seance_type, 
+                    MAQUETTE_module_sequencage.id_groupe_type, 
+                    CAST(MAQUETTE_module_sequencage.duree_h AS FLOAT) AS duree_h,
+                    MAQUETTE_module.code_module, 
+                    LNM_seance_type.type, 
+                    LNM_groupe_type.groupe_type, 
+                    ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK as intervenant_principal
+            FROM MAQUETTE_module_sequence
+            	LEFT JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage
+                LEFT JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module
+                LEFT JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+                LEFT JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
+                LEFT JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = MAQUETTE_module_sequence.id_intervenant_principal
+            WHERE MAQUETTE_module.id_responsable = %(id_responsable)s
         """,
         "params": {
-            "id_module": id_module,
+            "id_responsable": id_responsable,
         },
         "allowedRolesRequester": ["user"],
     }
-    return json.loads(db_request(current_user, SQLRequest(**request)))
+    return db_request(current_user, SQLRequest(**request))
+
+@router.get("/modules/sessions/{id_responsable}/",
+            tags=["module"],
+            summary="Get modules by responsible",
+            description="Get all modules of a responsible")
+def get_modules_intervenant(
+        id_responsable: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request" : f"""
+            SELECT
+	            CLASS_session.id_session,
+                CLASS_session.id_groupe,
+                LNM_groupe.nom_groupe,
+                LNM_promo.id_promo,
+                ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK as promo,
+                MAQUETTE_module_sequence.numero_ordre,
+                MAQUETTE_module_sequence.id_intervenant_principal,
+                MAQUETTE_module_sequence.commentaire,
+                MAQUETTE_module_sequencage.id_module,
+                MAQUETTE_module_sequencage.id_seance_type,
+                CAST(MAQUETTE_module_sequencage.duree_h AS FLOAT) AS duree_h,
+                MAQUETTE_module.code_module,
+                LNM_seance_type.type,
+                ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK as intervenant
+			FROM CLASS_session
+            	LEFT JOIN LNM_groupe ON LNM_groupe.id_groupe = CLASS_session.id_groupe
+                LEFT JOIN LNM_promo ON LNM_promo.id_promo = LNM_groupe.id_promo
+                LEFT JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_promo.id_promo
+            	LEFT JOIN MAQUETTE_module_sequence ON MAQUETTE_module_sequence.id_module_sequence = CLASS_session.id_module_sequence
+            	LEFT JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage
+                LEFT JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module
+                LEFT JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type
+                LEFT JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
+                LEFT JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = CLASS_session.id_enseignant
+            WHERE MAQUETTE_module.id_responsable = %(id_responsable)s
+        """,
+        "params": {
+            "id_responsable": id_responsable,
+        },
+        "allowedRolesRequester": ["user"],
+    }
+    return db_request(current_user, SQLRequest(**request))
+
+
 
 #####################################
 # Patch
@@ -328,7 +435,91 @@ def update_module(
             },
             "allowedRolesRequester" : ["responsable_etudes"],
         }
-        if current_user.id == get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
+        if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
+            request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    return db_request(current_user, SQLRequest(**request))
+
+@router.patch("/modules/{id_module}/sequencages/{id_sequencage}/",
+            tags=["module"],
+            summary="Update sequencage",
+            description="Update sequencage according to parameters")
+def update_sequencage(
+    id_module: int,
+    id_sequencage: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    data: Dict[str, Any],):
+
+    if 'id_intervenant_principal' in data.keys():
+        request = {
+            # ToDo refactor when SQLAlchemy Core is up
+            "request" : f"""
+                UPDATE MAQUETTE_module_sequencage
+                SET id_intervenant_principal = %(id_intervenant_principal)s
+                WHERE id_module_sequencage = %(id_sequencage)s
+            """,
+            "params": {
+                "id_intervenant_principal": data['id_intervenant_principal'],
+                "id_sequencage": id_sequencage,
+            },
+            "allowedRolesRequester" : [],
+        }
+        if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
+            request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    return db_request(current_user, SQLRequest(**request))
+
+
+@router.patch("/modules/{id_module}/sequences/{id_sequence}/",
+            tags=["module"],
+            summary="Update sequencage",
+            description="Update sequencage according to parameters")
+def update_sequence(
+    id_module: int,
+    id_sequence: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    data: Dict[str, Any],):
+    if 'id_intervenant_principal' in data.keys():
+        request = {
+            # ToDo refactor when SQLAlchemy Core is up
+            "request": f"""
+                   UPDATE MAQUETTE_module_sequence
+                   SET id_intervenant_principal = %(id_intervenant_principal)s
+                   WHERE id_module_sequence = %(id_sequence)s
+               """,
+            "params": {
+                "id_intervenant_principal": data['id_intervenant_principal'],
+                "id_sequence": id_sequence,
+            },
+            "allowedRolesRequester": [],
+        }
+        if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
+            request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    return db_request(current_user, SQLRequest(**request))
+
+
+@router.patch("/modules/{id_module}/sessions/{id_session}/",
+            tags=["module"],
+            summary="Update sequencage",
+            description="Update sequencage according to parameters")
+def update_session(
+    id_module: int,
+    id_session: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    data: Dict[str, Any],):
+    if 'id_enseignant' in data.keys():
+        request = {
+            # ToDo refactor when SQLAlchemy Core is up
+            "request": f"""
+                   UPDATE CLASS_session
+                   SET id_enseignant = %(id_enseignant)s
+                   WHERE id_session = %(id_session)s
+               """,
+            "params": {
+                "id_enseignant": data['id_enseignant'],
+                "id_session": id_session,
+            },
+            "allowedRolesRequester": [],
+        }
+        if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
             request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
@@ -397,7 +588,37 @@ def add_sequencage(
             }
         }
     request["allowedRolesRequester"] = ["responsable_etudes"]
-    print(type(get_module_responsible_id(id_module, current_user)), flush=True)
-    if current_user.id == get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
+    print(type(__get_module_responsible_id(id_module, current_user)), flush=True)
+    if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    return db_request(current_user, SQLRequest(**request))
+
+
+#####################################
+# Delete
+#####################################
+
+@router.delete("/modules/{id_module}/sequencages/{id_sequencage}",
+            tags=["module"],
+            summary="Update module",
+            description="Update module according to parameters")
+def delete_sequencage(
+    id_module: int,
+    id_sequencage: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+
+    request = {
+        # ToDo refactor next when SQLAlchemy Core is up
+        "request" : f"""
+            DELETE FROM MAQUETTE_module_sequencage
+            WHERE id_module_sequencage = %(id_sequencage)s
+        """,
+        "params": {
+            "id_sequencage": id_sequencage,
+        },
+        "allowedRolesRequester" : [],
+    }
+    if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
         request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))

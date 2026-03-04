@@ -88,10 +88,10 @@ def update_table_sequencage(token, user_id, selected_module):
     )
     return [table_sequencage]
 
-def update_table_sequence(user_id, selected_module, selected_seance_type):
+def update_table_sequence(token, user_id, selected_module, selected_seance_type):
     if not selected_module:
         return []
-    df = app5_module_tools.get_moduleSequenceByEnseignantId(user_id)
+    df = app5_module_tools.get_moduleSequenceByEnseignantId(token, user_id)
     if not df.empty:
         if selected_seance_type:
             df = df[(df['id_module'] == selected_module) & (df['id_seance_type'] == selected_seance_type)][['id_sequence', 'type', 'duree_h', 'groupe_type', 'numero_ordre', 'intervenant_principal', 'commentaire']]
@@ -133,10 +133,11 @@ def update_table_sequence(user_id, selected_module, selected_seance_type):
         table_sequence = dash_table.DataTable()
     return [table_sequence]
 
-def update_table_session(user_id, selected_module, selected_seance_type, selected_promotion):
+def update_table_session(token, user_id, selected_module, selected_seance_type, selected_promotion):
     if not selected_module:
         return []
-    df = app5_module_tools.get_moduleSessionByEnseignantId(user_id)
+    df = app5_module_tools.get_moduleSessionByEnseignantId(token, user_id)
+
     if not df.empty:
         if selected_seance_type and selected_promotion:
             df = df[(df['id_module'] == selected_module) &
@@ -289,10 +290,11 @@ def register_callbacks_edit(app):
         Input('table_sequencage', 'data_previous'),
         State('table_sequencage', 'data'),
         State('user_id', 'data'),
+        State('filtre_module', 'value'),
         State('token', 'data'),
         prevent_initial_call=True,
     )
-    def cb_remove_sequencag(previous, current, user_id, token):
+    def cb_remove_sequencag(previous, current, user_id, id_module, token):
         if previous is None:
             print("Kaboum", flush=True)
             #return "Kaboum"
@@ -305,7 +307,7 @@ def register_callbacks_edit(app):
                               & (df['duree_h'] == to_remove['duree_h'])
                               & (df['groupe_type'] == to_remove['groupe_type'])][['id_module_sequencage']].iat[0, 0]
             #print('id_toRemove', id_to_remove, flush=True)
-            app5_module_tools.remove_moduleSequencage(id_to_remove)
+            app5_module_tools.remove_moduleSequencage(token, id_module, id_to_remove)
 
     # Changement d'intervenant principal au niveau séquençage
     @app.callback(
@@ -318,21 +320,21 @@ def register_callbacks_edit(app):
         State('token', 'data'),
         prevent_initial_call=True,
     )
-    def cb_change_intervenant_sequencage(previous, current, user_id: int, selected_module, token):
+    def cb_change_intervenant_sequencage(previous, current, user_id: int, id_module: int, token):
         if previous is None:
-            return update_table_sequencage(token, user_id, selected_module), update_table_sequence(user_id, selected_module, None)
+            return update_table_sequencage(token, user_id, id_module), update_table_sequence(token, user_id, id_module, None)
         else:
             row_changed = [row for row in current  if row not in previous]
             if len(row_changed) > 0: # else callback invoked by data deleted
                 df = app5_module_tools.get_moduleSequencageByEnseignantId(token, user_id)
                 row_changed = row_changed[0]
                 new_intervenant_id = row_changed['nouvel_intervenant']
-                id_sequencage = df[(df['nombre'] == row_changed['nombre'])
+                id_sequencage = int(df[(df['nombre'] == row_changed['nombre'])
                                   & (df['type'] == row_changed['type'])
                                   & (df['duree_h'] == row_changed['duree_h'])
-                                  & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0]
-                ret = app5_module_tools.set_intervenant_principal_sequencage(id_sequencage, new_intervenant_id)
-            return update_table_sequencage(token, user_id, selected_module), update_table_sequence(user_id, selected_module, None)
+                                  & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0])
+                ret = app5_module_tools.set_intervenant_principal_sequencage(token, id_module, id_sequencage, new_intervenant_id)
+            return update_table_sequencage(token, user_id, id_module), update_table_sequence(user_id, id_module, None)
 
     # Mise à jour de la table des séquençages selon le module sélectionné
     @app.callback(
@@ -353,7 +355,7 @@ def register_callbacks_edit(app):
     )
     def cb_check_sequencage_vs_maquette(data, id_module, user_id, token):
         df = app5_module_tools.check_moduleSequencage(token, user_id)
-        #print(df, flush=True)
+
         if df.empty:
             df = DataFrame(columns = ['id_module', 'code_module', 'CM_to_plan', 'TD_to_plan', 'TP_to_plan', 'Proj_to_plan'])
         if id_module:
@@ -375,10 +377,11 @@ def register_callbacks_edit(app):
         Output('filtre_type', 'options'),
         State('user_id', 'data'),
         Input('filtre_module', 'value'),
+        State('token', 'data'),
         prevent_initial_call=True,
     )
-    def update_filter_sequence_option(user_id, selected_module):
-        df = app5_module_tools.get_moduleSequenceByEnseignantId(user_id)
+    def update_filter_sequence_option(user_id, selected_module, token):
+        df = app5_module_tools.get_moduleSequenceByEnseignantId(token, user_id)
         options = []
         if not df.empty:
             options = [{'label': row['type'], 'value': row['id_seance_type']} for _, row in df[df['id_module'] == selected_module][['id_seance_type', 'type']].drop_duplicates().iterrows()]
@@ -390,10 +393,11 @@ def register_callbacks_edit(app):
         State('user_id', 'data'),
         Input('filtre_module', 'value'),
         Input('filtre_type', 'value'),
+        State('token', 'data'),
         prevent_initial_call=True,
     )
-    def cb_update_table_sequence(user_id, selected_module, selected_type):
-        return update_table_sequence(user_id, selected_module, selected_type)
+    def cb_update_table_sequence(user_id, selected_module, selected_type, token):
+        return update_table_sequence(token, user_id, selected_module, selected_type)
 
     @app.callback(
         Output('sequence_div', 'children', allow_duplicate=True),
@@ -409,20 +413,24 @@ def register_callbacks_edit(app):
     )
     def cb_change_intervenant_sequence(previous, current, user_id, selected_module, selected_type, selected_promo, token):
         if previous is None:
-            return update_table_sequence(user_id, selected_module, selected_type), update_table_session(user_id, selected_module, selected_type, selected_promo)
+            return (update_table_sequence(token, user_id, selected_module, selected_type),
+                    update_table_session(token, user_id, selected_module, selected_type, selected_promo)
+                    )
         else:
             row_changed = [row for row in current if row not in previous]
             if len(row_changed) > 0:  # else callback invoked by data deleted
                 #df = app5_module_tools.get_moduleSequenceByEnseignantId(user_id)
                 row_changed = row_changed[0]
-                new_intervenant_id = row_changed['nouvel_intervenant']
-                id_sequence = row_changed['id_sequence']
+                new_intervenant_id = int(row_changed['nouvel_intervenant'])
+                id_sequence = int(row_changed['id_sequence'])
                 # id_sequence = df[(df['type'] == row_changed['type'])
                 #                    & (df['numero_ordre'] == row_changed['numero_ordre'])
                 #                    & (df['duree_h'] == row_changed['duree_h'])
                 #                    & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0]
-                ret = app5_module_tools.set_intervenant_principal_sequence(id_sequence, new_intervenant_id)
-                return update_table_sequencage(token, user_id, selected_module), update_table_session(user_id, selected_module, selected_type, selected_promo)
+                ret = app5_module_tools.set_intervenant_principal_sequence(token, selected_module, id_sequence, new_intervenant_id)
+                return (update_table_sequencage(token, user_id, selected_module),
+                        update_table_session(token, user_id, selected_module, selected_type, selected_promo)
+                        )
 
     #
     # Session
@@ -433,10 +441,12 @@ def register_callbacks_edit(app):
         Output('filtre_promo', 'options'),
         State('user_id', 'data'),
         Input('filtre_module', 'value'),
+        State('token', 'data'),
         prevent_initial_call=True,
     )
-    def update_filter_session_option(user_id, selected_module):
-        df = app5_module_tools.get_moduleSessionByEnseignantId(user_id)
+    def update_filter_session_option(user_id, selected_module, token):
+        df = app5_module_tools.get_moduleSessionByEnseignantId(token, user_id)
+
         options = []
         if not df.empty:
             options = [{'label': row['promo'], 'value': row['id_promo']} for _, row in df[df['id_module'] == selected_module][['id_promo', 'promo']].drop_duplicates().iterrows()]
@@ -449,10 +459,11 @@ def register_callbacks_edit(app):
         Input('filtre_module', 'value'),
         Input('filtre_type', 'value'),
         Input('filtre_promo', 'value'),
+        State('token', 'data'),
         prevent_initial_call=True,
     )
-    def cb_update_table_session(user_id, selected_module, selected_type, selected_promo):
-        return update_table_session(user_id, selected_module, selected_type, selected_promo)
+    def cb_update_table_session(user_id, selected_module, selected_type, selected_promo, token):
+        return update_table_session(token, user_id, selected_module, selected_type, selected_promo)
 
     # Update teacher session
     @app.callback(
@@ -463,21 +474,22 @@ def register_callbacks_edit(app):
         State('filtre_module', 'value'),
         Input('filtre_type', 'value'),
         Input('filtre_promo', 'value'),
+        State('token', 'data'),
         prevent_initial_call=True,
     )
-    def cb_change_intervenant_session(previous, current, user_id, selected_module, selected_type, selected_promo):
+    def cb_change_intervenant_session(previous, current, user_id, selected_module, selected_type, selected_promo, token):
         if previous is None:
-            return update_table_session(user_id, selected_module, selected_type, selected_promo)
+            return update_table_session(token, user_id, selected_module, selected_type, selected_promo)
         else:
             row_changed = [row for row in current if row not in previous]
             if len(row_changed) > 0:  # else callback invoked by data deleted
                 #df = app5_module_tools.get_moduleSequenceByEnseignantId(user_id)
                 row_changed = row_changed[0]
-                new_intervenant_id = row_changed['nouvel_intervenant']
-                id_session = row_changed['id_session']
+                new_intervenant_id = int(row_changed['nouvel_intervenant'])
+                id_session = int(row_changed['id_session'])
                 # id_sequence = df[(df['type'] == row_changed['type'])
                 #                    & (df['numero_ordre'] == row_changed['numero_ordre'])
                 #                    & (df['duree_h'] == row_changed['duree_h'])
                 #                    & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0]
-                ret = app5_module_tools.set_intervenant_session(id_session, new_intervenant_id)
-                return update_table_session(user_id, selected_module, selected_type, selected_promo)
+                ret = app5_module_tools.set_intervenant_session(token, selected_module, id_session, new_intervenant_id)
+                return update_table_session(token, user_id, selected_module, selected_type, selected_promo)

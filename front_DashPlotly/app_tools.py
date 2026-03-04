@@ -1,3 +1,6 @@
+import logging
+import sys
+
 from dotenv import load_dotenv
 import os
 from warnings import deprecated
@@ -33,6 +36,9 @@ def patch_endpoint(url, data, token):
 def post_endpoint(url, data, token):
     return get_python_endpoint_data('post', url, data, token)
 
+def delete_endpoint(url, data, token):
+    return get_python_endpoint_data('delete', url, data, token)
+
 def get_python_endpoint_data(method, url, data, token):
     """
     Appel de l'API FastAPI
@@ -50,7 +56,7 @@ def get_python_endpoint_data(method, url, data, token):
 
     try:
 
-
+        logging.info(f"Calling {method} {url} {data}")
         # Appel au "endpoint" (pas besoin de body car tout est dans la dépendance)
         if method == 'get':
             headers = {
@@ -70,6 +76,12 @@ def get_python_endpoint_data(method, url, data, token):
                 'Authorization': f'Bearer {token}'
             }
             resp = requests.post(url, headers=headers, json=data, timeout=30)
+        elif method == 'delete':
+            headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': f'Bearer {token}'
+            }
+            resp = requests.delete(url, headers=headers, timeout=30)
         else:
             return pd.DataFrame()
 
@@ -93,22 +105,22 @@ def get_python_endpoint_data(method, url, data, token):
             return pd.DataFrame()
 
     except Timeout:
-        print(f"Timeout lors de l'appel à {url}")
+        logging.exception(f"Timeout lors de l'appel à {url}")
         return pd.DataFrame()
         raise
 
     except RequestException as e:
-        print(f"Erreur de connexion: {e}")
+        logging.exception(f"Erreur de connexion: {e}")
         return pd.DataFrame()
         raise
 
     except ValueError as e:
-        print(f"Erreur lors du parsing de la réponse JSON: {e}")
+        logging.exception(f"Erreur lors du parsing de la réponse JSON: {e}")
         return pd.DataFrame()
         raise
 
     except Exception as e:
-        print(f"Erreur inattendue: {e}")
+        logging.exception(f"Erreur inattendue: {e}")
         return pd.DataFrame()
         raise
 

@@ -53,27 +53,25 @@ def add_moduleSequencage(token, data):
     return df
 
 
-    # headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
-    # url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/create/createSequencage.php'
-    # resp = requests.post(url, data=data, headers=headers)
-    # urlData = resp.content
-    # return io.StringIO(urlData.decode('utf-8'))
 
-def remove_moduleSequencage(id_sequencage):
-    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/delete/deleteSequencage.php'
-    resp = requests.post(url, data={'id_module_sequencage': id_sequencage}, headers=headers)
-    urlData = resp.content
-    #print(urlData, flush=True)
-    return io.StringIO(urlData.decode('utf-8'))
+def remove_moduleSequencage(token, id_module: int, id_sequencage: int):
+    df = app_tools.delete_endpoint(
+        url = app_tools.get_python_backend_url(f"/modules/{id_module}/sequencages/{id_sequencage}"),
+        data = {'id_module': id_module,
+                'id_sequencage': id_sequencage},
+        token = token
+    )
+    return df
 
-def set_intervenant_principal_sequencage(id_sequencage, id_intervenant_principal):
-    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/update/setSequencageIntervenantPrincipal.php'
-    resp = requests.post(url, data={'id_module_sequencage': id_sequencage, 'id_intervenant_principal': id_intervenant_principal }, headers=headers)
-    urlData = resp.content
-    #print(urlData, flush=True)
-    return io.StringIO(urlData.decode('utf-8'))
+def set_intervenant_principal_sequencage(token, id_module: int, id_sequencage: int, id_intervenant_principal: int):
+    df = app_tools.patch_endpoint(
+        url = app_tools.get_python_backend_url(f"/modules/{id_module}/sequencages/{id_sequencage}/"),
+        data = {'id_module': id_module,
+                'id_sequencage': id_sequencage,
+                'id_intervenant_principal': id_intervenant_principal},
+        token = token
+    )
+    return df
 
 
 def check_moduleSequencage(token, id_enseignant):
@@ -87,36 +85,43 @@ def check_moduleSequencage(token, id_enseignant):
 ######################
 # Sequence
 
-def get_moduleSequenceByEnseignantId(id_enseignant):
-    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listModuleSequence.php'
-    resp = requests.post(url, data={'id_enseignant': id_enseignant}, headers=headers)
-    urlData = resp.content
-    #print(urlData, flush=True)
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+def get_moduleSequenceByEnseignantId(token, id_responsable):
+    df = app_tools.get_endpoint_data(
+        url=app_tools.get_python_backend_url(f"/modules/sequences/{id_responsable}/"),
+        data = {'id_responsable': id_responsable},
+        token=token
+    )
+    return df
 
-def set_intervenant_principal_sequence(id_sequence, id_intervenant_principal):
-    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/update/setSequenceIntervenantPrincipal.php'
-    resp = requests.post(url, data={'id_module_sequence': id_sequence, 'id_intervenant_principal': id_intervenant_principal }, headers=headers)
-    urlData = resp.content
-    #print(urlData, flush=True)
-    return io.StringIO(urlData.decode('utf-8'))
+def set_intervenant_principal_sequence(token, id_module, id_sequence, id_intervenant_principal):
+    df = app_tools.patch_endpoint(
+        url = app_tools.get_python_backend_url(f"/modules/{id_module}/sequences/{id_sequence}/"),
+        data = {'id_module': id_module,
+                'id_sequence': id_sequence,
+                'id_intervenant_principal': id_intervenant_principal},
+        token = token
+    )
+    return df
+
 
 ######################
 # Session
 
-def get_moduleSessionByEnseignantId(id_enseignant):
-    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listSessionEnseignant.php'
-    resp = requests.post(url, data={'id_enseignant': id_enseignant}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+def get_moduleSessionByEnseignantId(token, id_responsable):
+    df = app_tools.get_endpoint_data(
+        url=app_tools.get_python_backend_url(f"/modules/sessions/{id_responsable}/"),
+        data = {'id_responsable': id_responsable},
+        token=token
+    )
+    return df
 
-def set_intervenant_session(id_session, id_enseignant):
-    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/update/setSessionIntervenant.php'
-    resp = requests.post(url, data={'id_session': id_session, 'id_enseignant': id_enseignant}, headers=headers)
-    urlData = resp.content
-    #print(urlData, flush=True)
-    return io.StringIO(urlData.decode('utf-8'))
+def set_intervenant_session(token, id_module, id_session, id_intervenant):
+    df = app_tools.patch_endpoint(
+        url = app_tools.get_python_backend_url(f"/modules/{id_module}/sessions/{id_session}/"),
+        data = {'id_module': id_module,
+                'id_session': id_session,
+                'id_enseignant': id_intervenant},
+        token = token
+    )
+    return df
+

@@ -7,6 +7,8 @@ import requests
 import io
 import math
 
+import app_tools
+
 load_dotenv()
 
 
@@ -17,7 +19,7 @@ def calcul_informations(notes_promo: pd.Series, note_eleve=None):
     # notes_promo=[eleve['note'] for eleve in notes_promo]
 
     if note_eleve == None:
-        note_eleve = notes_promo[0]
+        note_eleve = notes_promo.iloc[0]
 
 
     #ordre_notes = [round(val, 2) for val in sorted(notes_promo, reverse=True)]
@@ -51,73 +53,42 @@ def calcul_informations(notes_promo: pd.Series, note_eleve=None):
 
     return classement, moyenne, mediane, ecart_type, X_notes, Y_notes, couleur
 
-def get_notes_eleves(id_etudiant):
-    # cur.execute(f"SELECT evaluation, id_etudiant, module.nom  FROM ETU_classical_evaluation as eval JOIN MAQUETTE_module as module ON eval.id_module=module.id_module WHERE eval.id_etudiant={num_etu}")
-    #
-    # rows = cur.fetchall()
-    #
-    # # Récupération des données
-    # data = pd.DataFrame(rows, columns=["evaluation", "id_etudiant", "nom_module"])
-    # return data
+def get_notes_eleves(token, id_etudiant):
+    df = app_tools.get_endpoint_data(
+        url=app_tools.get_python_backend_url(f"/evaluations/classical/etudiants/{id_etudiant}"),
+        data = {'id_etudiant': id_etudiant},
+        token=token
+    )
+    return df
 
-    # id_etudiant not in the following result
+def get_average_notes_promo(token, id_module):
+    df = app_tools.get_endpoint_data(
+        url=app_tools.get_python_backend_url(f"/evaluations/classical/modules/{id_module}/average/"),
+        data = {'id_module': id_module},
+        token=token
+    )
+    return df
 
-    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listEvaluationEtudiant.php'
-    resp = requests.post(url, data={'id_etudiant':id_etudiant}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+def get_data_promo(token, id_module):
+    df = app_tools.get_endpoint_data(
+        url=app_tools.get_python_backend_url(f"/evaluations/classical/modules/{id_module}/"),
+        data = {'id_module': id_module},
+        token=token
+    )
+    return df
 
-def get_average_notes_promo(id_module):
-    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listEvaluationModuleAverage.php'
-    resp = requests.post(url, data={'id_module':id_module}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+def get_modules_byIdEtudiant(token, id_etudiant):
+    df = app_tools.get_endpoint_data(
+        url=app_tools.get_python_backend_url(f"/modules/etudiants/{id_etudiant}/"),
+        data = {'id_etudiant': id_etudiant},
+        token=token
+    )
+    return df
 
-def get_data_promo(id_matiere):
-    # cur.execute(
-    #     f"SELECT evaluation, id_etudiant, module.nom  FROM ETU_classical_evaluation as eval JOIN MAQUETTE_module as module ON eval.id_module=module.id_module WHERE eval.id_module={id_matiere}")
-    #
-    # rows = cur.fetchall()
-    #
-    # # Récupération des données
-    # data = pd.DataFrame(rows, columns=["evaluation", "id_etudiant", "nom_module"])
-    # return data
-
-    # id_etudiant not in the following result due to anonymous raisons
-
-    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listEvaluationModule.php'
-    resp = requests.post(url, data={'id_module':id_matiere}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
-
-
-# use get_notes_eleves with matiere filter instead
-# def get_data_etudiant(id_etudiant, id_matiere):
-#     cur.execute(
-#         f"SELECT evaluation, id_etudiant, module.nom  "
-#         f"FROM ETU_classical_evaluation as eval "
-#         f"JOIN MAQUETTE_module as module ON eval.id_module=module.id_module "
-#         f"WHERE eval.id_etudiant={num_etu} and eval.id_module={id_matiere}")
-#
-#     rows = cur.fetchall()
-#
-#     # Récupération des données
-#     data = pd.DataFrame(rows, columns=["evaluation", "id_etudiant", "nom_module"])
-#     return data
-
-def get_modules_byIdEtudiant(id_etudiant):
-    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset': 'UTF-8'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listModulesEtudiant.php'
-    resp = requests.post(url, data={'id_etudiant': id_etudiant}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
-
-def get_data_prof(id_enseignant):
-    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset': 'UTF-8'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listEvaluationEnseignant.php'
-    resp = requests.post(url, data={'id_enseignant': id_enseignant}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+def get_data_prof(token, id_enseignant):
+    df = app_tools.get_endpoint_data(
+        url=app_tools.get_python_backend_url(f"/evaluations/classical/enseignants/{id_enseignant}"),
+        data = {'id_enseignant': id_enseignant},
+        token=token
+    )
+    return df
