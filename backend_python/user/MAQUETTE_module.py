@@ -401,7 +401,85 @@ def get_modules_intervenant(
     }
     return db_request(current_user, SQLRequest(**request))
 
+@router.get("/modules/{id_module}/dependencies/",
+            tags=["module"],
+            summary="Get modules dependencies",
+            description="Get all modules dependencies")
+def get_modules_intervenant(
+        id_module: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request" : f"""
+            SELECT `id_sequence_prev`, `id_sequence_next`
+            FROM `MAQUETTE_dependance_sequence` 
+                JOIN MAQUETTE_module_sequence on MAQUETTE_module_sequence.id_module_sequence = MAQUETTE_dependance_sequence.id_sequence_prev 
+                JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage 
+                JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module 
+                JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type 
+            WHERE MAQUETTE_module.id_module = %(id_module_prev)s
+            UNION
+            SELECT `id_sequence_prev`, `id_sequence_next`
+            FROM `MAQUETTE_dependance_sequence` 
+                JOIN MAQUETTE_module_sequence on MAQUETTE_module_sequence.id_module_sequence = MAQUETTE_dependance_sequence.id_sequence_next 
+                JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage 
+                JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module 
+                JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type 
+            WHERE MAQUETTE_module.id_module = %(id_module_next)s
+        """,
+        "params": {
+            "id_module_prev": id_module,
+            "id_module_next": id_module,
+        },
+        "allowedRolesRequester": ["user"],
+    }
+    return db_request(current_user, SQLRequest(**request))
 
+
+@router.get("/modules/{id_module}/sequence_dependencies/",
+            tags=["module"],
+            summary="Get sequence dependencies",
+            description="Get all modules sequence dependencies")
+def get_modules_intervenant(
+        id_module: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request": f"""
+            SELECT MAQUETTE_module_sequence.id_module_sequence, LNM_seance_type.type, MAQUETTE_module.code_module, MAQUETTE_module.nom, MAQUETTE_module_sequence.commentaire 
+			FROM MAQUETTE_module_sequence 
+                JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage 
+                JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module 
+                JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type 
+            WHERE MAQUETTE_module_sequence.id_module_sequence IN (
+                    SELECT MAQUETTE_module_sequence.id_module_sequence
+                    FROM MAQUETTE_module_sequence
+                        JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage 
+                        JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module 
+                    WHERE MAQUETTE_module.id_module = %(id_module)s)
+            OR MAQUETTE_module_sequence.id_module_sequence IN (
+                    SELECT `id_sequence_next` 
+                    FROM `MAQUETTE_dependance_sequence` 
+                        JOIN MAQUETTE_module_sequence as sequence_prev on sequence_prev.id_module_sequence = MAQUETTE_dependance_sequence.id_sequence_prev 
+                        JOIN MAQUETTE_module_sequencage  as sequencage_prev ON sequencage_prev.id_module_sequencage = sequence_prev.id_module_sequencage 
+                        JOIN MAQUETTE_module as module_prev ON module_prev.id_module = sequencage_prev.id_module 
+                    WHERE module_prev.id_module = %(id_module_prev)s)
+            OR MAQUETTE_module_sequence.id_module_sequence IN (
+                    SELECT `id_sequence_prev`
+                    FROM `MAQUETTE_dependance_sequence` 
+                        JOIN MAQUETTE_module_sequence as sequence_next on sequence_next.id_module_sequence = MAQUETTE_dependance_sequence.id_sequence_next
+                        JOIN MAQUETTE_module_sequencage  as sequencage_next ON sequencage_next.id_module_sequencage = sequence_next.id_module_sequencage 
+                        JOIN MAQUETTE_module as module_next ON module_next.id_module = sequencage_next.id_module 
+                    WHERE module_next.id_module = %(id_module_next)s)
+        """,
+        "params": {
+            "id_module": id_module,
+            "id_module_prev": id_module,
+            "id_module_next": id_module,
+        },
+        "allowedRolesRequester": ["user"],
+    }
+    return db_request(current_user, SQLRequest(**request))
 
 #####################################
 # Patch

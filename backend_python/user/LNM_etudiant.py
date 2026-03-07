@@ -79,7 +79,7 @@ def get_etudiants_absences(
             "id_responsable": id_responsable,
         }
         request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
-        
+
     # if id_enseignant filter is set
     elif id_enseignant == current_user.id:
         request["request"]  += f""" WHERE CLASS_session.id_enseignant = %(id_enseignant)s"""
@@ -226,7 +226,7 @@ def post_etudiant_stage(
         """,
         "params": {
             "entreprise": data['entreprise'],
-            "intitule": data[intitule],
+            "intitule": data['intitule'],
             "description": data['description'],
             "ville": data['ville'],
             "date_debut": data['date_debut'],
@@ -285,5 +285,137 @@ def delete_etudiant_stage(
             "id_stage": data['id_stage'],
         },
         "allowedRolesRequester": ["responsable_stages"],
+    }
+    return db_request(current_user, SQLRequest(**request))
+
+
+@router.get("/etudiants/{id_etudiant:int}/load/",
+            tags=["student", "absence", ],
+            summary="Students",
+            description="Return the list of students")
+def get_etudiant_load(
+        id_etudiant: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    # ToDo convert parameters to be SQLAlchemy Core compatible when it will be up
+    request = {
+        "request": f"""
+                SELECT 
+                    DATE_FORMAT(session.schedule, '%Y-%m-%dT%H:%i') AS schedule, 
+                    CAST(sequencage.duree_h AS FLOAT) AS duree_h, 
+                    module.nom 
+                FROM CLASS_session as session 
+                    JOIN LNM_groupe as grp ON session.id_groupe = grp.id_groupe 
+                    JOIN LNM_promo as promo ON grp.id_promo = promo.id_promo 
+                    JOIN LNM_etudiant as etu ON grp.id_promo = etu.id_promo 
+                    JOIN MAQUETTE_module_sequence as sequence ON session.id_module_sequence=sequence.id_module_sequence 
+                    JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage 
+                    JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module 
+                WHERE etu.id_etudiant = %(id_etudiant)s 
+            """,
+        "params": {
+            "id_etudiant": id_etudiant,
+        },
+        "allowedRolesRequester": ["user"],
+    }
+    return db_request(current_user, SQLRequest(**request))
+
+
+@router.get("/etudiants/{id_etudiant:int}/edt/",
+            tags=["student", "absence", ],
+            summary="Students",
+            description="Return the list of students")
+def get_etudiant_edt(
+        id_etudiant: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    # ToDo convert parameters to be SQLAlchemy Core compatible when it will be up
+    request = {
+        "request": f"""
+                    SELECT 
+                        etu.nom, 
+                        DATE_FORMAT(session.schedule, '%Y-%m-%dT%H:%i') AS date_prevue, 
+                        promo.annee, 
+                        CAST(sequencage.duree_h AS FLOAT) AS nb_heure, 
+                        module.nom AS matiere
+                    FROM CLASS_session as session
+                        JOIN LNM_groupe as grp ON session.id_groupe = grp.id_groupe
+                        JOIN LNM_promo as promo ON grp.id_promo = promo.id_promo
+                        JOIN LNM_etudiant as etu ON grp.id_promo = etu.id_promo
+                        JOIN MAQUETTE_module_sequence as sequence ON session.id_module_sequence=sequence.id_module_sequence
+                        JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage
+                        JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module
+                    WHERE etu.id_etudiant =   %(id_etudiant)s
+                    ORDER BY session.schedule; 
+            """,
+        "params": {
+            "id_etudiant": id_etudiant,
+        },
+        "allowedRolesRequester": ["user"],
+    }
+    return db_request(current_user, SQLRequest(**request))
+
+
+@router.get("/etudiants/{id_etudiant:int}/pastedt/",
+            tags=["student", "absence", ],
+            summary="Students",
+            description="Return the list of students")
+def get_etudiant_pastedt(
+        id_etudiant: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    # ToDo convert parameters to be SQLAlchemy Core compatible when it will be up
+    request = {
+        "request": f"""
+                    SELECT etu.nom, 
+                        DATE_FORMAT(session.schedule, '%Y-%m-%dT%H:%i') AS date_prevue, 
+                        promo.annee, 
+                        CAST(sequencage.duree_h AS FLOAT) AS nb_heure, 
+                        module.nom AS matiere
+                    FROM CLASS_session as session
+                        JOIN LNM_groupe as grp ON session.id_groupe = grp.id_groupe
+                        JOIN LNM_promo as promo ON grp.id_promo = promo.id_promo
+                        JOIN LNM_etudiant as etu ON grp.id_promo = etu.id_promo
+                        JOIN MAQUETTE_module_sequence as sequence ON session.id_module_sequence=sequence.id_module_sequence
+                        JOIN MAQUETTE_module_sequencage as sequencage ON sequence.id_module_sequencage=sequencage.id_module_sequencage
+                        JOIN MAQUETTE_module as module ON sequencage.id_module=module.id_module
+                    WHERE session.schedule < CURRENT_DATE 
+                        AND etu.id_etudiant = %(id_etudiant)s
+                    ORDER BY session.schedule; 
+            """,
+        "params": {
+            "id_etudiant": id_etudiant,
+        },
+        "allowedRolesRequester": ["user"],
+    }
+    return db_request(current_user, SQLRequest(**request))
+
+@router.get("/etudiants/{id_etudiant}/rendus/",
+            tags=["student", "absence", ],
+            summary="Students",
+            description="Return the list of students")
+def get_etudiant_pastedt(
+        id_etudiant: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    # ToDo convert parameters to be SQLAlchemy Core compatible when it will be up
+    request = {
+        "request": f"""
+            SELECT rm.description, 
+            module.nom, 
+            ue.learning_unit_name, 
+            rm_etu.avancement
+            FROM LNM_rendu_module as rm 
+                JOIN LNM_rendu_module_as_etudiant as rm_etu ON rm_etu.id_rendu_module=rm.id_rendu_module 
+                JOIN LNM_etudiant as etu ON etu.id_etudiant=rm_etu.id_etudiant 
+                JOIN MAQUETTE_module_as_learning_unit as mue ON rm.id_module=mue.id_module 
+                JOIN MAQUETTE_module as module ON mue.id_module=module.id_module 
+                JOIN MAQUETTE_learning_unit as ue ON mue.id_learning_unit=ue.id_learning_unit 
+            WHERE etu.id_etudiant = %(id_etudiant)s
+            """,
+        "params": {
+            "id_etudiant": id_etudiant,
+        },
+        "allowedRolesRequester": ["user"],
     }
     return db_request(current_user, SQLRequest(**request))

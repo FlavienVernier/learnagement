@@ -5,7 +5,7 @@ import logging
 import init
 
 from system import authenticate, check
-from user import CLASS_abscence, LNM_enseignant, LNM_etudiant, LNM_evaluation, LNM_filiere,  LNM_university, MAQUETTE_module
+from user import LNM_enseignant, LNM_etudiant, LNM_evaluation, LNM_filiere,  LNM_university, MAQUETTE_module
 
 class bcolors:
     HEADER = '\033[95m'
@@ -30,7 +30,6 @@ app = FastAPI()
 
 app.include_router(authenticate.router)
 app.include_router(check.router)
-app.include_router(CLASS_abscence.router)
 app.include_router(LNM_enseignant.router)
 app.include_router(LNM_etudiant.router)
 app.include_router(LNM_university.router)
