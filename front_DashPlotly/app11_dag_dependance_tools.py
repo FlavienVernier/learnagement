@@ -5,7 +5,7 @@ import app_tools
 load_dotenv()
 
 def get_list_dependance_by_idModule(token, id_module):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url(f"/modules/{id_module}/dependencies/"),
         data={'id_module': id_module},
         token=token)
@@ -13,7 +13,7 @@ def get_list_dependance_by_idModule(token, id_module):
 
 
 def get_list_sequence_dependance_by_idModule(token, id_module):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url(f"/modules/{id_module}/sequence_dependencies/"),
         data={'id_module': id_module},
         token=token)

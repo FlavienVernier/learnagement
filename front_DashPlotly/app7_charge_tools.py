@@ -12,16 +12,14 @@ original_palette = px.colors.qualitative.Alphabet
 custom_palette = [c for c in original_palette if c.lower() != '#85660d']
 
 def get_etudiant_edt(token, id_etudiant):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url(f"/etudiants/{id_etudiant}/edt/"),
-        data={'id_etudiant': id_etudiant},
         token=token)
     return df
 
 def get_etudiant_pastedt(token, id_etudiant):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url(f"/etudiants/{id_etudiant}/pastedt/"),
-        data={'id_etudiant': id_etudiant},
         token=token)
     return df
 
@@ -50,15 +48,13 @@ def transforme_données(data):
     return pd.DataFrame(rows)
 
 def get_chargeByEnseignantId(token, id_enseignant):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url(f"/enseignants/{id_enseignant}/charge/"),
-        data={'id_enseignant': id_enseignant},
         token=token)
     return df
 
 def get_chargeByEtudianttId(token, id_etudiant):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url(f"/etudiants/{id_etudiant}/load/"),
-        data={'id_etudiant': id_etudiant},
         token=token)
     return df

@@ -14,7 +14,7 @@ router = APIRouter()
 
 ######################################################
 #
-# spécific to all students : /etudiants/[spécific data]
+# Get relative to all students : /etudiants/[fields]
 #
 ######################################################
 
@@ -101,6 +101,7 @@ def get_etudiants_stages(
     request = {
         "request" : """
             SELECT LNM_stage.`id_stage`, 
+                   LNM_etudiant.id_etudiant, 
                    ExplicitSecondaryKs_LNM_etudiant.ExplicitSecondaryK AS "étudiant", 
                    ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK AS "promo", 
                    LNM_stage.`entreprise`, 
@@ -148,7 +149,7 @@ def get_etudiants_stages(
 
 ######################################################
 #
-# spécific to 1 student : /etudiants/{id_etudiant:int}
+# Get specific to 1 student : /etudiants/{id_etudiant:int}/[fields]
 #
 ######################################################
 
@@ -208,86 +209,6 @@ def get_etudiant_absences(
     if current_user.id == id_etudiant:
         request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
-
-@router.post("/etudiants/{id_etudiant:int}/stage",
-            tags=["student", "internship",],
-            summary="Students",
-            description="Return the list of students")
-def post_etudiant_stage(
-    id_etudiant: int,
-    current_user: Annotated[User, Depends(get_current_active_user)],
-    data: Dict[str, Any],
-):
-    # ToDo convert parameters to be SQLAlchemy Core compatible when it will be up
-    request = {
-        "request" : """ 
-                    INSERT INTO `LNM_stage` (`entreprise`, `intitulé`, `description`, `ville`, `date_debut`, `date_fin`, `nature`, `id_etudiant`, `id_enseignant`) 
-                    VALUES (%(entreprise)s, %(intitule)s, %(description)s, %(ville)s, %(date_debut)s, %(date_fin)s, %(nature)s, %(id_etudiant)s, %(id_enseignant)s)
-        """,
-        "params": {
-            "entreprise": data['entreprise'],
-            "intitule": data['intitule'],
-            "description": data['description'],
-            "ville": data['ville'],
-            "date_debut": data['date_debut'],
-            "date_fin": data['date_fin'],
-            "nature": data['nature'],
-            "id_etudiant": id_etudiant,
-            "id_enseignant": data['id_enseignant'],
-        },
-        "allowedRolesRequester": ["responsable_stages"],
-    }
-    return db_request(current_user, SQLRequest(**request))
-
-
-@router.patch("/etudiants/{id_etudiant:int}/stage",
-             tags=["student", "internship",],
-             summary="Students",
-             description="Return the list of students")
-def patch_etudiant_stage(
-        id_etudiant: int,
-        current_user: Annotated[User, Depends(get_current_active_user)],
-        data: Dict[str, Any],
-):
-    # ToDo il pourrait être intéressant de vérifier que le stage est bien à l'étudiant
-    # ToDo convert parameters to be SQLAlchemy Core compatible when it will be up
-    request = {
-        "request": """"
-                   UPDATE LNM_stage
-            SET id_enseignant = '%(id_enseignant)s'
-            WHERE id_stage = '%(d_stage)s'
-        """,
-        "params": {
-            "id_enseignant": data['id_enseignant'],
-            "id_stage": data['id_stage'],
-        },
-        "allowedRolesRequester": ["responsable_stages"],
-    }
-    return db_request(current_user, SQLRequest(**request))
-
-
-@router.delete("/etudiants/{id_etudiant:int}/stage",
-              tags=["student", "internship",],
-              summary="Students",
-              description="Return the list of students")
-def delete_etudiant_stage(
-        id_etudiant: int,
-        current_user: Annotated[User, Depends(get_current_active_user)],
-        data: Dict[str, Any],
-):
-    # ToDo il pourrait être intéressant de vérifier que le stage est bien à l'étudiant
-    # ToDo convert parameters to be SQLAlchemy Core compatible when it will be up
-    request = {
-        "request": """
-                   DELETE FROM `LNM_stage` WHERE `id_stage`= %(id_stage)s)
-                   """,
-        "params": {
-            "id_stage": data['id_stage'],
-        },
-        "allowedRolesRequester": ["responsable_stages"],
-    }
-    return db_request(current_user, SQLRequest(**request))
-
 
 @router.get("/etudiants/{id_etudiant:int}/load/",
             tags=["student", "absence", ],
@@ -419,3 +340,153 @@ def get_etudiant_pastedt(
         "allowedRolesRequester": ["user"],
     }
     return db_request(current_user, SQLRequest(**request))
+
+@router.get("/etudiants/{id_etudiant:int}/stages",
+            tags=["student",  "internship",],
+            summary="Students",
+            description="Return the list of students")
+def get_etudiants_stages(
+        id_etudiant: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request" : """
+            SELECT LNM_stage.`id_stage`, 
+                   ExplicitSecondaryKs_LNM_etudiant.ExplicitSecondaryK AS "étudiant", 
+                   ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK AS "promo", 
+                   LNM_stage.`entreprise`, 
+                   LNM_stage.`intitulé`, 
+                   LNM_stage.`description`, 
+                   LNM_stage.`ville`, 
+                   DATE_FORMAT(LNM_stage.`date_debut`, '%Y-%m-%dT%H:%i') AS date_debut, 
+                   DATE_FORMAT(LNM_stage.`date_fin`, '%Y-%m-%dT%H:%i') AS date_fin, 
+                   LNM_stage.`nature`, 
+                   ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK AS "enseignant"
+            FROM `LNM_stage` 
+                     JOIN LNM_etudiant ON LNM_etudiant.id_etudiant = LNM_stage.id_etudiant
+                     LEFT JOIN LNM_enseignant ON LNM_enseignant.id_enseignant = LNM_stage.id_enseignant
+                     JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_etudiant.id_promo
+                     JOIN ExplicitSecondaryKs_LNM_etudiant ON ExplicitSecondaryKs_LNM_etudiant.id_etudiant = LNM_etudiant.id_etudiant
+                     LEFT JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = LNM_enseignant.id_enseignant
+            WHERE LNM_stage.id_etudiant = %(id_etudiant)s;
+                    """,
+        "params": {
+            "id_etudiant": id_etudiant,
+        },
+        "allowedRolesRequester": ["responsable_etudes", "responsable_stages"],
+    }
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    return db_request(current_user, SQLRequest(**request))
+
+######################################################
+#
+# Post
+#
+######################################################
+
+@router.post("/etudiants/{id_etudiant:int}/stage",
+            tags=["student", "internship",],
+            summary="Students",
+            description="Return the list of students")
+def post_etudiant_stage(
+    id_etudiant: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    data: Dict[str, Any],
+):
+    # ToDo convert parameters to be SQLAlchemy Core compatible when it will be up
+    if not 'id_enseignant' in data or not data['id_enseignant']:
+        data['id_enseignant'] = 'null'
+        request = {
+            "request" : """ 
+                        INSERT INTO `LNM_stage` (`entreprise`, `intitulé`, `description`, `ville`, `date_debut`, `date_fin`, `nature`, `id_etudiant`) 
+                        VALUES (%(entreprise)s, %(intitule)s, %(description)s, %(ville)s, %(date_debut)s, %(date_fin)s, %(nature)s, %(id_etudiant)s)
+            """,
+        }
+    else:
+        request = {
+            "request" : """ 
+                        INSERT INTO `LNM_stage` (`entreprise`, `intitulé`, `description`, `ville`, `date_debut`, `date_fin`, `nature`, `id_etudiant`, `id_enseignant`) 
+                        VALUES (%(entreprise)s, %(intitule)s, %(description)s, %(ville)s, %(date_debut)s, %(date_fin)s, %(nature)s, %(id_etudiant)s, %(id_enseignant)s)
+            """,
+        }
+    request.update({
+        "params": {
+            "entreprise": data['entreprise'],
+            "intitule": data['intitule'],
+            "description": data['description'],
+            "ville": data['ville'],
+            "date_debut": data['date_debut'],
+            "date_fin": data['date_fin'],
+            "nature": data['nature'],
+            "id_etudiant": id_etudiant,
+            "id_enseignant": data['id_enseignant'],
+        },
+        "allowedRolesRequester": ["responsable_stages"],
+    })
+    return db_request(current_user, SQLRequest(**request))
+
+
+######################################################
+#
+# Patch
+#
+######################################################
+
+@router.patch("/etudiants/{id_etudiant:int}/stages/{id_stage:int}",
+             tags=["student", "internship",],
+             summary="Students",
+             description="Return the list of students")
+def patch_etudiant_stage(
+        id_etudiant: int,
+        id_stage: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+        data: Dict[str, Any],
+):
+    # ToDo il pourrait être intéressant de vérifier que le stage est bien à l'étudiant
+    # ToDo convert parameters to be SQLAlchemy Core compatible when it will be up
+    request = {
+        "request": """
+                    UPDATE LNM_stage
+                    SET id_enseignant = %(id_enseignant)s
+                    WHERE id_stage = %(id_stage)s
+        """,
+        "params": {
+            "id_enseignant": data['id_enseignant'],
+            "id_stage": id_stage,
+        },
+        "allowedRolesRequester": ["responsable_stages"],
+    }
+    return db_request(current_user, SQLRequest(**request))
+
+
+######################################################
+#
+# Delete
+#
+######################################################
+
+@router.delete("/etudiants/{id_etudiant:int}/stages/{id_stage:int}",
+              tags=["student", "internship",],
+              summary="Students",
+              description="Return the list of students")
+def delete_etudiant_stage(
+        id_etudiant: int,
+        id_stage: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    # ToDo il pourrait être intéressant de vérifier que le stage est bien à l'étudiant
+    # ToDo convert parameters to be SQLAlchemy Core compatible when it will be up
+    request = {
+        "request": """
+                   DELETE FROM `LNM_stage` WHERE `id_stage`= %(id_stage)s
+                   """,
+        "params": {
+            "id_stage": id_stage,
+        },
+        "allowedRolesRequester": ["responsable_stages"],
+    }
+    return db_request(current_user, SQLRequest(**request))
+
+
+

@@ -5,14 +5,14 @@ import app_tools
 load_dotenv()
 
 def get_list_enseignants_responsabilites(token):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url=app_tools.get_python_backend_url("//enseignant_responsabilite/"),
         token=token)
     return df
 
 
 def get_list_modules_m2c3(token, id_filiere, id_statut):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url=app_tools.get_python_backend_url("/m2c3/"),
         data={'id_filiere': id_filiere,
               'id_statut': id_statut},

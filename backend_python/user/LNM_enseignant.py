@@ -10,6 +10,12 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+######################################################
+#
+# Get relative to all teachers : /enseignants/[fields]
+#
+######################################################
+
 @router.get("/enseignants/",
             tags=["user", "enseignant"],
             summary="Teachers",
@@ -71,7 +77,15 @@ def enseignants_load(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/enseignants/{id_enseignant}/charge/",
+
+
+######################################################
+#
+# Get specific to 1 teacher : /enseignants/{id_enseignant:int}/[fields]
+#
+######################################################
+
+@router.get("/enseignants/{id_enseignant:int}/charge/",
              tags=["user", "enseignant"],
              summary="Teachers load",
              description="Return the list of teachers load")
@@ -100,4 +114,42 @@ def enseignants_load(
         },
         "allowedRolesRequester": ["administratif"],
     }
+    return db_request(current_user, SQLRequest(**request))
+
+@router.get("/enseignants/{id_enseignant:int}/stages",
+            tags=["student",  "internship",],
+            summary="Students",
+            description="Return the list of students")
+def get_etudiants_stages(
+        id_enseignant: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request" : """
+            SELECT LNM_stage.`id_stage`, 
+                   ExplicitSecondaryKs_LNM_etudiant.ExplicitSecondaryK AS "étudiant", 
+                   ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK AS "promo", 
+                   LNM_stage.`entreprise`, 
+                   LNM_stage.`intitulé`, 
+                   LNM_stage.`description`, 
+                   LNM_stage.`ville`, 
+                   DATE_FORMAT(LNM_stage.`date_debut`, '%Y-%m-%dT%H:%i') AS date_debut, 
+                   DATE_FORMAT(LNM_stage.`date_fin`, '%Y-%m-%dT%H:%i') AS date_fin, 
+                   LNM_stage.`nature`, 
+                   ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK AS "enseignant"
+            FROM `LNM_stage` 
+                     JOIN LNM_etudiant ON LNM_etudiant.id_etudiant = LNM_stage.id_etudiant
+                     LEFT JOIN LNM_enseignant ON LNM_enseignant.id_enseignant = LNM_stage.id_enseignant
+                     JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_etudiant.id_promo
+                     JOIN ExplicitSecondaryKs_LNM_etudiant ON ExplicitSecondaryKs_LNM_etudiant.id_etudiant = LNM_etudiant.id_etudiant
+                     LEFT JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = LNM_enseignant.id_enseignant
+            WHERE LNM_stage.id_enseignant = %(id_enseignant)s;
+                    """,
+        "params": {
+            "id_enseignant": id_enseignant,
+        },
+        "allowedRolesRequester": ["responsable_etudes", "responsable_stages"],
+    }
+    if(current_user.id == id_enseignant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))

@@ -49,41 +49,36 @@ def calcul_informations(notes_promo: pd.Series, note_eleve=None):
     return classement, moyenne, mediane, ecart_type, X_notes, Y_notes, couleur
 
 def get_notes_eleves(token, id_etudiant):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url=app_tools.get_python_backend_url(f"/evaluations/classical/etudiants/{id_etudiant}"),
-        data = {'id_etudiant': id_etudiant},
         token=token
     )
     return df
 
 def get_average_notes_promo(token, id_module):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url=app_tools.get_python_backend_url(f"/evaluations/classical/modules/{id_module}/average/"),
-        data = {'id_module': id_module},
         token=token
     )
     return df
 
 def get_data_promo(token, id_module):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url=app_tools.get_python_backend_url(f"/evaluations/classical/modules/{id_module}/"),
-        data = {'id_module': id_module},
         token=token
     )
     return df
 
 def get_modules_byIdEtudiant(token, id_etudiant):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url=app_tools.get_python_backend_url(f"/modules/etudiants/{id_etudiant}/"),
-        data = {'id_etudiant': id_etudiant},
         token=token
     )
     return df
 
 def get_data_prof(token, id_enseignant):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url=app_tools.get_python_backend_url(f"/evaluations/classical/enseignants/{id_enseignant}"),
-        data = {'id_enseignant': id_enseignant},
         token=token
     )
     return df

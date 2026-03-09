@@ -62,8 +62,8 @@ def update_table_sequencage(token, user_id, selected_module):
     #df = df[df['id_module'] == selected_module]
     #data=df.to_dict('records')
     #print(data, flush=True)
-    dfi = app_tools.get_explicit_keys("LNM_enseignant")
-    intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in dfi.iterrows()]
+    dfi = app_tools.get_enseignants(token)
+    intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id_enseignant']} for _, row in dfi.iterrows()]
 
     table_sequencage = dash_table.DataTable(
         id='table_sequencage',
@@ -98,8 +98,8 @@ def update_table_sequence(token, user_id, selected_module, selected_seance_type)
         else: #display all sequence types
             df = df[df['id_module'] == selected_module][['id_sequence', 'type', 'numero_ordre', 'duree_h', 'groupe_type', 'intervenant_principal', 'commentaire']]
 
-        dfi = app_tools.get_explicit_keys("LNM_enseignant")
-        intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in dfi.iterrows()]
+        dfi = app_tools.get_enseignants(token)
+        intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id_enseignant']} for _, row in dfi.iterrows()]
 
         table_sequence = dash_table.DataTable(
             id='table_sequence',
@@ -153,8 +153,8 @@ def update_table_session(token, user_id, selected_module, selected_seance_type, 
             df = df[(df['id_module'] == selected_module)][
                 ['id_session', 'type', 'numero_ordre', 'duree_h', 'nom_groupe', 'intervenant', 'commentaire']].sort_values(by=['type', 'numero_ordre'], ascending=[False, False])
 
-        dfi = app_tools.get_explicit_keys("LNM_enseignant")
-        intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in dfi.iterrows()]
+        dfi = app_tools.get_enseignants(token)
+        intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id_enseignant']} for _, row in dfi.iterrows()]
 
         table_session = dash_table.DataTable(
             id='table_session',
@@ -235,12 +235,12 @@ def register_callbacks_edit(app):
         data = {}
         for i in df.columns:
             data[i]= ""
-        df = app_tools.get_explicit_keys("LNM_groupe_type")
-        groupe_type_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in df.iterrows()]
-        df = app_tools.get_explicit_keys("LNM_enseignant")
-        intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in df.iterrows()]
-        df = app_tools.get_explicit_keys("LNM_seance_type")
-        seance_type_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in df.iterrows()]
+        df = app_tools.get_groupe_types(token)
+        groupe_type_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id_groupe_type']} for _, row in df.iterrows()]
+        df = app_tools.get_enseignants(token)
+        intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id_enseignant']} for _, row in df.iterrows()]
+        df = app_tools.get_seance_types(token)
+        seance_type_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id_seance_type']} for _, row in df.iterrows()]
 
         table_intervenants = dash_table.DataTable(
             id='add_table',

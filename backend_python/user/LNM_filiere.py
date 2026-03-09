@@ -19,7 +19,9 @@ def filieres(
 ):
     request = {
         "request" : """
-                        SELECT * FROM LNM_filiere
+                        SELECT LNM_filiere.*, ExplicitSecondaryKs_LNM_filiere.ExplicitSecondaryK
+                        FROM LNM_filiere
+                        JOIN ExplicitSecondaryKs_LNM_filiere ON ExplicitSecondaryKs_LNM_filiere.id_filiere = LNM_filiere.id_filiere
                     """,
         "allowedRolesRequester" : ["user"],
     }
@@ -34,7 +36,43 @@ def statuts(
 ):
     request = {
         "request" : """
-                        SELECT * FROM LNM_statut
+                        SELECT LNM_statut.*, ExplicitSecondaryKs_LNM_statut.ExplicitSecondaryK
+                        FROM LNM_statut
+                        JOIN ExplicitSecondaryKs_LNM_statut ON ExplicitSecondaryKs_LNM_statut.id_statut = LNM_statut.id_statut
+                    """,
+        "allowedRolesRequester" : ["user"],
+    }
+    return db_request(current_user, SQLRequest(**request))
+
+@router.get("/groupe_types/",
+            tags=["user", "filiere"],
+            summary="Status",
+            description="Return the list of groupe types")
+def groupe_types(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request" : """
+                        SELECT LNM_groupe_type.*, ExplicitSecondaryKs_LNM_groupe_type.ExplicitSecondaryK
+                        FROM LNM_groupe_type
+                        JOIN ExplicitSecondaryKs_LNM_groupe_type ON ExplicitSecondaryKs_LNM_groupe_type.id_groupe_type = LNM_groupe_type.id_groupe_type;
+                    """,
+        "allowedRolesRequester" : ["user"],
+    }
+    return db_request(current_user, SQLRequest(**request))
+
+@router.get("/seance_types/",
+            tags=["user", "filiere"],
+            summary="Status",
+            description="Return the list of seance types")
+def seance_types(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request" : """
+                        SELECT LNM_seance_type.*, ExplicitSecondaryKs_LNM_seance_type.ExplicitSecondaryK
+                        FROM LNM_seance_type
+                        JOIN ExplicitSecondaryKs_LNM_seance_type ON ExplicitSecondaryKs_LNM_seance_type.id_seance_type = LNM_seance_type.id_seance_type;
                     """,
         "allowedRolesRequester" : ["user"],
     }
@@ -45,7 +83,7 @@ def statuts(
             summary="Filiere",
             description="Return the list of filieres")
 def dags(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+        current_user = None,  #current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     request = {
         "request" : """
@@ -72,6 +110,23 @@ def dags(
                                  JOIN APC_apprentissage_critique ON APC_apprentissage_critique.id_apprentissage_critique = APC_apprentissage_critique_as_module.id_apprentissage_critique
                                  JOIN APC_niveau ON APC_niveau.id_niveau = APC_apprentissage_critique.id_niveau
                                  JOIN APC_competence ON APC_competence.id_competence = APC_niveau.id_competence
+                    """,
+        "allowedRolesRequester" : ["anonymous"],
+    }
+    return db_request(current_user, SQLRequest(**request))
+
+@router.get("/promos/",
+            tags=["user", "filiere"],
+            summary="promos",
+            description="Return the list of promos")
+def promos(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request" : """
+                        SELECT LNM_promo.`id_promo`, ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK AS promo
+                        FROM `LNM_promo`
+                        JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_promo.id_promo;
                     """,
         "allowedRolesRequester" : ["user"],
     }

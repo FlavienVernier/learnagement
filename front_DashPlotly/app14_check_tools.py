@@ -6,43 +6,43 @@ load_dotenv()
 
 def check_sequencage_vs_maquette(token):
 
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url=app_tools.get_python_backend_url("/maquette_vs_sequencage/"),
         token=token)
     return df
 
 def check_session_vs_maquette(token):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url("maquette_vs_session"),
         token=token)
     return df
 
 def check_module_without_learning_unit(token):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url("module_sans_unite_d_enseignement"),
         token=token)
     return df
 
 def check_module_without_apprentissage_critique(token):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url("/module_sans_apprentissage_critique/"),
         token=token)
     return df
 
 def check_module_ects(token):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url("/module_detail_ects/"),
         token=token)
     return df
 
 def check_enseignant_sans_cours(token):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url("/enseignant_sans_cours/"),
         token=token)
     return df
 
 def check_session_sans_enseignant(token):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url("/session_sans_intervenant/"),
         token=token)
     return df
@@ -61,7 +61,7 @@ def check_session_corruption(token):
         HTTPError: Si le token est invalide (401) ou accès refusé (403)
         RequestException: Pour les autres erreurs réseau
     """
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url("session_reference_corruption"),
         token=token)
     return df

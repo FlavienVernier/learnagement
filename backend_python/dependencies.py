@@ -222,12 +222,18 @@ def has_role(role_required: str):
 
 
 def db_request(requester: User, request: SQLRequest):
-    # check if there is no intersection between requester roles and request allowed roles
-    if not bool(set(requester.roles) & set(request.allowedRolesRequester)):
-        logger.error(f"User {requester.id} hasn't role {request.allowedRolesRequester}")
-        raise HTTPException(status_code=403, detail="Unauthorized access")
+    if not "anonymous" in request.allowedRolesRequester:
+        # check if there is no intersection between requester roles and request allowed roles
+        if not bool(set(requester.roles) & set(request.allowedRolesRequester)):
+            logger.error(f"User {requester.id} hasn't role {request.allowedRolesRequester}")
+            raise HTTPException(status_code=403, detail="Unauthorized access")
+
+    if requester:
+        logger.info(f"User {requester.id} has role {requester.roles} requests {request}")
+    else:
+        logger.info(f"Anonymous user requests {request}")
+
     rows = []
-    logger.info(f"User {requester.id} has role {requester.roles} requests {request}")
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)

@@ -291,7 +291,7 @@ def get_modules_etudiant(
             tags=["module"],
             summary="Get modules by responsible",
             description="Get all modules of a responsible")
-def get_modules_intervenant(
+def get_sequencages_responsable(
         id_responsable: int,
         current_user: Annotated[User, Depends(get_current_active_user)],
 ):
@@ -324,7 +324,7 @@ def get_modules_intervenant(
             tags=["module"],
             summary="Get modules by responsible",
             description="Get all modules of a responsible")
-def get_modules_intervenant(
+def get_sequences_responsable(
         id_responsable: int,
         current_user: Annotated[User, Depends(get_current_active_user)],
 ):
@@ -361,7 +361,7 @@ def get_modules_intervenant(
             tags=["module"],
             summary="Get modules by responsible",
             description="Get all modules of a responsible")
-def get_modules_intervenant(
+def get_sessions_responsable(
         id_responsable: int,
         current_user: Annotated[User, Depends(get_current_active_user)],
 ):
@@ -405,7 +405,7 @@ def get_modules_intervenant(
             tags=["module"],
             summary="Get modules dependencies",
             description="Get all modules dependencies")
-def get_modules_intervenant(
+def get_module_dependencies(
         id_module: int,
         current_user: Annotated[User, Depends(get_current_active_user)],
 ):
@@ -440,7 +440,7 @@ def get_modules_intervenant(
             tags=["module"],
             summary="Get sequence dependencies",
             description="Get all modules sequence dependencies")
-def get_modules_intervenant(
+def get_module_sequence_dependencies(
         id_module: int,
         current_user: Annotated[User, Depends(get_current_active_user)],
 ):
@@ -482,7 +482,9 @@ def get_modules_intervenant(
     return db_request(current_user, SQLRequest(**request))
 
 #####################################
+#
 # Patch
+#
 #####################################
 @router.patch("/module/{id_module}",
             tags=["module"],
@@ -603,7 +605,9 @@ def update_session(
 
 
 #####################################
+#
 # Post
+#
 #####################################
 
 @router.post("/modules/{id_module}/sequencage",
@@ -673,7 +677,9 @@ def add_sequencage(
 
 
 #####################################
+#
 # Delete
+#
 #####################################
 
 @router.delete("/modules/{id_module}/sequencages/{id_sequencage}",

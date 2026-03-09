@@ -13,33 +13,25 @@ from requests import HTTPError, Timeout, RequestException
 
 load_dotenv()
 
-def get_endpoint_data(url, data=None, token=None):
-    if data is None:
-        data = {}
-    if token:
-        return get_endpoint(url, data, token)
-    else:
-        return get_PHP_endpoint_data(url, data)
-
 def get_python_backend_url(endpoint):
     base_url = os.getenv("PYTHON_BACKEND_DOCKER_URL")
     port = os.getenv("PYTHON_BACKEND_DOCKER_PORT")
     url = f"{base_url}:{port}/{endpoint}"
     return url
 
-def get_endpoint(url, data, token):
-    return get_python_endpoint_data('get', url, data, token)
+def get_endpoint(url, token, data=None):
+    return python_endpoint('get', url, data, token)
 
 def patch_endpoint(url, data, token):
-    return get_python_endpoint_data('patch', url, data, token)
+    return python_endpoint('patch', url, data, token)
 
 def post_endpoint(url, data, token):
-    return get_python_endpoint_data('post', url, data, token)
+    return python_endpoint('post', url, data, token)
 
-def delete_endpoint(url, data, token):
-    return get_python_endpoint_data('delete', url, data, token)
+def delete_endpoint(url, token):
+    return python_endpoint('delete', url, None, token)
 
-def get_python_endpoint_data(method, url, data, token):
+def python_endpoint(method, url, data, token):
     """
     Appel de l'API FastAPI
 
@@ -55,8 +47,10 @@ def get_python_endpoint_data(method, url, data, token):
     """
 
     try:
-
-        logging.info(f"Calling {method} {url} {data}")
+        if data:
+            logging.info(f"Calling {method} {url} {data}")
+        else:
+            logging.info(f"Calling {method} {url}")
         # Appel au "endpoint" (pas besoin de body car tout est dans la dépendance)
         if method == 'get':
             headers = {
@@ -83,7 +77,7 @@ def get_python_endpoint_data(method, url, data, token):
             }
             resp = requests.delete(url, headers=headers, timeout=30)
         else:
-            return pd.DataFrame()
+            raise Exception(f"Method {method} not supported")
 
         # Gérer les erreurs HTTP immédiatement après la requête
         if resp.status_code == 401:
@@ -124,96 +118,33 @@ def get_python_endpoint_data(method, url, data, token):
         return pd.DataFrame()
         raise
 
-def get_php_backend_url(endpoint):
-    base_url_with_port = os.getenv("PHP_BACKEND_DOCKER_URL")
-    url = f"{base_url_with_port}/{endpoint}"
-    return url
-
-def get_PHP_endpoint_data(url, data):
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    resp = requests.post(
-        url,
-        data=data,
-        headers=headers
-    )
-
-    resp.raise_for_status()  # sécurité HTTP
-
-    json_data = resp.json()  # ← parsing JSON propre
-
-    # Cas [] ou null
-    if not json_data:
-        df = pd.DataFrame()
-    else :
-        #df = pd.DataFrame.from_records(json_data) # do not use int stay as str
-        # conversion intelligente des types
-        #df = df.convert_dtypes() # does not solve the problem
-        df = pd.read_json(io.StringIO(resp.content.decode('utf-8')))
-
-
-    # print("Status code:", resp.status_code)
-    # print("Raw text:", repr(resp.text))
-    # print("Parsed JSON:", resp.json())
-    # print("Type:", type(resp.json()))
-    #
-    # print("url", url)
-    # print("data", data)
-    # print("json_data", json_data)
-    # print("df", df, flush=True)
-    return df
-
-@deprecated("Use get_enseignants instead")
-def get_list_enseignants():
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listEnseignant.php'
-    resp = requests.post(url, data={}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
 def get_enseignants(token):
     url = get_python_backend_url("/enseignants/")
-    df = get_endpoint_data(url, token=token)
+    df = get_endpoint(url, token=token)
     return df
-
-@deprecated("Use get_filieres instead")
-def get_list_filieres():
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listAllFilieres.php'
-    resp = requests.post(url, data={}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
 def get_filieres(token):
     url = get_python_backend_url("/filieres/")
-    df = get_endpoint_data(url, token=token)
+    df = get_endpoint(url, token=token)
     return df
-
-@deprecated("Use get_statut instead")
-def get_list_statuts():
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listStatut.php'
-    resp = requests.post(url, data={}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
 
 def get_statuts(token):
     url = get_python_backend_url("/statuts/")
-    df = get_endpoint_data(url, token=token)
+    df = get_endpoint(url, token=token)
     return df
 
+def get_promos(token):
+    url = get_python_backend_url("/promos/")
+    df = get_endpoint(url, token=token)
+    return df
 
+def get_groupe_types(token):
+    url = get_python_backend_url("/groupe_types/")
+    df = get_endpoint(url, token=token)
+    return df
 
-def get_list_promo():
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listPromo.php'
-    resp = requests.post(url, data={}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
-
-@deprecated("Don't use anymore")
-def get_explicit_keys(table):
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/explicitSecondaryKeys.php'
-    resp = requests.post(url, data={'table':table}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+def get_seance_types(token):
+    url = get_python_backend_url("/seance_types/")
+    df = get_endpoint(url, token=token)
+    return df

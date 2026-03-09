@@ -6,25 +6,22 @@ load_dotenv()
 
 
 def get_moduleByEnseignantId(token, id_enseignant: int):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url(f"/modules/responsables/{id_enseignant}/"),
-        data = {'id_intervenant': id_enseignant},
         token = token
     )
     return df
 
 def get_moduleByEtudiantId(token, id_etudiant: int):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url(f"/modules/etudiants/{id_etudiant}/"),
-        data = {'id_etudiant': id_etudiant},
         token = token
     )
     return df
 
 def get_moduleByIntervenantId(token, id_enseignant: int):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url(f"/modules/intervenants/{id_enseignant}/"),
-        data = {'id_intervenant': id_enseignant},
         token = token
     )
     return df
@@ -33,9 +30,8 @@ def get_moduleByIntervenantId(token, id_enseignant: int):
 # Sequencage
 
 def get_moduleSequencageByEnseignantId(token, id_enseignant: int):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url(f"/modules/sequencages/{id_enseignant}/"),
-        data = {'id_responsable': id_enseignant},
         token = token
     )
     return df
@@ -71,9 +67,8 @@ def set_intervenant_principal_sequencage(token, id_module: int, id_sequencage: i
 
 
 def check_moduleSequencage(token, id_enseignant):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url = app_tools.get_python_backend_url(f"/maquette_vs_sequencage/{id_enseignant}/"),
-        data = {'id_responsable': id_enseignant},
         token=token
     )
     return df
@@ -82,9 +77,8 @@ def check_moduleSequencage(token, id_enseignant):
 # Sequence
 
 def get_moduleSequenceByEnseignantId(token, id_responsable):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url=app_tools.get_python_backend_url(f"/modules/sequences/{id_responsable}/"),
-        data = {'id_responsable': id_responsable},
         token=token
     )
     return df
@@ -104,9 +98,8 @@ def set_intervenant_principal_sequence(token, id_module, id_sequence, id_interve
 # Session
 
 def get_moduleSessionByEnseignantId(token, id_responsable):
-    df = app_tools.get_endpoint_data(
+    df = app_tools.get_endpoint(
         url=app_tools.get_python_backend_url(f"/modules/sessions/{id_responsable}/"),
-        data = {'id_responsable': id_responsable},
         token=token
     )
     return df
