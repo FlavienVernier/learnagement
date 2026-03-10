@@ -29,7 +29,7 @@ INSTANCE_NUMBER=None
 DOCKER_COMMAND=[]
 DOCKER_COMPOSE_COMMAND=[]
 
-containers = ["docker", "phpbackend", "backend_python", "webApp", "front_DashPlotly", "front_NextJS", ]
+containers = ["docker", "backend_python", "webApp", "front_DashPlotly", "front_NextJS", ]
 
 def load_dotenv():
     dotenv.load_dotenv()
@@ -107,9 +107,6 @@ def __mainConfiguration__():
 
             # ToDo Refactor XXX_URL (not XXX_DOCKER_URL) must be XXX_PUBLIC_URL,
             # ToDo remove url with "localhost"
-
-            file.write("PHP_BACKEND_URL=http://localhost:" + str(instance_number) + "0081" + "\n")
-            file.write("PHP_BACKEND_DOCKER_URL=http://learnagement_phpbackend_" + instance_name + "\n")
 
             file.write("PYTHON_BACKEND_DOCKER_URL=http://learnagement_backend_python_" + instance_name + "\n")
             file.write("PYTHON_BACKEND_DOCKER_PORT=4000\n")

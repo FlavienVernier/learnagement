@@ -60,28 +60,7 @@ services:
             interval: 5s
             timeout: 5s
             retries: 55
-    phpbackend_${INSTANCE_NAME}:  # ToDo remove when python backend will be operational
-        container_name: learnagement_phpbackend_${INSTANCE_NAME}
-        build: ./phpbackend/
-        restart: always
-        networks:
-              - learnagement_back_${INSTANCE_NAME}
-              - learnagement_front_${INSTANCE_NAME}
-        ports:
-            - "${INSTANCE_NUMBER}0081:80"
-        volumes:
-            - ../phpbackend:/var/www/html
-            - ./log/phpbackend:/var/log/apache2
-        depends_on:
-            mysql_${INSTANCE_NAME}:
-                condition: service_healthy
-        healthcheck:
-            test: ["CMD", "curl", "-f", "http://127.0.0.1:80/health.php"]
-            start_period: 10s
-            interval: 5s
-            timeout: 5s
-            retries: 55
-    php_${INSTANCE_NAME}:
+    front_php_${INSTANCE_NAME}:
         container_name: learnagement_php_${INSTANCE_NAME}
         build: ./php/
         restart: always
@@ -93,8 +72,6 @@ services:
             - ../webApp:/var/www/html
             - ./log/php:/var/log/apache2
         depends_on:
-            phpbackend_${INSTANCE_NAME}:
-                condition: service_healthy
             backend_python_${INSTANCE_NAME}:
                 condition: service_healthy
 
@@ -110,8 +87,6 @@ services:
             - ../front_NextJS:/app
             - ../front_NextJS/node_modules:/app/node_modules
         depends_on:
-            phpbackend_${INSTANCE_NAME}:
-                condition: service_healthy
             backend_python_${INSTANCE_NAME}:
                 condition: service_healthy
     front_dashplotly_${INSTANCE_NAME}:
@@ -126,8 +101,6 @@ services:
             - ../front_DashPlotly/:/app/
             - ../front_DashPlotly/data/:/data/
         depends_on:
-            phpbackend_${INSTANCE_NAME}:
-                condition: service_healthy
             backend_python_${INSTANCE_NAME}:
                 condition: service_healthy
 volumes:
