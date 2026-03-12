@@ -1,4 +1,4 @@
-from dash import html, dcc
+from dash import html, dcc, dash_table
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import app10_stage_tools
@@ -22,13 +22,21 @@ def register_callbacks(app):
         State('token', 'data'),
     )
     def display_table(user_id_fake, user_id, token):
-        df_stages = app10_stage_tools.get_stages_by_supervisorId(token, user_id)
-        table_stages = dbc.Table.from_dataframe(
-            df_stages,
-            # Key styling options:
-            striped=True,
-            bordered=True,
-            hover=True,
+        df = app10_stage_tools.get_stages_by_supervisorId(token, user_id)
+        table_stages = dash_table.DataTable(
+            id='table_stage',
+            data=df.to_dict('records'),
+            style_cell_conditional=[
+                {'if': {'column_id': 'id_stage', },
+                 'display': 'None', }]
         )
+
+        # table_stages = dbc.Table.from_dataframe(
+        #     df,
+        #     # Key styling options:
+        #     striped=True,
+        #     bordered=True,
+        #     hover=True
+        # )
         return [table_stages]
 

@@ -279,6 +279,7 @@ def register_callbacks_edit(app):
         data[0]["id_module"] = selected_module
         data[0]["id_seance_type"] = data[0]["type"]
         data[0]["id_groupe_type"] = data[0]["groupe_type"]
+        data[0]["id_intervenant_principal"] = data[0]["intervenant_principal"]
         #print(data[0], flush=True)
         ret = app5_module_tools.add_moduleSequencage(token, data[0])
         #print(ret)
@@ -334,7 +335,7 @@ def register_callbacks_edit(app):
                                   & (df['duree_h'] == row_changed['duree_h'])
                                   & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0])
                 ret = app5_module_tools.set_intervenant_principal_sequencage(token, id_module, id_sequencage, new_intervenant_id)
-            return update_table_sequencage(token, user_id, id_module), update_table_sequence(user_id, id_module, None)
+            return update_table_sequencage(token, user_id, id_module), update_table_sequence(token, user_id, id_module, None)
 
     # Mise à jour de la table des séquençages selon le module sélectionné
     @app.callback(

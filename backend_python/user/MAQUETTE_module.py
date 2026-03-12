@@ -618,7 +618,8 @@ def add_sequencage(
     id_module: int,
     current_user: Annotated[User, Depends(get_current_active_user)],
     data: Dict[str, Any],):
-    if 'id_responsable' in data.keys() and data['id_responsable'] is not None and data['id_responsable'] != "":
+    print(data)
+    if 'id_intervenant_principal' in data.keys() and data['id_intervenant_principal'] is not None and data['id_intervenant_principal'] != "":
         request = {
             "request" : f"""
                 INSERT INTO MAQUETTE_module_sequencage ( 

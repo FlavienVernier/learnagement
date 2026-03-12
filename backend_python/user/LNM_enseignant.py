@@ -114,6 +114,8 @@ def enseignants_load(
         },
         "allowedRolesRequester": ["administratif"],
     }
+    if(current_user.id == id_enseignant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/enseignants/{id_enseignant:int}/stages",

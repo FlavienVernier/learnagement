@@ -49,8 +49,6 @@ def add_moduleSequencage(token, data):
 def remove_moduleSequencage(token, id_module: int, id_sequencage: int):
     df = app_tools.delete_endpoint(
         url = app_tools.get_python_backend_url(f"/modules/{id_module}/sequencages/{id_sequencage}"),
-        data = {'id_module': id_module,
-                'id_sequencage': id_sequencage},
         token = token
     )
     return df
@@ -58,9 +56,7 @@ def remove_moduleSequencage(token, id_module: int, id_sequencage: int):
 def set_intervenant_principal_sequencage(token, id_module: int, id_sequencage: int, id_intervenant_principal: int):
     df = app_tools.patch_endpoint(
         url = app_tools.get_python_backend_url(f"/modules/{id_module}/sequencages/{id_sequencage}/"),
-        data = {'id_module': id_module,
-                'id_sequencage': id_sequencage,
-                'id_intervenant_principal': id_intervenant_principal},
+        data = {'id_intervenant_principal': id_intervenant_principal},
         token = token
     )
     return df
@@ -86,9 +82,7 @@ def get_moduleSequenceByEnseignantId(token, id_responsable):
 def set_intervenant_principal_sequence(token, id_module, id_sequence, id_intervenant_principal):
     df = app_tools.patch_endpoint(
         url = app_tools.get_python_backend_url(f"/modules/{id_module}/sequences/{id_sequence}/"),
-        data = {'id_module': id_module,
-                'id_sequence': id_sequence,
-                'id_intervenant_principal': id_intervenant_principal},
+        data = {'id_intervenant_principal': id_intervenant_principal},
         token = token
     )
     return df
@@ -107,9 +101,7 @@ def get_moduleSessionByEnseignantId(token, id_responsable):
 def set_intervenant_session(token, id_module, id_session, id_intervenant):
     df = app_tools.patch_endpoint(
         url = app_tools.get_python_backend_url(f"/modules/{id_module}/sessions/{id_session}/"),
-        data = {'id_module': id_module,
-                'id_session': id_session,
-                'id_enseignant': id_intervenant},
+        data = {'id_enseignant': id_intervenant},
         token = token
     )
     return df
