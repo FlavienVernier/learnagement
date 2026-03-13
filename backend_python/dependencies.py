@@ -254,7 +254,8 @@ def db_request(requester: User, request: SQLRequest):
     finally:
         cursor.close()
         connection.close()
-    return json.dumps([dict(ix) for ix in rows])
+    #return json.dumps([dict(ix) for ix in rows]) # return string
+    return [dict(ix) for ix in rows] # return list that will be converted to json
 
 def main():
     return True

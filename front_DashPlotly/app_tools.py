@@ -88,15 +88,23 @@ def python_endpoint(method, url, data, token):
         # Gérer les erreurs HTTP
         resp.raise_for_status()
 
-        # Parser la réponse en DataFrame
-        json_string = resp.content.decode('utf-8')
+        # Parser la réponse received as string en DataFrame
+        #json_string = resp.content.decode('utf-8')
         #print(json_string, flush=True)
-        if json_string != "[]":
-            url_data = json.loads(json_string)
-            #print(url_data, flush=True)
-            return pd.read_json(io.StringIO(url_data))
+        #f json_string != "[]":
+        #    url_data = json.loads(json_string)
+        #    return pd.read_json(io.StringIO(url_data))
+        #else:
+        #    return pd.DataFrame()
+
+        # Parser la réponse JSON
+        data = resp.json()
+
+        if data:
+            return pd.DataFrame(data)
         else:
             return pd.DataFrame()
+
 
     except Timeout:
         logging.exception(f"Timeout lors de l'appel à {url}")
@@ -121,6 +129,11 @@ def python_endpoint(method, url, data, token):
 
 def get_enseignants(token):
     url = get_python_backend_url("/enseignants/")
+    df = get_endpoint(url, token=token)
+    return df
+
+def get_etudiants(token):
+    url = get_python_backend_url("/etudiants/")
     df = get_endpoint(url, token=token)
     return df
 

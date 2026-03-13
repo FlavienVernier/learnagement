@@ -1,4 +1,8 @@
 <?php
+    /////////////////
+    // WARNING !!!!
+    // Direct SQL queries are deprecated. Use backend API endpoints instead.
+    /////////////////
     $rendus = [];
     $sql="SELECT r.date, r.description, p.parcour AS promo
     FROM LNM_rendu_module r 

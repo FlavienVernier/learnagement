@@ -1,4 +1,10 @@
 <?php
+
+    /////////////////
+    // WARNING !!!!
+    // Direct SQL queries are deprecated. Use backend API endpoints instead.
+    /////////////////
+
     $id = $_SESSION['id'];
 
     function groupBy(array $items, string $key): array {

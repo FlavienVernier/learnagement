@@ -1,4 +1,8 @@
 <?php
+    /////////////////
+    // WARNING !!!!
+    // Direct SQL queries are deprecated. Use backend API endpoints instead.
+    /////////////////
     $rendus = [];
     $sql = "SELECT re.id_rendu_module AS id, r.description AS description, r.date AS date FROM `LNM_rendu_module_as_etudiant` re
     JOIN LNM_rendu_module r ON r.id_rendu_module=re.id_rendu_module WHERE re.date_depot is NULL 

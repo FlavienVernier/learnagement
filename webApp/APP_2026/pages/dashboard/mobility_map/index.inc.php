@@ -54,7 +54,11 @@
 </div>
 
 <!-- Fetch univ list from DB -->
-<?php 
+<?php
+    /////////////////
+    // WARNING !!!!
+    // Direct SQL queries are deprecated. Use backend API endpoints instead.
+    /////////////////
     $sql = "SELECT * FROM MOB_partner_university";
     $result = mysqli_query($conn, $sql) or die("Requête invalide: ". mysqli_error( $conn )."\n".$sql);
     $universities = mysqli_fetch_all($result, MYSQLI_ASSOC);    
