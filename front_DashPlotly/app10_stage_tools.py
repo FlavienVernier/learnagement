@@ -61,6 +61,7 @@ def add_stage(token, entreprise, sujet, mission, ville, start_date, end_date, id
         return "Data saved successfully"
     except Exception as e:
         logging.exception(e)
+        return str(e)
 
 def set_internship_supervisor(token, id_etudiant, id_stage, new_supervisor_id):
     df = app_tools.patch_endpoint(

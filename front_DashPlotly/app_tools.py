@@ -106,25 +106,25 @@ def python_endpoint(method, url, data, token):
             return pd.DataFrame()
 
 
-    except Timeout:
+    except Timeout as e:
         logging.exception(f"Timeout lors de l'appel à {url}")
-        return pd.DataFrame()
-        raise
+        #return pd.DataFrame()
+        raise e
 
     except RequestException as e:
         logging.exception(f"Erreur de connexion: {e}")
-        return pd.DataFrame()
-        raise
+        #return pd.DataFrame()
+        raise e
 
     except ValueError as e:
         logging.exception(f"Erreur lors du parsing de la réponse JSON: {e}")
-        return pd.DataFrame()
-        raise
+        #return pd.DataFrame()
+        raise e
 
     except Exception as e:
         logging.exception(f"Erreur inattendue: {e}")
-        return pd.DataFrame()
-        raise
+        #return pd.DataFrame()
+        raise e
 
 
 def get_enseignants(token):

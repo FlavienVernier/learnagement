@@ -29,7 +29,7 @@ def __get_module_responsible_id(id_module: int,
         },
         "allowedRolesRequester": ["user"],
     }
-    return json.loads(db_request(current_user, SQLRequest(**request)))
+    return db_request(current_user, SQLRequest(**request))
 
 def __participate(id_module: int, id_etudiant: int, current_user: Annotated[User, Depends(get_current_active_user)], ):
     request = {
@@ -49,7 +49,7 @@ def __participate(id_module: int, id_etudiant: int, current_user: Annotated[User
         },
         "allowedRolesRequester": ["user"],
     }
-    res = json.loads(db_request(current_user, SQLRequest(**request)))
+    res = db_request(current_user, SQLRequest(**request))
     print(("res", res), flush=True)
     return True
 
@@ -671,7 +671,7 @@ def add_sequencage(
             }
         }
     request["allowedRolesRequester"] = ["responsable_etudes"]
-    print(type(__get_module_responsible_id(id_module, current_user)), flush=True)
+    #print(type(__get_module_responsible_id(id_module, current_user)), flush=True)
     if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
         request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
