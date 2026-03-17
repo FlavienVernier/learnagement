@@ -25,7 +25,11 @@ def enseignants(
 ):
     request = {
         "request" : """
-                        SELECT LNM_enseignant.*, 
+                        SELECT LNM_enseignant.`id_enseignant`, 
+                               LNM_enseignant.`prenom`, 
+                               LNM_enseignant.`nom`, 
+                               LNM_enseignant.`mail`, 
+                               LNM_enseignant.`statut`, 
                                ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK
                         FROM LNM_enseignant 
                         JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = LNM_enseignant.id_enseignant
@@ -57,7 +61,7 @@ def enseignants_responsabilities(
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/enseignants/charge/",
-             tags=["user", "enseignant"],
+             tags=["administratif", "enseignant"],
              summary="Teachers load",
              description="Return the list of teachers load")
 def enseignants_load(
@@ -86,7 +90,7 @@ def enseignants_load(
 ######################################################
 
 @router.get("/enseignants/{id_enseignant:int}/charge/",
-             tags=["user", "enseignant"],
+             tags=["administratif", "enseignant"],
              summary="Teachers load",
              description="Return the list of teachers load")
 def enseignants_load(
@@ -119,7 +123,7 @@ def enseignants_load(
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/enseignants/{id_enseignant:int}/stages",
-            tags=["student",  "internship",],
+            tags=["administratif", "enseignant",  "internship",],
             summary="Students",
             description="Return the list of students")
 def get_etudiants_stages(

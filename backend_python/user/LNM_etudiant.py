@@ -19,7 +19,7 @@ router = APIRouter()
 ######################################################
 
 @router.get("/etudiants/",
-            tags=["student"],
+            tags=["user", "student"],
             summary="Students",
             description="Return the list of students")
 def get_etudiants(
@@ -32,7 +32,6 @@ def get_etudiants(
                             LNM_etudiant.`nom`,
                             LNM_etudiant.`prenom`,
                             LNM_etudiant.`mail`,
-                            LNM_etudiant.`password_updated`,
                             ExplicitSecondaryK
                         FROM LNM_etudiant
                         JOIN ExplicitSecondaryKs_LNM_etudiant ON ExplicitSecondaryKs_LNM_etudiant.id_etudiant = LNM_etudiant.id_etudiant
@@ -44,7 +43,7 @@ def get_etudiants(
 
 
 @router.get("/etudiants/absences/",
-            tags=["student",  "absence",],
+            tags=["student", "administratif"],
             summary="Students",
             description="Return the list of students")
 def get_etudiants_absences(
@@ -92,7 +91,7 @@ def get_etudiants_absences(
 
 
 @router.get("/etudiants/stages",
-            tags=["student",  "internship",],
+            tags=["administratif", "student",  "internship",],
             summary="Students",
             description="Return the list of students")
 def get_etudiants_stages(
@@ -125,7 +124,7 @@ def get_etudiants_stages(
 
 
 @router.get("/etudiants/without_stage",
-            tags=["student", "internship"],
+            tags=["administratif", "student", "internship"],
             summary="Students",
             description="Return the list of students")
 def get_etudiants_stages(
@@ -154,7 +153,7 @@ def get_etudiants_stages(
 ######################################################
 
 @router.get("/etudiants/{id_etudiant:int}",
-            tags=["student",],
+            tags=["student","user"],
             summary="Students",
             description="Return the list of students")
 def get_etudiant(
@@ -182,7 +181,7 @@ def get_etudiant(
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/etudiants/{id_etudiant:int}/absences",
-            tags=["student", "absence",],
+            tags=["administratif", "student",],
             summary="Students",
             description="Return the list of students")
 def get_etudiant_absences(
@@ -211,7 +210,7 @@ def get_etudiant_absences(
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/etudiants/{id_etudiant:int}/load/",
-            tags=["student", "absence", ],
+            tags=["student", "administratif", ],
             summary="Students",
             description="Return the list of students")
 def get_etudiant_load(
@@ -237,13 +236,15 @@ def get_etudiant_load(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["administratif", "enseignant"],
     }
+    if current_user.id == id_etudiant:
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 
 @router.get("/etudiants/{id_etudiant:int}/edt/",
-            tags=["student", "absence", ],
+            tags=["student", "administratif", ],
             summary="Students",
             description="Return the list of students")
 def get_etudiant_edt(
@@ -272,13 +273,15 @@ def get_etudiant_edt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["administratif",],
     }
+    if current_user.id == id_etudiant:
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 
 @router.get("/etudiants/{id_etudiant:int}/pastedt/",
-            tags=["student", "absence", ],
+            tags=["student",],
             summary="Students",
             description="Return the list of students")
 def get_etudiant_pastedt(
@@ -312,7 +315,7 @@ def get_etudiant_pastedt(
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/etudiants/{id_etudiant}/rendus/",
-            tags=["student", "absence", ],
+            tags=["student", ],
             summary="Students",
             description="Return the list of students")
 def get_etudiant_pastedt(
@@ -342,7 +345,7 @@ def get_etudiant_pastedt(
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/etudiants/{id_etudiant:int}/stages",
-            tags=["student",  "internship",],
+            tags=["administratif", "student",  "internship",],
             summary="Students",
             description="Return the list of students")
 def get_etudiants_stages(
@@ -386,7 +389,7 @@ def get_etudiants_stages(
 ######################################################
 
 @router.post("/etudiants/{id_etudiant:int}/stage",
-            tags=["student", "internship",],
+            tags=["administratif", "student", "internship",],
             summary="Students",
             description="Return the list of students")
 def post_etudiant_stage(
@@ -434,7 +437,7 @@ def post_etudiant_stage(
 ######################################################
 
 @router.patch("/etudiants/{id_etudiant:int}/stages/{id_stage:int}",
-             tags=["student", "internship",],
+             tags=["administratif", "student", "internship",],
              summary="Students",
              description="Return the list of students")
 def patch_etudiant_stage(
@@ -467,7 +470,7 @@ def patch_etudiant_stage(
 ######################################################
 
 @router.delete("/etudiants/{id_etudiant:int}/stages/{id_stage:int}",
-              tags=["student", "internship",],
+              tags=["administratif", "student", "internship",],
               summary="Students",
               description="Return the list of students")
 def delete_etudiant_stage(

@@ -44,7 +44,7 @@ def tree_competence(
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/evaluations/apc/etudiants/{id_etudiant}",
-            tags=["user"],
+            tags=["student"],
             summary="Universities",
             description="Return the list of partner universities")
 def get_apc_etudiant_evaluation(
@@ -75,7 +75,7 @@ def get_apc_etudiant_evaluation(
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/evaluations/classical/etudiants/{id_etudiant}",
-            tags=["user"],
+            tags=["student"],
             summary="Universities",
             description="Return the list of partner universities")
 def get_classical_etudiant_evaluation(
@@ -104,7 +104,7 @@ def get_classical_etudiant_evaluation(
 
 
 @router.get("/evaluations/classical/modules/{id_module}",
-            tags=["user"],
+            tags=["student"],
             summary="Universities",
             description="Return the list of partner universities")
 def get_classical_module_evaluation(
@@ -130,7 +130,7 @@ def get_classical_module_evaluation(
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/evaluations/classical/modules/{id_module}/average",
-            tags=["user"],
+            tags=["student"],
             summary="Universities",
             description="Return the list of partner universities")
 def get_classical_module_evaluation_average(
@@ -156,7 +156,7 @@ def get_classical_module_evaluation_average(
 
 
 @router.get("/evaluations/classical/enseignants/{id_enseignant}",
-            tags=["user"],
+            tags=["enseignant"],
             summary="Universities",
             description="Return the list of partner universities")
 def tree_competence(
