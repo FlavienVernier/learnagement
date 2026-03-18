@@ -68,7 +68,7 @@
 }
 
 .time-slot {
-    height: 60px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -76,6 +76,7 @@
     color: #666;
     font-weight: 500;
     border-bottom: 1px solid #e0e0e0;
+    box-sizing: border-box;
 }
 
 /* ----------------------------------------------------------
@@ -116,14 +117,15 @@
    ---------------------------------------------------------- */
 .day-content {
     position: relative;
-    height: 1020px; /* 17 hours (6 AM to 10 PM) × 60px */
+    /* 14 hours (7 AM to 9 PM) × 40px = 560px */
+    height: 560px; 
     background: 
         repeating-linear-gradient(
             to bottom,
             transparent 0px,
-            transparent 59px,
-            #e0e0e0 59px,
-            #e0e0e0 60px
+            transparent 39px,
+            #e0e0e0 39px,
+            #e0e0e0 40px
         );
 }
 
@@ -132,13 +134,14 @@
    ---------------------------------------------------------- */
 .event-block {
     position: absolute;
-    width: calc(100% - 20px);
-    left: 0px;
+    width: 100%; 
+    left: 0;
+    box-sizing: border-box; 
     background: #4CAF50;
     color: white;
     padding: 6px 8px;
     border-radius: 4px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     cursor: pointer;
     overflow: hidden;
@@ -185,6 +188,50 @@
     margin-bottom: 8px;
     color: #fff;
 }
+
+/* ----------------------------------------------------------
+   Calendar Setup Card (for first-time users)
+   ---------------------------------------------------------- */
+
+.setup-card {
+    max-width: 500px;
+    margin: 100px auto;
+    padding: 40px;
+    text-align: center;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border: 1px solid #e0e0e0;
+}
+
+.setup-icon { font-size: 3rem; margin-bottom: 20px; }
+
+.input-group input {
+    width: 100%;
+    padding: 12px;
+    margin: 20px 0;
+    border: 2px solid #eee;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+    border-color: #2196F3;
+    outline: none;
+}
+
+.btn-primary {
+    background: #2196F3;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-primary:hover { background: #1976D2; }
 
 /* ----------------------------------------------------------
    RESPONSIVE DESIGN
