@@ -4,9 +4,9 @@ Learnagement (Learning management) est un outil d'intégration de données de l'
 L'App Web s'organise autour de différents objectifs enrichis par les axes de développement choisi par les étudiants et enseignants : la gestion du planning prévisionnel des enseignants, la cohérence entre le MCCC, le prévisionnel et la planification réelle, et la gestion des absences des étudiants...
 
 ## Prérequis
-OS Unix ou Windows
-Docker desktop
-Python 3
+OS Unix ou Windows,
+Docker desktop,
+Python 3.
 
 ## Installation et lancement
 
@@ -24,7 +24,7 @@ source ./venv/bin/activate
 python learnagement.py -start
 ```
 
-Au 1e lancement, l'app vous demande le numéro d'instance 'I' compris entre 1 et 4. Trois services seront accessibles :  
+Au 1e lancement, l'app vous demande le numéro d'instance 'I' compris entre 2 et 4. Trois services seront accessibles :  
 - L'app web : 127.0.0.1:```i```0080;
 - PhPMyAdmin : 127.0.0.1:```i```8080; root/<mot de passe défini à l'installation>
 

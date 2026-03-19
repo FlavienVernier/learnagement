@@ -1,11 +1,13 @@
 # General Normalization and spécific Normalisations
 
 ## directory architechture and contents
-- ToDo dyrectory architechture the same as app directory
 - Doc dyrectory architechture the same as app directory
-- ToDo dyrectory architechture contains only ToDo.md files
-- Doc dyrectory architechture contains only Norm.md files
+- Doc dyrectory architechture contains only Norm.md files and their resources
 
+## Useful tools
+- Existing backend endpoints: 127.0.0.1:```i```4000/docs#/
+- Firefox RESTED extension
+- Chrome Client REST extension
 
 ## [Docker](./docker/doc.md)
 
