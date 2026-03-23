@@ -5,6 +5,7 @@
         [ "link" => "liste_personnel", "label" => "Liste", "img" => "./assets/icons/list.svg" ],
         [ "link" => "ressources", "label" => "Ressources", "img" => "./assets/icons/info.svg" ],
         [ "link" => "python", "label" => "Tableau de bord", "img" => "./assets/icons/console.svg" ],
+        [ "link" => "dependance_module", "label" => "Dépendances", "img" => "./assets/icons/dependance_module.svg" ]
     ];
     if ($_SESSION['type'] != 'administratif')
         array_push($routes, [ "link" => "rendus", "label" => "Mes Rendus", "img" => "./assets/icons/file.svg" ]);
