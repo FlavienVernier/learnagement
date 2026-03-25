@@ -7,26 +7,30 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 const markers = L.markerClusterGroup();
 
-let universities = [];
-
-const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university";
-console.log(url)
-try {
-    const response = await fetch(url, {
-        headers: {
-            "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
-            "Content-Type": "application/json"
+const fetchUniversities = async () => {
+    const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID;
+    let universities = [];
+    try {
+        const response = await fetch(url, {
+            headers: {
+                "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+                "Content-Type": "application/json"
+            }
+        });
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
         }
-    });
-    if (!response.ok) {
-        throw new Error(`Response status: ${response.status}`);
+
+        universities = await response.json();
+        console.log(universities);
+    } catch (error) {
+        console.error(error.message);
     }
 
-    universities = await response.json();
-    console.log(universities);
-} catch (error) {
-    console.error(error.message);
+    return universities;
 }
+
+const universities = await fetchUniversities();
 
 function popupText(university) {
     return `
@@ -38,12 +42,9 @@ function popupText(university) {
     `;
 }
 
-window.updateMap = updateMap;
-
 function updateMap() {
     markers.clearLayers();
     
-    const selectedFiliere = document.getElementById('filiereSelect').value;
     const selectedSemestre = document.getElementById('semestreSelect').value;
     const selectedNote = parseFloat(document.getElementById('noteMinRange').value);
 
@@ -51,15 +52,15 @@ function updateMap() {
         // Affiche univ si note_min <= selectedNote
         const uNote = u.note_min === null ? 0 : parseFloat(u.note_min);
         if (uNote > selectedNote) return false;
-        
-        let key = "";
-        if (selectedFiliere) {
-            key = selectedSemestre + "_" + selectedFiliere;
-        } else {
-            key = selectedSemestre + "_total_places";
-        }
 
-        return parseInt(u[key]) > 0;
+        // Filtre le semestre
+        if (selectedSemestre === "S8") {
+            return u.annee === 4;
+        } else if (selectedSemestre === "S9") {
+            return u.annee === 5;
+        } else {
+            return true;
+        }
     });
 
     filtered.forEach(university => {
@@ -70,4 +71,5 @@ function updateMap() {
     map.addLayer(markers);
 }
 
+window.updateMap = updateMap; // Pour pouvoir appeler depuis le PHP
 updateMap();

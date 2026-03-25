@@ -17,7 +17,8 @@
     window.ENV = {
         BACKEND_URL: "http://127.0.0.1",
         BACKEND_PORT: "44000",
-        USER_TOKEN: "<?= $_SESSION["jwt_token"] ?>"
+        USER_TOKEN: "<?= $_SESSION["jwt_token"] ?>",
+        USER_ID: "<?= $_SESSION["id"] ?>"
     };
     console.log("Environnement chargé :", window.ENV);
 </script>
@@ -35,18 +36,6 @@
 
     <form id="filterForm" onsubmit="return false;" class="hidden bg-white p-4 rounded-lg shadow-lg border border-gray-200">
         <div class="flex flex-wrap justify-center items-center gap-4">
-            <div class="flex flex-col">
-                <label for="filiereSelect" class="text-xs font-semibold text-gray-600 mb-1">Filière</label>
-                <select name="filiere" id="filiereSelect" onchange="updateMap()" class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary">
-                <option value="">Toutes</option>
-                <option value="BAT">BAT</option>
-                <option value="EIT">EIT</option>
-                <option value="IDU">IDU</option>
-                <option value="MC">MC</option>
-                <option value="MM">MM</option>
-                <option value="SNI">SNI</option>
-                </select>
-            </div>
             <div class="flex flex-col">
                 <label for="semestreSelect" class="text-xs font-semibold text-gray-600 mb-1">Semestre</label>
                 <select name="semestre" id="semestreSelect" onchange="updateMap()" class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary">
