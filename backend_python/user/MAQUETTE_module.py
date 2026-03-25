@@ -481,6 +481,41 @@ def get_module_sequence_dependencies(
     }
     return db_request(current_user, SQLRequest(**request))
 
+
+@router.get("/modules/toAPCs",
+            tags=["anonymous"],
+            summary="Filiere",
+            description="Return competences of a filiere")
+def modules_toAPCs(
+
+):
+    request = {
+        # "request": """
+        #            SELECT
+        #                 `id_apprentissage_critique`,
+        #                 GROUP_CONCAT( concat(`MAQUETTE_module`.`id_module`,
+        #                 `MAQUETTE_module`.`code_module`,
+        #                 `MAQUETTE_module`.`nom`) SEPARATOR ' ')
+        #
+        #            FROM `APC_apprentissage_critique_as_module`
+        #                 JOIN `MAQUETTE_module` ON `APC_apprentissage_critique_as_module`.`id_module` = `MAQUETTE_module`.`id_module`
+        #            GROUP BY id_apprentissage_critique
+        #            """,
+        "request": """
+                   SELECT 
+                        `id_apprentissage_critique`,
+                        `MAQUETTE_module`.`id_module`,
+                        `MAQUETTE_module`.`code_module`,
+                        `MAQUETTE_module`.`nom`
+                        
+                   FROM `APC_apprentissage_critique_as_module`
+                        JOIN `MAQUETTE_module` ON `APC_apprentissage_critique_as_module`.`id_module` = `MAQUETTE_module`.`id_module`
+      
+                   """,
+        "allowedRolesRequester" : ["anonymous"],
+    }
+    return db_request(None, SQLRequest(**request))
+
 #####################################
 #
 # Patch
@@ -691,6 +726,7 @@ def delete_sequencage(
     id_module: int,
     id_sequencage: int,
     current_user: Annotated[User, Depends(get_current_active_user)],
+
 ):
 
     request = {
@@ -707,3 +743,4 @@ def delete_sequencage(
     if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
         request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
+

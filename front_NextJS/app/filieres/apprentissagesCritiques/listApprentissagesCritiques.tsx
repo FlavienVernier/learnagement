@@ -17,6 +17,7 @@ import ModulesOfApprentissageCritique from "@/app/filieres/apprentissagesCritiqu
 import Image from "next/image";
 
 
+
 /**
  * Composant de la liste des apprentissages critiques
  * Affiche la liste des apprentissages critiques d'une compétence
@@ -25,6 +26,7 @@ import Image from "next/image";
  * @returns {JSX.Element} Composant React
  */
 export default function ListApprentissagesCritiques({idCompetence}:{idCompetence: number}) {
+    const [idFiliereClicked, setIdFiliereClicked] = useState<string[]>([])
     const [apprentissagesCritiques, setApprentissagesCritiques] = useState<apprentissagesCritiquesStruct>({})
     const [apcAsModule, setApcAsModule] = useState<ModulesOfAPC>({})
 
@@ -41,7 +43,7 @@ export default function ListApprentissagesCritiques({idCompetence}:{idCompetence
         }
     }, [levels, apprentissagesCritiques]);
 
-    useEffect(() => {
+    /*useEffect(() => {
         let form_data = new FormData
         form_data.append("idCompetence", idCompetence.toString())
         axios.post("/api/proxy/list/listApprentissagesCritiques", form_data, {withCredentials: true})
@@ -50,14 +52,52 @@ export default function ListApprentissagesCritiques({idCompetence}:{idCompetence
                 setApprentissagesCritiques(data)
                 setLevels(Object.keys(data))
             })
-    }, [idCompetence]);
+    }, [idCompetence]);*/
 
     useEffect(() => {
+        axios.get(`/api/proxy/filieres/${idFiliereClicked}0/competences/${idCompetence}/apprentissagesCritiques`, {withCredentials: true})
+            .then(response => {
+                let data = response.data
+                // Transformer la liste plate en objet indexé par niveau
+                const groupedByLevel = data.reduce((acc: apprentissagesCritiquesStruct, item: apprentissageCritique & {niveau: number}) => {
+                    const niveau = item.niveau
+                    if (!acc[niveau]) {
+                        acc[niveau] = []
+                    }
+                    acc[niveau].push(item)
+                    return acc
+                }, {})
+
+                setApprentissagesCritiques(groupedByLevel)
+                setLevels(Object.keys(groupedByLevel))
+            })
+    }, [idFiliereClicked, idCompetence]);
+
+    /*useEffect(() => {
         let form_data = new FormData
         form_data.append("indexBy", "id_apprentissage_critique")
         axios.post("/api/proxy/list/listModulesOfAllAPC", form_data, {withCredentials: true})
             .then(response => {
                 setApcAsModule(response.data)
+            })
+    }, []);*/
+
+    useEffect(() => {
+        axios.get(`/api/proxy/modules/toAPCs`, {withCredentials: true})
+            .then(response => {
+                const data = response.data
+
+                // Transformer la liste plate en objet indexé par id_apprentissage_critique
+                const groupedByApc = data.reduce((acc: ModulesOfAPC, item: ModuleOfApc & {id_apprentissage_critique: number}) => {
+                    const id = item.id_apprentissage_critique
+                    if (!acc[id]) {
+                        acc[id] = []
+                    }
+                    acc[id].push(item)
+                    return acc
+                }, {})
+
+                setApcAsModule(groupedByApc)
             })
     }, []);
 
@@ -94,9 +134,9 @@ export default function ListApprentissagesCritiques({idCompetence}:{idCompetence
             <div className={"flex flex-col gap-4"}>
                 {/* Affichage des APC*/}
                 {(!isEmpty(apprentissagesCritiques) && levelClicked >= 0 && Object.keys(apcAsModule).length > 0) && (
-                    apprentissagesCritiques[levelClicked].map((apc: apprentissageCritique) => (
+                    apprentissagesCritiques[levelClicked.valueOf()].map((apc: apprentissageCritique) => (
                         <div key={apc.id_apprentissage_critique}>
-                            <div id={apc.id_apprentissage_critique.toString()}
+                            <div id={apc.id_apprentissage_critique}
                                  className={`flex justify-between items-center p-2 shadow-md font-medium bg-white
                                  ${(apc.id_apprentissage_critique in Object.keys(apcAsModule)) ? 
                                      'cursor-pointer' : 'cursor-not-allowed'

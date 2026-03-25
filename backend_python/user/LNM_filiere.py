@@ -1,30 +1,50 @@
 import logging
 
 from fastapi import APIRouter, Depends
-from typing import Annotated
+from typing import Annotated, Optional
 from pydantic import BaseModel
 
-from dependencies import db_request, get_current_active_user, User, SQLRequest
+from dependencies import db_request, get_current_active_user, get_current_active_user_optional, User, SQLRequest
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 @router.get("/filieres/",
-            tags=["user", "filiere"],
+            tags=["anonymous", "user", "filiere"],
             summary="Filiere",
             description="Return the list of filieres")
 def filieres(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[Optional[User], Depends(get_current_active_user_optional)],
+    #current_user: Annotated[User, Depends(get_current_active_user)],
 ):
-    request = {
-        "request" : """
-                        SELECT LNM_filiere.*, ExplicitSecondaryKs_LNM_filiere.ExplicitSecondaryK
-                        FROM LNM_filiere
-                        JOIN ExplicitSecondaryKs_LNM_filiere ON ExplicitSecondaryKs_LNM_filiere.id_filiere = LNM_filiere.id_filiere
-                    """,
-        "allowedRolesRequester" : ["user"],
-    }
+    print(current_user, flush=True)
+    # Comportement différencié selon que l'utilisateur est authentifié ou non
+    if current_user:
+        # Requête pour utilisateur authentifié
+        request = {
+            "request" : """
+                            SELECT LNM_filiere.*, ExplicitSecondaryKs_LNM_filiere.ExplicitSecondaryK
+                            FROM LNM_filiere
+                            JOIN ExplicitSecondaryKs_LNM_filiere ON ExplicitSecondaryKs_LNM_filiere.id_filiere = LNM_filiere.id_filiere
+                        """,
+            "allowedRolesRequester" : ["user"],
+        }
+    else:
+        # Requête pour utilisateur non authentifié
+        request = {
+            "request" : """
+                            SELECT LNM_filiere.id_filiere, 
+                                   LNM_filiere.nom_filiere, 
+                                   LNM_filiere.nom_long,
+                                   ExplicitSecondaryKs_LNM_filiere.ExplicitSecondaryK AS filiere
+                            FROM LNM_filiere
+                            JOIN ExplicitSecondaryKs_LNM_filiere ON ExplicitSecondaryKs_LNM_filiere.id_filiere = LNM_filiere.id_filiere
+                        
+                        """,
+            "allowedRolesRequester" : ["anonymous"],
+        }
+    print(request,flush=True)
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/statuts/",
@@ -131,3 +151,85 @@ def promos(
         "allowedRolesRequester" : ["user"],
     }
     return db_request(current_user, SQLRequest(**request))
+
+@router.get("/filieres/{id_filiere:int}/competences",
+            tags=["anonymous"],
+            summary="Filiere",
+            description="Return competences of a filiere")
+def competence_filiere(
+        id_filiere: int,
+):
+    request = {
+        "request" : """
+            SELECT
+                `APC_competence`.`id_competence` AS `id_competence`,
+                `APC_competence`.`code_competence` AS `code_competence`,
+                `APC_competence`.`libelle_competence` AS `libelle_competence`,
+                `APC_competence`.`description` AS `description_competence`
+            FROM `APC_competence_as_filiere_as_statut`
+                JOIN `APC_competence` ON `APC_competence_as_filiere_as_statut`.`id_competence` = `APC_competence`.`id_competence`
+                JOIN `LNM_filiere` ON `APC_competence_as_filiere_as_statut`.`id_filiere` = `LNM_filiere`.`id_filiere`
+            WHERE `LNM_filiere`.`id_filiere` = %(id_filiere)s""",
+        "params": {
+            "id_filiere": id_filiere,
+        },
+        "allowedRolesRequester" : ["anonymous"],
+    }
+    return db_request(None, SQLRequest(**request))
+
+
+@router.get("/filieres/{id_filiere:int}/competences/{id_competence:int}",
+            tags=["anonymous"],
+            summary="Filiere",
+            description="Return competences of a filiere")
+def competence_filiere(
+        id_filiere: int,
+        id_competence: int,
+):
+    request = {
+        "request": """
+                   SELECT * FROM `APC_composante_essentielle` WHERE `id_competence` = %(id_competence)s""",
+        "params": {
+            "id_competence": id_competence,
+        },
+        "allowedRolesRequester" : ["anonymous"],
+    }
+    return db_request(None, SQLRequest(**request))
+
+
+@router.get("/filieres/{id_filiere:int}/competences/{id_competence:int}/apprentissagesCritiques",
+            tags=["anonymous"],
+            summary="Filiere",
+            description="Return competences of a filiere")
+def apprentissagesCritiques_competence_filiere(
+        id_filiere: int,
+        id_competence: int,
+):
+    request = { #`APC_niveau`.`id_competence`,`APC_apprentissage_critique`.`id_apprentissage_critique`,
+        # "request": """
+        #            SELECT
+        #
+        #                 `APC_niveau`.`niveau`,
+        #
+        #                 GROUP_CONCAT(`APC_apprentissage_critique`.`libelle_apprentissage` SEPARATOR ' ')
+        #            FROM `APC_apprentissage_critique`
+        #            JOIN `APC_niveau` ON `APC_apprentissage_critique`.`id_niveau` = `APC_niveau`.`id_niveau`
+        #            WHERE `APC_niveau`.`id_competence` = %(id_competence)s
+        #            GROUP BY `APC_niveau`.`id_competence`, `APC_niveau`.`niveau`
+        #           """,
+        "request": """
+                   SELECT
+                        `APC_niveau`.`id_competence`, 
+                        `APC_apprentissage_critique`.`id_apprentissage_critique`,
+                        `APC_niveau`.`niveau`,
+                        `APC_apprentissage_critique`.`libelle_apprentissage` 
+                   FROM `APC_apprentissage_critique`
+                   JOIN `APC_niveau` ON `APC_apprentissage_critique`.`id_niveau` = `APC_niveau`.`id_niveau`
+                   WHERE `APC_niveau`.`id_competence` = %(id_competence)s
+                   """,
+        "params": {
+            "id_competence": id_competence,
+        },
+        "allowedRolesRequester" : ["anonymous"],
+    }
+    return db_request(None, SQLRequest(**request))

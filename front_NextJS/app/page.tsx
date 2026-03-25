@@ -11,7 +11,7 @@ import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-import ListFilieres from "@/app/filieres/listFilieres";
+import ListFilieresAsAnonymous from "@/app/filieres/listFilieresAsAnonymous";
 import Loader from "@/app/indicators/loading";
 
 import ProfilIcon from "@/public/profile.svg"
@@ -26,13 +26,15 @@ import Link from "next/link";
 export default function Home() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filieres, setFilieres] = useState<Filiere[]>([]);
+  //const [filieres, setFilieres] = useState<Filiere[]>([]);
+  const [filieres, setFilieres] = useState<FiliereAsAnonymous[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setIsLoading(true);
   
-    axios.get('/api/proxy/list/listAllFilieres', {withCredentials: true})
+    //axios.get('/api/proxy/list/listAllFilieres', {withCredentials: true})
+    axios.get('/api/proxy/filieres', {withCredentials: false})
       .then((response) => {
         setFilieres(response.data);
         setIsLoading(false);
@@ -72,7 +74,7 @@ export default function Home() {
           <Link href={'/connection'}><ProfilIcon className={'clickable-animation cursor-pointer'} /></Link>
         </div>
       </header>
-      {isLoading ? <Loader /> : <ListFilieres filieres={filteredFilieres} />}
+      {isLoading ? <Loader /> : <ListFilieresAsAnonymous filieres={filteredFilieres} />}
     </main>
   );
 }

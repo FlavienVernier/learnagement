@@ -22,12 +22,14 @@ import cross from "@/public/white-cross.png"
 /**
  * Composant de la modale des filières
  * Affiche les détails d'une filière sélectionnée
- * 
+ *
+ * @param {string[]} idFiliere - Id de la filière sélectionnée
+ * @param {Function} setIdFiliere - Fonction pour mettre à jour l'id de la filière
  * @param {string[]} nomFiliere - Nom de la filière sélectionnée
  * @param {Function} setNomFiliere - Fonction pour mettre à jour le nom de la filière
  * @returns {JSX.Element} Composant React
  */
-export default function ModaleFiliere({nomFiliere, setNomFiliere}: { nomFiliere: string[], setNomFiliere: any }) {
+export default function ModaleFiliere({idFiliere, setIdFiliere, nomFiliere, setNomFiliere}: {idFiliere: string[], setIdFiliere: any , nomFiliere: string[], setNomFiliere: any }): JSX.Element {
     const [infosCompetences, setInfosCompetences] = useState<infosCompetence[]>([])
     const [idCompetenceClicked, setIdCompetenceClicked] = useState<number>(-1)
     const [composantesEssentielles, setComposantesEssentielles] = useState<composanteEssentielle[]>([])
@@ -40,7 +42,7 @@ export default function ModaleFiliere({nomFiliere, setNomFiliere}: { nomFiliere:
         };
     }, []);
 
-    useEffect(() => {
+    /*useEffect(() => {
         let form_data = new FormData
         form_data.append("nom_filiere", nomFiliere[0])
         axios.post("/api/proxy/list/listCompetencesOfFiliere", form_data, {withCredentials: true})
@@ -48,13 +50,20 @@ export default function ModaleFiliere({nomFiliere, setNomFiliere}: { nomFiliere:
                 setInfosCompetences(response.data)
             })
         setIdCompetenceClicked(-1)
-    }, [nomFiliere]);
-
+    }, [nomFiliere]);*/
     useEffect(() => {
+        axios.get(`/api/proxy/filieres/${idFiliere}/competences`)
+            .then(response => {
+                setInfosCompetences(response.data)
+            })
+        setIdCompetenceClicked(-1)
+    }, [idFiliere]);
+
+    /*useEffect(() => {
         if(idCompetenceClicked >= 0){
             let form_data = new FormData
             form_data.append("idCompetence", idCompetenceClicked.toString())
-            axios.post("/api/proxy/list/listComposanteEssentielle", form_data, {withCredentials: true})
+            axios.post("/api/proxy/filieres/${idFiliere}/competences/", form_data, {withCredentials: true})
                 .then(response => {
                     setComposantesEssentielles(response.data)
                 })
@@ -62,6 +71,16 @@ export default function ModaleFiliere({nomFiliere, setNomFiliere}: { nomFiliere:
             setComposantesEssentielles([]);
         }
 
+    }, [idCompetenceClicked]);*/
+    useEffect(() => {
+        if (idCompetenceClicked >= 0) {
+            axios.get(`/api/proxy/filieres/${idFiliere}/competences/${idCompetenceClicked}`)
+                .then(response => {
+                    setComposantesEssentielles(response.data)
+                })
+        } else {
+            setComposantesEssentielles([]);
+        }
     }, [idCompetenceClicked]);
 
     useEffect(() => {
@@ -79,6 +98,7 @@ export default function ModaleFiliere({nomFiliere, setNomFiliere}: { nomFiliere:
     }, []);
 
     function closeModale(){
+        setIdFiliere([]);
         setNomFiliere([]);
         setIdCompetenceClicked(-1)
     }

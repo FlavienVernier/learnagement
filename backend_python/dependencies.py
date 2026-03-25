@@ -6,13 +6,14 @@ import json
 import sqlalchemy
 import mysql.connector
 
-from typing import Annotated
+from typing import Annotated, Optional
 
 import jwt
 from jwt.exceptions import InvalidTokenError
 
-from fastapi import Header, HTTPException, Depends, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import Header, HTTPException, Depends, Security, status
+from fastapi.security import OAuth2PasswordBearer, HTTPBearer, HTTPAuthorizationCredentials
+
 from pydantic import BaseModel
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s:%(funcName)s:%(lineno)d - %(message)s')
@@ -23,6 +24,8 @@ dotenv.load_dotenv(".env")
 
 SECRET_KEY = os.getenv("INSTANCE_SECRET")
 ALGORITHM = "HS256"
+
+#security = HTTPBearer()
 
 class Token(BaseModel):
     access_token: str
@@ -48,7 +51,10 @@ class SQLRequest(BaseModel):
     params: dict | None = None
     allowedRolesRequester: list[str]
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="token",
+    auto_error=False,
+)
 
 async def get_token_header(x_token: Annotated[str, Header()]):
     if x_token != "fake-super-secret-token":
@@ -202,12 +208,36 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         raise credentials_exception
     return user
 
+async def get_optional_user(
+    token: Annotated[str | None, Depends(oauth2_scheme)]
+) -> User | None:
+    try:
+        return await get_current_user(token)
+    except:
+        return None
+
 async def get_current_active_user(
     current_user: Annotated[User, Depends(get_current_user)],
 ):
     #if current_user.disabled:
     #    raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+# Dépendance pour l'utilisateur authentifié (optionnelle)
+async def get_current_active_user_optional(
+    current_user: Annotated[User | None, Depends(get_optional_user)],
+    #credentials: HTTPAuthorizationCredentials = Security(security, scopes=[])
+) -> Optional[User]:
+    return current_user
+    # try:
+    #     print("srfqsfqfezrfqfgqezgfqegfqef", flush=True)
+    #     logging.error("dsfszefsefzefzefzef")
+    #     token = credentials.credentials
+    #     user = await get_optional_user(token)
+    #     return await get_current_active_user(user)
+    #     #return await get_current_active_user(token)
+    # except HTTPException:
+    #     return None
 
 def has_role(role_required: str):
     async def check_role(
