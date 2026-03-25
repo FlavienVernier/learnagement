@@ -143,6 +143,13 @@ def create_heatmap_for_niveau(niveau, df_pivot_niveau, module_names):
     fig = go.Figure()
     z_max = df_pivot_niveau.max().max()
 
+    module_names_list = [
+        module_names.get(mod, module_names.get(float(mod) if not isinstance(mod, float) else mod, f"Module {mod}"))
+        for mod in df_used.index
+    ]
+    # customdata : ID du module pour chaque cellule (utilisé par le callback pour le drill-down)
+    module_ids_customdata = [[str(mod)] * len(df_used.columns) for mod in df_used.index]
+
     for j in range(df_used.shape[1]):
         comp = df_used.columns[j]
         color_scale = ["white", get_competence_color(comp)]
@@ -150,10 +157,6 @@ def create_heatmap_for_niveau(niveau, df_pivot_niveau, module_names):
         for col in df_comp.columns:
             if col != comp:
                 df_comp.loc[:, col] = pd.NA
-        module_names_list = [
-            module_names.get(mod, module_names.get(float(mod) if not isinstance(mod, float) else mod, f"Module {mod}"))
-            for mod in df_used.index
-        ]
         fig.add_trace(
             go.Heatmap(
                 z=df_comp.values,
@@ -166,6 +169,7 @@ def create_heatmap_for_niveau(niveau, df_pivot_niveau, module_names):
                 hoverongaps=False,
                 xgap=1,
                 ygap=1,
+                customdata=module_ids_customdata,
                 hovertemplate="<b>%{y}</b><br>%{x}<br>AC: %{z}<extra></extra>",
             )
         )
@@ -192,7 +196,7 @@ def create_heatmap_for_niveau(niveau, df_pivot_niveau, module_names):
 
 def create_heatmap_for_module(module_id, df_pivot_module, module_names):
     df_reorganized = df_pivot_module.replace(
-        {"Requis": 3, "Recommandé": 2, "Complémentaire": 1, "": 0}
+        {"Requis": 3, "Recommandé": 2, "Complémentaire": 1, "Non associé": 0, "": 0}
     )
     df_used = df_reorganized.xs(module_id, level="id_module").astype("Int64")
     fig = go.Figure()
@@ -595,16 +599,25 @@ def register_callbacks(app):
                     except (ValueError, TypeError):
                         pass
             elif current_level == "semester":
-                clicked_name = point.get("y")
-                if clicked_name is not None:
-                    clicked_id = module_ids_str.get(clicked_name)
-                    if clicked_id is not None:
-                        try:
-                            clicked_id = float(clicked_id)
-                        except (ValueError, TypeError):
-                            pass
+                # Utilise customdata (ID du module) si disponible, sinon fallback sur le nom
+                customdata_val = point.get("customdata")
+                if customdata_val is not None:
+                    try:
+                        raw = customdata_val[0] if isinstance(customdata_val, list) else customdata_val
+                        new_module = float(raw)
                         new_level  = "module"
-                        new_module = clicked_id
+                    except (ValueError, TypeError):
+                        pass
+                else:
+                    clicked_name = point.get("y")
+                    if clicked_name is not None:
+                        clicked_id = module_ids_str.get(clicked_name)
+                        if clicked_id is not None:
+                            try:
+                                new_module = float(clicked_id)
+                                new_level  = "module"
+                            except (ValueError, TypeError):
+                                pass
 
         try:
             df_pivot_global, df_pivot_niveau, df_pivot_module = compute_competency_counts_per_module(filtered_df)
