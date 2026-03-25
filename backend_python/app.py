@@ -6,6 +6,7 @@ import init
 
 from system import authenticate, check
 from user import LNM_enseignant, LNM_etudiant, LNM_evaluation, LNM_filiere,  LNM_university, MAQUETTE_module
+from user import APC_data
 
 class bcolors:
     HEADER = '\033[95m'
@@ -36,6 +37,7 @@ app.include_router(LNM_university.router)
 app.include_router(LNM_filiere.router)
 app.include_router(MAQUETTE_module.router)
 app.include_router(LNM_evaluation.router)
+app.include_router(APC_data.router)
 
 # app.include_router(
 #     authenticate.router,

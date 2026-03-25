@@ -64,6 +64,7 @@ def import_apps():
     from app11_dag_dependance import app11_layout, register_callbacks as register_callbacks_app11
     from app13_mccc_administratif import app13_administratif_layout, register_callbacks as register_callbacks_app13_administratif
     from app14_check_administratif import app14_administratif_layout, register_callbacks as register_callbacks_app14_administratif
+    from apc_learnagement.apc20_heatmap_apc import heatmap_apc_layout, register_callbacks as register_callbacks_heatmap_apc
     return {
         'app2': (app2_layout, register_callbacks_app2),
         'app3_administratif': (app3_administratif_layout, register_callbacks_app3_administratif),
@@ -83,6 +84,7 @@ def import_apps():
         'app11': (app11_layout, register_callbacks_app11),
         'app13_administratif': (app13_administratif_layout, register_callbacks_app13_administratif),
         'app14_administratif': (app14_administratif_layout, register_callbacks_app14_administratif),
+        'apc20_heatmap_apc': (heatmap_apc_layout, register_callbacks_heatmap_apc),
     }
 
 LOGO = "https://placehold.co/100x100"
@@ -96,6 +98,7 @@ menu_items = {
         ('MCCC', 'app13_administratif'),
         ('Check', 'app14_administratif'),
         ('Charge enseignant', 'app7_administratif'),
+        ('APC', 'apc20_heatmap_apc'),
     ],
     'enseignant': [
         ('Vue modules', 'app5_enseignant_view'),
@@ -105,6 +108,7 @@ menu_items = {
         ('Notes', 'app4_enseignant'),
         ('Charge de travail', 'app7_enseignant'),
         ('Tutorat stages', 'app10_enseignant'),
+        ('APC', 'apc20_heatmap_apc'),
     ],
     'etudiant': [
         ('Compétences', 'app2'),
@@ -113,7 +117,8 @@ menu_items = {
         ('Dépendance Séances', 'app11'),
         ('Charge de travail', 'app7_etudiant'),
         ('Avancement rendus', 'app9'),
-        ('Stages', 'app10_etudiant')
+        ('Stages', 'app10_etudiant'),
+        ('APC', 'apc20_heatmap_apc'),
     ]
 }
 
