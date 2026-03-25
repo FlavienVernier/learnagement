@@ -209,39 +209,19 @@
             ["label" => "Dupliquer", "icon" => "⎘"],
             ["type" => "divider"],
             ["label" => "Supprimer", "icon" => "🗑", "danger" => true]
-        ];
-
-        // Notice we added the 'onclick' right here!
-        $dropdownTrigger = render("components/button", [
-            "label" => "Actions <span style='font-size:9px; opacity:.6'>▾</span>", 
-            "variant" => "secondary",
-            "onclick" => "toggleDropdown('dd1')" 
-        ]);
-        ?>
+        ];?>
 
         <?= render("components/dropdown", [
-            "id" => "dd1",
-            "trigger" => $dropdownTrigger,
+            "id"    => "dd1",
+            "label" => "Actions <span style='font-size:9px;opacity:.6'>▾</span>",
+            "items" => $dropdownItems
+        ]) ?>
+        <?= render("components/dropdown", [
+            "id"    => "dd2",
+            "label" => "Sélection <span style='font-size:9px;opacity:.6'>▾</span>",
             "items" => $dropdownItems
         ]) ?>
     </div>
-
-    <script>
-        function toggleDropdown(id) {
-            const menu = document.getElementById(id + '-menu');
-            if (!menu) return; // Prevent errors if menu isn't found
-            
-            const isOpen = menu.classList.contains('open');
-            document.querySelectorAll('.dropdown-menu.open').forEach(m => m.classList.remove('open'));
-            if (!isOpen) menu.classList.add('open');
-        }
-        
-        document.addEventListener('click', e => {
-            if (!e.target.closest('.dropdown')) {
-                document.querySelectorAll('.dropdown-menu.open').forEach(m => m.classList.remove('open'));
-            }
-        });
-    </script>
 
     <div class="test-section">
         <h3>8. Skeletons</h3>
@@ -292,33 +272,6 @@
         </div>
     </div>
 
-</div><script>
-    /* ── Toggle ── */
-    function syncToggle(input) { 
-        // Logic depends on your CSS, but usually just needs to trigger onchange 
-        console.log('Toggle state:', input.checked);
-    }
-
-    /* ── Dropdown ── */
-    function toggleDropdown(id) {
-        const menu = document.getElementById(id + '-menu');
-        const isOpen = menu.classList.contains('open');
-        document.querySelectorAll('.dropdown-menu.open').forEach(m => m.classList.remove('open'));
-        if (!isOpen) menu.classList.add('open');
-    }
-    
-    document.addEventListener('click', e => {
-        if (!e.target.closest('.dropdown')) {
-            document.querySelectorAll('.dropdown-menu.open').forEach(m => m.classList.remove('open'));
-        }
-    });
-
-    /* ── Tabs ── */
-    function setTab(btn, group) {
-        const parent = btn.closest('[role="tablist"]');
-        parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        btn.classList.add('active');
-    }
-</script>
+</div>
 </body>
 </html>
