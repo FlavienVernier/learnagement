@@ -1,10 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // Shared elements
     const btnPrev = document.getElementById("btn_prev");
     const btnNext = document.getElementById("btn_next");
     const pageInfo = document.getElementById("page_info");
 
-    // Add CSS animation for fade in if not present
     const style = document.createElement('style');
     style.innerHTML = `
         @keyframes fadeIn {
