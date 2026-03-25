@@ -12,6 +12,18 @@
 </script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
+<!-- ToDo : Déplacer dans un fichier global ex db.js -->
+<script>
+    window.ENV = {
+        BACKEND_URL: "http://127.0.0.1",
+        BACKEND_PORT: "44000",
+        USER_TOKEN: "<?= $_SESSION["jwt_token"] ?>"
+    };
+    console.log("Environnement chargé :", window.ENV);
+</script>
+
+<script type="module" src="pages/dashboard/mobility_map/map.js" defer></script>
+
 <!-- Map component -->
 <div id="map" style="height: 100%; width: 100%;"></div>
 
@@ -52,83 +64,3 @@
         </div>
     </form>
 </div>
-
-<!-- Fetch univ list from DB -->
-<?php
-    /////////////////
-    // WARNING !!!!
-    // Direct SQL queries are deprecated. Use backend API endpoints instead.
-    /////////////////
-    $sql = "SELECT * FROM MOB_partner_university";
-    $result = mysqli_query($conn, $sql) or die("Requête invalide: ". mysqli_error( $conn )."\n".$sql);
-    $universities = mysqli_fetch_all($result, MYSQLI_ASSOC);    
-?>
-
-<script>
-    function popupText(university) {
-        return `
-            <b>${university.name}</b> (${university.code})<br/>
-            <em class="text-[0.75rem]">${university.address}, ${university.country}</em><br/>
-            Langue${university.languages.includes(',') ? 's' : ''}: ${university.languages}<br/>
-            ${university.note_min !== null ? `Note min : ${university.note_min}<br/>` : ''}
-            <a href="${university.website}" target="_blank">${university.website}</a><br/>
-        `;
-    }
-
-    const map = L.map('map').setView([48.85, 2.35], 4);
-
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
-
-    const markers = L.markerClusterGroup();
-
-    const universities = <?= json_encode($universities) ?>;
-    // ToDo refactoring to access data throw api, not with direct sql request
-    // ToDo Token management required
-    /*const url = process.env.PYTHON_BACKEND_DOCKER_URL + ":" + process.env.PYTHON_BACKEND_DOCKER_PORT + "/university/"
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
-        }
-
-        const universities = await response.json();
-        console.log(universities);
-    } catch (error) {
-        console.error(error.message);
-    }*/
-
-    function updateMap() {
-        markers.clearLayers();
-        
-        const selectedFiliere = document.getElementById('filiereSelect').value;
-        const selectedSemestre = document.getElementById('semestreSelect').value;
-        const selectedNote = parseFloat(document.getElementById('noteMinRange').value);
-
-        const filtered = universities.filter(function(u) {
-            // Affiche univ si note_min <= selectedNote
-            const uNote = u.note_min === null ? 0 : parseFloat(u.note_min);
-            if (uNote > selectedNote) return false;
-            
-            let key = "";
-            if (selectedFiliere) {
-                key = selectedSemestre + "_" + selectedFiliere;
-            } else {
-                key = selectedSemestre + "_total_places";
-            }
-
-            return parseInt(u[key]) > 0;
-        });
-
-        filtered.forEach(function(university) {
-            const marker = L.marker([university.latitude, university.longitude])
-                .bindPopup(popupText(university));
-            markers.addLayer(marker);
-        });
-        map.addLayer(markers);
-    }
-
-    updateMap();
-</script>

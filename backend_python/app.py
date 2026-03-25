@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import logging
 
@@ -27,6 +28,14 @@ access_logger.addFilter(HealthFilter())
 
 #app = FastAPI(dependencies=[Depends(get_query_token)])
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(authenticate.router)
 app.include_router(check.router)

@@ -3966,8 +3966,6 @@ INSERT INTO `MOB_partner_university` VALUES (89,'BFH Bern University of Applied 
 INSERT INTO `MOB_partner_university` VALUES (90,'National United University (NUU)','TW-NUU','Taïwan','No.1, Lienda, Miaoli 360301, Taiwan',24.546052,120.812880,'https://www.nuu.edu.tw/index.php?Lang=en','Anglais',3,0,0,0,3,3,0,0,0,0,3,0,0,0,3,3,0,0,0,0,NULL,'Bilateral');
 UNLOCK TABLES;
 
-LOCK TABLES `MOB_partner_university_places` WRITE;
-/*!40000 ALTER TABLE `MOB_partner_university_places` DISABLE KEYS */;
 INSERT INTO `MOB_partner_university_places` (`id_partner_university`, `id_promo`, `number_of_places`)
 SELECT id_partner_university, 15, S8_IDU FROM MOB_partner_university WHERE S8_IDU > 0 AND S8_IDU IS NOT NULL UNION ALL
 SELECT id_partner_university, 16, S9_IDU FROM MOB_partner_university WHERE S9_IDU > 0 AND S9_IDU IS NOT NULL UNION 
@@ -3981,7 +3979,6 @@ SELECT id_partner_university, 27, S8_EIT FROM MOB_partner_university WHERE S8_EI
 SELECT id_partner_university, 28, S9_EIT FROM MOB_partner_university WHERE S9_EIT > 0 AND S9_EIT IS NOT NULL UNION ALL
 SELECT id_partner_university, 30, S8_MC FROM MOB_partner_university WHERE S8_MC > 0 AND S8_MC IS NOT NULL UNION ALL
 SELECT id_partner_university, 31, S9_MC FROM MOB_partner_university WHERE S9_MC > 0 AND S9_MC IS NOT NULL;
-UNLOCK TABLES;
 
 ALTER TABLE `MOB_partner_university`
     DROP COLUMN `S8_total_places`,
