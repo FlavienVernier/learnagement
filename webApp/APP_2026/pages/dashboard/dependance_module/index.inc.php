@@ -1,52 +1,59 @@
 <?php
 require_once __DIR__ . "/../../../utils/endpoint.php";
 $token = $_SESSION["jwt_token"];
-
-echo "<!-- DEBUG: dependency module index.inc.php loaded -->\n";
-echo "<!-- DEBUG: jwt_token = $token -->\n";
-
-echo '<link rel="stylesheet" href="pages/dashboard/dependance_module/dependance_module.css"/>';
-echo '<script type="module" src="pages/dashboard/dependance_module/index.inc.js" defer></script>';
 ?>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.css"/>
+<link rel="stylesheet" href="pages/dashboard/dependance_module/dependance_module.css"/>
+<script type="module" src="pages/dashboard/dependance_module/index.inc.js" defer></script>
+
+<script>
+    window.USER_TOKEN = "<?= htmlspecialchars($token) ?>";
+</script>
 
 <div class="dependance-module-container">
 
-    <header class="top-bar">
-        <a href="formulaire.php" class="btn-form">⬅ Aller au formulaire</a>
-    </header>
-
     <section class="main-content">
+        
         <div class="filters-section">
-            <select id="filiere" class="filter-dropdown">
-                <option value="">Sélectionner une Filière...</option>
-                <option value="informatique">Informatique</option>
-                <option value="design">Design</option>
-                <option value="commerce">Commerce</option>
-            </select>
+            <?= render("components/select", [
+                "label" => "Filière",
+                "minWidth" => 180,
+                "options" => ["Informatique", "Mécanique", "Électronique", "Génie civil"],
+                "id" => "filiere-filter"
+            ]) ?>
 
-            <select id="temps" class="filter-dropdown">
-                <option value="">Sélectionner une Période...</option>
-                <option value="semestre1">Semestre 1</option>
-                <option value="semestre2">Semestre 2</option>
-                <option value="annee">Année complète</option>
-            </select>
+            <?= render("components/select", [
+                "label" => "Période",
+                "minWidth" => 180,
+                "options" => ["Semestre 1", "Semestre 2", "Année complète"],
+                "id" => "periode-filter", 
+                "defaultText" => "Année complète"
+            ]) ?>
 
-            <select id="module" class="filter-dropdown">
-                <option value="">Sélectionner un Module...</option>
-                <option value="maths">Mathématiques</option>
-                <option value="dev_web">Développement Web</option>
-                <option value="marketing">Marketing</option>
-            </select>
+            <?= render("components/select", [
+                "label" => "Module",
+                "minWidth" => 180,
+                "options" => ["Mathématiques", "Chimie", "Management", "Sport"],
+                "id" => "module-filter"
+            ]) ?>
         </div>
 
         <div id="active-tags-container" class="tags-container"></div>
 
-        <div class="gantt-wrapper">
-            <div id="gantt-chart">
-                <p class="placeholder-text">Le diagramme de Gantt s'affichera ici</p>
+        <div class="gantt-container-with-button">
+            
+            <div class="button-section">
+                <?= render("components/button", ["label" => "Ajouter module", "variant" => "primary", "size" => "lg"]) ?>
             </div>
+
+            <div class="gantt-wrapper">
+                <svg id="gantt-chart"></svg>
+            </div>
+            
         </div>
-</section>
+
+    </section>
 
 </div>
-</html>

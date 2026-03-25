@@ -1,43 +1,6 @@
-/* Reset basique */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-}
-
-.dependance-module-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-}
-
-body {
-    background-color: #f4f7f6;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-}
-
-/* Bouton en haut à gauche */
-.top-bar {
-    padding: 15px 20px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.btn-form {
-    text-decoration: none;
-    background-color: #007bff;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 5px;
-    font-weight: bold;
-    display: inline-block;
-}
-
-.btn-form:hover {
-    background-color: #0056b3;
+.dependance-module-container, .main-content {
+    min-width: 0; 
+    max-width: 100%;
 }
 
 .main-content {
@@ -45,33 +8,41 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 90%;
     padding: 20px;
+    overflow: hidden;
 }
 
 .filters-section {
     display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: 15px;
-    margin-bottom: 20px;
+    width: 90%;
+    max-width: 1200px;
+    justify-content: flex-start;
+    align-items: flex-end;
+    margin-bottom: 10px;
 }
 
-.filter-dropdown {
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-size: 16px;
+.select {
+    height: 36px;
+    padding: 5px 10px;
+    font-size: 14px;
 }
 
-/* Zone des tags actifs */
 .tags-container {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
-    margin-bottom: 30px;
+    width: 90%;
+    max-width: 1200px;
+    margin-bottom: 20px;
 }
-
 .filter-tag {
-    background-color: #e2e8f0;
-    color: #333;
-    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    padding: 5px 10px;
     border-radius: 20px;
     display: flex;
     align-items: center;
@@ -79,40 +50,37 @@ body {
     font-size: 14px;
 }
 
-.remove-tag {
-    cursor: pointer;
-    background: none;
-    border: none;
-    font-weight: bold;
-    color: #ff4d4d;
-    font-size: 16px;
-}
 
-/* Zone du Gantt (Milieu Bas) */
-.gantt-wrapper {
+.gantt-container-with-button {
     width: 90%;
     max-width: 1200px;
-    flex: 1; /* Prend l'espace restant en bas */
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.button-section {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+    padding: 0;
+}
+
+
+.gantt-wrapper {
+    flex: 1;
     background: white;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
     padding: 20px;
-    overflow-x: auto;
+    overflow-x: auto; /* Scroll horizontal pour la frise */
+    overflow-y: auto; /* Scroll vertical pour les modules */
+    min-height: 0;
 }
 
 #gantt-chart {
-    width: 100%;
-    height: 100%;
-    border: 2px dashed #ccc;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.placeholder-text {
-    color: #888;
-    font-style: italic;
+    display: block;
+    margin: 0;
+    overflow-x: auto;
 }
