@@ -39,6 +39,7 @@ def verify_password(plain_password, hashed_password):
 
 
 
+
 def authenticate_user(user_login: str, password: str):
     user = get_user(user_login)
     if not user:

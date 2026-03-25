@@ -8,11 +8,8 @@ import jwt
 import dash_bootstrap_components as dbc
 from flask import session, jsonify
 from dash import Input, Output, dcc, html, State
-
-
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
-
 from auth import FlaskAuth, decode_token
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s:%(funcName)s:%(lineno)d - %(message)s')
@@ -43,7 +40,6 @@ icon_map = {
     'disconnected': 'fa-solid fa-xmark'
 }
 
-    
 # Importer les layouts des différentes applications
 def import_apps():
     from app2_spyder_plot_competences import app2_layout, register_callbacks as register_callbacks_app2
@@ -64,6 +60,7 @@ def import_apps():
     from app11_dag_dependance import app11_layout, register_callbacks as register_callbacks_app11
     from app13_mccc_administratif import app13_administratif_layout, register_callbacks as register_callbacks_app13_administratif
     from app14_check_administratif import app14_administratif_layout, register_callbacks as register_callbacks_app14_administratif
+    from apc_dash.apc20_KPI import  apc_layout,register_callbacks as register_callbacks_apc
     return {
         'app2': (app2_layout, register_callbacks_app2),
         'app3_administratif': (app3_administratif_layout, register_callbacks_app3_administratif),
@@ -83,8 +80,8 @@ def import_apps():
         'app11': (app11_layout, register_callbacks_app11),
         'app13_administratif': (app13_administratif_layout, register_callbacks_app13_administratif),
         'app14_administratif': (app14_administratif_layout, register_callbacks_app14_administratif),
+        'apc20_KPI_competence':(apc_layout,register_callbacks_apc)
     }
-
 LOGO = "https://placehold.co/100x100"
 apps = import_apps()
 
@@ -96,6 +93,8 @@ menu_items = {
         ('MCCC', 'app13_administratif'),
         ('Check', 'app14_administratif'),
         ('Charge enseignant', 'app7_administratif'),
+        ('APC_kpi','apc20_KPI_competence')
+    
     ],
     'enseignant': [
         ('Vue modules', 'app5_enseignant_view'),
@@ -105,6 +104,7 @@ menu_items = {
         ('Notes', 'app4_enseignant'),
         ('Charge de travail', 'app7_enseignant'),
         ('Tutorat stages', 'app10_enseignant'),
+        ('APC_kpi','apc20_KPI_competence')
     ],
     'etudiant': [
         ('Compétences', 'app2'),
@@ -113,7 +113,8 @@ menu_items = {
         ('Dépendance Séances', 'app11'),
         ('Charge de travail', 'app7_etudiant'),
         ('Avancement rendus', 'app9'),
-        ('Stages', 'app10_etudiant')
+        ('Stages', 'app10_etudiant'),
+        ('APC_kpi','apc20_KPI_competence')
     ]
 }
 
