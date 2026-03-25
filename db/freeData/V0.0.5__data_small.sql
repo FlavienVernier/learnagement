@@ -2334,6 +2334,10 @@ UNLOCK TABLES;
 LOCK TABLES `LNM_filiere` WRITE;
 /*!40000 ALTER TABLE `LNM_filiere` DISABLE KEYS */;
 INSERT INTO `LNM_filiere` VALUES (3,'Info','Informatique',18);
+INSERT INTO `LNM_filiere` VALUES (4,'Meca','Mécanique', NULL);
+INSERT INTO `LNM_filiere` VALUES (5,'Sys','Systèmes', NULL);
+INSERT INTO `LNM_filiere` VALUES (6,'Bat','Bâtiment', NULL);
+INSERT INTO `LNM_filiere` VALUES (7,'Eco','Écologie', NULL);
 /*!40000 ALTER TABLE `LNM_filiere` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2350,6 +2354,21 @@ INSERT INTO `LNM_groupe` VALUES (8,'IDU3_TP12',5,3);
 INSERT INTO `LNM_groupe` VALUES (9,'IDU4_TP11',15,3);
 INSERT INTO `LNM_groupe` VALUES (10,'IDU4_TP12',15,3);
 INSERT INTO `LNM_groupe` VALUES (11,'IDU5_TP11',16,3);
+INSERT INTO `LNM_groupe` VALUES (12,'IDU5_TP12',16,3);
+INSERT INTO `LNM_groupe` VALUES (13,'MM3',17,1);
+INSERT INTO `LNM_groupe` VALUES (14,'MM4',18,1);
+INSERT INTO `LNM_groupe` VALUES (15,'MM5',19,1);
+INSERT INTO `LNM_groupe` VALUES (25,'SNI3',20,1);
+INSERT INTO `LNM_groupe` VALUES (26,'SNI4',21,1);
+INSERT INTO `LNM_groupe` VALUES (27,'SNI5',22,1);
+INSERT INTO `LNM_groupe` VALUES (37,'BAT3',23,1);
+INSERT INTO `LNM_groupe` VALUES (38,'BAT4',24,1);
+INSERT INTO `LNM_groupe` VALUES (39,'BAT5',25,1);
+INSERT INTO `LNM_groupe` VALUES (49,'EIT3',26,1);
+INSERT INTO `LNM_groupe` VALUES (50,'EIT4',27,1);
+INSERT INTO `LNM_groupe` VALUES (51,'EIT5',28,1);
+INSERT INTO `LNM_groupe` VALUES (62,'MC4',30,1);
+INSERT INTO `LNM_groupe` VALUES (63,'MC5',31,1);
 /*!40000 ALTER TABLE `LNM_groupe` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2371,6 +2390,21 @@ LOCK TABLES `LNM_promo` WRITE;
 INSERT INTO `LNM_promo` VALUES (5,3,1,3,NULL,'Annecy',1,1,2,NULL);
 INSERT INTO `LNM_promo` VALUES (15,3,1,4,NULL,'Annecy',1,1,2,NULL);
 INSERT INTO `LNM_promo` VALUES (16,3,1,5,NULL,'Annecy',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (17,4,1,3,NULL,'Annecy',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (18,4,1,4,NULL,'Annecy',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (19,4,1,5,NULL,'Annecy',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (20,5,1,3,NULL,'Annecy',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (21,5,1,4,NULL,'Annecy',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (22,5,1,5,NULL,'Annecy',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (23,6,1,3,NULL,'Chambéry',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (24,6,1,4,NULL,'Chambéry',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (25,6,1,5,NULL,'Chambéry',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (26,7,1,3,NULL,'Chambéry',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (27,7,1,4,NULL,'Chambéry',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (28,7,1,5,NULL,'Chambéry',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (29,4,1,3,NULL,'Chambéry',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (30,4,1,4,NULL,'Chambéry',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (31,4,1,5,NULL,'Chambéry',1,1,2,NULL);
 /*!40000 ALTER TABLE `LNM_promo` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3931,6 +3965,45 @@ INSERT INTO `MOB_partner_university` VALUES (88,'Högskolan Dalarna','SE-HD','Su
 INSERT INTO `MOB_partner_university` VALUES (89,'BFH Bern University of Applied Sciences','CH-BUAS','Suisse','Bern Holzikofenweg 8',46.937107,7.433990,'https://www.bfh.ch/ahb/fr/','Anglais, Allemand',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,'Bilateral');
 INSERT INTO `MOB_partner_university` VALUES (90,'National United University (NUU)','TW-NUU','Taïwan','No.1, Lienda, Miaoli 360301, Taiwan',24.546052,120.812880,'https://www.nuu.edu.tw/index.php?Lang=en','Anglais',3,0,0,0,3,3,0,0,0,0,3,0,0,0,3,3,0,0,0,0,NULL,'Bilateral');
 UNLOCK TABLES;
+
+LOCK TABLES `MOB_partner_university_places` WRITE;
+/*!40000 ALTER TABLE `MOB_partner_university_places` DISABLE KEYS */;
+INSERT INTO `MOB_partner_university_places` (`id_partner_university`, `id_promo`, `number_of_places`)
+SELECT id_partner_university, 15, S8_IDU FROM MOB_partner_university WHERE S8_IDU > 0 AND S8_IDU IS NOT NULL UNION ALL
+SELECT id_partner_university, 16, S9_IDU FROM MOB_partner_university WHERE S9_IDU > 0 AND S9_IDU IS NOT NULL UNION 
+SELECT id_partner_university, 18, S8_MM FROM MOB_partner_university WHERE S8_MM > 0 AND S8_MM IS NOT NULL UNION ALL
+SELECT id_partner_university, 19, S9_MM FROM MOB_partner_university WHERE S9_MM > 0 AND S9_MM IS NOT NULL UNION ALL
+SELECT id_partner_university, 21, S8_SNI FROM MOB_partner_university WHERE S8_SNI > 0 AND S8_SNI IS NOT NULL UNION ALL
+SELECT id_partner_university, 22, S9_SNI FROM MOB_partner_university WHERE S9_SNI > 0 AND S9_SNI IS NOT NULL UNION ALL
+SELECT id_partner_university, 24, S8_BAT FROM MOB_partner_university WHERE S8_BAT > 0 AND S8_BAT IS NOT NULL UNION ALL
+SELECT id_partner_university, 25, S9_BAT FROM MOB_partner_university WHERE S9_BAT > 0 AND S9_BAT IS NOT NULL UNION ALL
+SELECT id_partner_university, 27, S8_EIT FROM MOB_partner_university WHERE S8_EIT > 0 AND S8_EIT IS NOT NULL UNION ALL
+SELECT id_partner_university, 28, S9_EIT FROM MOB_partner_university WHERE S9_EIT > 0 AND S9_EIT IS NOT NULL UNION ALL
+SELECT id_partner_university, 30, S8_MC FROM MOB_partner_university WHERE S8_MC > 0 AND S8_MC IS NOT NULL UNION ALL
+SELECT id_partner_university, 31, S9_MC FROM MOB_partner_university WHERE S9_MC > 0 AND S9_MC IS NOT NULL;
+UNLOCK TABLES;
+
+ALTER TABLE `MOB_partner_university`
+    DROP COLUMN `S8_total_places`,
+    DROP COLUMN `S8_MM`,
+    DROP COLUMN `S8_MC`,
+    DROP COLUMN `S8_MMT`,
+    DROP COLUMN `S8_SNI`,
+    DROP COLUMN `S8_BAT`,
+    DROP COLUMN `S8_EIT`,
+    DROP COLUMN `S8_IDU`,
+    DROP COLUMN `S8_ESB`,
+    DROP COLUMN `S8_AM`,
+    DROP COLUMN `S9_total_places`,
+    DROP COLUMN `S9_MM`,
+    DROP COLUMN `S9_MC`,
+    DROP COLUMN `S9_MMT`,
+    DROP COLUMN `S9_SNI`,
+    DROP COLUMN `S9_BAT`,
+    DROP COLUMN `S9_EIT`,
+    DROP COLUMN `S9_IDU`,
+    DROP COLUMN `S9_ESB`,
+    DROP COLUMN `S9_AM`;
 
 LOCK TABLES `MRDBF_system_request` WRITE;
 /*!40000 ALTER TABLE `MRDBF_system_request` DISABLE KEYS */;

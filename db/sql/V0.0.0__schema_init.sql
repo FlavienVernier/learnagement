@@ -704,7 +704,6 @@ CREATE TABLE `MOB_partner_university_places` (
   `id_promo` int NOT NULL,
   `number_of_places` int NOT NULL,
   PRIMARY KEY (`id_partner_university`,`id_promo`),
-  UNIQUE KEY `SECONDARY` (`id_partner_university`,`id_promo`),
   KEY `FK_partner_university_places_as_promo` (`id_promo`),
   CONSTRAINT `FK_partner_university_places_as_partner_university` FOREIGN KEY (`id_partner_university`) REFERENCES `MOB_partner_university` (`id_partner_university`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_partner_university_places_as_promo` FOREIGN KEY (`id_promo`) REFERENCES `LNM_promo` (`id_promo`) ON DELETE RESTRICT ON UPDATE RESTRICT
