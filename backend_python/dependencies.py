@@ -88,6 +88,9 @@ def get_administratif(user_login: str):
         logger.exception(e)
     if len(users) != 0:
         user_dict = users[0]
+        if not user_dict.get("password"):
+            logger.warning(f"Inactive user '{user_login}' try to connect")
+            return None
         user_dict["roles"] = ["user", "administratif", users[0]['ExplicitSecondaryK']]
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor()
@@ -121,6 +124,9 @@ def get_enseignant(user_login: str):
         logger.exception(e)
     if len(users) != 0:
         user_dict = users[0]
+        if not user_dict.get("password"):
+            logger.warning(f"Inactive user '{user_login}' try to connect")
+            return None
         user_dict["roles"] = ["user", "enseignant", users[0]['ExplicitSecondaryK']]
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor()
@@ -154,6 +160,9 @@ def get_etudiant(user_login: str):
         logger.exception(e)
     if len(users) != 0:
         user_dict = users[0]
+        if not user_dict.get("password"):
+            logger.warning(f"Inactive user '{user_login}' try to connect")
+            return None
         user_dict["roles"] = ["user", "etudiant", users[0]['ExplicitSecondaryK']]
         return UserInDB(**user_dict)
     return None

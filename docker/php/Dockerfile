@@ -14,12 +14,20 @@ RUN a2enmod ssl
 # Working directory
 WORKDIR /var/www/html
 
+# Copie les vhosts
+COPY ssl.conf /etc/apache2/sites-available/ssl.conf
+#COPY default.conf /etc/apache2/sites-available/000-default.conf
+
+# Activer le site SSL
+RUN a2ensite ssl.conf
+
 # Copy entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh \
     && sed -i 's/\r$//' /entrypoint.sh
 
 EXPOSE 80
+EXPOSE 443
 
 # IMPORTANT: use entrypoint, not command
 ENTRYPOINT ["/entrypoint.sh"]

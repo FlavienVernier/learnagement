@@ -13,13 +13,26 @@ error_log('Your message here');
     //$token = base64_encode(json_encode($payload)) . '.' . hash_hmac('sha256', json_encode($payload), $secret);
 ?>
 
-<!--<iframe src="<?php /*= 'http://'. $_SERVER['SERVER_NAME'] . ':' . $_ENV['DASH_PORT'] . '/'. $type . '/' .
+<!--
+    <iframe src="<?php /*= 'http://'. $_SERVER['SERVER_NAME'] . ':' . $_ENV['DASH_PORT'] . '/'. $type . '/' .
         '?auth_old_token=' . urlencode($token) .
         '&jwt_token=' . $_SESSION["jwt_token"]
         */?>"
-    class="h-full w-full" style="border:none;"></iframe>-->
+    class="h-full w-full" style="border:none;"></iframe>
+-->
 
+
+<?php
+    $protocol = $_ENV['ENV'] === 'prod' ? 'https' : 'http';
+    $dash_url = $protocol . '://' . $_SERVER['SERVER_NAME'] . ':' . $_ENV['DASH_PORT'] . '/' . $type . '/?jwt_token=' . $_SESSION["jwt_token"];
+?>
+
+<iframe src="<?= $dash_url ?>"
+        class="h-full w-full" style="border:none;"></iframe>
+
+<!--
 <iframe src="<?= 'http://'. $_SERVER['SERVER_NAME'] . ':' . $_ENV['DASH_PORT'] . '/'. $type . '/' .
 '?jwt_token=' . $_SESSION["jwt_token"]
 ?>"
         class="h-full w-full" style="border:none;"></iframe>
+-->

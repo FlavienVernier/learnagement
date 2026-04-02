@@ -1,13 +1,15 @@
-# General Normalization and spécific Normalisations
+# General Documentation
 
-## directory architechture and contents
-- Doc dyrectory architechture the same as app directory
-- Doc dyrectory architechture contains only Norm.md files and their resources
+## directory architecture and contents
+- Doc directory architecture the same as app directory
+- Doc directory architecture contains at least one doc.md files
 
 ## Useful tools
 - Existing backend endpoints: 127.0.0.1:```i```4000/docs#/
 - Firefox RESTED extension
 - Chrome Client REST extension
+
+## [Dev/Prod environnement](prod.md)
 
 ## [Docker](./docker/doc.md)
 

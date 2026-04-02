@@ -8,11 +8,13 @@ import time
 import socket
 import datetime
 import dotenv
+import re
 #from dotenv import load_dotenv
 from getpass import getpass
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes
 from pathlib import Path
+
 
 # Couleurs pour les messages (non directement nécessaires dans Python mais émulation via ANSI codes)
 RED = "\033[0;31m"
@@ -24,6 +26,7 @@ YELLOW='\033[0;33m'
 #White='\033[0;37m'
 NC = "\033[0m"  # No color
 
+ENVIRONMENT= "dev"
 INSTANCE_NAME=None
 INSTANCE_NUMBER=None
 DOCKER_COMMAND=[]
@@ -31,12 +34,6 @@ DOCKER_COMPOSE_COMMAND=[]
 
 containers = ["docker", "backend_python", "webApp", "front_DashPlotly", "front_NextJS", ]
 
-def load_dotenv():
-    dotenv.load_dotenv()
-    global DOCKER_COMMAND
-    DOCKER_COMMAND=os.environ["DOCKER_COMMAND"].split(' ')
-    global DOCKER_COMPOSE_COMMAND
-    DOCKER_COMPOSE_COMMAND=os.environ["DOCKER_COMPOSE_COMMAND"].split(' ')
 
 #def generate_nextauth_secret(base_secret: str) -> bytes:
 def __generate_secret__() -> bytes:
@@ -54,6 +51,87 @@ def __generate_secret__() -> bytes:
     derived_key = hkdf.derive(base_secret.encode('utf-8'))
     return derived_key
 
+def load_dotenv():
+    dotenv.load_dotenv()
+    global DOCKER_COMMAND
+    DOCKER_COMMAND=os.environ["DOCKER_COMMAND"].split(' ')
+    global DOCKER_COMPOSE_COMMAND
+    DOCKER_COMPOSE_COMMAND=os.environ["DOCKER_COMPOSE_COMMAND"].split(' ')
+
+def update_env_variable(env_variables, key=None, value=None):
+    updated = re.sub(
+        rf'^{key}=.*$',
+        f'{key}={value}',
+        env_variables,
+        flags=re.MULTILINE
+    )
+    return updated
+
+def __generate_env():
+    if not os.path.exists(".env2"):
+        dotenv.load_dotenv("env_skeleton.env")
+        with open("env_skeleton.env", 'r') as f:
+            content = f.read()
+
+        # Instance
+
+        instance_name = input("Give the intance name (lowercase): ").lower()
+        content = update_env_variable(content, key="INSTANCE_NAME", value=instance_name)
+        content = update_env_variable(content, key="COMPOSE_PROJECT_NAME", value=f"learnagement_{instance_name}")
+
+        # Due to ports generation, and as ports 1XXXX are locked in some OS, instance number 1 cannot be used
+        instance_number = "-1"
+        while not instance_number in ["0", "2", "3", "4"]:
+            try:
+                instance_number = input("Give the instance number (0,2,3 or 4 -- not 1): ")
+            except:
+                instance_number = "-1"
+        content=update_env_variable(content, key="INSTANCE_NUMBER", value=INSTANCE_NUMBER)
+
+        # Compute ports
+        backend_python_port  = int(instance_number) * 10000 + int(os.environ["BACKEND_PYTHON_DOCKER_PORT"])
+        front_php_port = int(instance_number) * 10000 + int(os.environ["FRONT_PHP_DOCKER_PORT"])
+        front_dash_port = int(instance_number) * 10000 + int(os.environ["FRONT_DASH_DOCKER_PORT"])
+        front_nextauth_port = int(instance_number) * 10000 + int(os.environ["FRONT_NEXTAUTH_DOCKER_PORT"])
+        instance_port = front_php_port
+
+        content = update_env_variable(content, key="COMPOSE_PROJECT_NAME", value=f"learnagement_{instance_name}")
+
+        content = update_env_variable(content, key="INSTANCE_SECRET", value=str(__generate_secret__().hex()))
+        content = update_env_variable(content, key="INSTANCE_URL", value = protocol + "://" + socket.gethostname())
+        content = update_env_variable(content, key="INSTANCE_PORT", value = str(instance_port))
+
+        # MySQL
+        content = update_env_variable(content, key="MYSQL_SERVER", value=f"learnagement_mysql_{instance_name}")
+        content = update_env_variable(content, key="MYSQL_ROOT_PASSWORD ", value=getpass("Give the MySQL Root password: "))
+        content = update_env_variable(content, key="MYSQL_USER_PASSWORD", value=getpass("Give the MySQL User password: "))
+
+        # Backend
+        content = update_env_variable(content, key="BACKEND_PYTHON_DOCKER_URL", value=f"http://learnagement_backend_python_{instance_name}")
+        content = update_env_variable(content, key="BACKEND_PYTHON_PORT", value=str(backend_python_port))
+
+        # Fronts
+        content = update_env_variable(content, key="FRONT_PHP_PORT", value=str(front_php_port))
+        content = update_env_variable(content, key="FRONT_DASH_PORT", value=str(front_dash_port))
+        content = update_env_variable(content, key="FRONT_NEXTAUTH_PORT", value=str(front_nextauth_port))
+
+        with open(".env2", 'w') as f:
+            f.write(content)
+    dotenv.load_dotenv()
+
+def update_env_file_variable(env_file=".env", key=None, value=None):
+    if key and value:
+        with open(env_file, 'r') as f:
+            content = f.read()
+
+        updated = update_env_variable(content, key, value)
+
+        with open(env_file, 'w') as f:
+            f.write(updated)
+
+        print(f"{YELLOW}Warning: environment variables changed!{NC}")
+
+# Deprecated, use __generate_env instead
 def __mainConfiguration__():
     """
     Ask the system administrator for configuration information if the configuration file does not exist and store these information into "config.py"
@@ -61,14 +139,17 @@ def __mainConfiguration__():
     
     #if not os.path.exists("config.py") or not os.path.exists(".env"):
     if not os.path.exists(".env"):
+        # ToDo refactor so that default parameters are in skeleton.env file
         with open(".env", 'w') as file:
             file.write("#########################################################################" + "\n")
             file.write("# Edit only .env in the Learnagement root directory, next propagate it with 'Learnagement -updateEnv' #" + "\n")
             file.write("#########################################################################" + "\n")
             file.write("" + "\n")
+            file.write("ENV=" + ENVIRONMENT + "\n")
             file.write("SESSION_TIMEOUT=" + "900" + "\n")
             file.write("DOCKER_COMMAND=docker" + "\n")
             file.write("DOCKER_COMPOSE_COMMAND=docker compose" + "\n")
+            file.write("SSL_DIR=" + "../certs/" + "\n")
 
 
             file.write("" + "\n")
@@ -76,6 +157,8 @@ def __mainConfiguration__():
             file.write("# DO NOT EDIT ANY VARIABLE AFTER THIS LINE"  + "\n")
             file.write("#########################################################################" + "\n")
             file.write("" + "\n")
+
+            file.write("DOCKER_SSL_DIR=" + "/etc/ssl/learnagement/" + "\n")
 
             instance_name = input("Give the intance name (lowercase): ").lower()
             file.write("COMPOSE_PROJECT_NAME=learnagement_" + instance_name + "\n") # Define project name for docker
@@ -100,6 +183,11 @@ def __mainConfiguration__():
             file.write("MYSQL_USER_LOGIN=learnagement" + "\n")
             file.write("MYSQL_USER_PASSWORD=" + getpass("Give the MySQL User password: ") + "\n")
 
+            file.write("" + "\n")
+            file.write("#########################################################################" + "\n")
+            file.write("" + "\n")
+
+            file.write("FRONT_PHP_PORT=80" + "\n")
 
             file.write("" + "\n")
             file.write("#########################################################################" + "\n")
@@ -147,6 +235,7 @@ def updateEnv():
         shutil.copy(source_path, target_path)
         print(f"Copied: {source_path} -> {target_path}")
 
+        
 def __dbConfiguration__():
 
     init_db_folder = os.path.join("db", "docker-entrypoint-initdb.d")
@@ -229,6 +318,8 @@ def __dockerConfiguration__():
         __searchReplaceInFile__("docker-compose.yml", "${INSTANCE_NAME}", os.environ["INSTANCE_NAME"])
         __searchReplaceInFile__("docker-compose.yml", "${INSTANCE_NUMBER}", str(os.environ["INSTANCE_NUMBER"]))
         #searchReplaceInFile("docker-compose.yml", "MYSQL_ROOT_PASSWORD", os.environ["MYSQL_ROOT_PASSWORD"])
+        __searchReplaceInFile__("docker-compose.yml", "${SSL_DIR}", str(os.environ["SSL_DIR"]))
+        __searchReplaceInFile__("docker-compose.yml", "${DOCKER_SSL_DIR}", str(os.environ["DOCKER_SSL_DIR"]))
     elif(os.path.getmtime("docker-compose.yml.skeleton") > os.path.getmtime("docker-compose.yml")):
         print(f"{YELLOW}WARNING: docker-compose.yml.skeleton has been updated, your docker-compose.yml can be deprecated{NC}")
     
@@ -269,13 +360,17 @@ def __dockerRun__(docker_option):
 
     
 
-def start(docker_option = []):
+def start(docker_option = None):
+    if not docker_option:
+        docker_option = []
     __mainConfiguration__()
+    __generate_env()
 
     __dbConfiguration__()
     __dbDataConfiguration__()
 
     __dockerConfiguration__()
+    __security_check()
     __dockerRun__(docker_option)
     
     print(f"{YELLOW}WWeb Apps will run on: {os.environ['INSTANCE_NUMBER']}0080{NC}")
@@ -399,7 +494,7 @@ def exportInstance():
     except OSError as error:
         print(error)
 
-def importInstance(instanceArchive):
+def import_instance(instanceArchive):
     # Check if instance is not already running from .
     # ToDo
     # If no instance running
@@ -475,7 +570,34 @@ def destroy():
     else:
         print(f"{GREEN}App not destroyed{NC}")
 
-def fromScratch():
+def from_env(environment=None):
+    if environment:
+        global ENVIRONMENT
+        ENVIRONMENT=environment
+
+        # buils .env if not exist
+        __mainConfiguration__()
+        __generate_env()
+
+        # remove configuration files that depends on .env
+        try:
+            os.remove(os.path.join("docker", "docker-compose.yml"))
+        except FileNotFoundError as e:
+            print(e)
+
+        # Reset environment variable according to dev or prod environment
+        update_env_file_variable(key="ENV", value=environment)
+        if environment == "prod":
+            # ToDo refactor so that default parameters are in prod.env file
+            update_env_file_variable(key="FRONT_PHP_PORT", value=344)
+        else:
+            # ToDo refactor so that default parameters are in dev.env file
+            update_env_file_variable(key="FRONT_PHP_PORT", value=80)
+
+    # Update .env for each sub-app
+    updateEnv()
+
+def from_scratch():
 
     load_dotenv()
 
@@ -517,9 +639,56 @@ def fromScratch():
         print(f"{GREEN}The application was reset to its initial state.{NC}")
 
 
-def help(argv):
-    print("Usage: " + argv[0] + " [-start|-stop|-build|-backupDB|-fromScratch|-updateEnv|-exportInstance|-importInstance FILE_NAME|-help]")
-            
+
+def __get_git_branch():
+    try:
+        branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            stderr=subprocess.DEVNULL
+        ).decode("utf-8").strip()
+        return branch
+    except Exception:
+        return None
+
+def __security_check():
+    load_dotenv()
+    git_branch = __get_git_branch()
+    if git_branch == "main" :
+        if os.environ["ENV"] !="prod" :
+            print(f"{RED}SECURITY ALERT: App run from main branch without 'ENV' environment variable set as 'prod'{NC}")
+            exit(1)
+
+    elif git_branch == "prerelease":
+        if os.environ["ENV"] != "prod":
+            print(f"{YELLOW}SECURITY WARNING: App run from prerelease branch without 'ENV' environment variable set as 'prod'{NC}")
+
+    else:
+        print(f"{GREEN}App run from '{git_branch}' branch with '{os.environ['ENV']}' environment{NC}")
+
+
+def __help(argv):
+    print(f"""
+        {GREEN}Usage:{NC} {argv[0]} [OPTION]
+        
+        {GREEN}Options:{NC}
+          -start                Start the application (default if no option given)
+          -build                Start the application and rebuild Docker images
+          -stop                 Stop the application
+          -backupDB             Backup the database (structure, data and triggers)
+          -fromEnv [dev|prod]   Reset the application to to use new .env , app must be stopped before
+          -fromScratch          Reset the application to its initial state (IRREVERSIBLE), app must be stopped before
+          -exportInstance       Export the current instance as a zip archive
+          -importInstance FILE  Import an instance from a zip archive
+          -help                 Show this help message
+        
+        {YELLOW}Examples:{NC}
+          {argv[0]} -start
+          {argv[0]} -stop
+          {argv[0]} -importInstance Learnagement_myinstance_20240101.zip
+        
+        {RED}WARNING:{NC} -fromScratch will delete all data and configuration. Use with caution.
+    """)
+
 def main(argv):
     # if script parameter is destroy
     if len(argv)==1 or (len(argv)==2 and argv[1] == "-start"):
@@ -531,15 +700,20 @@ def main(argv):
     elif len(argv)==2 and argv[1] == "-build":
         start(docker_option = ["--build"])
     elif len(argv)==2 and argv[1] == "-fromScratch":
-        fromScratch()
-    elif len(argv)==2 and argv[1] == "-updateEnv":
-        updateEnv()
+        from_scratch()
+    elif len(argv) in [2, 3] and argv[1] == "-fromEnv":
+        if len(argv)==2:
+            from_env()
+        elif argv[2] in ["dev","prod"]:
+            from_env(argv[2])
     elif len(argv)==2 and argv[1] == "-exportInstance":
         exportInstance()
     elif len(argv)==3 and argv[1] == "-importInstance":
-        importInstance(argv[2])
+        import_instance(argv[2])
+    elif len(argv) == 2 and argv[1] == "-help":
+        __help(argv)
     else:
-        help(argv)
+        __help(argv)
 
 if __name__ == "__main__":
     main(sys.argv)

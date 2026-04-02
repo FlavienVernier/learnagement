@@ -8,8 +8,8 @@ python -m venv docker_venv
 . docker_venv/bin/activate
 
 # Vérifier si l'installation a déjà été effectuée
-if [ ! -f "docker_venv/.installed" ]; then
-    echo "Première installation des dépendances..."
+if [ ! -f "docker_venv/.installed" ] || [ "requirements.txt" -nt "docker_venv/.installed" ]; then
+    echo "Première installation des dépendances, ou nouvelle dépendance..."
     pip install --upgrade pip
     pip install -r requirements.txt
     touch docker_venv/.installed
