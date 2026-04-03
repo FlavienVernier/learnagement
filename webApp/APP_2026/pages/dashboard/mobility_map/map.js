@@ -39,8 +39,44 @@ function popupText(university) {
         Langue${university.languages.includes(',') ? 's' : ''}: ${university.languages}<br/>
         ${university.note_min !== null ? `Note min : ${university.note_min}<br/>` : ''}
         <a href="${university.website}" target="_blank">${university.website}</a><br/>
+        <button
+            type="button"
+            onclick='window.addUniversityToWishes(${JSON.stringify(university)})'
+            class="mt-2 inline-flex items-center rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90"
+        >
+            Ajouter aux voeux
+        </button>
     `;
 }
+
+async function addUniversityToWishes(university) {
+    console.warn('Endpoint des voeux non défini.');
+    return;
+
+    try {
+        const response = await fetch(wishesEndpoint, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id_etudiant: window.ENV.USER_ID,
+                id_partner_university: university.id_partner_university,
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+
+        console.log('Université ajoutée aux voeux :', university);
+    } catch (error) {
+        console.error('Impossible d\'ajouter l\'université aux voeux :', error.message);
+    }
+}
+
+window.addUniversityToWishes = addUniversityToWishes;
 
 function updateMap() {
     markers.clearLayers();

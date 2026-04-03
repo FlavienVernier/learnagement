@@ -2,7 +2,7 @@ import logging
 
 from fastapi import APIRouter, Depends
 from typing import Annotated
-from pydantic import BaseModel
+from typing import Any, Dict
 
 from dependencies import db_request, get_current_active_user, User, SQLRequest
 
@@ -50,5 +50,32 @@ def list_universities_etudiant(
             "id_etudiant": id_etudiant
         },
         "allowedRolesRequester" : ["etudiant"],
+    }
+    return db_request(current_user, SQLRequest(**request))
+
+
+@router.post("/university/etudiant/{id_etudiant:int}/wish/{id_partner_university:int}",
+            tags=["user", "mobility"],
+            summary="Add university to wishes",
+            description="Add a partner university to the student's mobility wishes")
+def add_university_to_wishes(
+    id_etudiant: int,
+    id_partner_university: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request": """
+                        INSERT INTO MOB_wishes (id_etudiant, id_partner_university, priority)
+                        VALUES (%(id_etudiant)s, %(id_partner_university)s, (
+                            SELECT COALESCE(MAX(priority), 0) + 1
+                            FROM MOB_wishes
+                            WHERE id_etudiant = %(id_etudiant)s
+                        ))
+                    """,
+        "params": {
+            "id_etudiant": id_etudiant,
+            "id_partner_university": id_partner_university,
+        },
+        "allowedRolesRequester": ["etudiant"],
     }
     return db_request(current_user, SQLRequest(**request))
