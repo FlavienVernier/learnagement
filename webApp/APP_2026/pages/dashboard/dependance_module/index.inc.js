@@ -1,6 +1,21 @@
 const activeFilters = {};
 let myGantt = null;
 
+console.log("Données des modules :", dataModules);
+
+// Astuce : console.table() est très pratique pour afficher 
+// des tableaux d'objets (comme ce que te renvoie l'API) de manière lisible
+console.table(dataModules);
+
+console.log("Données des promos :", dataPromos);
+console.table(dataPromos);
+
+console.log("Données des filières :", dataFilieres);
+console.table(dataFilieres);
+
+console.log("Données des dépendances de modules :", dataModulesDependencies);
+console.table(dataModulesDependencies);
+
 let tasks_test = [
   {
     "id": "T1",

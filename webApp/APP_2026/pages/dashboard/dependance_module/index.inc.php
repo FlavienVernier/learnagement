@@ -1,6 +1,11 @@
 <?php
 require_once __DIR__ . "/../../../utils/endpoint.php";
 $token = $_SESSION["jwt_token"];
+
+$modulesResp = get_modules_responsables($token);
+$promos = get_promos($token);
+$filieres = get_filieres($token);
+$modulesDepedencies = get_module_dependencies(1, $token);
 ?>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
@@ -10,6 +15,10 @@ $token = $_SESSION["jwt_token"];
 
 <script>
     window.USER_TOKEN = "<?= htmlspecialchars($token) ?>";
+    const dataModules = <?php echo json_encode($modulesResp); ?>;
+    const dataPromos = <?php echo json_encode($promos); ?>;
+    const dataFilieres = <?php echo json_encode($filieres); ?>;
+    const dataModulesDependencies = <?php echo json_encode($modulesDepedencies); ?>;
 </script>
 
 <div class="dependance-module-container">
