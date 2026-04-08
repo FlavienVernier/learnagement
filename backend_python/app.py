@@ -5,7 +5,7 @@ import logging
 import init
 
 from system import authenticate, check
-from user import LNM_enseignant, LNM_etudiant, LNM_evaluation, LNM_filiere,  LNM_university, MAQUETTE_module,apc_KPI_competence
+from user import LNM_enseignant, LNM_etudiant, LNM_evaluation, LNM_filiere,  LNM_university, MAQUETTE_module,apc_KPI_competence,apc_competence
 
 class bcolors:
     HEADER = '\033[95m'
@@ -36,10 +36,14 @@ app.include_router(LNM_university.router)
 app.include_router(LNM_filiere.router)
 app.include_router(MAQUETTE_module.router)
 app.include_router(LNM_evaluation.router)
+
 app.include_router(apc_KPI_competence.router)
 @app.get("/etudiant")
 def get_etudiant():
     return{"message : liste des etudiants "}
+
+app.include_router(apc_competence.router)
+
 # app.include_router(
 #     authenticate.router,
 #     prefix="/authenticate",
@@ -74,3 +78,5 @@ if __name__ == "__main__":
     init.init()
     print(bcolors.OKGREEN + "Start backend Python..." + bcolors.ENDC)
     uvicorn.run(app, host="0.0.0.0", port=4000)
+
+
