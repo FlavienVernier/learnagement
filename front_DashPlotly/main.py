@@ -98,7 +98,7 @@ menu_items = {
         ('MCCC', 'app13_administratif'),
         ('Check', 'app14_administratif'),
         ('Charge enseignant', 'app7_administratif'),
-        ('APC', 'apc20_heatmap_apc'),
+        ('APC_heatmap', 'apc20_heatmap_apc'),
     ],
     'enseignant': [
         ('Vue modules', 'app5_enseignant_view'),
@@ -108,7 +108,7 @@ menu_items = {
         ('Notes', 'app4_enseignant'),
         ('Charge de travail', 'app7_enseignant'),
         ('Tutorat stages', 'app10_enseignant'),
-        ('APC', 'apc20_heatmap_apc'),
+        ('APC_heatmap', 'apc20_heatmap_apc'),
     ],
     'etudiant': [
         ('Compétences', 'app2'),
@@ -118,7 +118,7 @@ menu_items = {
         ('Charge de travail', 'app7_etudiant'),
         ('Avancement rendus', 'app9'),
         ('Stages', 'app10_etudiant'),
-        ('APC', 'apc20_heatmap_apc'),
+        ('APC_heatmap', 'apc20_heatmap_apc'),
     ]
 }
 
