@@ -64,6 +64,7 @@ def import_apps():
     from apc_dash.apc20_KPI import  apc_layout,register_callbacks as register_callbacks_apc
     from apc_dash.apc20_competence_ac import apc20_competence_ac_layout, register_callbacks as register_callbacks_apc20
     from apc_dash.app_reseaupolytech_etudiant import polytech_analysis_layout, register_reseau_polytech_callbacks
+    from apc_dash.apc20_metier_orientation import apc20_metier_orientation_layout,register_callbacks as register_callbacks_apc20_orientation_metier
     return {
         'app2': (app2_layout, register_callbacks_app2),
         'app3_administratif': (app3_administratif_layout, register_callbacks_app3_administratif),
@@ -87,6 +88,7 @@ def import_apps():
         'apc20_KPI_competence':(apc_layout,register_callbacks_apc),
         'apc20_learnagement': (apc20_competence_ac_layout, register_callbacks_apc20),
         'app15_etudiant':(polytech_analysis_layout,register_reseau_polytech_callbacks),
+        'apc20_orientation_metier':(apc20_metier_orientation_layout,register_callbacks_apc20_orientation_metier),
     }#apc20_etudiant
 
 LOGO = "https://placehold.co/100x100"
@@ -103,6 +105,8 @@ menu_items = {
         ('APC_heatmap', 'apc20_heatmap_apc'),
         ('APC_kpi','apc20_KPI_competence'),
         ('APC', 'apc20_learnagement'),
+        ('Réseau Polytech','app15_etudiant'),
+        ('orientation par metier','apc20_orientation_metier'),
     ],
     'enseignant': [
         ('Vue modules', 'app5_enseignant_view'),
@@ -113,8 +117,10 @@ menu_items = {
         ('Charge de travail', 'app7_enseignant'),
         ('Tutorat stages', 'app10_enseignant'),
         ('APC_heatmap', 'apc20_heatmap_apc'),
-        ('APC_kpi','apc20_KPI_competence'),
+        #('APC_kpi','apc20_KPI_competence'),
         ('APC', 'apc20_learnagement'),
+        ('Réseau Polytech','app15_etudiant'),
+        ('orientation par metier','apc20_orientation_metier'),
     ],
     'etudiant': [
         ('Compétences', 'app2'),
@@ -128,6 +134,7 @@ menu_items = {
         ('APC_kpi','apc20_KPI_competence'),
         ('APC', 'apc20_learnagement'),
         ('Réseau Polytech','app15_etudiant'),
+        ('orientation par metier','apc20_orientation_metier'),
     ]
 }
 
