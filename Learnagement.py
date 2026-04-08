@@ -29,7 +29,7 @@ INSTANCE_NUMBER=None
 DOCKER_COMMAND=[]
 DOCKER_COMPOSE_COMMAND=[]
 
-containers = ["docker", "phpbackend", "backend_python", "webApp", "visualisation", "webappnext", ]
+containers = ["docker", "backend_python", "webApp", "front_DashPlotly", "front_NextJS", ]
 
 def load_dotenv():
     dotenv.load_dotenv()
@@ -105,14 +105,16 @@ def __mainConfiguration__():
             file.write("#########################################################################" + "\n")
             file.write("" + "\n")
 
-            # ToDo Refactor XXX_URL (not XXX_DOCKER_URL) must be XXX_PUBLIC_URL, remove url with "localhost"
+            # ToDo Refactor XXX_URL (not XXX_DOCKER_URL) must be XXX_PUBLIC_URL,
+            # ToDo remove url with "localhost"
 
-            file.write("PHP_BACKEND_URL=http://localhost:" + str(instance_number) + "0081" + "\n")
-            file.write("PHP_BACKEND_DOCKER_URL=http://learnagement_phpbackend_" + instance_name + "\n")
+            file.write("PYTHON_BACKEND_DOCKER_URL=http://learnagement_backend_python_" + instance_name + "\n")
+            file.write("PYTHON_BACKEND_DOCKER_PORT=4000\n")
 
             file.write("" + "\n")
             file.write("#########################################################################" + "\n")
             file.write("" + "\n")
+
 
             file.write("DASH_SERVER=learnagement_python_web_server_" + instance_name + "\n")
             file.write("DASH_PORT=" + str(instance_number) + "8050" + "\n")
@@ -122,13 +124,11 @@ def __mainConfiguration__():
             file.write("" + "\n")
 
             file.write("NEXTAUTH_URL=http://localhost:" + str(instance_number) + "3000" + "\n")
+            file.write("NEXTAUTH_PUBLIC_PORT=" + str(instance_number) + "3000" + "\n")
             file.write("NEXTAUTH_DOCKER_URL=http://learnagement_nextjs_" + instance_name + "\n")
 
             file.write("" + "\n")
             file.write("#########################################################################" + "\n")
-            file.write("" + "\n")
-
-            file.write("MOBILITY_PORT=" + str(instance_number) + "5173" + "\n")
 
         print(f".env générated")
 
@@ -493,24 +493,32 @@ def fromScratch():
                 prog.communicate()
             else:
                 subprocess.run(DOCKER_COMMAND + ["volume", "rm", os.environ["COMPOSE_PROJECT_NAME"] + "_learnagement_persistent_db_" + os.environ["INSTANCE_NAME"]], check=True)
+        except subprocess.CalledProcessError as e:
+            print(e.output)
 
+        try:
             shutil.rmtree(os.path.join("db", "data"), ignore_errors=True)
             shutil.rmtree(os.path.join("db", "docker-entrypoint-initdb.d"), ignore_errors=True)
             os.remove(os.path.join("docker", "docker-compose.yml"))
-
+        except FileNotFoundError as e:
+            print(e)
+        try:
             os.remove(".env")
-            for container in containers:
+        except FileNotFoundError as e:
+            print(e)
+
+        for container in containers:
+            try:
                 target_path = os.path.join(container, ".env")
                 os.remove(target_path)
+            except FileNotFoundError as e:
+                print(e)
 
-            print(f"{GREEN}The application was reset to its initial state.{NC}")
-        except subprocess.CalledProcessError as e:
-            print(e.output)
-            print(f"{RED}The application was not reset to its initial state.{NC}")
+        print(f"{GREEN}The application was reset to its initial state.{NC}")
 
 
 def help(argv):
-    print("Usage: " + argv[0] + " [-start|-stop|-build|-backupDB|-destroy|-fromScratch|-updateEnv|-exportInstance|-importInstance FILE_NAME|-help]")
+    print("Usage: " + argv[0] + " [-start|-stop|-build|-backupDB|-fromScratch|-updateEnv|-exportInstance|-importInstance FILE_NAME|-help]")
             
 def main(argv):
     # if script parameter is destroy
@@ -522,8 +530,6 @@ def main(argv):
         stop()
     elif len(argv)==2 and argv[1] == "-build":
         start(docker_option = ["--build"])
-    elif len(argv)==2 and argv[1] == "-destroy":
-        destroy()
     elif len(argv)==2 and argv[1] == "-fromScratch":
         fromScratch()
     elif len(argv)==2 and argv[1] == "-updateEnv":

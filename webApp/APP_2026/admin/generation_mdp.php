@@ -9,6 +9,10 @@
 
 <body>
     <?php
+            /////////////////
+            // WARNING !!!!
+            // Direct SQL queries are deprecated. Use backend API endpoints instead.
+            /////////////////
         $message = "";
 
         require_once("../config.php");

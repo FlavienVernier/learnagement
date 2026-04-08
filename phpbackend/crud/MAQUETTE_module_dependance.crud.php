@@ -6,7 +6,7 @@ function listMAQUETTE_moduleDependancesByIdModule($conn, $id) {
             JOIN MAQUETTE_module_sequence on MAQUETTE_module_sequence.id_module_sequence = MAQUETTE_dependance_sequence.id_sequence_prev 
             JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage 
             JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module 
-            JOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type 
+            JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type 
             WHERE MAQUETTE_module.id_module = '$id'
             UNION
             SELECT `id_sequence_prev`, `id_sequence_next`
@@ -14,7 +14,7 @@ function listMAQUETTE_moduleDependancesByIdModule($conn, $id) {
             JOIN MAQUETTE_module_sequence on MAQUETTE_module_sequence.id_module_sequence = MAQUETTE_dependance_sequence.id_sequence_next 
             JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage 
             JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module 
-            JOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type 
+            JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type 
             WHERE MAQUETTE_module.id_module = '$id';";
     $res = mysqli_query($conn, $sql);
     $rs = rs_to_table($res);
@@ -22,11 +22,11 @@ function listMAQUETTE_moduleDependancesByIdModule($conn, $id) {
 }
 
 function listMAQUETTE_moduleSequenceDependancesByIdModule($conn, $id) {
-    $sql = "SELECT MAQUETTE_module_sequence.id_module_sequence, LNM_seanceType.type, MAQUETTE_module.code_module, MAQUETTE_module.nom, MAQUETTE_module_sequence.commentaire 
+    $sql = "SELECT MAQUETTE_module_sequence.id_module_sequence, LNM_seance_type.type, MAQUETTE_module.code_module, MAQUETTE_module.nom, MAQUETTE_module_sequence.commentaire 
 			FROM MAQUETTE_module_sequence 
             JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage 
             JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module 
-            JOIN LNM_seanceType ON LNM_seanceType.id_seance_type = MAQUETTE_module_sequencage.id_seance_type 
+            JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type 
             WHERE MAQUETTE_module_sequence.id_module_sequence IN (SELECT MAQUETTE_module_sequence.id_module_sequence
                   FROM MAQUETTE_module_sequence
                 JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage 

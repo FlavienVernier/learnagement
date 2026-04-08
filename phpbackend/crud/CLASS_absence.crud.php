@@ -45,7 +45,11 @@ function listCLASS_absenceByStudentId($conn, $id){
     return $rs;
 }
 
-
+/**
+ * @deprecated
+ *
+ * @return $this
+ */
 function listCLASS_absence($conn){
     $sql = "SELECT concat(LNM_etudiant.prenom, ' ', LNM_etudiant.nom) as etudiant, concat(LNM_filiere.nom_filiere, '_', LNM_promo.annee, '_', LNM_statut.nom_statut) as filiere, MAQUETTE_module.code_module, CLASS_session.schedule
             FROM `CLASS_absence` 

@@ -1,5 +1,27 @@
 # Credits
-
+- Learnangement V1
+  - [Flavien Vernier][1]:  
+  Author of Learnagement and main dev manager
+  - APC Team
+    - Souha Gharsallah:
+    Student dev during IDU Project Base Learning (2024-2027)
+    - Mohamed Omar Hajri:
+    Student dev during IDU Project Base Learning (2024-2027)
+    - Mariem Khedhira:
+    Student dev during IDU Project Base Learning (2024-2027)
+    - Steve Mboda Nguenang:
+    Student dev during IDU Project Base Learning (2024-2027)
+    - Aya Ouddou:
+    Student dev during IDU Project Base Learning (2024-2027)
+  - Learnagement Team 
+    - Maxence Ambert:
+    Student dev during IDU Project Base Learning (2024-2027)
+    - Louis Amoudruz:  
+    Student dev during IDU Project Base Learning (2024-2027)
+    - Lucas Billy:  
+    Student dev during IDU Project Base Learning (2024-2027)
+    - Corentin Campillo Laffin:  
+    Student dev during IDU Project Base Learning (2024-2027)
 - Learnangement V0
   - [Flavien Vernier][1]:  
   Author of Learnagement and main dev manager
