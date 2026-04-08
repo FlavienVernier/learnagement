@@ -3,7 +3,6 @@ import logging
 from fastapi import APIRouter, Depends
 from typing import Annotated, Dict, Any
 from pydantic import BaseModel
-
 from dependencies import db_request, get_current_active_user, User, SQLRequest
 logger = logging.getLogger(__name__)
 router = APIRouter()

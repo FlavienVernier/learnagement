@@ -95,8 +95,8 @@ menu_items = {
         ('MCCC', 'app13_administratif'),
         ('Check', 'app14_administratif'),
         ('Charge enseignant', 'app7_administratif'),
-        ('APC_kpi','apc20_KPI_competence')
-            ('APC', 'apc20_learnagement'),
+        ('APC_kpi','apc20_KPI_competence'),
+        ('APC', 'apc20_learnagement'),
     ],
     'enseignant': [
         ('Vue modules', 'app5_enseignant_view'),
@@ -106,7 +106,7 @@ menu_items = {
         ('Notes', 'app4_enseignant'),
         ('Charge de travail', 'app7_enseignant'),
         ('Tutorat stages', 'app10_enseignant'),
-        ('APC_kpi','apc20_KPI_competence')
+        ('APC_kpi','apc20_KPI_competence'),
         ('APC', 'apc20_learnagement'),
     ],
     'etudiant': [
@@ -117,7 +117,7 @@ menu_items = {
         ('Charge de travail', 'app7_etudiant'),
         ('Avancement rendus', 'app9'),
         ('Stages', 'app10_etudiant'),
-        ('APC_kpi','apc20_KPI_competence')
+        ('APC_kpi','apc20_KPI_competence'),
          ('APC', 'apc20_learnagement'),
     ]
 }
