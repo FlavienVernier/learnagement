@@ -64,6 +64,8 @@ def import_apps():
     from apc_dash.apc20_KPI import  apc_layout,register_callbacks as register_callbacks_apc
     from apc_dash.apc20_competence_ac import apc20_competence_ac_layout, register_callbacks as register_callbacks_apc20
     from apc_dash.app_reseaupolytech_etudiant import polytech_analysis_layout, register_reseau_polytech_callbacks
+    from apc_dash.apc20_trajectoire import trajectoire_layout ,register_trajectoire_callbacks
+    from apc_dash.apc20_poids_modules import audit_poids_modules_layout, register_poids_modules_callbacks
     return {
         'app2': (app2_layout, register_callbacks_app2),
         'app3_administratif': (app3_administratif_layout, register_callbacks_app3_administratif),
@@ -87,6 +89,8 @@ def import_apps():
         'apc20_KPI_competence':(apc_layout,register_callbacks_apc),
         'apc20_learnagement': (apc20_competence_ac_layout, register_callbacks_apc20),
         'app15_etudiant':(polytech_analysis_layout,register_reseau_polytech_callbacks),
+        'app_trajectoire': (trajectoire_layout, register_trajectoire_callbacks),
+        'app_poids_modules': (audit_poids_modules_layout, register_poids_modules_callbacks),
     }#apc20_etudiant
 
 LOGO = "https://placehold.co/100x100"
@@ -103,6 +107,7 @@ menu_items = {
         ('APC_heatmap', 'apc20_heatmap_apc'),
         ('APC_kpi','apc20_KPI_competence'),
         ('APC', 'apc20_learnagement'),
+        ('Poids des modules','app_poids_modules'),
     ],
     'enseignant': [
         ('Vue modules', 'app5_enseignant_view'),
@@ -115,6 +120,7 @@ menu_items = {
         ('APC_heatmap', 'apc20_heatmap_apc'),
         ('APC_kpi','apc20_KPI_competence'),
         ('APC', 'apc20_learnagement'),
+        ('Trajectoire d etude','app_trajectoire'),
     ],
     'etudiant': [
         ('Compétences', 'app2'),
@@ -128,12 +134,16 @@ menu_items = {
         ('APC_kpi','apc20_KPI_competence'),
         ('APC', 'apc20_learnagement'),
         ('Réseau Polytech','app15_etudiant'),
+        ('Trajectoire d etude','app_trajectoire'),
     ]
 }
 
 #SECRET_KEY = os.getenv("INSTANCE_SECRET").encode()
 
 def render_sidebar(section, token_arg, status):
+    # AJOUTE CES DEUX LIGNES POUR LE DÉBOGAGE :
+    print(f"====== CRÉATION DU MENU POUR : {section} ======", flush=True)
+    print(f"====== CONTENU DU MENU : {menu_items[section]} ======", flush=True)
     links = []
     # Logo + titre
     links.append(html.Div([
@@ -157,7 +167,7 @@ def render_sidebar(section, token_arg, status):
     links.append(html.Div([
         html.I(className='fa-solid fa-check', style={'marginRight': '2rem'}),
         html.P("(" + status + ")")], className='sidebar-header'))
-    return html.Div(links, className='sidebar')
+    return html.Div(links, className='sidebar',style={'overflowY': 'auto', 'maxHeight': '100vh', 'paddingBottom': '50px'})
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
