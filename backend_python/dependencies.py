@@ -72,17 +72,21 @@ def db_connexion():
         logger.exception(e)
         raise e
 
-def get_administratif(user_login: str):
+def get_administratif(user_login: str, method: str = "LNM"):
+    if method == "LNM":
+        login_field = "mail"
+    elif method == "LDAP":
+        login_field = "login"
     users=[]
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("""SELECT LNM_administratif.id_administratif AS id, 
+        cursor.execute(f"""SELECT LNM_administratif.id_administratif AS id, 
                                  LNM_administratif.*, 
                                  ExplicitSecondaryKs_LNM_administratif.ExplicitSecondaryK
                           FROM LNM_administratif 
                           JOIN ExplicitSecondaryKs_LNM_administratif ON ExplicitSecondaryKs_LNM_administratif.id_administratif = LNM_administratif.id_administratif
-                          WHERE mail = %s""", (user_login,))
+                          WHERE {login_field} = %s""", (user_login,))
         users = cursor.fetchall()
     except Exception as e:
         logger.exception(e)
@@ -95,29 +99,33 @@ def get_administratif(user_login: str):
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor()
         cursor.execute(
-            """SELECT LNM_role.role 
+            f"""SELECT LNM_role.role 
                         FROM LNM_administratif 
                         JOIN LNM_administratif_as_role on LNM_administratif_as_role.id_administratif = LNM_administratif.id_administratif
                         JOIN LNM_role on LNM_role.id_role = LNM_administratif_as_role.id_role
-                        WHERE mail = %s""",
+                        WHERE {login_field} = %s""",
             (user_login,))
         roles = cursor.fetchall()
         user_dict["roles"] += [item for t in roles for item in t]
         return UserInDB(**user_dict)
     return None
 
-def get_enseignant(user_login: str):
+def get_enseignant(user_login: str, method: str = "LNM"):
+    if method == "LNM":
+        login_field = "mail"
+    elif method == "LDAP":
+        login_field = "login"
     users=[]
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("""
+        cursor.execute(f"""
                        SELECT LNM_enseignant.id_enseignant AS id, 
                               LNM_enseignant.*,
                               ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK
                        FROM LNM_enseignant 
                        JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = LNM_enseignant.id_enseignant
-                       WHERE mail = %s""",
+                       WHERE {login_field} = %s""",
                        (user_login,))
         users = cursor.fetchall()
     except Exception as e:
@@ -131,11 +139,11 @@ def get_enseignant(user_login: str):
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor()
         cursor.execute(
-            """SELECT LNM_role.role 
+            f"""SELECT LNM_role.role 
                         FROM LNM_enseignant 
                         JOIN LNM_enseignant_as_role on LNM_enseignant_as_role.id_enseignant = LNM_enseignant.id_enseignant
                         JOIN LNM_role on LNM_role.id_role = LNM_enseignant_as_role.id_role
-                        WHERE mail = %s""",
+                        WHERE {login_field} = %s""",
             (user_login,))
         roles = cursor.fetchall()
         user_dict["roles"] += [item for t in roles for item in t]
@@ -143,17 +151,21 @@ def get_enseignant(user_login: str):
     return None
 
 
-def get_etudiant(user_login: str):
+def get_etudiant(user_login: str, method: str = "LNM"):
+    if method == "LNM":
+        login_field = "mail"
+    elif method == "LDAP":
+        login_field = "login"
     users=[]
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("""SELECT LNM_etudiant.id_etudiant AS id, 
+        cursor.execute(f"""SELECT LNM_etudiant.id_etudiant AS id, 
                                  LNM_etudiant.*,
                                  ExplicitSecondaryKs_LNM_etudiant.ExplicitSecondaryK
                           FROM LNM_etudiant 
                           JOIN ExplicitSecondaryKs_LNM_etudiant ON ExplicitSecondaryKs_LNM_etudiant.id_etudiant = LNM_etudiant.id_etudiant
-                          WHERE mail = %s""",
+                          WHERE {login_field} = %s""",
                        (user_login,))
         users = cursor.fetchall()
     except Exception as e:
@@ -167,23 +179,19 @@ def get_etudiant(user_login: str):
         return UserInDB(**user_dict)
     return None
 
-def get_user(user_login: str):
-    administratif = get_administratif(user_login)
-    user = None
-    if administratif is not None:
-        user = get_administratif(user_login)
+def get_user(user_login: str, method: str = "LNM"):
+    fetchers = [get_administratif, get_enseignant, get_etudiant]
 
-    enseignant = get_enseignant(user_login)
-    if enseignant is not None:
-        user = get_enseignant(user_login)
+    user = next(
+        filter(None, (f(user_login, method) for f in fetchers)),
+        None
+    )
 
-    etudiant = get_etudiant(user_login)
-    if etudiant is not None:
-        user = get_etudiant(user_login)
     if user is not None:
-        logger.info(f"User {user_login} logged as {user}")
+        logger.info(f"User {user_login} logged as {user} with {method}")
     else:
-        logger.error(f"Logging error with login: {user_login}")
+        logger.error(f"Logging error with login: {user_login}, with method: {method}")
+
     return user
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
