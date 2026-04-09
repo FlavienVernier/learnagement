@@ -66,6 +66,8 @@ def import_apps():
     from apc_dash.app_reseaupolytech_etudiant import polytech_analysis_layout, register_reseau_polytech_callbacks
     from apc_dash.apc20_trajectoire import trajectoire_layout ,register_trajectoire_callbacks
     from apc_dash.apc20_poids_modules import audit_poids_modules_layout, register_poids_modules_callbacks
+    from apc_dash.apc20_metier_orientation import apc20_metier_orientation_layout,register_callbacks as register_callbacks_apc20_orientation_metier
+
     return {
         'app2': (app2_layout, register_callbacks_app2),
         'app3_administratif': (app3_administratif_layout, register_callbacks_app3_administratif),
@@ -91,6 +93,8 @@ def import_apps():
         'app15_etudiant':(polytech_analysis_layout,register_reseau_polytech_callbacks),
         'app_trajectoire': (trajectoire_layout, register_trajectoire_callbacks),
         'app_poids_modules': (audit_poids_modules_layout, register_poids_modules_callbacks),
+        'apc20_orientation_metier':(apc20_metier_orientation_layout,register_callbacks_apc20_orientation_metier),
+
     }#apc20_etudiant
 
 LOGO = "https://placehold.co/100x100"
@@ -108,6 +112,8 @@ menu_items = {
         ('APC_kpi','apc20_KPI_competence'),
         ('APC', 'apc20_learnagement'),
         ('Poids des modules','app_poids_modules'),
+        ('Réseau Polytech','app15_etudiant'),
+        ('orientation par metier','apc20_orientation_metier'),
     ],
     'enseignant': [
         ('Vue modules', 'app5_enseignant_view'),
@@ -118,9 +124,12 @@ menu_items = {
         ('Charge de travail', 'app7_enseignant'),
         ('Tutorat stages', 'app10_enseignant'),
         ('APC_heatmap', 'apc20_heatmap_apc'),
-        ('APC_kpi','apc20_KPI_competence'),
+        #('APC_kpi','apc20_KPI_competence'),
         ('APC', 'apc20_learnagement'),
         ('Trajectoire d etude','app_trajectoire'),
+        ('Réseau Polytech','app15_etudiant'),
+        ('orientation par metier','apc20_orientation_metier'),
+
     ],
     'etudiant': [
         ('Compétences', 'app2'),
@@ -135,6 +144,7 @@ menu_items = {
         ('APC', 'apc20_learnagement'),
         ('Réseau Polytech','app15_etudiant'),
         ('Trajectoire d etude','app_trajectoire'),
+        ('orientation par metier','apc20_orientation_metier'),
     ]
 }
 
