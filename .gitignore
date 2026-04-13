@@ -2,6 +2,7 @@
 *~
 **/logs
 **/*venv*
+**/vendor/*
 
 # data and backup directories store private data, NEVER PUT IN ON GIT 
 **/data
