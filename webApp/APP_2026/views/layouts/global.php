@@ -15,6 +15,7 @@
     <!-- Extension -->
     <link rel="stylesheet" href="/APP_2026/theme/theme.css">
     <link rel="stylesheet" href="/APP_2026/theme/tailwind.extension.css">
+    <?= $t->slot('style.top') ?>
 </head>
 <body>
     <?= $t->slot('body') ?>
