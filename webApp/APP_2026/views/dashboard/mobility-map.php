@@ -3,15 +3,20 @@
 <?php $t->startSlot('title'); ?>Carte de Mobilité — Learnagement<?php $t->endSlot(); ?>
 
 <?php $t->startSlot('content'); ?>
-<section class="flex flex-col grow relative">
+<section class="relative flex-1 min-h-[70vh]">
     <!-- Map component -->
     <div id="map" class="absolute inset-0" style="height: 100%; width: 100%;"></div>
 
-    <!-- Filtres -->
-    <div class="absolute top-2 left-1/2 -translate-x-1/2 z-[0] flex flex-col items-center gap-2.5">
-        <button onclick="document.getElementById('filterForm').classList.toggle('hidden')" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
-            Filtres
-        </button>
+    <!-- Contrôles et panneaux superposés -->
+    <div class="absolute top-[100px] left-4 z-[1000] flex max-w-[92vw] flex-col items-start gap-2.5">
+        <div class="flex items-center gap-2">
+            <button onclick="document.getElementById('filterForm').classList.toggle('hidden')" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
+                Filtres
+            </button>
+            <button onclick="document.getElementById('wishesPanel').classList.toggle('hidden')" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
+                Voeux
+            </button>
+        </div>
 
         <form id="filterForm" onsubmit="return false;" class="hidden bg-white p-4 rounded-lg shadow-lg border border-gray-200">
             <div class="flex flex-wrap justify-center items-center gap-4">
@@ -31,6 +36,15 @@
                 </div>
             </div>
         </form>
+
+        <aside id="wishesPanel" class="hidden w-[min(92vw,22rem)] max-h-[60vh] overflow-y-auto bg-white/95 p-4 rounded-lg shadow-lg border border-gray-200 backdrop-blur-sm">
+            <div class="mb-3 flex items-center justify-between">
+                <h2 class="text-sm font-semibold text-gray-800">Mes voeux</h2>
+                <span id="wishesCount" class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">0/5</span>
+            </div>
+            <p id="wishesEmpty" class="text-sm text-gray-500">Aucun voeu pour le moment.</p>
+            <ul id="wishesList" class="space-y-2"></ul>
+        </aside>
     </div>
 </section>
 <?php $t->endSlot(); ?>
@@ -39,8 +53,8 @@
 <?php $t->startSlot('style.top'); ?>
 <!-- Import Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""/>
+integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+crossorigin=""/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 <?php $t->endSlot(); ?>
@@ -68,14 +82,18 @@
 
 <?php $t->startSlot('script.bottom'); ?>
 <script type="module" defer>
-        const map = L.map('map').setView([48.85, 2.35], 4);
+    const map = L.map('map').setView([48.85, 2.35], 4);
+    const wishedUniversities = new Map();
 
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
+    // In a flex layout, Leaflet can initialize before final dimensions are settled.
+    requestAnimationFrame(() => map.invalidateSize());
 
-        const markers = L.markerClusterGroup();
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    const markers = L.markerClusterGroup();
 
     const fetchUniversities = async () => {
         const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID;
@@ -91,43 +109,254 @@
                 throw new Error(`Response status: ${response.status}`);
             }
 
-            const universities = await response.json();
+            universities = await response.json();
             console.log(universities);
         } catch (error) {
             console.error(error.message);
-        }*/
+        }
 
-        function updateMap() {
-            markers.clearLayers();
-            
-            const selectedSemestre = document.getElementById('semestreSelect').value;
-            const selectedNote = parseFloat(document.getElementById('noteMinRange').value);
+        return universities;
+    }
+
+    const fetchWishes = async () => {
+        const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID + "/wishes";
+        let wishes = [];
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+                    "Content-Type": "application/json"
+                }
+            });
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            wishes = await response.json();
+        } catch (error) {
+            console.error(error.message);
+        }
+
+        return wishes;
+    }
+
+    const universities = await fetchUniversities();
+
+    async function refreshWishesFromServer() {
+        const wishes = await fetchWishes();
+        wishedUniversities.clear();
+        wishes.forEach((wish) => {
+            wishedUniversities.set(wish.id_partner_university, wish);
+        });
+    }
+
+    await refreshWishesFromServer();
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
+    function renderWishesList() {
+        const wishesList = document.getElementById('wishesList');
+        const wishesEmpty = document.getElementById('wishesEmpty');
+        const wishesCount = document.getElementById('wishesCount');
+        const wishes = Array.from(wishedUniversities.values())
+            .sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999));
+
+        wishesCount.innerText = String(wishes.length) + "/5";
+
+        if (wishes.length === 0) {
+            wishesList.innerHTML = '';
+            wishesEmpty.classList.remove('hidden');
+            return;
+        }
+
+        wishesEmpty.classList.add('hidden');
+        wishesList.innerHTML = wishes
+            .map((wish, index) => `
+                <li class="rounded border border-gray-200 bg-gray-50 p-2">
+                    <div class="flex items-center justify-between gap-2">
+                        <div>
+                            <p class="text-sm text-gray-800"><strong class="font-semibold">${escapeHtml(wish.name)}</strong> (${escapeHtml(wish.code)})</p>
+                            <p class="text-xs text-gray-600">${escapeHtml(wish.country)}</p>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button
+                                type="button"
+                                onclick="window.moveWish(${wish.id_partner_university}, 'up')"
+                                ${(index === 0) ? 'disabled' : ''}
+                                class="h-7 w-7 text-base font-semibold text-gray-700 opacity-55 transition-opacity hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-20"
+                                title="Monter"
+                            >
+                                ↑
+                            </button>
+                            <button
+                                type="button"
+                                onclick="window.moveWish(${wish.id_partner_university}, 'down')"
+                                ${(index === wishes.length - 1) ? 'disabled' : ''}
+                                class="h-7 w-7 text-base font-semibold text-gray-700 opacity-55 transition-opacity hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-20"
+                                title="Descendre"
+                            >
+                                ↓
+                            </button>
+                            <button
+                                type="button"
+                                onclick="window.deleteWish(${wish.id_partner_university})"
+                                class="h-7 w-7 text-base font-semibold text-gray-700 opacity-55 transition duration-150 hover:text-red-600 hover:opacity-100"
+                                title="Supprimer"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    </div>
+                </li>
+            `)
+            .join('');
+    }
+
+    function popupText(university) {
+        const alreadyInWishes = wishedUniversities.has(university.id_partner_university);
+        return `
+            <b>${university.name}</b> (${university.code})<br/>
+            <em class="text-[0.75rem]">${university.address}, ${university.country}</em><br/>
+            Langue${university.languages.includes(',') ? 's' : ''}: ${university.languages}<br/>
+            ${university.note_min !== null ? `Note min : ${university.note_min}<br/>` : ''}
+            <a href="${university.website}" target="_blank">${university.website}</a><br/>
+            <button
+                type="button"
+                onclick='window.addUniversityToWishes(${JSON.stringify(university)})'
+                ${alreadyInWishes ? 'disabled' : ''}
+                class="mt-2 inline-flex items-center rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+                ${alreadyInWishes ? 'Ajoute aux voeux' : 'Ajouter aux voeux'}
+            </button>
+        `;
+    }
+
+    async function addUniversityToWishes(university) {
+        if (wishedUniversities.has(university.id_partner_university)) {
+            return;
+        }
+
+        try {
+            const wishesEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
+                + "/university/etudiant/" + window.ENV.USER_ID
+                + "/wish/" + university.id_partner_university;
+
+            const response = await fetch(wishesEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok && response.status !== 409) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            await refreshWishesFromServer();
+            renderWishesList();
+            updateMap();
+            console.log('Université ajoutée aux voeux :', university);
+        } catch (error) {
+            console.error('Impossible d\'ajouter l\'université aux voeux :', error.message);
+        }
+    }
+
+    async function deleteWish(idPartnerUniversity) {
+        try {
+            const deleteEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
+                + "/university/etudiant/" + window.ENV.USER_ID
+                + "/wish/" + idPartnerUniversity;
+
+            const response = await fetch(deleteEndpoint, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            await refreshWishesFromServer();
+            renderWishesList();
+            updateMap();
+        } catch (error) {
+            console.error('Impossible de supprimer le voeu :', error.message);
+        }
+    }
+
+    async function moveWish(idPartnerUniversity, direction) {
+        try {
+            const moveEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
+                + "/university/etudiant/" + window.ENV.USER_ID
+                + "/wish/" + idPartnerUniversity
+                + "/move/" + direction;
+
+            const response = await fetch(moveEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            await refreshWishesFromServer();
+            renderWishesList();
+            updateMap();
+        } catch (error) {
+            console.error('Impossible de deplacer le voeu :', error.message);
+        }
+    }
+
+    window.addUniversityToWishes = addUniversityToWishes;
+    window.deleteWish = deleteWish;
+    window.moveWish = moveWish;
+
+    function updateMap() {
+        markers.clearLayers();
+        
+        const selectedSemestre = document.getElementById('semestreSelect').value;
+        const selectedNote = parseFloat(document.getElementById('noteMinRange').value);
 
         const filtered = universities.filter(u => {
-                // Affiche univ si note_min <= selectedNote
-                const uNote = u.note_min === null ? 0 : parseFloat(u.note_min);
-                if (uNote > selectedNote) return false;
-                
+            // Affiche univ si note_min <= selectedNote
+            const uNote = u.note_min === null ? 0 : parseFloat(u.note_min);
+            if (uNote > selectedNote) return false;
+
             // Filtre le semestre
             if (selectedSemestre === "S8") {
                 return u.annee === 4;
             } else if (selectedSemestre === "S9") {
                 return u.annee === 5;
-                } else {
+            } else {
                 return true;
-                }
-            });
+            }
+        });
 
         filtered.forEach(university => {
-                const marker = L.marker([university.latitude, university.longitude])
-                    .bindPopup(popupText(university));
-                markers.addLayer(marker);
-            });
-            map.addLayer(markers);
+            const marker = L.marker([university.latitude, university.longitude])
+                .bindPopup(popupText(university));
+            markers.addLayer(marker);
+        });
+        map.addLayer(markers);
     }
 
     window.updateMap = updateMap; // Pour pouvoir appeler depuis le PHP
     renderWishesList();
-        updateMap();
-    </script>
+    updateMap();
+</script>
 <?php $t->endSlot(); ?>
