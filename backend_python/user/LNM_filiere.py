@@ -79,11 +79,11 @@ def seance_types(
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/filieres/dags",
-            tags=["user", "filiere"],
+            tags=["anonymous", "filiere"],
             summary="Filiere",
             description="Return the list of filieres")
 def dags(
-        current_user = None,  #current_user: Annotated[User, Depends(get_current_active_user)],
+        #current_user = None,  #current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     request = {
         "request" : """
@@ -113,7 +113,7 @@ def dags(
                     """,
         "allowedRolesRequester" : ["anonymous"],
     }
-    return db_request(current_user, SQLRequest(**request))
+    return db_request(None, SQLRequest(**request))
 
 @router.get("/promos/",
             tags=["user", "filiere"],
