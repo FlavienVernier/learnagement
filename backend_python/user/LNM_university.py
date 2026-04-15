@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated
 from typing import Any, Dict
 
@@ -63,6 +63,30 @@ def add_university_to_wishes(
     id_partner_university: int,
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
+    check_request = {
+        "request": """
+                        SELECT
+                            COUNT(*) AS wishes_count,
+                            SUM(CASE WHEN id_partner_university = %(id_partner_university)s THEN 1 ELSE 0 END) AS already_exists
+                        FROM MOB_wishes
+                        WHERE id_etudiant = %(id_etudiant)s
+                    """,
+        "params": {
+            "id_etudiant": id_etudiant,
+            "id_partner_university": id_partner_university,
+        },
+        "allowedRolesRequester": ["etudiant"],
+    }
+    check_rows = db_request(current_user, SQLRequest(**check_request))
+    wishes_count = int(check_rows[0].get("wishes_count", 0)) if check_rows else 0
+    already_exists = int(check_rows[0].get("already_exists", 0)) if check_rows else 0
+
+    if wishes_count >= 5:
+        raise HTTPException(status_code=400, detail="Vous ne pouvez pas ajouter plus de 5 voeux.")
+
+    if already_exists > 0:
+        raise HTTPException(status_code=400, detail="Cette universite est deja dans vos voeux.")
+
     request = {
         "request": """
                         INSERT INTO MOB_wishes (id_etudiant, id_partner_university, priority)

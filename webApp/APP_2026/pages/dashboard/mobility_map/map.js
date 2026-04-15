@@ -50,20 +50,17 @@ function popupText(university) {
 }
 
 async function addUniversityToWishes(university) {
-    console.warn('Endpoint des voeux non défini.');
-    return;
-
     try {
+        const wishesEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
+            + "/university/etudiant/" + window.ENV.USER_ID
+            + "/wish/" + university.id_partner_university;
+
         const response = await fetch(wishesEndpoint, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                id_etudiant: window.ENV.USER_ID,
-                id_partner_university: university.id_partner_university,
-            })
+            }
         });
 
         if (!response.ok) {
