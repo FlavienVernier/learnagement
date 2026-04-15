@@ -412,18 +412,18 @@ def get_module_dependencies(
         "request" : f"""
             SELECT `id_sequence_prev`, `id_sequence_next`
             FROM `MAQUETTE_dependance_sequence` 
-                JOIN MAQUETTE_module_sequence on MAQUETTE_module_sequence.id_module_sequence = MAQUETTE_dependance_sequence.id_sequence_prev 
-                JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage 
-                JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module 
-                JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type 
+                LEFT JOIN MAQUETTE_module_sequence on MAQUETTE_module_sequence.id_module_sequence = MAQUETTE_dependance_sequence.id_sequence_prev 
+                LEFT JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage 
+                LEFT JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module 
+                LEFT JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type 
             WHERE MAQUETTE_module.id_module = %(id_module_prev)s
             UNION
             SELECT `id_sequence_prev`, `id_sequence_next`
             FROM `MAQUETTE_dependance_sequence` 
-                JOIN MAQUETTE_module_sequence on MAQUETTE_module_sequence.id_module_sequence = MAQUETTE_dependance_sequence.id_sequence_next 
-                JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage 
-                JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module 
-                JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type 
+                LEFT JOIN MAQUETTE_module_sequence on MAQUETTE_module_sequence.id_module_sequence = MAQUETTE_dependance_sequence.id_sequence_next 
+                LEFT JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage 
+                LEFT JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module 
+                LEFT JOIN LNM_seance_type ON LNM_seance_type.id_seance_type = MAQUETTE_module_sequencage.id_seance_type 
             WHERE MAQUETTE_module.id_module = %(id_module_next)s
         """,
         "params": {
@@ -479,6 +479,53 @@ def get_module_sequence_dependencies(
         "allowedRolesRequester": ["user"],
     }
     return db_request(current_user, SQLRequest(**request))
+
+@router.get("/modules/{id_responsable}/gantt/",
+            tags=["module"],
+            summary="Get sequence dependencies for Gantt",
+            description="Get all modules sequence dependencies formatted for a Gantt chart")
+def get_data_gantt_endpoint(
+        id_responsable: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request": """
+            SELECT
+                pmms.id_module_sequence AS "prv_id",
+                pmm.code_module AS "prv_code_module",
+                pmm.nom AS "prv_nom",
+                pmmsg.duree_h AS "prv_duree_h",
+                CONCAT(plst.type, pmms.numero_ordre) AS "prv_type",
+                nmms.id_module_sequence AS "nxt_id",
+                nmm.code_module AS "nxt_code_module",
+                nmm.nom AS "nxt_nom",
+                nmmsg.duree_h AS "nxt_duree_h",
+                CONCAT(nlst.type, nmms.numero_ordre) AS "nxt_type"
+            FROM MAQUETTE_dependance_sequence mds
+            
+            # PREVIOUS
+            LEFT JOIN MAQUETTE_module_sequence pmms on pmms.id_module_sequence = mds.id_sequence_prev
+            JOIN MAQUETTE_module_sequencage pmmsg on pmmsg.id_module_sequencage = pmms.id_module_sequencage
+            JOIN LNM_seance_type plst on plst.id_seance_type = pmmsg.id_seance_type
+            JOIN MAQUETTE_module pmm on pmm.id_module = pmmsg.id_module
+            
+            # NEXT
+            LEFT JOIN MAQUETTE_module_sequence nmms on nmms.id_module_sequence = mds.id_sequence_next
+            JOIN MAQUETTE_module_sequencage nmmsg on nmmsg.id_module_sequencage = nmms.id_module_sequencage
+            JOIN LNM_seance_type nlst on nlst.id_seance_type = nmmsg.id_seance_type
+            JOIN MAQUETTE_module nmm on nmm.id_module = nmmsg.id_module
+            
+            # FILTER BY DYNAMIC MODULE ID (remplace le "id_responsable = 6")
+            WHERE pmm.id_module = %(id_responsable)s OR nmm.id_module = %(id_responsable)s;
+        """,
+        "params": {
+            # On passe simplement l'id_module proprement ici
+            "id_responsable": id_responsable,
+        },
+        "allowedRolesRequester": ["user"],
+    }
+    return db_request(current_user, SQLRequest(**request))
+
 
 #####################################
 #

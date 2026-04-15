@@ -1,20 +1,26 @@
 const activeFilters = {};
 let myGantt = null;
 
-console.log("Données des modules :", dataModules);
+console.log("token", token);
 
-// Astuce : console.table() est très pratique pour afficher 
-// des tableaux d'objets (comme ce que te renvoie l'API) de manière lisible
-console.table(dataModules);
+console.log("id utilisateur", userId);
 
-console.log("Données des promos :", dataPromos);
-console.table(dataPromos);
+// console.log("Données des modules :", dataModules);
+// console.table(dataModules);
 
-console.log("Données des filières :", dataFilieres);
-console.table(dataFilieres);
+// console.log("Données des promos :", dataPromos);
+// console.table(dataPromos);
+
+// console.log("Données des filières :", dataFilieres);
+// console.table(dataFilieres);
 
 console.log("Données des dépendances de modules :", dataModulesDependencies);
 console.table(dataModulesDependencies);
+
+ console.log("Données des reponsables modules :", dataModulesResponsables);
+
+ console.log("Données des intervenant par id :");
+    console.table(dataModulesIntervenantById);
 
 let tasks_test = [
   {
@@ -72,6 +78,80 @@ function updateGanttChart(tasks) {
 document.addEventListener("DOMContentLoaded", () => {
     const dropdowns = document.querySelectorAll('.select');
     const tagsContainer = document.getElementById('active-tags-container');
+    const btnOpen = document.querySelector('.button-section button');
+    const modal = document.getElementById('modal-ajout-module');
+    const form = document.getElementById('form-ajout-module');
+    const btnCancel = document.getElementById('btn-cancel-module');
+
+    if (btnOpen && modal) {
+        btnOpen.addEventListener('click', (e) => {
+            e.preventDefault();
+            modal.showModal();
+        });
+    }
+
+    // 2. Fermer la modale
+    if (btnCancel && modal) {
+        btnCancel.addEventListener('click', () => {
+            modal.close();
+            form.reset(); // Réinitialise les champs si on annule
+        });
+    }
+
+    // 3. Gérer la soumission du formulaire
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Empêche le rechargement de la page
+
+            // Récupération des données du formulaire
+            const formData = new FormData(form);
+
+            // Construction du JSON selon tes besoins backend
+            const payload = {
+                code_module: formData.get('code_module'),
+                nom: formData.get('nom'),
+                hCM: parseFloat(formData.get('hCM')) || 0,
+                hTD: parseFloat(formData.get('hTD')) || 0,
+                hTP: parseFloat(formData.get('hTP')) || 0,
+                semestre: parseInt(formData.get('semestre')),
+                id_responsable: parseInt(formData.get('id_responsable')),
+                promos: formData.getAll('promos[]').map(Number),
+                dependances_avant: formData.getAll('dependances_avant[]').map(Number),
+                dependances_apres: formData.getAll('dependances_apres[]').map(Number)
+            };
+
+            // Récupération du token (assure-toi que cette variable est définie dans ton PHP/JS)
+            // ex en PHP: echo "<script>const userToken = '$token';</script>";
+            const token = typeof userToken !== 'undefined' ? userToken : '';
+
+            try {
+                // Envoi à l'API Python (modifie l'URL selon ton routage)
+                const response = await fetch('/api/modules/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert("Module créé avec succès !");
+                    modal.close();
+                    form.reset();
+                    window.location.reload(); // Rafraîchit pour voir le nouveau module
+                } else {
+                    const error = await response.json();
+                    alert("Erreur lors de la création : " + (error.detail || response.statusText));
+                }
+
+            } catch (err) {
+                console.error("Erreur de requête :", err);
+                alert("Impossible de joindre le serveur.");
+            }
+        });
+    }
 
     dropdowns.forEach(dropdown => {
         dropdown.addEventListener('change', function() {

@@ -1,5 +1,6 @@
 <?php
 // Core properties
+$id = $id ?? null;
 $label = $label ?? '';
 $type = $type ?? 'button';
 
