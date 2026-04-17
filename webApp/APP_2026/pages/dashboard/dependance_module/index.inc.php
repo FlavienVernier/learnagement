@@ -2,6 +2,7 @@
 require_once __DIR__ . "/../../../utils/endpoint.php";
 $token = $_SESSION["jwt_token"];
 $user_id = $_SESSION['id'];
+$user_type = $_SESSION['type'];
 
 $enseignants = get_enseignants($token);
 $etudiants = get_etudiants($token);
@@ -12,6 +13,11 @@ $filieres = get_filieres($token);
 $modulesDepedencies = get_module_dependencies(61, $token);
 $modulesResponsable = get_modules_responsable_by_id($user_id, $token);
 $get_modules_intervenant_by_id = get_modules_intervenant_by_id($user_id, $token);
+if ($user_type=== 'enseignant') {
+    $dataGantt = get_data_gantt($user_id, $token);
+} else {
+    $dataGantt = get_data_gantt_etudiant($user_id, $token);
+}
 ?>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
@@ -20,6 +26,12 @@ $get_modules_intervenant_by_id = get_modules_intervenant_by_id($user_id, $token)
 <script type="module" src="pages/dashboard/dependance_module/index.inc.js" defer></script>
 
 <script>
+    const token = "<?= htmlspecialchars($token) ?>";
+    const userId = <?= json_encode($user_id) ?>;
+    const userType = <?= json_encode($user_type) ?>;
+    const dataGantt = <?php echo json_encode($dataGantt); ?>;
+
+    
     const dataModules = <?php echo json_encode($modulesResp); ?>;
     const dataPromos = <?php echo json_encode($promos); ?>;
     const dataFilieres = <?php echo json_encode($filieres); ?>;
@@ -27,8 +39,7 @@ $get_modules_intervenant_by_id = get_modules_intervenant_by_id($user_id, $token)
     const dataModulesResponsables = <?php echo json_encode($modulesResponsable); ?>;
     const dataModulesIntervenantById = <?php echo json_encode($get_modules_intervenant_by_id); ?>;
     const enseignants = <?php echo json_encode($enseignants); ?>;
-    const token = "<?= htmlspecialchars($token) ?>";
-    const userId = <?= json_encode($user_id) ?>;
+
 </script>
 
 <div class="dependance-module-container">

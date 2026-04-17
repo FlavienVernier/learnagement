@@ -158,12 +158,17 @@ function get_modules_m2c3($id_filiere, $id_statut, $token) {
     return get_endpoint($url, $token, $data);
 }
 
-function get_module_dependencies($id_module, $token) {
-    $url = get_python_backend_url("modules/".$id_module."/dependencies/");
+function get_data_gantt($id_responsable, $token) {
+    $url = get_python_backend_url("modules/gantt/" . $id_responsable . "/");
     return get_endpoint($url, $token);
 }
 
-function get_data_gantt($id_responsable, $token) {
-    $url = get_python_backend_url("modules/" . $id_responsable . "/gantt/");
+function get_data_gantt_etudiant($id_etudiant, $token) {
+    $url = get_python_backend_url("modules/gantt/etudiant/" . $id_etudiant . "/");
+    return get_endpoint($url, $token);
+}
+
+function get_module_dependencies($id_module, $token) {
+    $url = get_python_backend_url("modules/".$id_module."/dependencies/");
     return get_endpoint($url, $token);
 }
