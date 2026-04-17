@@ -1,8 +1,8 @@
 <?php
 
 function get_python_backend_url($endpoint) {
-    $base_url = getenv("PYTHON_BACKEND_DOCKER_URL");
-    $port = getenv("PYTHON_BACKEND_DOCKER_PORT");
+    $base_url = getenv("BACKEND_PYTHON_DOCKER_URL");
+    $port = getenv("BACKEND_PYTHON_DOCKER_PORT");
     return $base_url . ":" . $port . "/" . $endpoint;
 }
 

@@ -87,7 +87,7 @@
     const universities = <?= json_encode($universities) ?>;
     // ToDo refactoring to access data throw api, not with direct sql request
     // ToDo Token management required
-    /*const url = process.env.PYTHON_BACKEND_DOCKER_URL + ":" + process.env.PYTHON_BACKEND_DOCKER_PORT + "/university/"
+    /*const url = process.env.BACKEND_PYTHON_DOCKER_URL + ":" + process.env.BACKEND_ + "/university/"
     try {
         const response = await fetch(url);
         if (!response.ok) {

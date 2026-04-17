@@ -14,8 +14,8 @@ from requests import HTTPError, Timeout, RequestException
 load_dotenv()
 
 def get_python_backend_url(endpoint):
-    base_url = os.getenv("PYTHON_BACKEND_DOCKER_URL")
-    port = os.getenv("PYTHON_BACKEND_DOCKER_PORT")
+    base_url = os.getenv("BACKEND_PYTHON_DOCKER_URL")
+    port = os.getenv("BACKEND_PYTHON_DOCKER_PORT")
     url = f"{base_url}:{port}/{endpoint}"
     return url
 

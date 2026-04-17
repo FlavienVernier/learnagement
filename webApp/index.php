@@ -16,7 +16,7 @@
         <?php
             require_once("config.php");
             loadEnv(".");
-            print("<a href=" . $_ENV["NEXTAUTH_URL"] . ">L3 INFO SCEM 2025</a></br>")
+            print("<a href=" . $_ENV["INSTANCE_URL"] . ":" . $_ENV["FRONT_NEXTAUTH_PORT"] . ">L3 INFO SCEM 2025</a></br>")
         ?>
     </main>
   </body>

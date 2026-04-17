@@ -72,10 +72,10 @@ def db_connexion():
         logger.exception(e)
         raise e
 
-def get_administratif(user_login: str, method: str = "LNM"):
-    if method == "LNM":
+def get_administratif(user_login: str, method: str = "byMail"):
+    if method == "byMail":
         login_field = "mail"
-    elif method == "LDAP":
+    elif method == "byLoggin":
         login_field = "login"
     users=[]
     try:
@@ -110,10 +110,10 @@ def get_administratif(user_login: str, method: str = "LNM"):
         return UserInDB(**user_dict)
     return None
 
-def get_enseignant(user_login: str, method: str = "LNM"):
-    if method == "LNM":
+def get_enseignant(user_login: str, method: str = "byMail"):
+    if method == "byMail":
         login_field = "mail"
-    elif method == "LDAP":
+    elif method == "byLoggin":
         login_field = "login"
     users=[]
     try:
@@ -151,10 +151,10 @@ def get_enseignant(user_login: str, method: str = "LNM"):
     return None
 
 
-def get_etudiant(user_login: str, method: str = "LNM"):
-    if method == "LNM":
+def get_etudiant(user_login: str, method: str = "byMail"):
+    if method == "byMail":
         login_field = "mail"
-    elif method == "LDAP":
+    elif method == "byLoggin":
         login_field = "login"
     users=[]
     try:
@@ -179,7 +179,7 @@ def get_etudiant(user_login: str, method: str = "LNM"):
         return UserInDB(**user_dict)
     return None
 
-def get_user(user_login: str, method: str = "LNM"):
+def get_user(user_login: str, method: str = "byMail"):
     fetchers = [get_administratif, get_enseignant, get_etudiant]
 
     user = next(
@@ -203,12 +203,12 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     #print(token, flush=True)
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        userlogin = payload.get("email")
+        user_login = payload.get("email")
         #print("userlogin", userlogin, flush=True)
-        if userlogin is None:
+        if user_login is None:
             logger.error(f"Login error with payload: {payload}")
             raise credentials_exception
-        token_data = TokenData(mail=userlogin)
+        token_data = TokenData(mail=user_login)
         #print("token_data", token_data, flush=True)
     except InvalidTokenError as e:
         logger.error(f"Invalid token : {e}")

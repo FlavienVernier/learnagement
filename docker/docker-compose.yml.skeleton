@@ -67,7 +67,7 @@ services:
         networks:
               - learnagement_front_${INSTANCE_NAME}
         ports:
-            - "${INSTANCE_NUMBER}0080:${FRONT_PHP_PORT}"
+            - "${FRONT_PHP_PORT}:${FRONT_PHP_DOCKER_PORT}"
         volumes:
             - ../webApp:/var/www/html
             - ./log/php:/var/log/apache2

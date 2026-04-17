@@ -13,7 +13,7 @@ try {
   ] = $_POST;
 
 
-  $url = $_ENV["PYTHON_BACKEND_DOCKER_URL"] . ":" . $_ENV["PYTHON_BACKEND_DOCKER_PORT"] . "/token";
+  $url = $_ENV["BACKEND_PYTHON_DOCKER_URL"] . ":" . $_ENV["BACKEND_PYTHON_DOCKER_PORT"] . "/token";
   $data = http_build_query(['username' => $email,
            'password' => $password,
            'grant_type' => "password"
