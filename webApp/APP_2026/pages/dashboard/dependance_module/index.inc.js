@@ -24,48 +24,41 @@ console.log("id utilisateur", userId);
 
 console.log("Données pour le Gantt :", dataGantt);
 
-// let tasks_test = [
-//   {
-//     "id": "T1",
-//     "name": "Mathématiques - Semestre 1",
-//     "start": "2023-09-01",
-//     "end": "2023-12-20",
-//     "progress": 100,
-//     "dependencies": ""
-//   },
-//   {
-//     "id": "T2",
-//     "name": "Physique Appliquée",
-//     "start": "2024-01-05",
-//     "end": "2024-04-15",
-//     "progress": 30,
-//     "dependencies": "T1" 
-//   }
-// ]
+function getTagColorClass(filterId, value) {
+    const prefix = String(value).replace(/\d+.*$/, '').toLowerCase();
+    const map = {
+        proj: 'tag-proj', math: 'tag-math', info: 'tag-info',
+        algo: 'tag-algo', gest: 'tag-gest', sys: 'tag-sys',
+        net: 'tag-net',   bdd: 'tag-bdd'
+    };
+    return map[prefix] || 'tag-other';
+}
 
 function getNextSemestre(semestre) {
+    if (!semestre) return "S1";
     const num = parseInt(semestre.replace('S', ''));
     return `S${num + 1}`;
 }
 
-function semesterToDateEnseignant(semestre) {
-    const semestreMap = {
-        "S1":  { start: "2022-09-01", end: "2023-01-15" },
-        "S3":  { start: "2023-09-01", end: "2024-01-15" },
-        "S5":  { start: "2024-09-01", end: "2025-01-15" },
-        "S7":  { start: "2025-09-01", end: "2026-01-15" },
-        "S9":  { start: "2026-09-01", end: "2027-01-15" },
-
-        "S2":  { start: "2023-01-20", end: "2023-06-30" },
-        "S4":  { start: "2024-01-20", end: "2024-06-30" },
-        "S6":  { start: "2025-01-20", end: "2025-06-30" },
-        "S8":  { start: "2026-01-20", end: "2026-06-30" },
-        "S10": { start: "2027-01-20", end: "2027-06-30" },
-    };
-
-    return semestreMap[semestre] || { start: "2024-01-01", end: "2024-06-01" };
+function formatDate(dateObj) {
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const d = String(dateObj.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
 }
 
+// Vue Enseignant : On regroupe tout sur une seule année académique (2024-2025)
+function semesterToDateEnseignant(semestre) {
+    if (!semestre) return { start: "2024-09-01", end: "2025-06-30" };
+    const num = parseInt(semestre.replace('S', ''));
+    
+    if (num % 2 !== 0) {
+        return { start: "2024-09-01", end: "2025-01-15" };
+    } 
+    else {
+        return { start: "2025-01-20", end: "2025-06-30" };
+    }
+}
 function semesterToDateEtudiant(semestre) {
     const semestreMap = {
         "S1": { start: "2023-09-01", end: "2024-01-15" },
@@ -77,100 +70,129 @@ function semesterToDateEtudiant(semestre) {
         "S7": { start: "2026-09-01", end: "2027-01-15" },
         "S8": { start: "2027-01-20", end: "2027-06-30" },
     };
-
     return semestreMap[semestre] || { start: "2024-01-01", end: "2024-06-01" };
 }
 
-function updateGanttChart(tasks) {
-    const svgContainer = document.getElementById('gantt-chart');
+function transformDataForDHTMLX(dataGantt, userType) {
+    const tasksMap = new Map();
+    const links = [];
+    let linkIdCounter = 1;
 
-    if (!tasks || tasks.length === 0) {
-        svgContainer.innerHTML = "<text x='20' y='30' fill='gray'>Aucune donnée trouvée pour ces filtres.</text>";
-        myGantt = null;
-        return;
-    }
+    // Durée par défaut courte pour éviter que les blocs prennent tout le semestre
+    // Tu peux aussi utiliser item.prv_duree_h si tu veux des blocs proportionnels !
+    const DEFAULT_DURATION_DAYS = 14; 
 
-    if (myGantt) {
-        myGantt.refresh(tasks);
-    } 
-    else {
-        myGantt = new Gantt("#gantt-chart", tasks, {
-            header_height: 50,
-            column_width: 30,
-            step: 24,
-            view_modes: ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'],
-            bar_height: 25,
-            bar_corner_radius: 4,
-            arrow_curve: 5,
-            padding: 18,
-            view_mode: 'Month',
-            date_format: 'YYYY-MM-DD',
-            language: 'fr',
-            
-            
-            on_click: function (task) {
-                console.log("Tu as cliqué sur le module :", task.name);
-            }
-        });
-    }
-}
-
-
-function transformDataGanttToTasks(dataGantt) {
-    const moduleMap = {};
-
+    // --- ÉTAPE A : Création des nœuds et des liens ---
     dataGantt.forEach(item => {
-        // Ajouter le module précédent (prv)
-        if (!moduleMap[item.prv_code_module] && userType === 'enseignant') {
-            moduleMap[item.prv_code_module] = {
-                id: item.prv_code_module,
-                name: `${item.prv_nom} (${item.prv_semestre})`,
-                start: semesterToDateEnseignant(item.prv_semestre).start,
-                end: semesterToDateEnseignant(item.prv_semestre).end,
-                progress: 0,
-                dependencies: ""
-            };
-        }
-        else if (!moduleMap[item.prv_code_module] && userType === 'etudiant') {
-            moduleMap[item.prv_code_module] = {
-                id: item.prv_code_module,
-                name: `${item.prv_nom} (${item.prv_semestre})`,
-                start: semesterToDateEtudiant(item.prv_semestre).start,
-                end: semesterToDateEtudiant(item.prv_semestre).end,
-                progress: 0,
-                dependencies: ""
-            };
+            const prvKey = `${item.prv_code_module}_${item.prv_type}`;
+            const nxtKey = `${item.nxt_code_module}_${item.nxt_type}`;
+        if (!tasksMap.has(prvKey)) {
+            const dates = userType === 'enseignant'
+                ? semesterToDateEnseignant(item.prv_semestre)
+                : semesterToDateEtudiant(item.prv_semestre);
+
+            tasksMap.set(prvKey, {
+                id: prvKey,
+                text: `${prvKey}(${item.prv_nom})`,
+                start_date: dates.start, 
+                duration: item.prv_duree_h ? Math.ceil(item.prv_duree_h / 2) : DEFAULT_DURATION_DAYS
+            });
         }
 
-        // Ajouter le module suivant (nxt)
-        if (!moduleMap[item.nxt_code_module] && userType === 'enseignant') {
-            const nxtSemestre = getNextSemestre(item.prv_semestre); // ← ici
+        // Enfant (Suite)
+        const nxtSemestre = item.nxt_semestre || getNextSemestre(item.prv_semestre);
+        if (!tasksMap.has(nxtKey)) {
+            const dates = userType === 'enseignant'
+                ? semesterToDateEnseignant(nxtSemestre)
+                : semesterToDateEtudiant(nxtSemestre);
 
-            moduleMap[item.nxt_code_module] = {
-                id: item.nxt_code_module,
-                name: `${item.nxt_nom} (${nxtSemestre})`,
-                start: userType === 'enseignant'
-                    ? semesterToDateEnseignant(nxtSemestre).start
-                    : semesterToDateEtudiant(nxtSemestre).start,
-                end: userType === 'enseignant'
-                    ? semesterToDateEnseignant(nxtSemestre).end
-                    : semesterToDateEtudiant(nxtSemestre).end,
-                progress: 0,
-                dependencies: item.prv_code_module
-            };}
-        else if (!moduleMap[item.nxt_code_module] && userType === 'etudiant') {
-            moduleMap[item.nxt_code_module] = {
-                id: item.nxt_code_module,
-                name: `${item.nxt_nom}`,
-                start: semesterToDateEtudiant(item.nxt_semestre).start,
-                end: semesterToDateEtudiant(item.nxt_semestre).end,
-                progress: 0,
-                dependencies: item.prv_code_module
-            };
+            tasksMap.set(nxtKey, {
+                id: nxtKey,
+                text: `${nxtKey}(${item.nxt_nom})`,
+                start_date: dates.start,
+                duration: item.nxt_duree_h ? Math.ceil(item.nxt_duree_h / 2) : DEFAULT_DURATION_DAYS
+            });
+        }
+
+        // Lien (Flèche de dépendance)
+        if (prvKey !== nxtKey){
+            links.push({
+                id: linkIdCounter++,
+                source: prvKey,
+                target: nxtKey,
+                type: "0"
+            });
         }
     });
 
-    return Object.values(moduleMap);
+    // --- ÉTAPE B : Auto-scheduling (La Cascade Magique) ---
+    // Repousse la date de début d'un enfant après la date de fin de son parent
+    let hasChanged = true;
+    let loopLimit = 100; // Sécurité contre les dépendances circulaires
+
+    while (hasChanged && loopLimit > 0) {
+        hasChanged = false;
+        loopLimit--;
+
+        links.forEach(link => {
+            const parent = tasksMap.get(link.source);
+            const child = tasksMap.get(link.target);
+
+            if (parent && child) {
+                // Calcul de la fin du parent
+                const parentStartDate = new Date(parent.start_date);
+                const parentEndDate = new Date(parentStartDate);
+                parentEndDate.setDate(parentEndDate.getDate() + parent.duration);
+
+                const childStartDate = new Date(child.start_date);
+
+                if (childStartDate < parentEndDate) {
+                    child.start_date = formatDate(parentEndDate);
+                    hasChanged = true;
+                }
+            }
+        });
+    }
+
+    if (loopLimit === 0) {
+        console.warn("Attention : Dépendance circulaire détectée dans les modules.");
+    }
+
+    return {
+        data: Array.from(tasksMap.values()),
+        links: links
+    };
+}
+
+
+// ==========================================
+// 3. INITIALISATION ET CONFIGURATION DE DHTMLX
+// ==========================================
+
+function updateGanttChart(tasksData) {
+    const ganttContainer = document.getElementById('gantt-chart');
+
+    if (!tasksData || tasksData.data.length === 0) {
+        ganttContainer.innerHTML = "<p style='color: gray; padding: 20px;'>Aucune donnée trouvée.</p>";
+        return;
+    }
+
+    ganttContainer.innerHTML = "";
+    gantt.config.date_format = "%Y-%m-%d";
+    gantt.config.readonly = true;
+    
+    gantt.config.scale_unit = "month";
+    gantt.config.date_scale = "%M %Y";
+    gantt.config.min_column_width = 70;
+
+    // Configuration de la grille à gauche
+    gantt.config.columns = [
+        {name: "text", label: "Nom du module", width: "*", tree: true},
+    ];
+
+    gantt.init("gantt-chart");
+    gantt.clearAll();
+    gantt.parse(tasksData);
 }
 
 
@@ -180,7 +202,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnOpen = document.querySelector('.button-section button');
     const modal = document.getElementById('modal-ajout-module');
     const form = document.getElementById('form-ajout-module');
+    const btnCancel_Cross = document.getElementById('btn-cancel-module-cross');
     const btnCancel = document.getElementById('btn-cancel-module');
+
+    if (typeof dataGantt !== 'undefined') {
+        const formattedData = transformDataForDHTMLX(dataGantt, userType);
+        updateGanttChart(formattedData);
+    } else {
+        console.error("Les données dataGantt ne sont pas définies.");
+    }
 
     if (btnOpen && modal) {
         btnOpen.addEventListener('click', (e) => {
@@ -189,9 +219,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 2. Fermer la modale
-    if (btnCancel && modal) {
+    if (btnCancel && modal || (btnCancel_Cross && modal)) {
         btnCancel.addEventListener('click', () => {
+            modal.close();
+            form.reset();
+        });
+        btnCancel_Cross.addEventListener('click', () => {
             modal.close();
             form.reset();
         });
@@ -224,7 +257,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const token = typeof userToken !== 'undefined' ? userToken : '';
 
             try {
-                // Envoi à l'API Python (modifie l'URL selon ton routage)
                 const response = await fetch('/api/modules/', {
                     method: 'POST',
                     headers: {
@@ -297,35 +329,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function createTag(filterId, text, value) {
         const tag = document.createElement('div');
-        tag.classList.add('filter-tag');
-        tag.setAttribute('data-filter', filterId);
-        tag.setAttribute('data-value', value);
+        tag.classList.add('filter-tag', getTagColorClass(filterId, value));
+            tag.classList.add('filter-tag');
+            tag.setAttribute('data-filter', filterId);
+            tag.setAttribute('data-value', value);
 
-        tag.innerHTML = `
-            <span class="tag-text">${text}</span>
-            <button class="remove-tag" aria-label="Supprimer le filtre">&times;</button>
-        `;
+            tag.innerHTML = `
+                <span class="tag-text">${text}</span>
+                <button class="remove-tag" aria-label="Supprimer le filtre">&times;</button>
+            `;
 
-        tag.querySelector('.remove-tag').addEventListener('click', function() {
-            tag.remove(); 
+            tag.querySelector('.remove-tag').addEventListener('click', function() {
+                tag.remove(); 
 
-            const isMultiple = (filterId === 'filiere' || filterId === 'module');
-            if (isMultiple) {
-                for (let item of activeFilters[filterId]) {
-                    if (item.value === value) {
-                        activeFilters[filterId].delete(item);
-                        break;
+                const isMultiple = (filterId === 'filiere' || filterId === 'module');
+                if (isMultiple) {
+                    for (let item of activeFilters[filterId]) {
+                        if (item.value === value) {
+                            activeFilters[filterId].delete(item);
+                            break;
+                        }
                     }
+                } else {
+                    activeFilters[filterId] = null;
+                    document.getElementById(filterId).value = ""; 
                 }
-            } else {
-                activeFilters[filterId] = null;
-                document.getElementById(filterId).value = ""; 
-            }
-            
-        });
 
-        tagsContainer.appendChild(tag);
+            });
+
+            tagsContainer.appendChild(tag);
     }
-    const tasks = transformDataGanttToTasks(dataGantt);
-    updateGanttChart(tasks);
+    const formattedData = transformDataForDHTMLX(dataGantt, userType);
+    updateGanttChart(formattedData);
 });

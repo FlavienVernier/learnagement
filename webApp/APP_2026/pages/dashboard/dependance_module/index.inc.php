@@ -22,6 +22,9 @@ if ($user_type=== 'enseignant') {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.css"/>
+<script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js"></script>
+<link href="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css" rel="stylesheet">
+
 <link rel="stylesheet" href="pages/dashboard/dependance_module/dependance_module.css"/>
 <script type="module" src="pages/dashboard/dependance_module/index.inc.js" defer></script>
 
@@ -79,84 +82,66 @@ if ($user_type=== 'enseignant') {
             </div>
 
 
-            <div class="gantt-wrapper">
-                <svg id="gantt-chart"></svg>
-            </div>
+            <div id = "gantt-chart" class="gantt-chart"></div>
             
         </div>
 
     </section>
 
-    <dialog id="modal-ajout-module" style="padding: 20px; border-radius: 8px; border: 1px solid #ccc; max-width: 500px;">
-    <h3>Créer un nouveau module</h3>
-    
+    <dialog id="modal-ajout-module">
+  <div class="modal-header">
+    <h2>Nouveau module</h2>
+    <button class="btn-close" id="btn-cancel-module-cross" aria-label="Fermer">×</button>
+  </div>
+  <div class="modal-body">
     <form id="form-ajout-module">
-        <div style="margin-bottom: 15px;">
-            <label>Code du cours :</label>
-            <input type="text" name="code_module" placeholder="Ex: M2101" required style="width: 100%;">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label for="code_module">Code module</label>
+          <input type="text" id="code_module" name="code_module" placeholder="ex: PROJ631" required>
         </div>
 
-        <div style="margin-bottom: 15px;">
-            <label>Nom du cours :</label>
-            <input type="text" name="nom" placeholder="Ex: Programmation Web" required style="width: 100%;">
+        <div class="form-group">
+          <label for="nom">Nom du module</label>
+          <input type="text" id="nom" name="nom" placeholder="ex: Projet Algorithmique" required>
         </div>
 
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <div>
-                <label>Heures CM :</label>
-                <input type="number" step="0.5" name="hCM" placeholder="0" style="width: 100%;">
-            </div>
-            <div>
-                <label>Heures TD :</label>
-                <input type="number" step="0.5" name="hTD" placeholder="0" style="width: 100%;">
-            </div>
-            <div>
-                <label>Heures TP :</label>
-                <input type="number" step="0.5" name="hTP" placeholder="0" style="width: 100%;">
-            </div>
+        <div class="form-group full">
+          <label>Heures (CM · TD · TP)</label>
+          <div class="input-row">
+            <input type="number" name="hCM" placeholder="CM" min="0" step="0.5">
+            <input type="number" name="hTD" placeholder="TD" min="0" step="0.5">
+            <input type="number" name="hTP" placeholder="TP" min="0" step="0.5">
+          </div>
         </div>
 
-        <div style="margin-bottom: 15px;">
-            <label>Semestre :</label>
-            <input type="number" name="semestre" placeholder="Ex: 3" required style="width: 100%;">
+        <div class="form-group full">
+          <label>Semestre</label>
+          <div class="semestre-pills">
+            <input class="pill-input" type="radio" name="semestre" id="s1" value="1">
+            <label class="pill-label" for="s1">S1</label>
+            <input class="pill-input" type="radio" name="semestre" id="s2" value="2">
+            <label class="pill-label" for="s2">S2</label>
+            <!-- ... S3 à S8 sur le même modèle -->
+          </div>
         </div>
 
-        <div style="margin-bottom: 15px;">
-            <label>Enseignant associé :</label>
-            <select name="id_responsable" required style="width: 100%;">
-                <option value="">-- Sélectionner un enseignant --</option>
-                <option value="1">M. Dupont</option> 
-            </select>
+        <div class="form-group full">
+          <label for="id_responsable">Responsable</label>
+          <select name="id_responsable" id="id_responsable">
+            <option value="">— Sélectionner —</option>
+            <!-- options dynamiques -->
+          </select>
         </div>
 
-        <div style="margin-bottom: 15px;">
-            <label>Promos associées :</label>
-            <select name="promos[]" multiple style="width: 100%; height: 60px;">
-                <option value="1">Promo 2024</option>
-                <option value="2">Promo 2025</option>
-            </select>
-        </div>
-
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <div style="flex: 1;">
-                <label>Dépendances (Avant) :</label>
-                <select name="dependances_avant[]" multiple style="width: 100%; height: 60px;">
-                    <option value="10">M1101 - Intro</option>
-                </select>
-            </div>
-            <div style="flex: 1;">
-                <label>Dépendances (Après) :</label>
-                <select name="dependances_apres[]" multiple style="width: 100%; height: 60px;">
-                    <option value="15">M3101 - Avancé</option>
-                </select>
-            </div>
-        </div>
-
-        <div style="text-align: right; margin-top: 20px;">
-            <button type="button" id="btn-cancel-module" style="margin-right: 10px;">Annuler</button>
-            <button type="submit">Créer le module</button>
-        </div>
+      </div>
+      <div class="modal-footer" style="padding: 20px 0 0;">
+        <button type="button" class="btn" id="btn-cancel-module">Annuler</button>
+        <button type="submit" class="btn btn-primary">Créer le module</button>
+      </div>
     </form>
+  </div>
 </dialog>
 
 </div>

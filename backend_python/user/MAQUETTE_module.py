@@ -501,7 +501,7 @@ def get_data_gantt_endpoint(
                 nmms.id_module_sequence AS "nxt_id",
                 nmm.code_module AS "nxt_code_module",
                 nmd.nom AS "prv_discipline",
-                nls.semestre AS "prv_semestre",
+                nls.semestre AS "nxt_semestre",
                 nmm.nom AS "nxt_nom",
                 nmmsg.duree_h AS "nxt_duree_h",
                 CONCAT(nlst.type, nmms.numero_ordre) AS "nxt_type"
