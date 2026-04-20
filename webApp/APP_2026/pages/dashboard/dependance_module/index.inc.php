@@ -4,26 +4,41 @@ $token = $_SESSION["jwt_token"];
 $user_id = $_SESSION['id'];
 $user_type = $_SESSION['type'];
 
-$enseignants = get_enseignants($token);
-$etudiants = get_etudiants($token);
-
-$modulesResp = get_modules_responsables($token);
-$promos = get_promos($token);
-$filieres = get_filieres($token);
-$modulesDepedencies = get_module_dependencies(61, $token);
-$modulesResponsable = get_modules_responsable_by_id($user_id, $token);
-$get_modules_intervenant_by_id = get_modules_intervenant_by_id($user_id, $token);
 if ($user_type=== 'enseignant') {
     $dataGantt = get_data_gantt($user_id, $token);
 } else {
     $dataGantt = get_data_gantt_etudiant($user_id, $token);
 }
+
+$semestres_bruts = [];
+$modules_bruts = [];
+$filieres=[];
+
+foreach ($dataGantt as $item) {
+    if (!empty($item['prv_semestre'])) $semestres_bruts[] = $item['prv_semestre'];
+    if (!empty($item['nxt_semestre'])) $semestres_bruts[] = $item['nxt_semestre'];
+    
+    if (!empty($item['prv_nom'])) $modules_bruts[] = $item['prv_nom'];
+    if (!empty($item['nxt_nom'])) $modules_bruts[] = $item['nxt_nom'];
+
+    if (!empty($item['prv_filiere'])) $filieres[] = $item['prv_filiere'];
+    if (!empty($item['nxt_filiere'])) $filieres[] = $item['nxt_filiere'];
+}
+
+$options_semestres = array_unique($semestres_bruts);
+$options_modules = array_unique($modules_bruts);
+$options_filieres = array_unique($filieres);
+
+sort($options_semestres); 
+sort($options_modules);
+sort($options_filieres);
+
+array_unshift($options_semestres, "Année complète");
 ?>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.css"/>
 <script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js"></script>
 <link href="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css" rel="stylesheet">
+<script src="https://cdn.dhtmlx.com/gantt/edge/ext/dhtmlxgantt_grouping.js"></script>
 
 <link rel="stylesheet" href="pages/dashboard/dependance_module/dependance_module.css"/>
 <script type="module" src="pages/dashboard/dependance_module/index.inc.js" defer></script>
@@ -33,16 +48,6 @@ if ($user_type=== 'enseignant') {
     const userId = <?= json_encode($user_id) ?>;
     const userType = <?= json_encode($user_type) ?>;
     const dataGantt = <?php echo json_encode($dataGantt); ?>;
-
-    
-    const dataModules = <?php echo json_encode($modulesResp); ?>;
-    const dataPromos = <?php echo json_encode($promos); ?>;
-    const dataFilieres = <?php echo json_encode($filieres); ?>;
-    const dataModulesDependencies = <?php echo json_encode($modulesDepedencies); ?>;
-    const dataModulesResponsables = <?php echo json_encode($modulesResponsable); ?>;
-    const dataModulesIntervenantById = <?php echo json_encode($get_modules_intervenant_by_id); ?>;
-    const enseignants = <?php echo json_encode($enseignants); ?>;
-
 </script>
 
 <div class="dependance-module-container">
@@ -50,17 +55,19 @@ if ($user_type=== 'enseignant') {
     <section class="main-content">
         
         <div class="filters-section">
-            <?= render("components/select", [
-                "label" => "Filière",
-                "minWidth" => 180,
-                "options" => ["Informatique", "Mécanique", "Électronique", "Génie civil"],
-                "id" => "filiere-filter"
-            ]) ?>
+            <?php if ($user_type === 'enseignant') {
+                render("components/select", [
+                    "label" => "Filière",
+                    "minWidth" => 180,
+                    "options" => $options_filieres,
+                    "id" => "filiere-filter"
+                ]);
+            } ?>
 
             <?= render("components/select", [
                 "label" => "Période",
                 "minWidth" => 180,
-                "options" => ["Semestre 1", "Semestre 2", "Année complète"],
+                "options" => $options_semestres,
                 "id" => "periode-filter", 
                 "defaultText" => "Année complète"
             ]) ?>
@@ -68,7 +75,7 @@ if ($user_type=== 'enseignant') {
             <?= render("components/select", [
                 "label" => "Module",
                 "minWidth" => 180,
-                "options" => ["Mathématiques", "Chimie", "Management", "Sport"],
+                "options" => $options_modules,
                 "id" => "module-filter"
             ]) ?>
         </div>

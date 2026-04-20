@@ -5,23 +5,6 @@ console.log("token", token);
 
 console.log("id utilisateur", userId);
 
-// console.log("Données des modules :", dataModules);
-// console.table(dataModules);
-
-// console.log("Données des promos :", dataPromos);
-// console.table(dataPromos);
-
-// console.log("Données des filières :", dataFilieres);
-// console.table(dataFilieres);
-
-// console.log("Données des dépendances de modules :", dataModulesDependencies);
-// console.table(dataModulesDependencies);
-
-//  console.log("Données des reponsables modules :", dataModulesResponsables);
-
-//  console.log("Données des intervenant par id :");
-//     console.table(dataModulesIntervenantById);
-
 console.log("Données pour le Gantt :", dataGantt);
 
 function getTagColorClass(filterId, value) {
@@ -79,7 +62,6 @@ function transformDataForDHTMLX(dataGantt, userType) {
     let linkIdCounter = 1;
 
     // Durée par défaut courte pour éviter que les blocs prennent tout le semestre
-    // Tu peux aussi utiliser item.prv_duree_h si tu veux des blocs proportionnels !
     const DEFAULT_DURATION_DAYS = 14; 
 
     // --- ÉTAPE A : Création des nœuds et des liens ---
@@ -93,9 +75,12 @@ function transformDataForDHTMLX(dataGantt, userType) {
 
             tasksMap.set(prvKey, {
                 id: prvKey,
-                text: `${prvKey}(${item.prv_nom})`,
+                text: prvKey,
                 start_date: dates.start, 
-                duration: item.prv_duree_h ? Math.ceil(item.prv_duree_h / 2) : DEFAULT_DURATION_DAYS
+                duration: item.prv_duree_h ? Math.ceil(item.prv_duree_h / 2) : DEFAULT_DURATION_DAYS,
+                code_module: item.prv_code_module, 
+                duree_h: item.prv_duree_h,
+                type: item.prv_type
             });
         }
 
@@ -108,13 +93,15 @@ function transformDataForDHTMLX(dataGantt, userType) {
 
             tasksMap.set(nxtKey, {
                 id: nxtKey,
-                text: `${nxtKey}(${item.nxt_nom})`,
+                text: nxtKey,
                 start_date: dates.start,
-                duration: item.nxt_duree_h ? Math.ceil(item.nxt_duree_h / 2) : DEFAULT_DURATION_DAYS
+                duration: item.nxt_duree_h ? Math.ceil(item.nxt_duree_h / 2) : DEFAULT_DURATION_DAYS,
+                code_module: item.nxt_code_module, 
+                duree_h: item.nxt_duree_h,
+                type: item.nxt_type
             });
         }
 
-        // Lien (Flèche de dépendance)
         if (prvKey !== nxtKey){
             links.push({
                 id: linkIdCounter++,
@@ -125,7 +112,7 @@ function transformDataForDHTMLX(dataGantt, userType) {
         }
     });
 
-    // --- ÉTAPE B : Auto-scheduling (La Cascade Magique) ---
+    // --- ÉTAPE B : Auto-scheduling 
     // Repousse la date de début d'un enfant après la date de fin de son parent
     let hasChanged = true;
     let loopLimit = 100; // Sécurité contre les dépendances circulaires
@@ -187,12 +174,68 @@ function updateGanttChart(tasksData) {
 
     // Configuration de la grille à gauche
     gantt.config.columns = [
-        {name: "text", label: "Nom du module", width: "*", tree: true},
-    ];
+    {
+        name: "text", 
+        label: "Détails du module", 
+        width: "*", 
+        tree: true,
+        template: function(task) {
+            
+            if (task.is_group) {
+                return `<strong style="color:#2c3e50; font-size:1.1em;">📁 ${task.text}</strong>`;
+            }
+            const code = task.code_module || "N/A";
+            const duree = task.duree_h ? `${task.duree_h}h` : "";
+            const typeBadge = task.type ? `<span class="badge-type">${task.type}</span>` : "";
+
+            // On retourne le HTML formaté
+            return `
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <strong>${code}</strong> 
+                    <span style="color: gray; font-size: 0.85em;">${duree}</span>
+                    ${typeBadge}
+                </div>
+            `;
+        }
+    },
+];
 
     gantt.init("gantt-chart");
     gantt.clearAll();
+
+    const treeData = [];
+    const processedModules = new Set();
+
+    // 1. On parcourt les tâches pour fabriquer l'arbre
+    tasksData.data.forEach(task => {
+        const moduleCode = task.code_module;
+
+        if (moduleCode && !processedModules.has(moduleCode)) {
+            treeData.push({
+                id: `group_${moduleCode}`,       // ID unique pour le parent
+                text: moduleCode,                // Le texte affiché
+                is_group: true,                  // Marqueur perso pour le template HTML
+                open: true,                      // Dossier ouvert par défaut
+                type: gantt.config.types.project // Définit la tâche comme un projet global
+            });
+            processedModules.add(moduleCode);
+        }
+
+        // 2. On indique à la tâche actuelle qui est son parent
+        if (moduleCode) {
+            task.parent = `group_${moduleCode}`;
+        }
+        
+        // On ajoute la vraie tâche à la nouvelle liste
+        treeData.push(task);
+    });
+
+    // 3. On remplace les données plates par nos données hiérarchisées
+    tasksData.data = treeData;
+
+
     gantt.parse(tasksData);
+
 }
 
 

@@ -4,8 +4,9 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between; /* Pousse les éléments aux extrémités */
-    padding: 20px 0;
+    padding: 5px 0;
     border-bottom: 0.5px solid #e0e0e0;
+    max-height: fit-content;
 }
 
 .tags-container {
@@ -51,6 +52,9 @@
 }
 .remove-tag:hover { opacity: 1; }
 
+.button-section button{
+    background-color: var(--primary);
+}
 
 /* ===================== GANTT ===================== */
 .gantt-wrapper {
@@ -68,7 +72,6 @@
     position: relative;
 }
 
-/* Indicateur visuel de resize */
 .gantt-wrapper::after {
     content: '';
     position: absolute;
