@@ -3,6 +3,7 @@
     .bg-primary   { background-color: var(--primary); }
     .bg-secondary { background-color: var(--secondary); }
     .bg-accent    { background-color: var(--accent); }
+    .bg-info      { background-color: var(--info); }
     .bg-warning   { background-color: var(--warning); }
     .bg-error     { background-color: var(--error); }
 
@@ -10,12 +11,21 @@
     .text-primary   { color: var(--primary); }
     .text-secondary { color: var(--secondary); }
     .text-accent    { color: var(--accent); }
+    .text-info      { color: var(--info); }
     .text-warning   { color: var(--warning); }
     .text-error     { color: var(--error); }
 
     .text-on-primary   { color: var(--on-primary); }
     .text-on-secondary { color: var(--on-secondary); }
+    .text-on-info      { color: var(--on-info); }
     .text-on-accent    { color: var(--on-accent); }
     .text-on-warning   { color: var(--on-warning); }
     .text-on-error     { color: var(--on-error); }
+
+    .bg-on-primary   { background-color: var(--on-primary); }
+    .bg-on-secondary { background-color: var(--on-secondary); }
+    .bg-on-accent    { background-color: var(--on-accent); }
+    .bg-on-info      { background-color: var(--on-info); }
+    .bg-on-warning   { background-color: var(--on-warning); }
+    .bg-on-error     { background-color: var(--on-error); }
 }

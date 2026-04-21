@@ -19,4 +19,13 @@ $groupId = $groupId ?? 'tab-group-' . uniqid();
             <?= $label ?>
         </button>
     <?php endforeach; ?>
+
+    <script>
+        /* ── Tabs ── */
+        function setTab(btn, group) {
+            const parent = btn.closest('[role="tablist"]');
+            parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+        }
+    </script>
 </div>

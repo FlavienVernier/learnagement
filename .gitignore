@@ -2,6 +2,7 @@
 *~
 **/logs
 **/*venv*
+**/vendor/*
 
 # data and backup directories store private data, NEVER PUT IN ON GIT 
 **/data
@@ -12,6 +13,7 @@ __pycache__
 .*
 #*
 *#
+!.htaccess
 
 # private files that contain password, NEVER PUT IN ON GIT (must be replaced by .env)
 docker/docker-compose.yml

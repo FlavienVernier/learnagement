@@ -20,3 +20,10 @@ $opacityStyle = (!empty($disabled) && $disabled === true) ? ' style="opacity:.45
         <span class="toggle-label"<?= $opacityStyle ?>><?= htmlspecialchars($label) ?></span>
     <?php endif; ?>
 </label>
+<script>
+    /* ── Toggle ── */
+    function syncToggle(input) { 
+        // Logic depends on your CSS, but usually just needs to trigger onchange 
+        console.log('Toggle state:', input.checked);
+    }
+</script>
