@@ -1,7 +1,7 @@
 import json
 import logging
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated, Dict, Any
 from pydantic import BaseModel
 
@@ -814,6 +814,67 @@ def add_sequencage(
     #print(type(__get_module_responsible_id(id_module, current_user)), flush=True)
     if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
         request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    return db_request(current_user, SQLRequest(**request))
+
+
+@router.post("/modules/create/",
+             tags=["module"],
+             summary="Create a new module",
+             description="Create a module without sequencing")
+def create_module(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    data: Dict[str, Any],
+):
+    required = ['code_module', 'nom_module', 'ECTS', 'id_discipline', 'semestre', 'id_responsable']
+    missing = [f for f in required if f not in data or data[f] in (None, "")]
+    if missing:
+        raise HTTPException(status_code=422, detail=f"Champs manquants : {missing}")
+
+    request = {
+        "request": """
+            INSERT INTO MAQUETTE_module (
+                code_module,
+                nom_module,
+                hCM,
+                hTD,
+                hTP,
+                hProj,
+                hPerso,
+                ECTS,
+                id_semestre,
+                id_responsable,
+                id_discipline
+            ) VALUES (
+                %(code_module)s,
+                %(nom_module)s,
+                %(hCM)s,
+                %(hTD)s,
+                %(hTP)s,
+                %(hProj)s,
+                %(hPerso)s,
+                %(ECTS)s,
+                %(id_semestre)s,
+                %(id_responsable)s,
+                %(id_discipline)s
+            );
+        """,
+        "params": {
+            "code_module":    data['code_module'],
+            "nom_module":     data['nom_module'],
+            "hCM":            data.get('hCM', 0),
+            "hTD":            data.get('hTD', 0),
+            "hTP":            data.get('hTP', 0),
+            "hProj":          data.get('hProjet', 0),
+            "hPerso":         data.get('hPerso', 0),
+            "ECTS":           data['ECTS'],
+            "id_semestre":    data['semestre'],
+            "id_responsable": data['id_responsable'],
+            "id_discipline":  data['id_discipline'],
+        },
+        "allowedRolesRequester": ["responsable_etudes"],
+    }
+
+
     return db_request(current_user, SQLRequest(**request))
 
 

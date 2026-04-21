@@ -1,8 +1,37 @@
 <?php
 require_once __DIR__ . "/../../../utils/endpoint.php";
+
 $token = $_SESSION["jwt_token"];
 $user_id = $_SESSION['id'];
 $user_type = $_SESSION['type'];
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    
+    // 1. LA GOMME : Efface tout ce qui a été mis en mémoire tampon (espaces, HTML, commentaires)
+    if (ob_get_length()) {
+        ob_clean();
+    }
+
+    // 2. Forcer le navigateur à comprendre qu'on envoie uniquement du JSON
+    header('Content-Type: application/json');
+
+    $body  = json_decode(file_get_contents('php://input'), true);
+    $auth  = getallheaders()['Authorization'] ?? '';
+    $token_post = str_replace('Bearer ', '', $auth);
+
+    try {
+        $result = post_module($body, $token_post);
+        echo json_encode($result);
+    } catch (Exception $e) {
+        http_response_code(400);
+        echo json_encode(["detail" => $e->getMessage()]);
+    }
+    
+    // 3. LE BOUCLIER : On coupe l'exécution du script ici. 
+    // Plus aucun HTML (footer, etc.) ne pourra s'afficher en dessous.
+    exit;
+}
 
 if ($user_type=== 'enseignant') {
     $dataGantt = get_data_gantt($user_id, $token);
@@ -124,8 +153,8 @@ array_unshift($options_semestres, "Année complète");
         </div>
 
         <div class="form-group">
-          <label for="nom">Nom du module</label>
-          <input type="text" id="nom" name="nom" placeholder="ex: Projet Algorithmique" required>
+          <label for="nom_module">Nom du module</label>
+          <input type="text" id="nom_module" name="nom_module" placeholder="ex: Projet Algorithmique" required>
         </div>
 
         <div class="form-group full">
@@ -169,7 +198,7 @@ array_unshift($options_semestres, "Année complète");
 
         <div class="form-group full">
           <label for="id_responsable">Responsable</label>
-          <select name="select_responsable" id="select_responsable">
+          <select name="id_responsable" id="id_responsable">
             <option value="">— Sélectionner —</option>
             <?php foreach ($enseignants as $enseignant) { ?>
               <option value="<?= htmlspecialchars($enseignant['id_enseignant']) ?>">
@@ -180,7 +209,7 @@ array_unshift($options_semestres, "Année complète");
           </select>
 
           <label for="id_responsable">Discipline</label>
-          <select name="select_discipline" id="select_discipline">
+          <select name="id_discipline" id="id_discipline">
             <option value="">— Sélectionner —</option>
             <?php foreach ($disciplines as $discipline) { ?>
               <option value="<?= htmlspecialchars($discipline['id_discipline']) ?>">

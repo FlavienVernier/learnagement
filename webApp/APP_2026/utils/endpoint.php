@@ -177,3 +177,8 @@ function get_disciplines($token) {
     $url = get_python_backend_url("disciplines/");
     return get_endpoint($url, $token);
 }
+
+function post_module($data, $token) {
+    $url = get_python_backend_url("modules/create/");
+    return post_endpoint($url, $data, $token);
+}

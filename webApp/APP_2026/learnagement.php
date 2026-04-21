@@ -3,6 +3,7 @@
     require './utils/render.php';
     include "./utils/connectDB.php";
     include "./utils/router.php";
+    include "./utils/endpoint.php";
 
     create_session();
     $defaultPage = $_SESSION["connecte"] ? "home" : "login";

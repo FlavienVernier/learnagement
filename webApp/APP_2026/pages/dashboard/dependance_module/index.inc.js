@@ -175,7 +175,7 @@ function updateGanttChart(tasksData) {
     {
         name: "text", 
         label: "Détails du module", 
-        width: "*", 
+        width: "200", 
         tree: true,
         template: function(task) {
             
@@ -271,41 +271,37 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 3. Gérer la soumission du formulaire
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault(); // Empêche le rechargement de la page
 
-            // Récupération des données du formulaire
             const formData = new FormData(form);
+            console.log("Données du formulaire :", Object.fromEntries(formData.entries()));
 
-            // Construction du JSON selon tes besoins backend
             const payload = {
                 code_module: formData.get('code_module'),
-                nom: formData.get('nom'),
+                nom: formData.get('nom_module'),
                 hCM: parseFloat(formData.get('hCM')) || 0,
                 hTD: parseFloat(formData.get('hTD')) || 0,
                 hTP: parseFloat(formData.get('hTP')) || 0,
+                hProj: parseFloat(formData.get('hProjet')) || 0,
+                hPerso: parseFloat(formData.get('hPerso')) || 0,
+                ECTS: parseFloat(formData.get('ECTS')) || 0,
                 semestre: parseInt(formData.get('semestre')),
                 id_responsable: parseInt(formData.get('id_responsable')),
-                promos: formData.getAll('promos[]').map(Number),
-                dependances_avant: formData.getAll('dependances_avant[]').map(Number),
-                dependances_apres: formData.getAll('dependances_apres[]').map(Number)
+                id_discipline: parseInt(formData.get('id_discipline'))
             };
-
-            // Récupération du token (assure-toi que cette variable est définie dans ton PHP/JS)
-            // ex en PHP: echo "<script>const userToken = '$token';</script>";
-            const token = typeof userToken !== 'undefined' ? userToken : '';
+            console.log("Payload à envoyer :", payload);
 
             try {
-                const response = await fetch('/api/modules/', {
+                const response = await fetch('/APP_2026/learnagement.php?action=create_module', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(payload)
-                });
+                    });
 
                 if (response.ok) {
                     const result = await response.json();
@@ -353,15 +349,15 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 activeFilters[filterId] = { value: selectedValue, text: selectedText };
 
-                // On cherche s'il y a déjà un tag pour cette catégorie (ex: Période)
+                
                 let existingTag = document.querySelector(`.filter-tag[data-filter="${filterId}"]`);
 
                 if (existingTag) {
-                    // On le met à jour s'il existe
+                
                     existingTag.querySelector('.tag-text').textContent = selectedText;
                     existingTag.setAttribute('data-value', selectedValue);
                 } else {
-                    // Sinon on le crée
+                
                     createTag(filterId, selectedText, selectedValue);
                 }
             }
