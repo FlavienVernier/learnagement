@@ -604,6 +604,22 @@ def get_data_gantt_endpoint_etudiant(
     }
     return db_request(current_user, SQLRequest(**request))
 
+@router.get("/disciplines/",
+            tags=["module"],
+            summary="Get disciplines",
+            description="Get disciplines")
+def get_disciplines(
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request" : f"""
+                SELECT
+                    * 
+                FROM `MAQUETTE_discipline`""",
+        "allowedRolesRequester": ["user"],
+    }
+    return db_request(current_user, SQLRequest(**request))
+
 
 #####################################
 #

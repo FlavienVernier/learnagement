@@ -172,3 +172,8 @@ function get_module_dependencies($id_module, $token) {
     $url = get_python_backend_url("modules/".$id_module."/dependencies/");
     return get_endpoint($url, $token);
 }
+
+function get_disciplines($token) {
+    $url = get_python_backend_url("disciplines/");
+    return get_endpoint($url, $token);
+}

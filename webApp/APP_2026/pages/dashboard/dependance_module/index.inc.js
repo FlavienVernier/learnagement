@@ -2,9 +2,7 @@ const activeFilters = {};
 let myGantt = null;
 
 console.log("token", token);
-
 console.log("id utilisateur", userId);
-
 console.log("Données pour le Gantt :", dataGantt);
 
 function getTagColorClass(filterId, value) {
@@ -37,7 +35,7 @@ function semesterToDateEnseignant(semestre) {
     
     if (num % 2 !== 0) {
         return { start: "2024-09-01", end: "2025-01-15" };
-    } 
+    }
     else {
         return { start: "2025-01-20", end: "2025-06-30" };
     }
@@ -52,6 +50,8 @@ function semesterToDateEtudiant(semestre) {
         "S6": { start: "2026-01-20", end: "2026-06-30" },
         "S7": { start: "2026-09-01", end: "2027-01-15" },
         "S8": { start: "2027-01-20", end: "2027-06-30" },
+        "S9": { start: "2027-09-01", end: "2028-01-15" },
+        "S10": { start: "2028-01-20", end: "2028-06-30" }
     };
     return semestreMap[semestre] || { start: "2024-01-01", end: "2024-06-01" };
 }
@@ -64,7 +64,7 @@ function transformDataForDHTMLX(dataGantt, userType) {
     // Durée par défaut courte pour éviter que les blocs prennent tout le semestre
     const DEFAULT_DURATION_DAYS = 14; 
 
-    // --- ÉTAPE A : Création des nœuds et des liens ---
+    // Création des liens 
     dataGantt.forEach(item => {
             const prvKey = `${item.prv_code_module}_${item.prv_type}`;
             const nxtKey = `${item.nxt_code_module}_${item.nxt_type}`;
@@ -84,7 +84,7 @@ function transformDataForDHTMLX(dataGantt, userType) {
             });
         }
 
-        // Enfant (Suite)
+        // Enfant
         const nxtSemestre = item.nxt_semestre || getNextSemestre(item.prv_semestre);
         if (!tasksMap.has(nxtKey)) {
             const dates = userType === 'enseignant'
@@ -112,10 +112,9 @@ function transformDataForDHTMLX(dataGantt, userType) {
         }
     });
 
-    // --- ÉTAPE B : Auto-scheduling 
-    // Repousse la date de début d'un enfant après la date de fin de son parent
+    // Auto-scheduling 
     let hasChanged = true;
-    let loopLimit = 100; // Sécurité contre les dépendances circulaires
+    let loopLimit = 100;
 
     while (hasChanged && loopLimit > 0) {
         hasChanged = false;
@@ -126,7 +125,6 @@ function transformDataForDHTMLX(dataGantt, userType) {
             const child = tasksMap.get(link.target);
 
             if (parent && child) {
-                // Calcul de la fin du parent
                 const parentStartDate = new Date(parent.start_date);
                 const parentEndDate = new Date(parentStartDate);
                 parentEndDate.setDate(parentEndDate.getDate() + parent.duration);
@@ -153,7 +151,7 @@ function transformDataForDHTMLX(dataGantt, userType) {
 
 
 // ==========================================
-// 3. INITIALISATION ET CONFIGURATION DE DHTMLX
+// INITIALISATION ET CONFIGURATION DE DHTMLX
 // ==========================================
 
 function updateGanttChart(tasksData) {

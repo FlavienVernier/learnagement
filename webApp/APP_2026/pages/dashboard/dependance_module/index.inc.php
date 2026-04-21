@@ -6,6 +6,8 @@ $user_type = $_SESSION['type'];
 
 if ($user_type=== 'enseignant') {
     $dataGantt = get_data_gantt($user_id, $token);
+    $enseignants = get_enseignants($token);
+    $disciplines = get_disciplines($token);
 } else {
     $dataGantt = get_data_gantt_etudiant($user_id, $token);
 }
@@ -21,8 +23,8 @@ foreach ($dataGantt as $item) {
     if (!empty($item['prv_nom'])) $modules_bruts[] = $item['prv_nom'];
     if (!empty($item['nxt_nom'])) $modules_bruts[] = $item['nxt_nom'];
 
-    if (!empty($item['prv_filiere'])) $filieres[] = $item['prv_filiere'];
-    if (!empty($item['nxt_filiere'])) $filieres[] = $item['nxt_filiere'];
+    if (!empty($item['prv_discipline'])) $filieres[] = $item['prv_discipline'];
+    if (!empty($item['nxt_discipline'])) $filieres[] = $item['nxt_discipline'];
 }
 
 $options_semestres = array_unique($semestres_bruts);
@@ -83,10 +85,22 @@ array_unshift($options_semestres, "Année complète");
         <div id="active-tags-container" class="tags-container"></div>
 
         <div class="gantt-container-with-button">
-            
-            <div class="button-section">
-                <?= render("components/button", ["id" => "btn-add-module", "label" => "Ajouter module", "variant" => "primary", "size" => "lg"]) ?>
-            </div>
+            <?php if ($user_type === 'enseignant') { ?>
+              <div class="button-section">
+                  <?= render("components/button", [
+                      "id" => "btn-add-module", 
+                      "label" => "Ajouter module", 
+                      "variant" => "primary", 
+                      "size" => "sm"
+                  ]) ?>
+                  <?= render("components/button", [
+                      "id" => "btn-add-sequence", 
+                      "label" => "Ajouter séquence", 
+                      "variant" => "primary", 
+                      "size" => "sm"
+                  ]) ?>
+              </div>
+            <?php } ?>
 
 
             <div id = "gantt-chart" class="gantt-chart"></div>
@@ -115,11 +129,15 @@ array_unshift($options_semestres, "Année complète");
         </div>
 
         <div class="form-group full">
-          <label>Heures (CM · TD · TP)</label>
+          <label>Heures (CM · TD · TP· Proj· Perso) et ECTS</label>
           <div class="input-row">
             <input type="number" name="hCM" placeholder="CM" min="0" step="0.5">
             <input type="number" name="hTD" placeholder="TD" min="0" step="0.5">
             <input type="number" name="hTP" placeholder="TP" min="0" step="0.5">
+            <input type="number" name="hProjet" placeholder="Projet" min="0" step="0.5">
+            <input type="number" name="hPerso" placeholder="Perso" min="0" step="0.5">
+            <input type="number" name="ECTS" placeholder="ECTS" min="0" step="0.5">
+            
           </div>
         </div>
 
@@ -130,16 +148,48 @@ array_unshift($options_semestres, "Année complète");
             <label class="pill-label" for="s1">S1</label>
             <input class="pill-input" type="radio" name="semestre" id="s2" value="2">
             <label class="pill-label" for="s2">S2</label>
-            <!-- ... S3 à S8 sur le même modèle -->
+            <input class="pill-input" type="radio" name="semestre" id="s3" value="3">
+            <label class="pill-label" for="s3">S3</label>
+            <input class="pill-input" type="radio" name="semestre" id="s4" value="4">
+            <label class="pill-label" for="s4">S4</label>
+            <input class="pill-input" type="radio" name="semestre" id="s5" value="5">
+            <label class="pill-label" for="s5">S5</label>
+            <input class="pill-input" type="radio" name="semestre" id="s6" value="6">
+            <label class="pill-label" for="s6">S6</label>
+            <input class="pill-input" type="radio" name="semestre" id="s7" value="7">
+            <label class="pill-label" for="s7">S7</label>
+            <input class="pill-input" type="radio" name="semestre" id="s8" value="8">
+            <label class="pill-label" for="s8">S8</label>
+            <input class="pill-input" type="radio" name="semestre" id="s9" value="9">
+            <label class="pill-label" for="s9">S9</label>
+            <input class="pill-input" type="radio" name="semestre" id="s10" value="10">
+            <label class="pill-label" for="s10">S10</label>
           </div>
         </div>
 
         <div class="form-group full">
           <label for="id_responsable">Responsable</label>
-          <select name="id_responsable" id="id_responsable">
+          <select name="select_responsable" id="select_responsable">
             <option value="">— Sélectionner —</option>
-            <!-- options dynamiques -->
+            <?php foreach ($enseignants as $enseignant) { ?>
+              <option value="<?= htmlspecialchars($enseignant['id_enseignant']) ?>">
+                <?= htmlspecialchars($enseignant['prenom'] . ' ' . $enseignant['nom'] . ' ('. $enseignant['statut']. ') ') ?>
+              </option>
+            <?php } ?>
+
           </select>
+
+          <label for="id_responsable">Discipline</label>
+          <select name="select_discipline" id="select_discipline">
+            <option value="">— Sélectionner —</option>
+            <?php foreach ($disciplines as $discipline) { ?>
+              <option value="<?= htmlspecialchars($discipline['id_discipline']) ?>">
+                <?= htmlspecialchars($discipline['nom']) ?>
+              </option>
+            <?php } ?>
+
+          </select>
+          
         </div>
 
       </div>
