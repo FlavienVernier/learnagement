@@ -3,6 +3,7 @@
     require __DIR__ . '/utils/router.php';
     require __DIR__ . '/utils/auth.php';
     require __DIR__ . '/utils/session.php';
+    require __DIR__ . "/utils/endpoint.php";
     include __DIR__ . "/utils/connectDB.php";
 
     create_session();
@@ -11,7 +12,9 @@
         viewsPath: __DIR__ . '/views',
         router: $r,
         componentsPath: __DIR__ . '/components',
-        assetsPath: __DIR__ . '/assets'
+        scriptsPath: __DIR__ . '/scripts',
+        assetsPath: __DIR__ . '/assets',
+        baseUrl: '/APP_2026'
     );
     $user = getCurrentUser();
 
@@ -63,6 +66,16 @@
     $t->router->get('/dashboard/mobility-map', 'dashboard-mobility-map', function () use ($t, $user) {
         requireAuth($user, $t->router);
         echo $t->render('dashboard/mobility-map');
+    });
+
+    $t->router->get('/dashboard/dependance_module', 'dashboard-dependance-module', function () use ($t, $user) {
+        requireAuth($user, $t->router);
+        echo $t->render('dashboard/dependance_module');
+    });
+
+    $t->router->post('/dashboard/dependance_module', 'dashboard-dependance-module-post', function () use ($t, $user) {
+        requireAuth($user, $t->router);
+        echo $t->render('dashboard/@post/dependance_module');
     });
 
     $t->router->get('/dashboard/python', 'dashboard-python', function () use ($t, $user) {

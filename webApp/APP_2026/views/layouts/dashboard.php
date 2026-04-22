@@ -6,6 +6,7 @@
         ["type" => "item", "label" => "Dashboard", "url" => $t->router->href('dashboard'), "icon" => $t->asset('icons/square2x2.svg')],
         ["type" => "section", "label" => "Principale", "items" => []],
         ["type" => "section", "label" => "Professeur", "items" => []],
+        ["type" => "item", "label" => "Dépendance Module",    "url" => $t->router->href('dashboard-dependance-module'), "icon" => $t->asset('icons/dependance_module.svg')],
         ["type" => "section", "label" => "Administration", "items" => [
             ["type" => "dropdown", "label" => "Stage", "icon" => $t->asset('icons/company.svg'), "items" => [
                 ["type" => "item", "label" => "Gérer les stages", "url" => $t->router->href('dashboard-stage')],

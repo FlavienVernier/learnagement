@@ -5,15 +5,6 @@ console.log("token", token);
 console.log("id utilisateur", userId);
 console.log("Données pour le Gantt :", dataGantt);
 
-function getTagColorClass(filterId, value) {
-    const prefix = String(value).replace(/\d+.*$/, '').toLowerCase();
-    const map = {
-        proj: 'tag-proj', math: 'tag-math', info: 'tag-info',
-        algo: 'tag-algo', gest: 'tag-gest', sys: 'tag-sys',
-        net: 'tag-net',   bdd: 'tag-bdd'
-    };
-    return map[prefix] || 'tag-other';
-}
 
 function getNextSemestre(semestre) {
     if (!semestre) return "S1";
@@ -199,6 +190,8 @@ function updateGanttChart(tasksData) {
 ];
 
     gantt.init("gantt-chart");
+    const observer = new ResizeObserver(() => gantt.setSizes());
+    observer.observe(document.getElementById('gantt-chart'));
     gantt.clearAll();
 
     const treeData = [];
@@ -219,7 +212,7 @@ function updateGanttChart(tasksData) {
             processedModules.add(moduleCode);
         }
 
-        // 2. On indique à la tâche actuelle qui est son parent
+        // On indique à la tâche actuelle qui est son parent
         if (moduleCode) {
             task.parent = `group_${moduleCode}`;
         }
@@ -228,7 +221,7 @@ function updateGanttChart(tasksData) {
         treeData.push(task);
     });
 
-    // 3. On remplace les données plates par nos données hiérarchisées
+    // On remplace les données plates par nos données hiérarchisées
     tasksData.data = treeData;
 
 
@@ -366,7 +359,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function createTag(filterId, text, value) {
         const tag = document.createElement('div');
-        tag.classList.add('filter-tag', getTagColorClass(filterId, value));
             tag.classList.add('filter-tag');
             tag.setAttribute('data-filter', filterId);
             tag.setAttribute('data-value', value);

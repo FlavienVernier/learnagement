@@ -1,59 +1,14 @@
 <?php
-require_once __DIR__ . "/../../../utils/endpoint.php";
+
+$t->extend('layouts/dashboard');
+
+$t->startSlot('title'); ?>Dépendance modules<?php $t->endSlot();
+
+$t->startSlot('content');
 
 $token = $_SESSION["jwt_token"];
 $user_id = $_SESSION['id'];
 $user_type = $_SESSION['type'];
-
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (ob_get_length()) ob_clean();
-    header('Content-Type: application/json');
-
-    $body = json_decode(file_get_contents('php://input'), true);
-
-    if ($body) {
-        $sql = "INSERT INTO MAQUETTE_module (
-                    code_module, nom_module, hCM, hTD, hTP, hProj, hPerso, ECTS, id_semestre, id_responsable, id_discipline
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        $stmt = mysqli_prepare($conn, $sql);
-
-        if ($stmt) {
-            $code = $body['code_module'] ?? '';
-            $nom = $body['nom_module'] ?? ''; // ou 'nom' selon ce que vous envoyez
-            $hCM = $body['hCM'] ?? 0;
-            $hTD = $body['hTD'] ?? 0;
-            $hTP = $body['hTP'] ?? 0;
-            $hProj = $body['hProj'] ?? 0; // ou 'hProjet'
-            $hPerso = $body['hPerso'] ?? 0;
-            $ects = $body['ECTS'] ?? 0;
-            $semestre = $body['semestre'] ?? 0;
-            $resp = $body['id_responsable'] ?? 0;
-            $disc = $body['id_discipline'] ?? 0;
-
-            mysqli_stmt_bind_param($stmt, "ssddddddiii", 
-                $code, $nom, $hCM, $hTD, $hTP, $hProj, $hPerso, $ects, $semestre, $resp, $disc
-            );
-
-            if (mysqli_stmt_execute($stmt)) {
-                echo json_encode(["status" => "success", "message" => "Module créé en dur avec succès."]);
-            } else {
-                http_response_code(400);
-                echo json_encode(["detail" => "Erreur SQL : " . mysqli_stmt_error($stmt)]);
-            }
-            mysqli_stmt_close($stmt);
-        } else {
-            http_response_code(500);
-            echo json_encode(["detail" => "Erreur de préparation SQL : " . mysqli_error($conn)]);
-        }
-    } else {
-        http_response_code(400);
-        echo json_encode(["detail" => "Aucune donnée reçue."]);
-    }
-    
-    exit;
-}
 
 if ($user_type=== 'enseignant') {
     $dataGantt = get_data_gantt($user_id, $token);
@@ -93,9 +48,6 @@ array_unshift($options_semestres, "Année complète");
 <link href="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css" rel="stylesheet">
 <script src="https://cdn.dhtmlx.com/gantt/edge/ext/dhtmlxgantt_grouping.js"></script>
 
-<link rel="stylesheet" href="pages/dashboard/dependance_module/dependance_module.css"/>
-<script type="module" src="pages/dashboard/dependance_module/index.inc.js" defer></script>
-
 <script>
     const token = "<?= htmlspecialchars($token) ?>";
     const userId = <?= json_encode($user_id) ?>;
@@ -103,61 +55,59 @@ array_unshift($options_semestres, "Année complète");
     const dataGantt = <?php echo json_encode($dataGantt); ?>;
 </script>
 
+<script>
+    <?= $t->script("dependance_module") ?>
+</script>
+
 <div class="dependance-module-container">
 
     <section class="main-content">
         
-        <div class="filters-section">
-            <?php if ($user_type === 'enseignant') {
-                render("components/select", [
-                    "label" => "Filière",
-                    "minWidth" => 180,
-                    "options" => $options_filieres,
-                    "id" => "filiere-filter"
-                ]);
-            } ?>
-
-            <?= render("components/select", [
-                "label" => "Période",
-                "minWidth" => 180,
-                "options" => $options_semestres,
-                "id" => "periode-filter", 
-                "defaultText" => "Année complète"
-            ]) ?>
-
-            <?= render("components/select", [
-                "label" => "Module",
-                "minWidth" => 180,
-                "options" => $options_modules,
-                "id" => "module-filter"
-            ]) ?>
-        </div>
-
-        <div id="active-tags-container" class="tags-container"></div>
-
-        <div class="gantt-container-with-button">
-            <?php if ($user_type === 'enseignant') { ?>
-              <div class="button-section">
-                  <?= render("components/button", [
-                      "id" => "btn-add-module", 
-                      "label" => "Ajouter module", 
-                      "variant" => "primary", 
-                      "size" => "sm"
-                  ]) ?>
-                  <?= render("components/button", [
-                      "id" => "btn-add-sequence", 
-                      "label" => "Ajouter séquence", 
-                      "variant" => "primary", 
-                      "size" => "sm"
-                  ]) ?>
-              </div>
-            <?php } ?>
-
-
-            <div id = "gantt-chart" class="gantt-chart"></div>
-            
-        </div>
-
+      <div class="filters-section" id="filters-section">
+          <?php if ($user_type === 'enseignant') { ?>
+            <?= $t->component("select", props: [
+                  "label" => "Filière",
+                  "minWidth" => 300,
+                  "options" => $options_filieres,
+                  "id" => "filiere-filter"
+                ]); ?>
+          <?php } ?>
+          <?= $t->component("select", props: [
+                  "label" => "Période",
+                  "minWidth" => 300,
+                  "options" => $options_semestres,
+                  "id" => "periode-filter",
+                  "defaultText" => "Année complète"
+                ]); ?>
+          
+          <?= $t->component("select", props: [
+                  "label" => "Module",
+                  "minWidth" => 300,
+                  "options" => $options_modules,
+                  "id" => "module-filter"
+                ]); ?>
+      </div>
+      <div id="active-tags-container" class="tags-container"></div>
+      <div class="gantt-container-with-button">
+          <?php if ($user_type === 'enseignant') { ?>
+            <div class="button-section">
+                <?= $t->component("button", props: [
+                    "id" => "btn-add-module", 
+                    "label" => "Ajouter module", 
+                    "variant" => "primary", 
+                    "size" => "sm"
+                ]); ?>
+                <?= $t->component("button", props: [
+                    "id" => "btn-add-sequence", 
+                    "label" => "Ajouter séquence", 
+                    "variant" => "primary", 
+                    "size" => "sm"
+                ]); ?>
+            </div>
+          <?php } ?>
+          <div id = "gantt-chart" class="gantt-chart"></div>
+          
+      </div>
     </section>
 
     <dialog id="modal-ajout-module">
@@ -253,3 +203,4 @@ array_unshift($options_semestres, "Année complète");
 </dialog>
 
 </div>
+<?php $t->endSlot(); ?>
