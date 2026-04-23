@@ -60,13 +60,8 @@ def import_apps():
     from app11_dag_dependance import app11_layout, register_callbacks as register_callbacks_app11
     from app13_mccc_administratif import app13_administratif_layout, register_callbacks as register_callbacks_app13_administratif
     from app14_check_administratif import app14_administratif_layout, register_callbacks as register_callbacks_app14_administratif
-    from apc_dash.apc20_heatmap_apc import heatmap_apc_layout, register_callbacks as register_callbacks_heatmap_apc
-    from apc_dash.apc20_KPI import  apc_layout,register_callbacks as register_callbacks_apc
-    from apc_dash.apc20_competence_ac import apc20_competence_ac_layout, register_callbacks as register_callbacks_apc20
-    from apc_dash.app_reseaupolytech_etudiant import polytech_analysis_layout, register_reseau_polytech_callbacks
-    from apc_dash.apc20_trajectoire import trajectoire_layout ,register_trajectoire_callbacks
-    from apc_dash.apc20_poids_modules import audit_poids_modules_layout, register_poids_modules_callbacks
-    from apc_dash.apc20_metier_orientation import apc20_metier_orientation_layout,register_callbacks as register_callbacks_apc20_orientation_metier
+    
+    from apc_dash.apc_hub import apc_hub_layout, register_apc_hub_callbacks
 
     return {
         'app2': (app2_layout, register_callbacks_app2),
@@ -87,13 +82,7 @@ def import_apps():
         'app11': (app11_layout, register_callbacks_app11),
         'app13_administratif': (app13_administratif_layout, register_callbacks_app13_administratif),
         'app14_administratif': (app14_administratif_layout, register_callbacks_app14_administratif),
-        'apc20_heatmap_apc': (heatmap_apc_layout, register_callbacks_heatmap_apc),
-        'apc20_KPI_competence':(apc_layout,register_callbacks_apc),
-        'apc20_learnagement': (apc20_competence_ac_layout, register_callbacks_apc20),
-        'app15_etudiant':(polytech_analysis_layout,register_reseau_polytech_callbacks),
-        'app_trajectoire': (trajectoire_layout, register_trajectoire_callbacks),
-        'app_poids_modules': (audit_poids_modules_layout, register_poids_modules_callbacks),
-        'apc20_orientation_metier':(apc20_metier_orientation_layout,register_callbacks_apc20_orientation_metier),
+        'apc20_hub': (apc_hub_layout, register_apc_hub_callbacks),
 
     }#apc20_etudiant
 
@@ -108,12 +97,6 @@ menu_items = {
         ('MCCC', 'app13_administratif'),
         ('Check', 'app14_administratif'),
         ('Charge enseignant', 'app7_administratif'),
-        ('APC_heatmap', 'apc20_heatmap_apc'),
-        ('APC_kpi','apc20_KPI_competence'),
-        ('APC', 'apc20_learnagement'),
-        ('Poids des modules','app_poids_modules'),
-        ('Réseau Polytech','app15_etudiant'),
-        ('orientation par metier','apc20_orientation_metier'),
     ],
     'enseignant': [
         ('Vue modules', 'app5_enseignant_view'),
@@ -123,12 +106,13 @@ menu_items = {
         ('Notes', 'app4_enseignant'),
         ('Charge de travail', 'app7_enseignant'),
         ('Tutorat stages', 'app10_enseignant'),
-        ('APC_heatmap', 'apc20_heatmap_apc'),
+        ('APC', 'apc20_hub'),
+        #('APC_heatmap', 'apc20_heatmap_apc'),
         #('APC_kpi','apc20_KPI_competence'),
-        ('APC', 'apc20_learnagement'),
-        ('Trajectoire d etude','app_trajectoire'),
-        ('Réseau Polytech','app15_etudiant'),
-        ('orientation par metier','apc20_orientation_metier'),
+        #('APC', 'apc20_learnagement'),
+        #('Trajectoire d etude','app_trajectoire'),
+        #('Réseau Polytech','app15_etudiant'),
+        #('orientation par metier','apc20_orientation_metier'),
 
     ],
     'etudiant': [
@@ -139,12 +123,7 @@ menu_items = {
         ('Charge de travail', 'app7_etudiant'),
         ('Avancement rendus', 'app9'),
         ('Stages', 'app10_etudiant'),
-        ('APC_heatmap', 'apc20_heatmap_apc'),
-        ('APC_kpi','apc20_KPI_competence'),
-        ('APC', 'apc20_learnagement'),
-        ('Réseau Polytech','app15_etudiant'),
-        ('Trajectoire d etude','app_trajectoire'),
-        ('orientation par metier','apc20_orientation_metier'),
+        
     ]
 }
 

@@ -48,37 +48,6 @@ polytech_analysis_layout = html.Div(
 
         dcc.Store(id="selected-school-store", data="ALL"),
 
-        # Navbar
-        html.Div(
-            style={
-                'backgroundColor': COLORS['primary'],
-                'position': 'sticky', 'top': '0', 'zIndex': '9999',
-                'boxShadow': '0 2px 8px rgba(0,0,0,0.15)',
-            },
-            children=[html.Div(
-                style={'display': 'flex', 'alignItems': 'stretch',
-                       'padding': '0 24px', 'height': '64px'},
-                children=[
-                    html.Div(style={'display': 'flex', 'alignItems': 'stretch', 'gap': '4px'}, children=[
-                        html.Div("Réseau Polytech", id='tab-reseau', n_clicks=0,
-                            style={'display': 'flex', 'alignItems': 'center', 'padding': '0 20px',
-                                   'cursor': 'pointer', 'fontSize': '14px', 'fontWeight': '600',
-                                   'color': 'white', 'borderBottom': '3px solid white'}),
-                        html.Div("Polytech Annecy", id='tab-annecy', n_clicks=0,
-                            style={'display': 'flex', 'alignItems': 'center', 'padding': '0 20px',
-                                   'cursor': 'pointer', 'fontSize': '14px', 'fontWeight': '400',
-                                   'color': 'rgba(255,255,255,0.6)',
-                                   'borderBottom': '3px solid transparent'}),
-                    ]),
-                    html.Div(
-                        "Explorez les formations, compétences et débouchés des écoles Polytech",
-                        style={'marginLeft': 'auto', 'color': 'rgba(255,255,255,0.55)',
-                               'fontSize': '12px', 'display': 'flex', 'alignItems': 'center',
-                               'fontStyle': 'italic'}
-                    ),
-                ]
-            )]
-        ),
 
         # ── Page Réseau Polytech ──────────────────────────────────────────────
         html.Div(id='page-reseau', children=[
