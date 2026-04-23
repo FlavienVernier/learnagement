@@ -1,5 +1,6 @@
 <?php
-$id = $id ?? 'search-' . uniqid(); // Ensure it always has an ID for the clear button
+$value = $value ?? '';
+$name = $name ?? 'q';
 $placeholder = $placeholder ?? 'Rechercher…';
 $size = $size ?? 'md';
 
@@ -17,9 +18,9 @@ $showClear = $showClear ?? true; // Default to showing the clear button
         </svg>
     </span>
     
-    <input type="search" class="<?= $inputClass ?>" placeholder="<?= htmlspecialchars($placeholder) ?>" id="<?= $id ?>"<?= $inputStyle ?>>
-    
-    <?php if ($showClear): ?>
-        <button class="search-bar-clear" onclick="document.getElementById('<?= $id ?>').value=''; this.style.opacity=0;">✕</button>
-    <?php endif; ?>
+    <input id="<?= $uuid ?>" type="search" name="<?= $name ?>"
+        value="<?= $value ?>"
+        class="<?= $inputClass ?>"
+        placeholder="<?= htmlspecialchars($placeholder) ?>"
+        <?= $inputStyle ?>>
 </div>

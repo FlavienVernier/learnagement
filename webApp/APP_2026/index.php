@@ -75,4 +75,9 @@
         echo $t->render('dashboard/ressource');
     });
 
+    $t->router->get('/test', 'test', function () use ($t, $user) {
+        requireAuth($user, $t->router);
+        echo $t->render('dashboard/test');
+    });
+
     $t->router->run();

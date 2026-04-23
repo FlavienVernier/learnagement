@@ -4,6 +4,6 @@ $avatars = $avatars ?? [];
 
 <div class="avatar-group">
     <?php foreach ($avatars as $avatar): ?>
-        <?= render("components/avatar", $avatar) ?>
+        <?= $t->component("avatar", props: $avatar) ?>
     <?php endforeach; ?>
 </div>
