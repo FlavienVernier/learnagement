@@ -36,6 +36,7 @@ icon_map = {
     'app8': 'fa-solid fa-book',
     'app9': 'fa-solid fa-tasks',
     'app10': 'fa-solid fa-percentage',
+    'apc_ens_dashboard': 'fa-solid fa-graduation-cap',
     'connected': 'fa-solid fa-check',
     'disconnected': 'fa-solid fa-xmark'
 }
@@ -63,6 +64,7 @@ def import_apps():
     from apc_dash.apc20_heatmap_apc import heatmap_apc_layout, register_callbacks as register_callbacks_heatmap_apc
     from apc_dash.apc20_KPI import  apc_layout,register_callbacks as register_callbacks_apc
     from apc_dash.apc20_competence_ac import apc20_competence_ac_layout, register_callbacks as register_callbacks_apc20
+    from apc_dash.apc20_ens_dashboard import apc_ens_dashboard_layout, register_callbacks as register_callbacks_apc_ens_dashboard
     return {
         'app2': (app2_layout, register_callbacks_app2),
         'app3_administratif': (app3_administratif_layout, register_callbacks_app3_administratif),
@@ -84,7 +86,8 @@ def import_apps():
         'app14_administratif': (app14_administratif_layout, register_callbacks_app14_administratif),
         'apc20_heatmap_apc': (heatmap_apc_layout, register_callbacks_heatmap_apc),
         'apc20_KPI_competence':(apc_layout,register_callbacks_apc),
-        'apc20_learnagement': (apc20_competence_ac_layout, register_callbacks_apc20),
+        'apc20_learnagement':  (apc20_competence_ac_layout, register_callbacks_apc20),
+        'apc_ens_dashboard':   (apc_ens_dashboard_layout, register_callbacks_apc_ens_dashboard),
     }
 LOGO = "https://placehold.co/100x100"
 apps = import_apps()
@@ -100,6 +103,7 @@ menu_items = {
         ('APC_heatmap', 'apc20_heatmap_apc'),
         ('APC_kpi','apc20_KPI_competence'),
         ('APC', 'apc20_learnagement'),
+        ('APC Enseignant', 'apc_ens_dashboard'),
     ],
     'enseignant': [
         ('Vue modules', 'app5_enseignant_view'),
@@ -112,6 +116,7 @@ menu_items = {
         ('APC_heatmap', 'apc20_heatmap_apc'),
         ('APC_kpi','apc20_KPI_competence'),
         ('APC', 'apc20_learnagement'),
+        ('APC Enseignant', 'apc_ens_dashboard'),
     ],
     'etudiant': [
         ('Compétences', 'app2'),
@@ -123,7 +128,7 @@ menu_items = {
         ('Stages', 'app10_etudiant'),
         ('APC_heatmap', 'apc20_heatmap_apc'),
         ('APC_kpi','apc20_KPI_competence'),
-         ('APC', 'apc20_learnagement'),
+        ('APC', 'apc20_learnagement'),
     ]
 }
 
