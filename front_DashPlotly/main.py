@@ -166,6 +166,8 @@ app.layout = html.Div([
     dcc.Store(id='user_id', storage_type="memory", data='0'),
     dcc.Store(id='role', storage_type="memory", data='none'),
     dcc.Store(id='status', storage_type="memory", data='not connected'), #deprecated
+    # Stores des dashboards APC — toujours dans le DOM pour que leurs callbacks se déclenchent dès le token disponible
+    dcc.Store(id='apc-ens-raw-store'),
     dcc.Location(id="url-redirect", refresh=True),
     html.Div(id='sidebar'),
     html.Div(id='page-content', className='content')

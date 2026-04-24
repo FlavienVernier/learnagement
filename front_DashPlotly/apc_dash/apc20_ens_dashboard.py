@@ -104,7 +104,6 @@ def _nav_btn(item):
 
 apc_ens_dashboard_layout = html.Div(
     [
-        dcc.Store(id="apc-ens-raw-store"),
         dcc.Store(id="apc-ens-active-nav", data="fiche"),
 
         # ── En-tête ───────────────────────────────────────────────
@@ -218,18 +217,12 @@ def register_callbacks(app):
                 .merge(df_competences, on="id_competence", how="left")
             )
 
-            # Sélection défensive : on garde uniquement les colonnes présentes
-            mod_cols_wanted = ["id_module", "code_module", "nom", "ECTS",
-                               "id_semestre", "hCM", "hTD", "hTP",
-                               "hTPTD", "hPROJ", "hPersonnelle", "id_responsable"]
-            mod_cols_available = [c for c in mod_cols_wanted if c in df_modules.columns]
-            logging.info(f"[apc20_ens_dashboard] colonnes modules disponibles : {df_modules.columns.tolist()}")
-
-            df_ac_mod_full = df_ac_modules_raw.merge(
-                df_modules[mod_cols_available],
-                on="id_module",
-                how="left",
-            )
+            # Merge avec df_modules uniquement si elle contient des données
+            if not df_modules.empty and "id_module" in df_modules.columns:
+                df_ac_mod_full = df_ac_modules_raw.merge(df_modules, on="id_module", how="left")
+            else:
+                logging.warning("[apc20_ens_dashboard] df_modules vide — données modules non disponibles (MAQUETTE_module vide ?)")
+                df_ac_mod_full = df_ac_modules_raw.copy()
 
             df_main = df_base.merge(df_ac_mod_full, on="id_apprentissage_critique", how="left")
             df_main["competence_label"] = df_main["code_competence"]

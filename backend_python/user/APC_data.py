@@ -88,7 +88,7 @@ def get_apc_modules(
     request = {
         "request": """
             SELECT id_module, code_module, nom, ECTS, id_discipline, id_semestre,
-                   hCM, hTD, hTP, hTPTD, hPROJ, hPersonnelle, id_responsable, commentaire
+                   hCM, hTD, hTP, hPROJ, hPersonnelle, id_responsable, commentaire
             FROM MAQUETTE_module
         """,
         "allowedRolesRequester": ["user"],
