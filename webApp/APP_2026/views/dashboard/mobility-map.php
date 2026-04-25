@@ -7,6 +7,17 @@
     <!-- Map component -->
     <div id="map" class="absolute inset-0" style="height: 100%; width: 100%;"></div>
 
+    <!-- Street View Modal (grand format) -->
+    <div id="streetViewModal" class="streetview-modal">
+        <div class="streetview-content">
+            <div class="streetview-header">
+                <h2 id="streetViewTitle" class="text-lg font-semibold"></h2>
+                <button class="streetview-close" onclick="window.closeStreetViewModal()">x</button>
+            </div>
+            <div id="streetViewPanoramaModal" style="width: 100%; height: 100%;"></div>
+        </div>
+    </div>
+
     <!-- Contrôles et panneaux superposés -->
     <div class="absolute top-[100px] left-4 z-[1000] flex max-w-[92vw] flex-col items-start gap-2.5">
         <div class="flex items-center gap-2">
@@ -57,16 +68,27 @@ integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
 crossorigin=""/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+<link rel="stylesheet" href="/APP_2026/theme/mobility-map.css" />
 <?php $t->endSlot(); ?>
 
 
 <?php $t->startSlot('script.top'); ?>
+<?php
+    $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY'] ?? '');
+?>
 <!-- Import Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin="">
 </script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+<!-- Google Maps API pour Street View interactif -->
+<script src="https://maps.googleapis.com/maps/api/js?key=<?= urlencode($googleMapsApiKey) ?>&libraries=places"></script>
+
+<!-- Logic map dédiée -->
+<script src="/APP_2026/theme/mobility-map-carousel.js"></script>
+<script src="/APP_2026/theme/mobility-map-streetview.js"></script>
 
 <!-- ToDo : Déplacer dans un fichier global ex db.js -->
 <script>
@@ -84,6 +106,11 @@ crossorigin=""/>
 <script type="module" defer>
     const map = L.map('map').setView([48.85, 2.35], 4);
     const wishedUniversities = new Map();
+    const popupState = new Map();
+    window.MobilityMapState = {
+        popupState,
+        wishedUniversities,
+    };
 
     // In a flex layout, Leaflet can initialize before final dimensions are settled.
     requestAnimationFrame(() => map.invalidateSize());
@@ -141,6 +168,10 @@ crossorigin=""/>
     }
 
     const universities = await fetchUniversities();
+    const universitiesById = new Map(
+        universities.map((u) => [String(u.id_partner_university), u])
+    );
+    window.MobilityMapState.universitiesById = universitiesById;
 
     async function refreshWishesFromServer() {
         const wishes = await fetchWishes();
@@ -149,7 +180,6 @@ crossorigin=""/>
             wishedUniversities.set(wish.id_partner_university, wish);
         });
     }
-
     await refreshWishesFromServer();
 
     function escapeHtml(value) {
@@ -221,24 +251,60 @@ crossorigin=""/>
 
     function popupText(university) {
         const alreadyInWishes = wishedUniversities.has(university.id_partner_university);
+        const uid = String(university.id_partner_university);
+
+        window.MobilityMapState.popupState.set(uid, {
+            photos: null,
+            photoIndex: 0,
+            streetView: null
+        });
+        
         return `
-            <b>${university.name}</b> (${university.code})<br/>
-            <em class="text-[0.75rem]">${university.address}, ${university.country}</em><br/>
-            Langue${university.languages.includes(',') ? 's' : ''}: ${university.languages}<br/>
+            <div class="popup-tabs">
+                <button id="tab-photos-${uid}" type="button" class="popup-tab" onclick="window.switchPopupTab('${uid}', 'photos')">Photos</button>
+                <button id="tab-street-${uid}" type="button" class="popup-tab" onclick="window.switchPopupTab('${uid}', 'streetview')">StreetView</button>
+            </div>
+            <div id="panel-photos-${uid}" class="popup-panel hidden">
+                <div class="popup-carousel">
+                    <div class="popup-photo-frame">
+                        <img id="photo-image-${uid}" class="popup-photo" alt="Photo universite" />
+                        <button id="photo-prev-${uid}" type="button" class="popup-carousel-btn left" onclick="window.prevPopupPhoto('${uid}')" disabled>‹</button>
+                        <button id="photo-next-${uid}" type="button" class="popup-carousel-btn right" onclick="window.nextPopupPhoto('${uid}')" disabled>›</button>
+                    </div>
+                </div>
+                <p id="photo-caption-${uid}" class="popup-photo-caption"></p>
+                <p id="photo-status-${uid}" class="popup-status">Chargement des photos...</p>
+            </div>
+            <div id="panel-street-${uid}" class="popup-panel hidden">
+                <div id="streetview-${uid}" class="popup-streetview"></div>
+                <p id="street-status-${uid}" class="popup-status">Chargement du Street View...</p>
+                <div class="popup-streetview-actions">
+                    <button id="street-open-${uid}" type="button" class="popup-streetview-expand" onclick="window.openStreetViewModal('${uid}')" disabled>Ouvrir en grand</button>
+                </div>
+            </div>
+            <b>${escapeHtml(university.name)}</b> (${escapeHtml(university.code)})<br/>
+            <em class="text-[0.75rem]">${escapeHtml(university.address)}, ${escapeHtml(university.country)}</em><br/>
+            Langue${university.languages.includes(',') ? 's' : ''}: ${escapeHtml(university.languages)}<br/>
             ${university.note_min !== null ? `Note min : ${university.note_min}<br/>` : ''}
-            <a href="${university.website}" target="_blank">${university.website}</a><br/>
+            <a href="${escapeHtml(university.website)}" target="_blank">${escapeHtml(university.website)}</a><br/>
             <button
                 type="button"
-                onclick='window.addUniversityToWishes(${JSON.stringify(university)})'
+                onclick="window.addUniversityToWishes('${uid}')"
                 ${alreadyInWishes ? 'disabled' : ''}
                 class="mt-2 inline-flex items-center rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-                ${alreadyInWishes ? 'Ajoute aux voeux' : 'Ajouter aux voeux'}
+                ${alreadyInWishes ? 'Déjà dans les voeux' : 'Ajouter aux voeux'}
             </button>
         `;
     }
 
-    async function addUniversityToWishes(university) {
+    async function addUniversityToWishes(universityId) {
+        const university = universitiesById.get(String(universityId));
+        if (!university) {
+            console.error('Universite introuvable pour id:', universityId);
+            return;
+        }
+
         if (wishedUniversities.has(university.id_partner_university)) {
             return;
         }
@@ -321,7 +387,7 @@ crossorigin=""/>
             console.error('Impossible de deplacer le voeu :', error.message);
         }
     }
-
+    
     window.addUniversityToWishes = addUniversityToWishes;
     window.deleteWish = deleteWish;
     window.moveWish = moveWish;
@@ -350,6 +416,11 @@ crossorigin=""/>
         filtered.forEach(university => {
             const marker = L.marker([university.latitude, university.longitude])
                 .bindPopup(popupText(university));
+
+            marker.on('popupopen', () => {
+                void window.hydratePopupContent(university);
+            });
+
             markers.addLayer(marker);
         });
         map.addLayer(markers);
