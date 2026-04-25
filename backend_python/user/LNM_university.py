@@ -306,3 +306,51 @@ def move_university_wish(
     db_request(current_user, SQLRequest(**current_to_target_request))
 
     return {"message": "Voeu deplace.", "direction": direction}
+
+@router.post("/university/etudiant/{id_etudiant:int}/wishes/submit",
+            tags=["user", "mobility"],
+            summary="Submit university wishes",
+            description="Submit the student's mobility wishes for processing")
+def submit_university_wishes(
+    id_etudiant: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    if current_user.id != id_etudiant:
+        raise HTTPException(status_code=403, detail="Unauthorized access")
+
+    check_request = {
+        "request": """
+                        SELECT COUNT(*) AS wishes_count
+                        FROM MOB_wishes
+                        WHERE id_etudiant = %(id_etudiant)s
+                    """,
+        "params": {
+            "id_etudiant": id_etudiant,
+        },
+        "allowedRolesRequester": ["etudiant"],
+    }
+    check_rows = db_request(current_user, SQLRequest(**check_request))
+    wishes_count = int((check_rows[0].get("wishes_count") or 0)) if check_rows else 0
+
+    if wishes_count < 5:
+        raise HTTPException(status_code=400, detail="Vous devez avoir au moins 5 voeux pour les soumettre.")
+
+    # Update the submission date for all submitted wishes
+    update_request = {
+        "request": """
+                        UPDATE MOB_wishes
+                        SET submission_date = NOW()
+                        WHERE id_etudiant = %(id_etudiant)s
+                    """,
+        "params": {
+            "id_etudiant": id_etudiant,
+        },
+        "allowedRolesRequester": ["etudiant"],
+    }
+    db_request(current_user, SQLRequest(**update_request))
+
+    # ToDo : 
+    #    - Bloquer les modifications des voeux après soumission (côté front et back)
+    #    - Interface côté admin (RI)
+
+    return {"message": "Voeux soumis avec succes."}

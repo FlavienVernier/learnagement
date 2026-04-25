@@ -209,7 +209,9 @@ crossorigin=""/>
         wishesEmpty.classList.add('hidden');
         wishesList.innerHTML = wishes
             .map((wish, index) => `
-                <li class="rounded border border-gray-200 bg-gray-50 p-2">
+            <li class="rounded border border-gray-200 bg-gray-50 p-2">
+                <div class="flex items-center gap-4 mb-1">
+                    <span class="font-semibold text-lg text-gray-800">${index + 1}</span>
                     <div class="flex items-center justify-between gap-2">
                         <div>
                             <p class="text-sm text-gray-800"><strong class="font-semibold">${escapeHtml(wish.name)}</strong> (${escapeHtml(wish.code)})</p>
@@ -244,9 +246,23 @@ crossorigin=""/>
                             </button>
                         </div>
                     </div>
-                </li>
+                </div>
+            </li>
             `)
             .join('');
+
+        console.log('Voeux affichés :', wishes, wishes.length);
+
+        wishesList.innerHTML += `
+            <button
+                type="button"
+                onclick="window.submitWishes()"
+                class="mt-3 w-full rounded bg-primary px-3 py-2 text-sm font-semibold text-white cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-400"
+                ${wishes.length < 5 ? 'disabled' : ''}
+            >
+                Soumettre mes voeux
+            </button>
+        `;
     }
 
     function popupText(university) {
@@ -290,10 +306,10 @@ crossorigin=""/>
             <button
                 type="button"
                 onclick="window.addUniversityToWishes('${uid}')"
-                ${alreadyInWishes ? 'disabled' : ''}
-                class="mt-2 inline-flex items-center rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                ${alreadyInWishes || wishedUniversities.size >= 5 ? 'disabled' : ''}
+                class="mt-2 inline-flex items-center rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
             >
-                ${alreadyInWishes ? 'Déjà dans les voeux' : 'Ajouter aux voeux'}
+                ${alreadyInWishes ? 'Déjà dans les voeux' : wishedUniversities.size < 5 ? 'Ajouter aux voeux' : 'Maximum de voeux atteint'}
             </button>
         `;
     }
@@ -330,6 +346,7 @@ crossorigin=""/>
             renderWishesList();
             updateMap();
             console.log('Université ajoutée aux voeux :', university);
+            document.getElementById('wishesPanel').classList.remove('hidden');
         } catch (error) {
             console.error('Impossible d\'ajouter l\'université aux voeux :', error.message);
         }
@@ -387,10 +404,36 @@ crossorigin=""/>
             console.error('Impossible de deplacer le voeu :', error.message);
         }
     }
+
+    async function submitWishes() {
+        try {
+            const submitEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
+                + "/university/etudiant/" + window.ENV.USER_ID
+                + "/wishes/submit";
+
+            const response = await fetch(submitEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            alert('Voeux soumis avec succès !');
+        } catch (error) {
+            console.error('Impossible de soumettre les voeux :', error.message);
+            alert('Erreur lors de la soumission des voeux.');
+        }
+    }
     
     window.addUniversityToWishes = addUniversityToWishes;
     window.deleteWish = deleteWish;
     window.moveWish = moveWish;
+    window.submitWishes = submitWishes;
 
     function updateMap() {
         markers.clearLayers();

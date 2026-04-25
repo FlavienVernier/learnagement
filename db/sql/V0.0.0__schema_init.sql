@@ -718,6 +718,7 @@ CREATE TABLE `MOB_wishes` (
   `id_etudiant` int NOT NULL,
   `id_partner_university` int NOT NULL,
   `priority` int NOT NULL,
+  `submission_date` datetime NULL DEFAULT NULL,
   PRIMARY KEY (`id_wish`),
   UNIQUE KEY `SECONDARY` (`id_etudiant`,`priority`) USING BTREE,
   KEY `FK_wishes_as_etudiant` (`id_etudiant`),
