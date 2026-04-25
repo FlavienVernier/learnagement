@@ -19,6 +19,8 @@ from .apc20_layout import COLORS, KNOWN_COMPETENCES, get_competence_color, empty
 
 reseau_gaps_content = html.Div(
     [
+        dcc.Store(id="reseau-selected-node", data=None),
+
         # ── Section Réseau ────────────────────────────────────────
         html.Div(
             [
@@ -50,18 +52,49 @@ reseau_gaps_content = html.Div(
                     ],
                     style={"marginBottom": "14px"},
                 ),
+
+                # Graphe + bouton reset superposé
                 html.Div(
-                    dcc.Graph(
-                        id="reseau-graph",
-                        figure=empty_fig(),
-                        config={"displayModeBar": True, "displaylogo": False},
-                        style={"height": "560px"},
-                    ),
+                    [
+                        dcc.Graph(
+                            id="reseau-graph",
+                            figure=empty_fig(),
+                            config={"displayModeBar": True, "displaylogo": False},
+                            style={"height": "560px"},
+                        ),
+                        html.Button(
+                            [
+                                html.I(className="fa-solid fa-arrow-rotate-left",
+                                       style={"marginRight": "6px"}),
+                                "Retour vue globale",
+                            ],
+                            id="reseau-reset-btn",
+                            n_clicks=0,
+                            style={
+                                "display":        "none",
+                                "position":       "absolute",
+                                "top":            "14px",
+                                "left":           "14px",
+                                "zIndex":         "10",
+                                "backgroundColor": COLORS["primary"],
+                                "color":          "white",
+                                "border":         "none",
+                                "borderRadius":   "6px",
+                                "padding":        "7px 13px",
+                                "fontSize":       "13px",
+                                "fontWeight":     "600",
+                                "cursor":         "pointer",
+                                "boxShadow":      "0 2px 6px rgba(0,0,0,0.2)",
+                                "fontFamily":     "Inter, sans-serif",
+                            },
+                        ),
+                    ],
                     style={
+                        "position":        "relative",
                         "backgroundColor": "white",
-                        "borderRadius": "10px",
-                        "boxShadow": "0 1px 4px rgba(0,0,0,0.08)",
-                        "padding": "12px",
+                        "borderRadius":    "10px",
+                        "boxShadow":       "0 1px 4px rgba(0,0,0,0.08)",
+                        "padding":         "12px",
                     },
                 ),
             ],
@@ -98,15 +131,69 @@ reseau_gaps_content = html.Div(
 
 def register_callbacks(app):
 
+    # ── Mise à jour du nœud sélectionné (clic ou reset) ──────────
+    @app.callback(
+        Output("reseau-selected-node", "data"),
+        Input("reseau-graph",      "clickData"),
+        Input("reseau-reset-btn",  "n_clicks"),
+        Input("reseau-comp-filter","value"),
+        prevent_initial_call=True,
+    )
+    def update_selected_node(click_data, _reset, _filter):
+        ctx = callback_context
+        triggered = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
+
+        # Reset ou changement de filtre → on efface la sélection
+        if triggered in ("reseau-reset-btn", "reseau-comp-filter"):
+            return None
+
+        # Clic sur le graphe
+        if triggered == "reseau-graph" and click_data and click_data.get("points"):
+            pt = click_data["points"][0]
+            cd = pt.get("customdata")
+            if cd is not None:
+                try:
+                    return float(cd)
+                except (ValueError, TypeError):
+                    pass
+        return None
+
+    # ── Visibilité du bouton reset ────────────────────────────────
+    @app.callback(
+        Output("reseau-reset-btn", "style"),
+        Input("reseau-selected-node", "data"),
+        prevent_initial_call=False,
+    )
+    def toggle_reset_btn(selected):
+        base = {
+            "position":        "absolute",
+            "top":             "14px",
+            "left":            "14px",
+            "zIndex":          "10",
+            "backgroundColor": COLORS["primary"],
+            "color":           "white",
+            "border":          "none",
+            "borderRadius":    "6px",
+            "padding":         "7px 13px",
+            "fontSize":        "13px",
+            "fontWeight":      "600",
+            "cursor":          "pointer",
+            "boxShadow":       "0 2px 6px rgba(0,0,0,0.2)",
+            "fontFamily":      "Inter, sans-serif",
+        }
+        base["display"] = "flex" if selected is not None else "none"
+        base["alignItems"] = "center"
+        return base
+
     # ── Viz 3 : Réseau de modules ─────────────────────────────────
     @app.callback(
         Output("reseau-graph", "figure"),
-        Input("reseau-comp-filter", "value"),
-        Input("apc-ens-raw-store",  "data"),
-        Input("reseau-graph",       "clickData"),
+        Input("reseau-comp-filter",   "value"),
+        Input("apc-ens-raw-store",    "data"),
+        Input("reseau-selected-node", "data"),
         prevent_initial_call=False,
     )
-    def update_reseau(competences, raw_data, click_data):
+    def update_reseau(competences, raw_data, clicked_mod):
         if not competences or raw_data is None:
             return empty_fig("Données non disponibles")
 
@@ -155,21 +242,9 @@ def register_callbacks(app):
             raw = module_names.get(str(int(m)), module_names.get(str(m), f"M{m}"))
             return str(raw)[:30]
 
-        # ── Détermination du nœud cliqué ──────────────────────────
-        # Réinitialiser la sélection si c'est le filtre ou le store qui a déclenché
-        ctx = callback_context
-        triggered = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
-        clicked_mod = None
-        if triggered == "reseau-graph" and click_data and click_data.get("points"):
-            pt = click_data["points"][0]
-            cd = pt.get("customdata")
-            if cd is not None:
-                try:
-                    clicked_mod = float(cd)
-                    if clicked_mod not in G.nodes():
-                        clicked_mod = None
-                except (ValueError, TypeError):
-                    clicked_mod = None
+        # Vérifier que le nœud sélectionné existe toujours dans ce graphe
+        if clicked_mod is not None and clicked_mod not in G.nodes():
+            clicked_mod = None
 
         neighbors = set(G.neighbors(clicked_mod)) if clicked_mod is not None else set()
 
@@ -206,16 +281,13 @@ def register_callbacks(app):
                 hoverinfo="none", showlegend=False,
             ))
 
-        # ── Traces de nœuds (un trace par nœud pour contrôle individuel) ──
+        # ── Traces de nœuds ───────────────────────────────────────
         seen_comps = set()
         node_traces = []
-        all_comp_mods = {
-            comp: [m for m in G.nodes() if mod_dom_comp.get(m) == comp]
-            for comp in competences
-        }
 
         for comp in competences:
-            for m in all_comp_mods.get(comp, []):
+            comp_mods = [m for m in G.nodes() if mod_dom_comp.get(m) == comp]
+            for m in comp_mods:
                 is_clicked  = clicked_mod is not None and m == clicked_mod
                 is_neighbor = m in neighbors
                 is_dimmed   = clicked_mod is not None and not is_clicked and not is_neighbor
@@ -272,10 +344,7 @@ def register_callbacks(app):
             pad = 0.6
             xaxis_cfg = dict(range=[min(xs)-pad, max(xs)+pad], showgrid=False, zeroline=False, showticklabels=False)
             yaxis_cfg = dict(range=[min(ys)-pad, max(ys)+pad], showgrid=False, zeroline=False, showticklabels=False)
-            title_text = (
-                f"{_mod_label(clicked_mod)} — {G.degree(clicked_mod)} connexion(s) · "
-                "Utilisez 🏠 pour réinitialiser la vue"
-            )
+            title_text = f"{_mod_label(clicked_mod)} — {G.degree(clicked_mod)} connexion(s)"
         else:
             xaxis_cfg = dict(showgrid=False, zeroline=False, showticklabels=False)
             yaxis_cfg = dict(showgrid=False, zeroline=False, showticklabels=False)
