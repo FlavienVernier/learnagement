@@ -9,7 +9,7 @@ Questions enseignant :
 import pandas as pd
 import plotly.graph_objects as go
 import networkx as nx
-from dash import dcc, html, Input, Output
+from dash import dcc, html, Input, Output, callback_context
 from io import StringIO
 
 from .apc20_layout import COLORS, KNOWN_COMPETENCES, get_competence_color, empty_fig
@@ -29,7 +29,8 @@ reseau_gaps_content = html.Div(
                 html.P(
                     "Deux modules sont reliés s'ils partagent au moins un apprentissage critique. "
                     "La taille du nœud reflète le nombre d'AC couverts, "
-                    "la couleur indique la compétence dominante.",
+                    "la couleur indique la compétence dominante. "
+                    "Cliquez sur un nœud pour zoomer sur ses connexions.",
                     style={"margin": "0 0 14px 0", "color": "#6B7280", "fontSize": "13px"},
                 ),
                 html.Div(
@@ -102,9 +103,10 @@ def register_callbacks(app):
         Output("reseau-graph", "figure"),
         Input("reseau-comp-filter", "value"),
         Input("apc-ens-raw-store",  "data"),
+        Input("reseau-graph",       "clickData"),
         prevent_initial_call=False,
     )
-    def update_reseau(competences, raw_data):
+    def update_reseau(competences, raw_data, click_data):
         if not competences or raw_data is None:
             return empty_fig("Données non disponibles")
 
@@ -149,73 +151,146 @@ def register_callbacks(app):
 
         pos = nx.spring_layout(G, seed=42, k=3.0)
 
-        edge_x, edge_y = [], []
-        for u, v in G.edges():
-            x0, y0 = pos[u]
-            x1, y1 = pos[v]
-            edge_x += [x0, x1, None]
-            edge_y += [y0, y1, None]
+        def _mod_label(m):
+            raw = module_names.get(str(int(m)), module_names.get(str(m), f"M{m}"))
+            return str(raw)[:30]
 
-        edge_trace = go.Scatter(
-            x=edge_x, y=edge_y,
-            mode="lines",
-            line=dict(width=0.8, color="#D1D5DB"),
-            hoverinfo="none",
-        )
+        # ── Détermination du nœud cliqué ──────────────────────────
+        # Réinitialiser la sélection si c'est le filtre ou le store qui a déclenché
+        ctx = callback_context
+        triggered = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
+        clicked_mod = None
+        if triggered == "reseau-graph" and click_data and click_data.get("points"):
+            pt = click_data["points"][0]
+            cd = pt.get("customdata")
+            if cd is not None:
+                try:
+                    clicked_mod = float(cd)
+                    if clicked_mod not in G.nodes():
+                        clicked_mod = None
+                except (ValueError, TypeError):
+                    clicked_mod = None
 
-        node_traces = []
-        for comp in competences:
-            comp_mods = [m for m in G.nodes() if mod_dom_comp.get(m) == comp]
-            if not comp_mods:
-                continue
-            nx_ = [pos[m][0] for m in comp_mods]
-            ny_ = [pos[m][1] for m in comp_mods]
-            sizes = [max(14, min(45, G.nodes[m]["n_ac"] * 3)) for m in comp_mods]
+        neighbors = set(G.neighbors(clicked_mod)) if clicked_mod is not None else set()
 
-            def _mod_label(m):
-                raw = module_names.get(str(int(m)), module_names.get(str(m), f"M{m}"))
-                return str(raw)[:28]
-
-            labels      = [_mod_label(m) for m in comp_mods]
-            hover_texts = [
-                f"<b>{_mod_label(m)}</b><br>"
-                f"AC couverts : {G.nodes[m]['n_ac']}<br>"
-                f"Compétence dominante : {comp}<br>"
-                f"Connexions : {G.degree(m)}"
-                for m in comp_mods
-            ]
-
-            node_traces.append(go.Scatter(
-                x=nx_, y=ny_,
-                mode="markers+text",
-                marker=dict(
-                    size=sizes,
-                    color=get_competence_color(comp),
-                    opacity=0.85,
-                    line=dict(width=1.5, color="white"),
-                ),
-                text=labels,
-                textposition="top center",
-                textfont=dict(size=9, color="#374151"),
-                name=comp,
-                hovertext=hover_texts,
-                hoverinfo="text",
+        # ── Traces d'arêtes ───────────────────────────────────────
+        edge_traces = []
+        if clicked_mod is not None:
+            dim_x, dim_y, hi_x, hi_y = [], [], [], []
+            for u, v in G.edges():
+                x0, y0 = pos[u]; x1, y1 = pos[v]
+                if u == clicked_mod or v == clicked_mod:
+                    hi_x += [x0, x1, None]; hi_y += [y0, y1, None]
+                else:
+                    dim_x += [x0, x1, None]; dim_y += [y0, y1, None]
+            if dim_x:
+                edge_traces.append(go.Scatter(
+                    x=dim_x, y=dim_y, mode="lines",
+                    line=dict(width=0.4, color="#EBEBEB"),
+                    hoverinfo="none", showlegend=False,
+                ))
+            if hi_x:
+                edge_traces.append(go.Scatter(
+                    x=hi_x, y=hi_y, mode="lines",
+                    line=dict(width=2.5, color=COLORS["primary"]),
+                    hoverinfo="none", showlegend=False,
+                ))
+        else:
+            ex, ey = [], []
+            for u, v in G.edges():
+                x0, y0 = pos[u]; x1, y1 = pos[v]
+                ex += [x0, x1, None]; ey += [y0, y1, None]
+            edge_traces.append(go.Scatter(
+                x=ex, y=ey, mode="lines",
+                line=dict(width=0.8, color="#D1D5DB"),
+                hoverinfo="none", showlegend=False,
             ))
 
-        fig = go.Figure(data=[edge_trace] + node_traces)
+        # ── Traces de nœuds (un trace par nœud pour contrôle individuel) ──
+        seen_comps = set()
+        node_traces = []
+        all_comp_mods = {
+            comp: [m for m in G.nodes() if mod_dom_comp.get(m) == comp]
+            for comp in competences
+        }
+
+        for comp in competences:
+            for m in all_comp_mods.get(comp, []):
+                is_clicked  = clicked_mod is not None and m == clicked_mod
+                is_neighbor = m in neighbors
+                is_dimmed   = clicked_mod is not None and not is_clicked and not is_neighbor
+
+                base_size = max(14, min(45, G.nodes[m]["n_ac"] * 3))
+                size      = base_size + 14 if is_clicked else base_size
+                opacity   = 0.15 if is_dimmed else 0.88
+                border_w  = 3.5 if is_clicked else (2 if is_neighbor else 1.5)
+                border_c  = "#1D4ED8" if is_clicked else ("white" if not is_neighbor else COLORS["primary"])
+                txt_color = "#D1D5DB" if is_dimmed else "#374151"
+                txt_size  = 11 if is_clicked else 9
+
+                hover = (
+                    f"<b>{_mod_label(m)}</b><br>"
+                    f"AC couverts : {G.nodes[m]['n_ac']}<br>"
+                    f"Compétence dominante : {comp}<br>"
+                    f"Connexions : {G.degree(m)}"
+                )
+                if is_clicked and neighbors:
+                    lines = [
+                        f"  • {_mod_label(nb)} — {G.edges[m, nb]['weight']} AC partagés"
+                        for nb in sorted(neighbors, key=lambda n: -G.edges[m, n]["weight"])
+                    ]
+                    hover += "<br><br><b>Modules voisins :</b><br>" + "<br>".join(lines)
+
+                first_of_comp = comp not in seen_comps
+                if first_of_comp:
+                    seen_comps.add(comp)
+
+                node_traces.append(go.Scatter(
+                    x=[pos[m][0]], y=[pos[m][1]],
+                    mode="markers+text",
+                    marker=dict(
+                        size=size,
+                        color=get_competence_color(comp),
+                        opacity=opacity,
+                        line=dict(width=border_w, color=border_c),
+                    ),
+                    text=[_mod_label(m)],
+                    textposition="top center",
+                    textfont=dict(size=txt_size, color=txt_color),
+                    name=comp,
+                    legendgroup=comp,
+                    showlegend=first_of_comp,
+                    hovertext=[hover],
+                    hoverinfo="text",
+                    customdata=[m],
+                ))
+
+        # ── Zoom sur le voisinage si nœud sélectionné ─────────────
+        if clicked_mod is not None and clicked_mod in pos:
+            focus = list(neighbors | {clicked_mod})
+            xs = [pos[n][0] for n in focus]; ys = [pos[n][1] for n in focus]
+            pad = 0.6
+            xaxis_cfg = dict(range=[min(xs)-pad, max(xs)+pad], showgrid=False, zeroline=False, showticklabels=False)
+            yaxis_cfg = dict(range=[min(ys)-pad, max(ys)+pad], showgrid=False, zeroline=False, showticklabels=False)
+            title_text = (
+                f"{_mod_label(clicked_mod)} — {G.degree(clicked_mod)} connexion(s) · "
+                "Utilisez 🏠 pour réinitialiser la vue"
+            )
+        else:
+            xaxis_cfg = dict(showgrid=False, zeroline=False, showticklabels=False)
+            yaxis_cfg = dict(showgrid=False, zeroline=False, showticklabels=False)
+            title_text = "Réseau de modules — liens par apprentissages critiques partagés"
+
+        fig = go.Figure(data=edge_traces + node_traces)
         fig.update_layout(
-            title=dict(
-                text="Réseau de modules — liens par apprentissages critiques partagés",
-                x=0.5, xanchor="center",
-                font=dict(size=15, family="Inter, sans-serif"),
-            ),
+            title=dict(text=title_text, x=0.5, xanchor="center", font=dict(size=14, family="Inter, sans-serif")),
             showlegend=True,
             legend=dict(title="Compétence dominante", font=dict(size=11)),
             height=560,
             paper_bgcolor="white",
             plot_bgcolor="white",
-            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+            xaxis=xaxis_cfg,
+            yaxis=yaxis_cfg,
             margin=dict(l=20, r=20, t=70, b=20),
             font=dict(family="Inter, sans-serif"),
             hovermode="closest",
