@@ -7,12 +7,9 @@
         ["type" => "section", "label" => "Principale", "items" => []],
         ["type" => "section", "label" => "Professeur", "items" => []],
         ["type" => "section", "label" => "Administration", "items" => [
-            ["type" => "dropdown", "label" => "Stage", "icon" => $t->asset('icons/company.svg'), "items" => [
-                ["type" => "item", "label" => "Gérer les stages", "url" => $t->router->href('dashboard-stage')],
-                ["type" => "item", "label" => "Nouveau stage",    "url" => $t->router->href('home')],
-            ]],
             ["type" => "item", "label" => "Ressources", "url" => $t->router->href('dashboard-ressource'), "icon" => $t->asset('icons/file.svg')],
             ["type" => "item", "label" => "Carte de mobilité", "url" => $t->router->href('dashboard-mobility-map'), "icon" => $t->asset('icons/map.svg')],
+            ["type" => "item", "label" => "Annuaire", "url" => $t->router->href('dashboard-annuaire'), "icon" => $t->asset('icons/list.svg')],
         ]],
         ["type" => "split"],
         ["type" => "item", "label" => "Ancien Dashboard", "url" => $t->router->href('dashboard-python'), "icon" => $t->asset('icons/console.svg')],
@@ -21,6 +18,22 @@
 
     if ($user && $user['type'] === 'etudiant') {
         $urls[1]['items'][] = ["type" => "item", "label" => "Profil", "url" => $t->router->href('dashboard-profile'), "icon" => $t->asset('icons/user-circle.svg')];
+        $urls[1]['items'][] = ["type" => "item", "label" => "Rendus", "url" => $t->router->href('dashboard-rendus-student'), "icon" => $t->asset('icons/file.svg')];
+    }
+
+    if ($user && $user['type'] === 'enseignant') {
+        $urls[2]['items'][] = ["type" => "item", "label" => "Rendus", "url" => $t->router->href('dashboard-rendus-enseignant'), "icon" => $t->asset('icons/file.svg')];
+    }
+
+    if ($user && $user['type'] !== 'etudiant') {
+        $urls[2]['items'][] = ["type" => "dropdown", "label" => "Stage", "icon" => $t->asset('icons/company.svg'), "items" => [
+                ["type" => "item", "label" => "Gérer les stages", "url" => $t->router->href('dashboard-stage')],
+                ["type" => "item", "label" => "Nouveau stage",    "url" => $t->router->href('dashboard-create-stage')],
+            ]];
+    }
+
+    if ($user && $user['type'] !== 'administratif') {
+        $urls[3]['items'][] = ["type" => "item", "label" => "Dépendance Module",    "url" => $t->router->href('dashboard-dependance-module'), "icon" => $t->asset('icons/dependance_module.svg')];
     }
 ?>
 <?= $t->slot('script.top') ?>

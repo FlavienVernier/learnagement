@@ -10,15 +10,20 @@
     // Direct SQL queries are deprecated. Use backend API endpoints instead.
     /////////////////
 
+$sql = "SELECT e.id_enseignant, e.nom, e.prenom FROM LNM_enseignant e;";
+$stmt = mysqli_prepare($pdo, $sql);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$enseignants = mysqli_fetch_all($result, MYSQLI_ASSOC);
+usort($enseignants, function ($a, $b) {
+    return strcmp($a['nom'], $b['nom']);
+});
+
 $sql = "SELECT 
-            e.id_etudiant,
+            s.*,
             CONCAT(UPPER(e.nom), ' ', e.prenom) AS student_fullname,
             e.mail,
             CONCAT(f.nom_filiere, p.annee) AS filiere,
-            s.entreprise,
-            s.date_debut,
-            s.date_fin,
-            s.nature,
             CONCAT(UPPER(en.nom), ' ', en.prenom) AS teacher_fullname,
             en.mail AS teacher_mail,
             CASE
@@ -43,6 +48,7 @@ $complets    = array_values(array_filter($etudiants, fn($e) => $e['status'] === 
 
 $filtre    = $_GET['filtre'] ?? 'tous';
 $recherche = $_GET['q'] ?? '';
+$filtre_enseignant = $_GET['id_enseignant'] ?? '';
 
 $liste = match($filtre) {
     'sans_stage'  => $sans_stage,
@@ -51,13 +57,25 @@ $liste = match($filtre) {
     default       => $etudiants,
 };
 
-if ($recherche) {
-    $liste = array_values(array_filter($liste, fn($e) =>
-        str_contains(strtolower($e['student_fullname']),   strtolower($recherche)) ||
-        str_contains(strtolower($e['mail']), strtolower($recherche)) ||
-        str_contains(strtolower($e['filiere']), strtolower($recherche)) ||
-        ($e['entreprise'] && str_contains(strtolower($e['entreprise']), strtolower($recherche)))
-    ));
+if ($recherche !== '' || $filtre_enseignant !== '') {
+    $liste = array_values(array_filter($liste, function($e) use ($recherche, $filtre_enseignant) {
+        // Filtre enseignant — doit correspondre exactement si renseigné
+        if ($filtre_enseignant !== '' && (string)($e['id_enseignant'] ?? '') !== $filtre_enseignant)
+            return false;
+
+        // Filtre recherche — au moins un champ doit correspondre si renseigné
+        if ($recherche !== '') {
+            $q = strtolower($recherche);
+            $match =
+                str_contains(strtolower($e['student_fullname'] ?? ''), $q) ||
+                str_contains(strtolower($e['mail']             ?? ''), $q) ||
+                str_contains(strtolower($e['filiere']          ?? ''), $q) ||
+                str_contains(strtolower($e['entreprise']       ?? ''), $q);
+            if (!$match)
+                return false;
+        }
+        return true;
+    }));
 }
 ?>
 <section class="flex flex-col grow relative m-8">
@@ -71,18 +89,18 @@ if ($recherche) {
         <!-- KPIs cliquables -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
-            <a href="?filtre=tous" class="block rounded-2xl p-5 border <?= $filtre === 'tous' ? 'border-blue-500 ring-2 ring-blue-200 dark:ring-blue-800' : 'border-gray-200 dark:border-gray-700' ?> hover:shadow-md transition">
+            <a href="?filtre=tous" class="block rounded-2xl p-5 border <?= $filtre === 'tous' ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200' ?> hover:shadow-md transition">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-sm font-medium text-gray-600">Total étudiants</span>
                     <span class="bg-blue-100 p-2 rounded-lg">
-                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     </span>
                 </div>
                 <div class="text-4xl font-extrabold text-gray-900"><?= $total ?></div>
                 <div class="mt-1 text-xs">Tous les étudiants</div>
             </a>
 
-            <a href="?filtre=sans_stage" class="block rounded-2xl p-5 border <?= $filtre === 'sans_stage' ? 'border-red-500 ring-2 ring-red-200 dark:ring-red-900' : 'border-gray-200 dark:border-gray-700' ?> hover:shadow-md transition">
+            <a href="?filtre=sans_stage" class="block rounded-2xl p-5 border <?= $filtre === 'sans_stage' ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-200' ?> hover:shadow-md transition">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-sm font-medium text-gray-600">Sans stage</span>
                     <span class="bg-red-100 p-2 rounded-lg">
@@ -93,53 +111,129 @@ if ($recherche) {
                 <div class="mt-1 text-xs"><?= round(count($sans_stage) / $total * 100) ?>% du total</div>
             </a>
 
-            <a href="?filtre=sans_tuteur" class="block rounded-2xl p-5 border <?= $filtre === 'sans_tuteur' ? 'border-yellow-500 ring-2 ring-yellow-200 dark:ring-yellow-900' : 'border-gray-200 dark:border-gray-700' ?> hover:shadow-md transition">
+            <a href="?filtre=sans_tuteur" class="block rounded-2xl p-5 border <?= $filtre === 'sans_tuteur' ? 'border-yellow-500 ring-2 ring-yellow-200' : 'border-gray-200' ?> hover:shadow-md transition">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-sm font-medium text-gray-600">Sans tuteur</span>
                     <span class="bg-yellow-100 p-2 rounded-lg">
                         <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </span>
                 </div>
-                <div class="text-4xl font-extrabold text-yellow-600 dark:text-yellow-400"><?= count($sans_tuteur) ?></div>
+                <div class="text-4xl font-extrabold text-yellow-600"><?= count($sans_tuteur) ?></div>
                 <div class="mt-1 text-xs"><?= round(count($sans_tuteur) / $total * 100) ?>% du total</div>
             </a>
 
-            <a href="?filtre=complet" class="block rounded-2xl p-5 border <?= $filtre === 'complet' ? 'border-green-500 ring-2 ring-green-200 dark:ring-green-900' : 'border-gray-200 dark:border-gray-700' ?> hover:shadow-md transition">
+            <a href="?filtre=complet" class="block rounded-2xl p-5 border <?= $filtre === 'complet' ? 'border-green-500 ring-2 ring-green-200' : 'border-gray-200' ?> hover:shadow-md transition">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-sm font-medium text-gray-600">Stage complet</span>
                     <span class="bg-green-100 p-2 rounded-lg">
                         <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </span>
                 </div>
-                <div class="text-4xl font-extrabold text-green-600 dark:text-green-400"><?= count($complets) ?></div>
+                <div class="text-4xl font-extrabold text-green-600"><?= count($complets) ?></div>
                 <div class="mt-1 text-xs"><?= round(count($complets) / $total * 100) ?>% du total</div>
             </a>
 
         </div>
 
         <!-- Barre d'outils -->
-        <div class="rounded-2xl border mb-6">
-            <div class="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div class="relative w-full sm:w-80">
-                    <form method="GET">
-                        <input type="hidden" name="filtre" value="<?= $t->e($filtre) ?>">
+        <div class="bg-white border border-black/8 rounded-xl mb-5">
+            <form method="GET">
+                <input type="hidden" name="filtre" value="<?= $t->e($filtre) ?>">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-3">
+
+                    <!-- Recherche -->
+                    <div class="relative flex-1 border border-black/8 rounded-lg py-2">
                         <?= $t->component("search_bar", props: [
                             "size" => "lg",
                             "value"=> $t->e($recherche),
                             "placeholder" => "Rechercher un étudiant, entreprise..."
                         ]) ?>
-                    </form>
-                </div>
-                <div class="flex items-center gap-3">
-                    <?php if ($filtre !== 'tous'): ?>
-                    <a href="?filtre=tous" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 transition">
-                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-                        Réinitialiser
-                    </a>
+                    </div>
+
+                    <!-- Filtre enseignant -->
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
+                                <circle cx="12" cy="8" r="4" stroke="#94a3b8" stroke-width="1.8"/>
+                                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <select name="id_enseignant"
+                                class="text-sm text-[#0f2744] bg-slate-50 border border-black/8 rounded-lg pl-9 pr-8 py-2 outline-none focus:border-blue-500 focus:bg-white transition-colors appearance-none cursor-pointer min-w-44">
+                            <option value="">Tous les enseignants</option>
+                            <?php foreach ($enseignants as $ens): ?>
+                                <option value="<?= $ens['id_enseignant'] ?>"
+                                    <?= ($filtre_enseignant ?? '') == $ens['id_enseignant'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($ens['nom'] . ' ' . $ens['prenom']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div class="absolute inset-y-0 right-2.5 flex items-center pointer-events-none">
+                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24">
+                                <polyline points="6 9 12 15 18 9" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Séparateur vertical -->
+                    <div class="hidden sm:block w-px h-8 bg-black/8 shrink-0"></div>
+
+                    <!-- Bouton soumettre -->
+                    <button type="submit"
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#0f2744] hover:bg-[#1a3a5c] text-white text-sm font-medium rounded-lg transition-colors shrink-0">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Filtrer
+                    </button>
+
+                    <!-- Réinitialiser -->
+                    <?php if ($filtre !== 'tous' || !empty($recherche) || !empty($filtre_enseignant)): ?>
+                        <a href="?filtre=tous"
+                        class="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-medium rounded-lg transition-colors shrink-0">
+                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24">
+                                <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            Réinitialiser
+                        </a>
                     <?php endif; ?>
-                    <span class="text-sm"><?= count($liste) ?> résultat<?= count($liste) > 1 ? 's' : '' ?></span>
+
                 </div>
-            </div>
+
+                <!-- Bande inférieure : résultats + filtres actifs -->
+                <?php $hasFilters = !empty($recherche) || !empty($filtre_enseignant) || $filtre !== 'tous'; ?>
+                <?php if ($hasFilters): ?>
+                    <div class="flex items-center gap-2 px-3 pb-3 flex-wrap">
+                        <span class="text-xs text-slate-400">Filtres actifs :</span>
+
+                        <?php if (!empty($recherche)): ?>
+                            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full">
+                                "<?= $t->e($recherche) ?>"
+                            </span>
+                        <?php endif; ?>
+
+                        <?php if (!empty($filtre_enseignant)): ?>
+                            <?php $nomEns = ''; foreach ($enseignants as $e) { if ($e['id_enseignant'] == $filtre_enseignant) { $nomEns = $e['nom'] . ' ' . $e['prenom']; break; } } ?>
+                            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 bg-purple-50 text-purple-700 rounded-full">
+                                <?= htmlspecialchars($nomEns) ?>
+                            </span>
+                        <?php endif; ?>
+
+                        <span class="ml-auto text-xs text-slate-400">
+                            <?= count($liste) ?> résultat<?= count($liste) > 1 ? 's' : '' ?>
+                        </span>
+                    </div>
+                <?php else: ?>
+                    <div class="flex items-center justify-end px-3 pb-3">
+                        <span class="text-xs text-slate-400">
+                            <?= count($liste) ?> résultat<?= count($liste) > 1 ? 's' : '' ?>
+                        </span>
+                    </div>
+                <?php endif; ?>
+
+            </form>
         </div>
 
         <!-- Tableau -->
@@ -152,6 +246,7 @@ if ($recherche) {
                             <th class="px-6 py-4 font-semibold">Programme</th>
                             <th class="px-6 py-4 font-semibold">Statut</th>
                             <th class="px-6 py-4 font-semibold">Entreprise</th>
+                            <th class="px-6 py-4 font-semibold">Intitulé</th>
                             <th class="px-6 py-4 font-semibold">Période</th>
                             <th class="px-6 py-4 font-semibold">Tuteur</th>
                             <th class="px-6 py-4 font-semibold text-right">Actions</th>
@@ -214,6 +309,15 @@ if ($recherche) {
                                 <?php endif; ?>
                             </td>
 
+                            <td class="px-6 py-4">
+                                <?php if ($e['entreprise']): ?>
+                                    <div class="font-medium text-gray-900"><?= $t->e($e['intitulé']) ?></div>
+                                    <div class="text-xs text-gray-500"><?= $t->e($e['nature']) ?></div>
+                                <?php else: ?>
+                                    <span class="text-gray-400">—</span>
+                                <?php endif; ?>
+                            </td>
+
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <?php if ($e['entreprise']): ?>
                                     <div class="text-gray-900"><?= date('d/m/Y', strtotime($e['date_debut'])) ?></div>
@@ -239,24 +343,59 @@ if ($recherche) {
 
                             <td class="px-6 py-4">
                                 <div class="flex items-center justify-end gap-2">
-                                    <?php if ($e['entreprise']): ?>
-                                    <button
-                                        data-modal-target="modal-<?= $e['id_etudiant'] ?>"
-                                        data-modal-toggle="modal-<?= $e['id_etudiant'] ?>"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 transition"
-                                    >
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                        Modifier
-                                    </button>
+                                    <?php if ($user['type'] === 'administratif'): ?>
+                                        <?php if ($e['entreprise']): ?>
+                                            <button
+                                                data-modal-target="modal-<?= $e['id_etudiant'] ?>"
+                                                data-modal-toggle="modal-<?= $e['id_etudiant'] ?>"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition"
+                                            >
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                Modifier
+                                            </button>
+                                        <?php else: ?>
+                                            <a href="<?= $t->router->href('dashboard-create-stage', query: ['id_etudiant' => $e['id_etudiant']]) ?>"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-700 bg-green-50 rounded-lg hover:bg-green-100 transition">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                                Ajouter stage
+                                            </a>
+                                        <?php endif; ?>
                                     <?php else: ?>
-                                    <button
-                                        data-modal-target="modal-<?= $e['id_etudiant'] ?>"
-                                        data-modal-toggle="modal-<?= $e['id_etudiant'] ?>"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-700 bg-green-50 rounded-lg hover:bg-green-100 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition"
-                                    >
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                                        Ajouter stage
-                                    </button>
+                                        <?php if ($e['entreprise']): ?>
+                                            <form action="<?= $t->router->href("dashboard-stage-post") ?>" method="POST">
+                                                <input type="hidden" name="id_stage" value="<?= $t->e($e['id_stage'] ?? '') ?>">
+                                                <input type="hidden" name="entreprise" value="<?= $t->e($e['entreprise'] ?? '') ?>">
+                                                <input type="hidden" name="intitulé" value="<?= $t->e($e['intitulé'] ?? '') ?>">
+                                                <input type="hidden" name="nature" value="<?= $t->e($e['nature'] ?? '') ?>">
+                                                <input type="hidden" name="date_debut" value="<?= $t->e($e['date_debut'] ?? '') ?>">
+                                                <input type="hidden" name="date_fin" value="<?= $t->e($e['date_fin'] ?? '') ?>">
+                                                <input type="hidden" name="description" value="<?= $t->e($e['description'] ?? '') ?>">
+                                                <input type="hidden" name="adresse" value="<?= $t->e($e['adresse'] ?? '') ?>">
+                                                <input type="hidden" name="code_postal" value="<?= $t->e($e['code_postal'] ?? '') ?>">
+                                                <input type="hidden" name="ville" value="<?= $t->e($e['ville'] ?? '') ?>">
+                                                <input type="hidden" name="pays" value="<?= $t->e($e['pays'] ?? '') ?>">
+                                                <input type="hidden" name="id_enseignant" value="<?= $user['id'] === $e['id_enseignant'] ? '' : $t->e($user['id']) ?>">
+
+                                                
+                                                <button type="submit"
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg hover:bg-blue-100 transition
+                                                    <?= $user['id'] === $e['id_enseignant'] ? 'text-red-700 bg-red-50' : 'text-blue-700 bg-blue-50' ?>">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                    <?= $user['id'] === $e['id_enseignant'] ? 'Retirer' : 'Remplacer' ?> tuteur
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
+                                        <button
+                                            data-modal-target="modal-<?= $e['id_etudiant'] ?>"
+                                            data-modal-toggle="modal-<?= $e['id_etudiant'] ?>"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                            </svg>
+                                            Détail
+                                        </button>
                                     <?php endif; ?>
                                 </div>
                             </td>
@@ -272,106 +411,164 @@ if ($recherche) {
 
     <!-- ===================== MODALS ===================== -->
     <?php foreach ($etudiants as $e):
-        $isEdit = (bool)$e['entreprise'];
-        $modalTitle = $isEdit ? 'Modifier le stage' : 'Ajouter un stage';
-        $submitLabel = $isEdit ? 'Enregistrer' : 'Ajouter le stage';
-        $submitClass = $isEdit
-            ? 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-300'
-            : 'bg-green-600 hover:bg-green-700 focus:ring-green-300';
-        $action = $isEdit
-            ? '/dashboard/stages/' . $e['id_etudiant'] . '/edit'
-            : '/dashboard/stages/' . $e['id_etudiant'] . '/add';
+        $isEdit = (bool)$e['entreprise'] && $user['type'] === 'administratif';
+        $modalTitle = $isEdit ? 'Modifier le stage' : 'Détail du stage';
     ?>
     <div id="modal-<?= $e['id_etudiant'] ?>" tabindex="-1" aria-hidden="true"
         class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-        <div class="relative p-4 w-full max-w-2xl max-h-full">
-            <div class="relative bg-white rounded-2xl shadow dark:bg-gray-800">
+        <div class="relative p-4 w-full max-w-5xl max-h-full">
+            <div class="relative bg-white rounded-2xl shadow">
 
                 <!-- Header -->
-                <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between p-6 border-b border-gray-200 bg-primary text-on-primary rounded-tl-2xl rounded-tr-2xl">
                     <div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white"><?= $modalTitle ?></h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-500 mt-0.5"><?= $t->e($e['nom']) ?> · <?= $t->e($e['programme']) ?></p>
+                        <h3 class="text-lg font-bold"><?= $modalTitle ?></h3>
+                        <p class="text-sm mt-0.5"><?= $t->e($e['student_fullname']) ?> · <?= $t->e($e['filiere']) ?></p>
                     </div>
                     <button data-modal-hide="modal-<?= $e['id_etudiant'] ?>"
-                        class="text-gray-500 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center">
+                        class="bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center">
                         <svg class="w-3 h-3" fill="none" viewBox="0 0 14 14"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/></svg>
                     </button>
                 </div>
 
                 <!-- Formulaire -->
-                <form action="<?= $action ?>" method="POST" class="p-6 space-y-5">
+                <form action="<?= $t->router->href("dashboard-stage-post") ?>" method="POST" class="p-6 space-y-5">
+                    <input type="hidden" name="id_stage" value="<?= $t->e($e['id_stage'] ?? '') ?>">
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Entreprise</label>
+                        <div class="col-span-full">
+                            <label class="block mb-2 text-sm font-medium text-gray-900">Entreprise <span class="text-red-500">*</span></label>
                             <input type="text" name="entreprise"
                                 value="<?= $t->e($e['entreprise'] ?? '') ?>"
                                 placeholder="Nom de l'entreprise"
-                                <?= !$isEdit ? 'required' : '' ?>
+                                required
+                                <?= $isEdit ? '' : 'disabled' ?>
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"/>
                         </div>
                         <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Poste / Mission</label>
-                            <input type="text" name="poste"
-                                value="<?= $t->e($e['entreprise'] ?? '') ?>"
+                            <label class="block mb-2 text-sm font-medium text-gray-900">Intitulé <span class="text-red-500">*</span></label>
+                            <input type="text" name="intitulé"
+                                value="<?= $t->e($e['intitulé'] ?? '') ?>"
                                 placeholder="Intitulé du poste"
-                                <?= !$isEdit ? 'required' : '' ?>
+                                required
+                                <?= $isEdit ? '' : 'disabled' ?>
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"/>
                         </div>
                         <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date de début</label>
-                            <input type="date" name="debut"
-                                value="<?= $t->e($e['entreprise'] ?? '') ?>"
-                                <?= !$isEdit ? 'required' : '' ?>
+                            <label class="block mb-2 text-sm font-medium text-gray-900">Nature <span class="text-red-500">*</span></label>
+                            <input type="text" name="nature"
+                                value="<?= $t->e($e['nature'] ?? '') ?>"
+                                placeholder="Nature du poste"
+                                required
+                                <?= $isEdit ? '' : 'disabled' ?>
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"/>
                         </div>
                         <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date de fin</label>
-                            <input type="date" name="fin"
-                                value="<?= $t->e($e['entreprise'] ?? '') ?>"
-                                <?= !$isEdit ? 'required' : '' ?>
+                            <label class="block mb-2 text-sm font-medium text-gray-900">Date de début <span class="text-red-500">*</span></label>
+                            <input type="date" name="date_debut"
+                                value="<?= $t->e($e['date_debut'] ?? '') ?>"
+                                required
+                                <?= $isEdit ? '' : 'disabled' ?>
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"/>
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-gray-900">Date de fin <span class="text-red-500">*</span></label>
+                            <input type="date" name="date_fin"
+                                value="<?= $t->e($e['date_fin'] ?? '') ?>"
+                                required
+                                <?= $isEdit ? '' : 'disabled' ?>
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"/>
+                        </div>
+                        <div class="col-span-full">
+                            <label class="block mb-2 text-sm font-medium text-gray-900">Description <span class="text-red-500">*</span></label>
+                            <textarea name="description" id="" required <?= $isEdit ? '' : 'disabled' ?>
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"><?= $t->e($e['description'] ?? '') ?></textarea>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-gray-100">
+                        <p class="text-sm font-semibold text-gray-700 mb-4">
+                            Adresse du stage
+                            <?php if (!$isEdit): ?>
+                                <span class="font-normal text-gray-500">(optionnel)</span>
+                            <?php endif; ?>
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="col-span-full">
+                                <label class="block mb-2 text-sm font-medium text-gray-900">Adresse</label>
+                                <input type="text" name="adresse"
+                                    value="<?= $t->e($e['adresse'] ?? '') ?>"
+                                    placeholder="Adresse du stage"
+                                    <?= $isEdit ? '' : 'disabled' ?>
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"/>
+                            </div>
+                            <div>
+                                <label class="block mb-2 text-sm font-medium text-gray-900">Code postal</label>
+                                <input type="text" name="code_postal"
+                                    value="<?= $t->e($e['code_postal'] ?? '') ?>"
+                                    placeholder="Code postal"
+                                    <?= $isEdit ? '' : 'disabled' ?>
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"/>
+                            </div>
+                            <div>
+                                <label class="block mb-2 text-sm font-medium text-gray-900">Ville <span class="text-red-500">*</span></label>
+                                <input type="text" name="ville"
+                                    value="<?= $t->e($e['ville'] ?? '') ?>"
+                                    placeholder="Ville du stage"
+                                    required
+                                    <?= $isEdit ? '' : 'disabled' ?>
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"/>
+                            </div>
+                            <div>
+                                <label class="block mb-2 text-sm font-medium text-gray-900">Pays</label>
+                                <input type="text" name="pays"
+                                    value="<?= $t->e($e['pays'] ?? '') ?>"
+                                    placeholder="Pays du stage"
+                                    <?= $isEdit ? '' : 'disabled' ?>
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"/>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Tuteur -->
-                    <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
-                        <p class="text-sm font-semibold text-gray-700 dark:text-gray-400 mb-4">
+                    <div class="pt-2 border-t border-gray-100">
+                        <p class="text-sm font-semibold text-gray-700 mb-4">
                             Tuteur entreprise
                             <?php if (!$isEdit): ?>
                                 <span class="font-normal text-gray-500">(optionnel)</span>
                             <?php endif; ?>
                         </p>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 gap-4">
                             <div>
-                                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du tuteur</label>
-                                <input type="text" name="tuteur"
-                                    value="<?= $t->e($e['entreprise'] ?? '') ?>"
-                                    placeholder="Prénom Nom"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"/>
-                            </div>
-                            <div>
-                                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email du tuteur</label>
-                                <input type="email" name="tuteur_email"
-                                    value="<?= $t->e($e['entreprise'] ?? '') ?>"
-                                    placeholder="tuteur@entreprise.com"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"/>
+                                <label class="block text-xs font-medium text-slate-600 mb-1.5" for="id_enseignant">Nom du tuteur</label>
+                                <select id="id_enseignant" name="id_enseignant"
+                                        <?= $isEdit ? '' : 'disabled' ?>
+                                        class="w-full text-sm text-[#0f2744] bg-slate-50 border border-black/10 rounded-lg px-3 py-2.5 outline-none focus:border-blue-500 focus:bg-white transition-colors">
+                                    <option value="">Aucun</option>
+                                    <?php foreach ($enseignants as $ens): ?>
+                                        <option value="<?= $ens['id_enseignant'] ?>"
+                                            <?= ($e['id_enseignant'] ?? '') == $ens['id_enseignant'] ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($ens['nom'] . ' ' . $ens['prenom']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                         </div>
                     </div>
 
                     <!-- Footer -->
-                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
-                        <button type="button" data-modal-hide="modal-<?= $e['id_etudiant'] ?>"
-                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-600 transition">
-                            Annuler
-                        </button>
-                        <button type="submit"
-                            class="px-4 py-2 text-sm font-medium text-white rounded-lg focus:ring-4 transition <?= $submitClass ?>">
-                            <?= $submitLabel ?>
-                        </button>
-                    </div>
+                    <?php if ($user['type'] === 'administratif'): ?>
+                        <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                            <button type="button" data-modal-hide="modal-<?= $e['id_etudiant'] ?>"
+                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                                Annuler
+                            </button>
+                            <button type="submit"
+                                class="px-4 py-2 text-sm font-medium text-white rounded-lg focus:ring-4 transition bg-blue-600 hover:bg-blue-700 focus:ring-blue-300">
+                                Enregistrer
+                            </button>
+                        </div>
+                    <?php endif; ?>
 
                 </form>
             </div>

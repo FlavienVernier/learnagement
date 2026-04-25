@@ -38,7 +38,7 @@
             $this->addRoute('PATCH', $path, $name, $handler);
         }
 
-        public function href(string $name, array $params = []): string {
+        public function href(string $name, array $params = [], array $query = []): string {
             if (!isset($this->namedRoutes[$name])) {
                 throw new Exception("Route not found: $name");
             }
@@ -57,12 +57,12 @@
                 }
             ,$path);
 
-            return $this->baseURI . $path;
+            return $this->baseURI . $path . (!empty($query) ? '?' . http_build_query($query) : '');
 
         }
 
-        public function redirect(string $name, array $params = []): void {
-            header('Location: ' . $this->href($name, $params));
+        public function redirect(string $name, array $params = [], array $query = []): void {
+            header('Location: ' . $this->href($name, $params, $query));
             exit;
         }
 
@@ -80,9 +80,7 @@
                     return;
                 }
             }
-
-            http_response_code(404);
-            echo '404 Not Found';
+            $this->redirect('404');
         }
 
         private function toRegex(string $path): string

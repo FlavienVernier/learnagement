@@ -1,0 +1,211 @@
+/* ===================== TAGS ===================== */
+.filters-section {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between; /* Pousse les éléments aux extrémités */
+    padding: 5px 0;
+    border-bottom: 0.5px solid #e0e0e0;
+    max-height: fit-content;
+}
+
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 16px; /* espace vertical + horizontal entre les tags */
+    width: 90%;
+    max-width: 1200px;
+    margin-bottom: 20px;
+}
+
+.filter-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+}
+
+/* Couleurs par préfixe de code module */
+.filter-tag.tag-proj { background: #EEEDFE; color: #3C3489; }
+.filter-tag.tag-math { background: #E1F5EE; color: #085041; }
+.filter-tag.tag-info { background: #E6F1FB; color: #0C447C; }
+.filter-tag.tag-algo { background: #FAECE7; color: #712B13; }
+.filter-tag.tag-gest { background: #EAF3DE; color: #27500A; }
+.filter-tag.tag-sys  { background: #FAEEDA; color: #633806; }
+.filter-tag.tag-net  { background: #FBEAF0; color: #72243E; }
+.filter-tag.tag-bdd  { background: #FCEBEB; color: #791F1F; }
+.filter-tag.tag-other{ background: #F1EFE8; color: #444441; }
+
+.remove-tag {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+    opacity: 0.6;
+    padding: 0;
+    color: inherit;
+}
+.remove-tag:hover { opacity: 1; }
+
+.button-section{
+    display: flex;
+    gap: 12px;
+    flex-direction: row;
+    width: 30%;
+    padding-bottom: 3px;
+}
+
+/* ===================== GANTT ===================== */
+.gantt-wrapper {
+    flex: 1;
+    background: white;
+    border-radius: 8px;
+    border: 0.5px solid #e0e0e0;
+    padding: 16px;
+    overflow: auto;
+    resize: vertical;
+    min-height: 700px;
+    max-height: 900px;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.gantt-wrapper::after {
+    content: '';
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    width: 14px;
+    height: 14px;
+    background:
+        linear-gradient(135deg, transparent 40%, #ccc 40%, #ccc 55%, transparent 55%),
+        linear-gradient(135deg, transparent 60%, #ccc 60%, #ccc 75%, transparent 75%);
+    pointer-events: none;
+}
+
+#gantt-chart {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 260px;
+}
+
+
+/* ===================== FORMULAIRE ===================== */
+dialog {
+    border: none;
+    border-radius: 12px;
+    padding: 0;
+    width: 100%;
+    max-width: 520px;
+    background: #fff;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    color: #111;
+}
+dialog::backdrop { background: rgba(0,0,0,0.4); }
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 14px;
+    border-bottom: 0.5px solid #e5e5e5;
+}
+.modal-header h2 { font-size: 16px; font-weight: 500; }
+
+.modal-body  { padding: 20px 24px; }
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 0 24px 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 16px;
+}
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+
+label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+}
+input, select, textarea {
+    height: 36px;
+    padding: 0 10px;
+    border: 0.5px solid #d0d0d0;
+    border-radius: 6px;
+    font-size: 13px;
+    width: 100%;
+    background: #fff;
+    color: #111;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #534AB7;
+    box-shadow: 0 0 0 3px rgba(83,74,183,0.1);
+}
+textarea { height: 72px; padding: 8px 10px; resize: vertical; }
+
+.input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+}
+
+/* Pills de sélection semestre */
+.semestre-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.pill-input { display: none; }
+.pill-label {
+    display: inline-flex;
+    align-items: center;
+    height: 30px;
+    padding: 0 12px;
+    border: 0.5px solid #d0d0d0;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: #666;
+}
+.pill-input:checked + .pill-label {
+    background: #EEEDFE;
+    color: #3C3489;
+    border-color: #AFA9EC;
+}
+
+/* Boutons */
+.btn {
+    height: 36px;
+    padding: 0 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 0.5px solid #d0d0d0;
+    background: #fff;
+    color: #111;
+    transition: background 0.15s;
+}
+.btn:hover { background: var(--accent); }
+.btn-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: #999;
+    line-height: 1;
+    padding: 0;
+}
+.btn-close:hover { color: #111; }

@@ -15,9 +15,16 @@
     <!-- Extension -->
     <link rel="stylesheet" href="/APP_2026/theme/theme.css">
     <link rel="stylesheet" href="/APP_2026/theme/tailwind.extension.css">
+    <?= $t->slot('stylesheet') ?>
 </head>
 <body>
     <?= $t->slot('body') ?>
+    <?php $toasts = Alert::flush(); ?>
+    <div class="absolute bottom-4 right-4 flex flex-col gap-4 z-50">
+        <?php foreach($toasts as $toast) : ?>
+            <?= $t->component('toast', props:['type' => $toast['type'], 'message' => $toast['message']]) ?>
+        <?php endforeach; ?>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
 </body>
 </html>
