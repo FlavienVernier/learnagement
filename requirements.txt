@@ -6,3 +6,5 @@ dash~=3.0.4
 python-dotenv~=1.1.0
 flask~=3.0.3
 plotly~=6.1.2
+
+dash-leaflet~=1.0.15
