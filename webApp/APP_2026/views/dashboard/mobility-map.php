@@ -137,7 +137,6 @@ crossorigin=""/>
             }
 
             universities = await response.json();
-            console.log(universities);
         } catch (error) {
             console.error(error.message);
         }
@@ -207,6 +206,11 @@ crossorigin=""/>
         }
 
         wishesEmpty.classList.add('hidden');
+        
+        const isSubmitted = wishes.some(w => w.submission_date !== null);
+
+        console.log(wishes, isSubmitted);
+
         wishesList.innerHTML = wishes
             .map((wish, index) => `
             <li class="rounded border border-gray-200 bg-gray-50 p-2">
@@ -217,7 +221,7 @@ crossorigin=""/>
                             <p class="text-sm text-gray-800"><strong class="font-semibold">${escapeHtml(wish.name)}</strong> (${escapeHtml(wish.code)})</p>
                             <p class="text-xs text-gray-600">${escapeHtml(wish.country)}</p>
                         </div>
-                        <div class="flex items-center gap-1">
+                        <div class="flex items-center gap-1 ${isSubmitted ? 'hidden' : ''}">
                             <button
                                 type="button"
                                 onclick="window.moveWish(${wish.id_partner_university}, 'up')"
@@ -251,16 +255,14 @@ crossorigin=""/>
             `)
             .join('');
 
-        console.log('Voeux affichés :', wishes, wishes.length);
-
         wishesList.innerHTML += `
             <button
                 type="button"
                 onclick="window.submitWishes()"
                 class="mt-3 w-full rounded bg-primary px-3 py-2 text-sm font-semibold text-white cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-400"
-                ${wishes.length < 5 ? 'disabled' : ''}
+                ${wishes.length < 5 || isSubmitted ? 'disabled' : ''}
             >
-                Soumettre mes voeux
+                ${isSubmitted ? 'Voeux soumis' : 'Soumettre mes voeux'}
             </button>
         `;
     }
@@ -268,6 +270,7 @@ crossorigin=""/>
     function popupText(university) {
         const alreadyInWishes = wishedUniversities.has(university.id_partner_university);
         const uid = String(university.id_partner_university);
+        const isSubmitted = Array.from(wishedUniversities.values()).some(w => w.submission_date !== null);
 
         window.MobilityMapState.popupState.set(uid, {
             photos: null,
@@ -306,10 +309,10 @@ crossorigin=""/>
             <button
                 type="button"
                 onclick="window.addUniversityToWishes('${uid}')"
-                ${alreadyInWishes || wishedUniversities.size >= 5 ? 'disabled' : ''}
+                ${alreadyInWishes || wishedUniversities.size >= 5 || isSubmitted ? 'disabled' : ''}
                 class="mt-2 inline-flex items-center rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
             >
-                ${alreadyInWishes ? 'Déjà dans les voeux' : wishedUniversities.size < 5 ? 'Ajouter aux voeux' : 'Maximum de voeux atteint'}
+                ${alreadyInWishes ? 'Déjà dans les voeux' : isSubmitted ? 'Voeux déjà soumis' : wishedUniversities.size < 5 ? 'Ajouter aux voeux' : 'Maximum de voeux atteint'}
             </button>
         `;
     }
@@ -345,7 +348,6 @@ crossorigin=""/>
             await refreshWishesFromServer();
             renderWishesList();
             updateMap();
-            console.log('Université ajoutée aux voeux :', university);
             document.getElementById('wishesPanel').classList.remove('hidden');
         } catch (error) {
             console.error('Impossible d\'ajouter l\'université aux voeux :', error.message);
@@ -406,6 +408,10 @@ crossorigin=""/>
     }
 
     async function submitWishes() {
+        if (!confirm("Êtes-vous sûr de vouloir soumettre vos voeux ? Cette action est définitive et vous ne pourrez plus les modifier par la suite.")) {
+            return;
+        }
+
         try {
             const submitEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
                 + "/university/etudiant/" + window.ENV.USER_ID
@@ -424,6 +430,9 @@ crossorigin=""/>
             }
 
             alert('Voeux soumis avec succès !');
+            await refreshWishesFromServer();
+            renderWishesList();
+            updateMap();
         } catch (error) {
             console.error('Impossible de soumettre les voeux :', error.message);
             alert('Erreur lors de la soumission des voeux.');

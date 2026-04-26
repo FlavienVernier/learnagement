@@ -67,7 +67,7 @@ def list_university_wishes_etudiant(
 
     request = {
         "request": """
-                        SELECT w.priority, u.*
+                        SELECT w.priority, w.submission_date, u.*
                         FROM MOB_wishes w
                         JOIN MOB_partner_university u ON u.id_partner_university = w.id_partner_university
                         WHERE w.id_etudiant = %(id_etudiant)s
@@ -98,7 +98,8 @@ def add_university_to_wishes(
                         SELECT
                             COUNT(*) AS wishes_count,
                             COALESCE(MAX(priority), 0) AS max_priority,
-                            COALESCE(SUM(CASE WHEN id_partner_university = %(id_partner_university)s THEN 1 ELSE 0 END), 0) AS already_exists
+                            COALESCE(SUM(CASE WHEN id_partner_university = %(id_partner_university)s THEN 1 ELSE 0 END), 0) AS already_exists,
+                            MAX(CASE WHEN submission_date IS NOT NULL THEN 1 ELSE 0 END) AS is_submitted
                         FROM MOB_wishes
                         WHERE id_etudiant = %(id_etudiant)s
                     """,
@@ -112,6 +113,10 @@ def add_university_to_wishes(
     wishes_count = int((check_rows[0].get("wishes_count") or 0)) if check_rows else 0
     max_priority = int((check_rows[0].get("max_priority") or 0)) if check_rows else 0
     already_exists = int((check_rows[0].get("already_exists") or 0)) if check_rows else 0
+    is_submitted = int((check_rows[0].get("is_submitted") or 0)) if check_rows else 0
+
+    if is_submitted > 0:
+        raise HTTPException(status_code=400, detail="Vos voeux ont déjà été soumis et ne peuvent plus être modifiés.")
 
     if wishes_count >= 5:
         raise HTTPException(status_code=400, detail="Vous ne pouvez pas ajouter plus de 5 voeux.")
@@ -150,7 +155,7 @@ def delete_university_from_wishes(
 
     check_request = {
         "request": """
-                        SELECT priority
+                        SELECT priority, submission_date
                         FROM MOB_wishes
                         WHERE id_etudiant = %(id_etudiant)s
                           AND id_partner_university = %(id_partner_university)s
@@ -164,6 +169,9 @@ def delete_university_from_wishes(
     check_rows = db_request(current_user, SQLRequest(**check_request))
     if not check_rows:
         raise HTTPException(status_code=404, detail="Voeu introuvable.")
+
+    if check_rows[0].get("submission_date") is not None:
+        raise HTTPException(status_code=400, detail="Vos voeux ont déjà été soumis et ne peuvent plus être modifiés.")
 
     removed_priority = int(check_rows[0]["priority"])
 
@@ -217,7 +225,7 @@ def move_university_wish(
 
     current_request = {
         "request": """
-                        SELECT priority
+                        SELECT priority, submission_date
                         FROM MOB_wishes
                         WHERE id_etudiant = %(id_etudiant)s
                           AND id_partner_university = %(id_partner_university)s
@@ -231,6 +239,9 @@ def move_university_wish(
     current_rows = db_request(current_user, SQLRequest(**current_request))
     if not current_rows:
         raise HTTPException(status_code=404, detail="Voeu introuvable.")
+
+    if current_rows[0].get("submission_date") is not None:
+        raise HTTPException(status_code=400, detail="Vos voeux ont déjà été soumis et ne peuvent plus être modifiés.")
 
     current_priority = int(current_rows[0]["priority"])
     target_priority = current_priority - 1 if direction == "up" else current_priority + 1
@@ -320,7 +331,9 @@ def submit_university_wishes(
 
     check_request = {
         "request": """
-                        SELECT COUNT(*) AS wishes_count
+                        SELECT 
+                            COUNT(*) AS wishes_count,
+                            MAX(CASE WHEN submission_date IS NOT NULL THEN 1 ELSE 0 END) AS is_submitted
                         FROM MOB_wishes
                         WHERE id_etudiant = %(id_etudiant)s
                     """,
@@ -331,6 +344,10 @@ def submit_university_wishes(
     }
     check_rows = db_request(current_user, SQLRequest(**check_request))
     wishes_count = int((check_rows[0].get("wishes_count") or 0)) if check_rows else 0
+    is_submitted = int((check_rows[0].get("is_submitted") or 0)) if check_rows else 0
+
+    if is_submitted > 0:
+        raise HTTPException(status_code=400, detail="Vos voeux ont déjà été soumis.")
 
     if wishes_count < 5:
         raise HTTPException(status_code=400, detail="Vous devez avoir au moins 5 voeux pour les soumettre.")
@@ -350,7 +367,6 @@ def submit_university_wishes(
     db_request(current_user, SQLRequest(**update_request))
 
     # ToDo : 
-    #    - Bloquer les modifications des voeux après soumission (côté front et back)
     #    - Interface côté admin (RI)
 
     return {"message": "Voeux soumis avec succes."}
