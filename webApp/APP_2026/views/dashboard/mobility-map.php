@@ -19,7 +19,7 @@
     </div>
 
     <!-- Contrôles et panneaux superposés -->
-    <div class="absolute top-[100px] left-4 z-[1000] flex max-w-[92vw] flex-col items-start gap-2.5">
+    <div class="absolute top-[10px] left-[55px] z-[1000] flex max-w-[92vw] flex-col items-start gap-2.5">
         <div class="flex items-center gap-2">
             <button onclick="document.getElementById('filterForm').classList.toggle('hidden')" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
                 Filtres
@@ -34,6 +34,7 @@
                 <div class="flex flex-col">
                     <label for="semestreSelect" class="text-xs font-semibold text-gray-600 mb-1">Semestre</label>
                     <select name="semestre" id="semestreSelect" onchange="updateMap()" class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary">
+                    <option>Tous</option>
                     <option value="S8">S8</option>
                     <option value="S9">S9</option>
                     </select>
@@ -48,7 +49,7 @@
             </div>
         </form>
 
-        <aside id="wishesPanel" class="hidden w-[min(92vw,22rem)] max-h-[60vh] overflow-y-auto bg-white/95 p-4 rounded-lg shadow-lg border border-gray-200 backdrop-blur-sm">
+        <aside id="wishesPanel" class="hidden w-[min(92vw,22rem)] max-h-[80vh] overflow-y-auto bg-white/95 p-4 rounded-lg shadow-lg border border-gray-200 backdrop-blur-sm">
             <div class="mb-3 flex items-center justify-between">
                 <h2 class="text-sm font-semibold text-gray-800">Mes voeux</h2>
                 <span id="wishesCount" class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">0/5</span>
@@ -209,15 +210,13 @@ crossorigin=""/>
         
         const isSubmitted = wishes.some(w => w.submission_date !== null);
 
-        console.log(wishes, isSubmitted);
-
         wishesList.innerHTML = wishes
             .map((wish, index) => `
             <li class="rounded border border-gray-200 bg-gray-50 p-2">
                 <div class="flex items-center gap-4 mb-1">
                     <span class="font-semibold text-lg text-gray-800">${index + 1}</span>
-                    <div class="flex items-center justify-between gap-2">
-                        <div>
+                    <div class="flex items-center justify-between gap-2 w-full">
+                        <div class="cursor-pointer flex-1 hover:text-primary transition-colors" onclick="window.flyToUniversity('${wish.id_partner_university}')" title="Voir sur la carte">
                             <p class="text-sm text-gray-800"><strong class="font-semibold">${escapeHtml(wish.name)}</strong> (${escapeHtml(wish.code)})</p>
                             <p class="text-xs text-gray-600">${escapeHtml(wish.country)}</p>
                         </div>
@@ -267,6 +266,24 @@ crossorigin=""/>
         `;
     }
 
+    function getLanguageFlags(languagesString) {
+        if (!languagesString) return '';
+        const flags = {
+            'Allemand': '🇩🇪',
+            'Anglais': '🇬🇧',
+            'Espagnol': '🇪🇸',
+            'Français': '🇫🇷',
+            'Portugais': '🇵🇹',
+            'Italien': '🇮🇹',
+            'Japonais': '🇯🇵'
+        };
+        
+        return languagesString.split(',').map(l => {
+            const lang = l.trim();
+            return flags[lang] ? `<span title="${escapeHtml(lang)}" class="text-base cursor-help">${flags[lang]}</span>` : escapeHtml(lang);
+        }).join(' ');
+    }
+
     function popupText(university) {
         const alreadyInWishes = wishedUniversities.has(university.id_partner_university);
         const uid = String(university.id_partner_university);
@@ -303,7 +320,9 @@ crossorigin=""/>
             </div>
             <b>${escapeHtml(university.name)}</b> (${escapeHtml(university.code)})<br/>
             <em class="text-[0.75rem]">${escapeHtml(university.address)}, ${escapeHtml(university.country)}</em><br/>
-            Langue${university.languages.includes(',') ? 's' : ''}: ${escapeHtml(university.languages)}<br/>
+            ${getLanguageFlags(university.languages)}<br/>
+            S${university.annee == 4 ? '8' : '9'} : 
+            ${escapeHtml(university.number_of_places)} place${university.number_of_places > 1 ? 's' : ''}<br/>
             ${university.note_min !== null ? `Note min : ${university.note_min}<br/>` : ''}
             <a href="${escapeHtml(university.website)}" target="_blank">${escapeHtml(university.website)}</a><br/>
             <button
@@ -444,8 +463,34 @@ crossorigin=""/>
     window.moveWish = moveWish;
     window.submitWishes = submitWishes;
 
+    window.flyToUniversity = function(uid) {
+        const university = universitiesById.get(String(uid));
+        if (!university) return;
+
+        const marker = window.MobilityMapState.markerInstances && window.MobilityMapState.markerInstances.get(String(uid));
+        if (marker) {
+            markers.zoomToShowLayer(marker, () => {
+                marker.openPopup();
+            });
+            document.getElementById('wishesPanel').classList.add('hidden');
+        } else {
+            // Le marqueur est filtré : on désactive les filtres pour l'afficher
+            document.getElementById('semestreSelect').value = 'Tous';
+            const range = document.getElementById('noteMinRange');
+            range.value = 20;
+            document.getElementById('noteMinValue').innerText = 20;
+            updateMap();
+            
+            // On retente la navigation et l'ouverture lorsque la carte est à jour
+            setTimeout(() => {
+                window.flyToUniversity(uid);
+            }, 100);
+        }
+    };
+
     function updateMap() {
         markers.clearLayers();
+        window.MobilityMapState.markerInstances = new Map();
         
         const selectedSemestre = document.getElementById('semestreSelect').value;
         const selectedNote = parseFloat(document.getElementById('noteMinRange').value);
@@ -473,6 +518,7 @@ crossorigin=""/>
                 void window.hydratePopupContent(university);
             });
 
+            window.MobilityMapState.markerInstances.set(String(university.id_partner_university), marker);
             markers.addLayer(marker);
         });
         map.addLayer(markers);
