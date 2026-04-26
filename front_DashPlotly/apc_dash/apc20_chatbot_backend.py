@@ -1,14 +1,17 @@
 """
-Backend du chatbot APC — appel API REST Gemini via requests (pas de dépendance externe).
+Backend du chatbot APC — appel API REST Groq (compatible OpenAI) via requests.
+Aucune dépendance externe requise.
 """
 import os
+import json
 import logging
 import requests as http
 
 from .apc20_chatbot_tools import GEMINI_TOOLS, execute_tool
 
 
-_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+_MODEL   = "llama-3.3-70b-versatile"
 
 _SYSTEM = """Tu es un assistant pédagogique expert en Approche Par Compétences (APC) \
 pour une formation universitaire de type BUT/IUT.
@@ -37,74 +40,87 @@ Rappel sur les types de liens module–AC :
 _MAX_ITERATIONS = 8
 
 
+def _groq_tools():
+    """Convertit les définitions GEMINI_TOOLS au format OpenAI/Groq."""
+    return [
+        {"type": "function", "function": {
+            "name":        t["name"],
+            "description": t["description"],
+            "parameters":  t.get("parameters", {"type": "object", "properties": {}}),
+        }}
+        for t in GEMINI_TOOLS
+    ]
+
+
 def process_message(message: str, history: list, token: str) -> str:
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
         return (
-            "⚠️ Clé API Gemini non configurée. "
-            "Ajoutez `GEMINI_API_KEY=...` dans le fichier `.env`."
+            "⚠️ Clé API Groq non configurée. "
+            "Créez un compte sur groq.com et ajoutez `GROQ_API_KEY=...` dans le fichier `.env`."
         )
 
-    # Construire l'historique au format Gemini (role: user/model)
-    contents = []
+    # Construire les messages au format OpenAI
+    messages = [{"role": "system", "content": _SYSTEM}]
     for msg in history:
-        role = "model" if msg["role"] == "assistant" else "user"
-        contents.append({"role": role, "parts": [{"text": msg["content"]}]})
-    contents.append({"role": "user", "parts": [{"text": message}]})
+        messages.append({"role": msg["role"], "content": msg["content"]})
+    messages.append({"role": "user", "content": message})
 
-    body = {
-        "system_instruction": {"parts": [{"text": _SYSTEM}]},
-        "tools": [{"function_declarations": GEMINI_TOOLS}],
-        "contents": contents,
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type":  "application/json",
     }
 
     for iteration in range(_MAX_ITERATIONS):
-        resp = http.post(
-            f"{_API_URL}?key={api_key}",
-            json=body,
-            timeout=60,
-        )
+        body = {
+            "model":       _MODEL,
+            "messages":    messages,
+            "tools":       _groq_tools(),
+            "tool_choice": "auto",
+            "max_tokens":  1500,
+        }
+
+        resp = http.post(_API_URL, headers=headers, json=body, timeout=60)
 
         if resp.status_code == 429:
-            return "⏳ Limite de requêtes atteinte (tier gratuit Gemini). Attendez quelques secondes avant de réessayer."
-        if resp.status_code == 403:
-            return "⚠️ Clé API invalide ou accès refusé. Vérifiez votre `GEMINI_API_KEY`."
+            return "⏳ Limite de requêtes Groq atteinte. Réessayez dans quelques secondes."
+        if resp.status_code == 401:
+            return "⚠️ Clé API Groq invalide. Vérifiez votre `GROQ_API_KEY`."
         if not resp.ok:
             try:
                 detail = resp.json().get("error", {}).get("message", resp.text[:200])
             except Exception:
                 detail = resp.text[:200]
-            return f"⚠️ Erreur API Gemini ({resp.status_code}) : {detail}"
+            return f"⚠️ Erreur API Groq ({resp.status_code}) : {detail}"
 
-        data = resp.json()
+        data        = resp.json()
+        choice      = data["choices"][0]
+        msg_out     = choice["message"]
+        finish      = choice.get("finish_reason", "stop")
 
-        candidate = data["candidates"][0]
-        parts      = candidate["content"]["parts"]
+        logging.info(f"[chatbot] iter={iteration} finish_reason={finish}")
 
-        # Collecter les appels de fonctions
-        function_calls = [p["functionCall"] for p in parts if "functionCall" in p]
+        # Réponse textuelle finale
+        if finish == "stop" or not msg_out.get("tool_calls"):
+            return msg_out.get("content") or "Aucune réponse générée."
 
-        if not function_calls:
-            # Réponse textuelle finale
-            text_parts = [p["text"] for p in parts if "text" in p]
-            return "\n".join(text_parts)
+        # Appels d'outils
+        messages.append(msg_out)
 
-        # Ajouter la réponse du modèle (avec les function calls) à l'historique
-        logging.info(f"[chatbot] iter={iteration} — {len(function_calls)} appel(s) d'outil")
-        body["contents"].append({"role": "model", "parts": parts})
+        for tc in msg_out["tool_calls"]:
+            fn_name = tc["function"]["name"]
+            try:
+                fn_args = json.loads(tc["function"]["arguments"])
+            except (json.JSONDecodeError, TypeError):
+                fn_args = {}
 
-        # Exécuter les outils et renvoyer les résultats
-        function_responses = []
-        for fc in function_calls:
-            logging.info(f"[chatbot] tool={fc['name']} args={fc.get('args', {})}")
-            result = execute_tool(fc["name"], fc.get("args", {}), token)
-            function_responses.append({
-                "functionResponse": {
-                    "name":     fc["name"],
-                    "response": {"result": result},
-                }
+            logging.info(f"[chatbot] tool={fn_name} args={fn_args}")
+            result = execute_tool(fn_name, fn_args, token)
+
+            messages.append({
+                "role":         "tool",
+                "tool_call_id": tc["id"],
+                "content":      result,
             })
-
-        body["contents"].append({"role": "user", "parts": function_responses})
 
     return "Je n'ai pas pu générer une réponse complète. Veuillez reformuler votre question."
