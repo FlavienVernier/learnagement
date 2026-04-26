@@ -30,6 +30,7 @@ from .apc20_ens_fiche_module import fiche_module_content,  register_callbacks as
 from .apc20_ens_couverture   import couverture_content,    register_callbacks as _reg_couverture
 from .apc20_ens_reseau_gaps  import reseau_gaps_content,   register_callbacks as _reg_reseau_gaps
 from .apc20_ens_contribution import contribution_content,  register_callbacks as _reg_contribution
+from .apc20_chatbot          import chatbot_layout,        register_callbacks as _reg_chatbot
 
 
 # ─── Configuration de la navigation ───────────────────────────────
@@ -184,6 +185,9 @@ apc_ens_dashboard_layout = html.Div(
     style={"fontFamily": "Inter, sans-serif", "backgroundColor": "#F9FAFB"},
 )
 
+# Ajout du chatbot dans le layout du dashboard enseignant
+apc_ens_dashboard_layout = html.Div([apc_ens_dashboard_layout, chatbot_layout])
+
 
 # ─── Callbacks ────────────────────────────────────────────────────
 
@@ -284,3 +288,4 @@ def register_callbacks(app):
     _reg_couverture(app)
     _reg_reseau_gaps(app)
     _reg_contribution(app)
+    _reg_chatbot(app)
