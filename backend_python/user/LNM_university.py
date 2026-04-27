@@ -2,13 +2,114 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional, Tuple
+from pydantic import BaseModel, Field
 
 from dependencies import db_request, get_current_active_user, User, SQLRequest
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+class UniversityPlacePayload(BaseModel):
+    id_filiere: int
+    annee: int
+    number_of_places: int = Field(ge=0)
+
+
+class UniversityAdminPayload(BaseModel):
+    name: str
+    country: str
+    code: Optional[str] = None
+    address: Optional[str] = None
+    latitude: float = 0.0
+    longitude: float = 0.0
+    website: Optional[str] = None
+    languages: Optional[str] = None
+    note_min: Optional[float] = None
+    type: Optional[str] = "ERASMUS"
+    places: List[UniversityPlacePayload] = []
+
+
+def _resolve_promo_id(
+    current_user: User,
+    id_filiere: int,
+    annee: int,
+) -> int:
+    promo_request = {
+        "request": """
+                        SELECT id_promo
+                        FROM LNM_promo
+                        WHERE id_filiere = %(id_filiere)s
+                          AND annee = %(annee)s
+                        ORDER BY id_promo ASC
+                        LIMIT 1
+                    """,
+        "params": {
+            "id_filiere": id_filiere,
+            "annee": annee,
+        },
+        "allowedRolesRequester": ["relations_internationales"],
+    }
+    promo_rows = db_request(current_user, SQLRequest(**promo_request))
+    if not promo_rows:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Aucune promo trouvee pour la filiere {id_filiere} en annee {annee}.",
+        )
+
+    return int(promo_rows[0]["id_promo"])
+
+
+def _sync_university_places(
+    current_user: User,
+    id_partner_university: int,
+    places: List[UniversityPlacePayload],
+) -> None:
+    normalized_places: Dict[Tuple[int, int], int] = {}
+    for place in places:
+        if place.number_of_places <= 0:
+            continue
+        normalized_places[(place.id_filiere, place.annee)] = int(place.number_of_places)
+
+    resolved_places: List[Dict[str, int]] = []
+    for (id_filiere, annee), number_of_places in normalized_places.items():
+        id_promo = _resolve_promo_id(current_user, id_filiere, annee)
+        resolved_places.append(
+            {
+                "id_promo": id_promo,
+                "number_of_places": number_of_places,
+            }
+        )
+
+    delete_places_request = {
+        "request": """
+                        DELETE FROM MOB_partner_university_places
+                        WHERE id_partner_university = %(id_partner_university)s
+                    """,
+        "params": {
+            "id_partner_university": id_partner_university,
+        },
+        "allowedRolesRequester": ["relations_internationales"],
+    }
+    db_request(current_user, SQLRequest(**delete_places_request))
+
+    for place in resolved_places:
+        insert_place_request = {
+            "request": """
+                            INSERT INTO MOB_partner_university_places (id_partner_university, id_promo, number_of_places)
+                            VALUES (%(id_partner_university)s, %(id_promo)s, %(number_of_places)s)
+                        """,
+            "params": {
+                "id_partner_university": id_partner_university,
+                "id_promo": place["id_promo"],
+                "number_of_places": place["number_of_places"],
+            },
+            "allowedRolesRequester": ["relations_internationales"],
+        }
+        db_request(current_user, SQLRequest(**insert_place_request))
+
 
 @router.get("/university/",
             tags=["user", "mobility"],
@@ -426,3 +527,151 @@ def list_university_catalog_ri(
         "allowedRolesRequester": ["relations_internationales"],
     }
     return db_request(current_user, SQLRequest(**request))
+
+
+@router.post("/university/admin",
+            tags=["user", "mobility"],
+            summary="Create partner university for RI",
+            description="Create a partner university and its places by filiere/semester for International Relations admins")
+def create_university_ri(
+    payload: UniversityAdminPayload,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    name = payload.name.strip()
+    country = payload.country.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Le nom de l'universite est obligatoire.")
+    if not country:
+        raise HTTPException(status_code=400, detail="Le pays est obligatoire.")
+
+    insert_request = {
+        "request": """
+                        INSERT INTO MOB_partner_university (
+                            name, code, country, address, latitude, longitude, website, 
+                            languages, note_min, type
+                        ) VALUES (
+                            %(name)s, %(code)s, %(country)s, %(address)s, %(latitude)s, 
+                            %(longitude)s, %(website)s, %(languages)s, %(note_min)s, %(type)s
+                        )
+                    """,
+        "params": {
+            "name": name,
+            "code": payload.code,
+            "country": country,
+            "address": payload.address,
+            "latitude": payload.latitude,
+            "longitude": payload.longitude,
+            "website": payload.website,
+            "languages": payload.languages,
+            "note_min": payload.note_min,
+            "type": payload.type,
+        },
+        "allowedRolesRequester": ["relations_internationales"],
+    }
+
+    try:
+        db_request(current_user, SQLRequest(**insert_request))
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Creation impossible: {exc}")
+
+    select_request = {
+        "request": """
+                        SELECT id_partner_university
+                        FROM MOB_partner_university
+                        WHERE name = %(name)s
+                          AND country = %(country)s
+                        ORDER BY id_partner_university DESC
+                        LIMIT 1
+                    """,
+        "params": {
+            "name": name,
+            "country": country,
+        },
+        "allowedRolesRequester": ["relations_internationales"],
+    }
+    rows = db_request(current_user, SQLRequest(**select_request))
+    if not rows:
+        raise HTTPException(status_code=500, detail="Universite creee mais identifiant introuvable.")
+
+    id_partner_university = int(rows[0]["id_partner_university"])
+    _sync_university_places(current_user, id_partner_university, payload.places)
+
+    return {
+        "message": "Universite creee.",
+        "id_partner_university": id_partner_university,
+    }
+
+
+@router.put("/university/admin/{id_partner_university:int}",
+            tags=["user", "mobility"],
+            summary="Update partner university for RI",
+            description="Update a partner university and its places by filiere/semester for International Relations admins")
+def update_university_ri(
+    id_partner_university: int,
+    payload: UniversityAdminPayload,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    exists_request = {
+        "request": """
+                        SELECT id_partner_university
+                        FROM MOB_partner_university
+                        WHERE id_partner_university = %(id_partner_university)s
+                    """,
+        "params": {
+            "id_partner_university": id_partner_university,
+        },
+        "allowedRolesRequester": ["relations_internationales"],
+    }
+    rows = db_request(current_user, SQLRequest(**exists_request))
+    if not rows:
+        raise HTTPException(status_code=404, detail="Universite introuvable.")
+
+    name = payload.name.strip()
+    country = payload.country.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Le nom de l'universite est obligatoire.")
+    if not country:
+        raise HTTPException(status_code=400, detail="Le pays est obligatoire.")
+
+    update_request = {
+        "request": """
+                        UPDATE MOB_partner_university
+                        SET
+                            name = %(name)s,
+                            code = %(code)s,
+                            country = %(country)s,
+                            address = %(address)s,
+                            latitude = %(latitude)s,
+                            longitude = %(longitude)s,
+                            website = %(website)s,
+                            languages = %(languages)s,
+                            note_min = %(note_min)s,
+                            type = %(type)s
+                        WHERE id_partner_university = %(id_partner_university)s
+                    """,
+        "params": {
+            "id_partner_university": id_partner_university,
+            "name": name,
+            "code": payload.code,
+            "country": country,
+            "address": payload.address,
+            "latitude": payload.latitude,
+            "longitude": payload.longitude,
+            "website": payload.website,
+            "languages": payload.languages,
+            "note_min": payload.note_min,
+            "type": payload.type,
+        },
+        "allowedRolesRequester": ["relations_internationales"],
+    }
+
+    try:
+        db_request(current_user, SQLRequest(**update_request))
+        _sync_university_places(current_user, id_partner_university, payload.places)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Mise a jour impossible: {exc}")
+
+    return {
+        "message": "Universite mise a jour.",
+        "id_partner_university": id_partner_university,
+    }

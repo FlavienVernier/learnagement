@@ -2339,6 +2339,7 @@ INSERT INTO `LNM_filiere` VALUES (4,'Meca','Mécanique', NULL);
 INSERT INTO `LNM_filiere` VALUES (5,'Sys','Systèmes', NULL);
 INSERT INTO `LNM_filiere` VALUES (6,'Bat','Bâtiment', NULL);
 INSERT INTO `LNM_filiere` VALUES (7,'Eco','Écologie', NULL);
+INSERT INTO `LNM_filiere` VALUES (8,'Mat','Matériaux', NULL);
 /*!40000 ALTER TABLE `LNM_filiere` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2403,9 +2404,9 @@ INSERT INTO `LNM_promo` VALUES (25,6,1,5,NULL,'Chambéry',1,1,2,NULL);
 INSERT INTO `LNM_promo` VALUES (26,7,1,3,NULL,'Chambéry',1,1,2,NULL);
 INSERT INTO `LNM_promo` VALUES (27,7,1,4,NULL,'Chambéry',1,1,2,NULL);
 INSERT INTO `LNM_promo` VALUES (28,7,1,5,NULL,'Chambéry',1,1,2,NULL);
-INSERT INTO `LNM_promo` VALUES (29,4,1,3,NULL,'Chambéry',1,1,2,NULL);
-INSERT INTO `LNM_promo` VALUES (30,4,1,4,NULL,'Chambéry',1,1,2,NULL);
-INSERT INTO `LNM_promo` VALUES (31,4,1,5,NULL,'Chambéry',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (29,8,1,3,NULL,'Chambéry',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (30,8,1,4,NULL,'Chambéry',1,1,2,NULL);
+INSERT INTO `LNM_promo` VALUES (31,8,1,5,NULL,'Chambéry',1,1,2,NULL);
 /*!40000 ALTER TABLE `LNM_promo` ENABLE KEYS */;
 UNLOCK TABLES;
 

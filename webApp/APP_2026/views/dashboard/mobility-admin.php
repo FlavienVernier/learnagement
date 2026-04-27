@@ -142,6 +142,76 @@
         </div>
     </div>
 
+    <div class="rounded-2xl border overflow-hidden">
+        <div class="p-4 border-b flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
+            <div>
+                <h2 class="text-lg font-bold">Universités partenaires</h2>
+                <p class="text-sm text-gray-500">Ajout et ajustement des places par filière/semestre.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <input id="universityAdminSearch" type="search" placeholder="Rechercher une universite..."
+                    class="border text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-64 p-2.5" />
+                <button id="addUniversityRowBtn" type="button"
+                    class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition">
+                    Ajouter une universite
+                </button>
+            </div>
+        </div>
+        <div id="addUniversityPanel" class="hidden p-4 border-b bg-gray-50">
+            <div class="mb-3 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-800">Nouvelle université partenaire</h3>
+                <button id="cancelAddUniversityBtn" type="button" class="text-xs px-3 py-1.5 rounded bg-gray-200 text-gray-700 hover:bg-gray-300">Annuler</button>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-3">
+                <input id="newUniName" type="text" placeholder="Nom de l'université *" class="border rounded px-3 py-2 text-sm" />
+                <input id="newUniCountry" type="text" placeholder="Pays *" class="border rounded px-3 py-2 text-sm" />
+                <input id="newUniCode" type="text" placeholder="Code" class="border rounded px-3 py-2 text-sm" />
+                <input id="newUniAddress" type="text" placeholder="Adresse" class="border rounded px-3 py-2 text-sm lg:col-span-2" />
+                <input id="newUniWebsite" type="url" placeholder="Site web" class="border rounded px-3 py-2 text-sm" />
+                <input id="newUniLanguages" type="text" placeholder="Langues (ex: Anglais, Espagnol)" class="border rounded px-3 py-2 text-sm lg:col-span-2" />
+                <div class="grid grid-cols-3 gap-2 lg:col-span-1">
+                    <input id="newUniLatitude" type="number" step="0.000001" placeholder="Latitude" class="border rounded px-3 py-2 text-sm" />
+                    <input id="newUniLongitude" type="number" step="0.000001" placeholder="Longitude" class="border rounded px-3 py-2 text-sm" />
+                    <input id="newUniNoteMin" type="number" step="0.01" min="0" max="20" placeholder="Note min" class="border rounded px-3 py-2 text-sm" />
+                </div>
+                <select id="newUniType" class="border rounded px-3 py-2 text-sm">
+                    <option value="ERASMUS">ERASMUS</option>
+                    <option value="Bilateral">Bilateral</option>
+                </select>
+            </div>
+
+            <div class="rounded border bg-white p-3">
+                <div class="mb-2 flex items-center justify-between">
+                    <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-600">Places par filière / semestre</h4>
+                    <button id="addNewUniPlaceRowBtn" type="button" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300">Ajouter une ligne</button>
+                </div>
+                <div id="newUniPlacesRows" class="space-y-2"></div>
+            </div>
+
+            <div class="mt-3 flex items-center justify-end gap-2">
+                <button id="saveNewUniversityBtn" type="button" class="text-xs px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700">Créer l'université</button>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="text-xs uppercase border-b bg-primary text-on-primary">
+                    <tr>
+                        <th class="px-6 py-4 font-semibold">Universite</th>
+                        <th class="px-6 py-4 font-semibold">Pays</th>
+                        <th class="px-6 py-4 font-semibold">Code</th>
+                        <th class="px-6 py-4 font-semibold">Demandes</th>
+                        <th class="px-6 py-4 font-semibold text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="universitiesAdminBody" class="divide-y divide-gray-500">
+                    <tr>
+                        <td colspan="5" class="px-6 py-10 text-center text-gray-500">Chargement des universites...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <div id="streetViewModal" class="streetview-modal">
         <div class="streetview-content">
             <div class="streetview-header">
@@ -155,7 +225,7 @@
 <?php $t->endSlot(); ?>
 
 
-<?php $t->startSlot('style.top'); ?>
+<?php $t->startSlot('stylesheet'); ?>
 <!-- Import Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
@@ -201,6 +271,7 @@ crossorigin=""/>
     const map = L.map('map').setView([48.85, 2.35], 4);
     const submittedWishesByStudent = new Map();
     const expandedStudentRows = new Set();
+    const expandedUniversityRows = new Set();
     const popupState = new Map();
     const wishesCountByUniversityId = new Map();
     window.MobilityMapState = {
@@ -262,56 +333,76 @@ crossorigin=""/>
         return wishes;
     }
 
-    const universityCatalog = await fetchUniversityCatalog();
     const universitiesById = new Map();
     const filieresById = new Map();
-
-    for (const row of universityCatalog) {
-        const uid = String(row.id_partner_university);
-        if (!universitiesById.has(uid)) {
-            universitiesById.set(uid, {
-                ...row,
-                filieres: [],
-                filiereIds: new Set(),
-                wishCount: 0,
-            });
-        }
-
-        const university = universitiesById.get(uid);
-        if (row.id_filiere !== null && row.id_filiere !== undefined) {
-            const filiereId = String(row.id_filiere);
-            university.filiereIds.add(filiereId);
-            university.filieres.push({
-                id_filiere: row.id_filiere,
-                nom_filiere: row.nom_filiere,
-                nom_long: row.nom_long,
-                annee: row.annee,
-                number_of_places: row.number_of_places,
-            });
-
-            if (!filieresById.has(filiereId)) {
-                filieresById.set(filiereId, {
-                    id_filiere: row.id_filiere,
-                    nom_filiere: row.nom_filiere,
-                    nom_long: row.nom_long,
-                });
-            }
-        }
-    }
-
-    const universities = Array.from(universitiesById.values()).map((university) => ({
-        ...university,
-        filieres: university.filieres.sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere))),
-    }));
+    const editableUniversities = [];
 
     window.MobilityMapState.universitiesById = universitiesById;
     window.MobilityMapState.filieresById = filieresById;
 
-    const filiereSelect = document.getElementById('filiereSelect');
-    filiereSelect.innerHTML = '<option value="toutes">Toutes</option>' + Array.from(filieresById.values())
-        .sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere)))
-        .map((filiere) => `<option value="${escapeHtml(String(filiere.id_filiere))}">${escapeHtml(filiere.nom_filiere || filiere.nom_long || 'Filiere')}</option>`)
-        .join('');
+    function buildFiliereOptionsHtml() {
+        return Array.from(filieresById.values())
+            .sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere)))
+            .map((filiere) => `<option value="${escapeHtml(String(filiere.id_filiere))}">${escapeHtml(filiere.nom_filiere || filiere.nom_long || 'Filiere')}</option>`)
+            .join('');
+    }
+
+    function hydrateCatalogState(universityCatalogRows) {
+        universitiesById.clear();
+        filieresById.clear();
+        editableUniversities.splice(0, editableUniversities.length);
+
+        for (const row of universityCatalogRows) {
+            const uid = String(row.id_partner_university);
+            if (!universitiesById.has(uid)) {
+                universitiesById.set(uid, {
+                    ...row,
+                    filieres: [],
+                    filiereIds: new Set(),
+                    wishCount: 0,
+                });
+            }
+
+            const university = universitiesById.get(uid);
+            if (row.id_filiere !== null && row.id_filiere !== undefined) {
+                const filiereId = String(row.id_filiere);
+                university.filiereIds.add(filiereId);
+                university.filieres.push({
+                    id_filiere: row.id_filiere,
+                    nom_filiere: row.nom_filiere,
+                    nom_long: row.nom_long,
+                    annee: row.annee,
+                    number_of_places: row.number_of_places,
+                });
+
+                if (!filieresById.has(filiereId)) {
+                    filieresById.set(filiereId, {
+                        id_filiere: row.id_filiere,
+                        nom_filiere: row.nom_filiere,
+                        nom_long: row.nom_long,
+                    });
+                }
+            }
+        }
+
+        const universities = Array.from(universitiesById.values()).map((university) => ({
+            ...university,
+            filieres: university.filieres.sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere))),
+        }));
+
+        editableUniversities.push(
+            ...universities.map((u) => ({
+                ...u,
+                rowKey: String(u.id_partner_university),
+                filiereIds: new Set(u.filiereIds || []),
+                filieres: (u.filieres || []).map((f) => ({ ...f })),
+                isDraft: false,
+            }))
+        );
+
+        const filiereSelect = document.getElementById('filiereSelect');
+        filiereSelect.innerHTML = '<option value="toutes">Toutes</option>' + buildFiliereOptionsHtml();
+    }
 
     async function refreshWishesFromServer() {
         const wishes = await fetchWishes();
@@ -341,7 +432,15 @@ crossorigin=""/>
             }
         });
     }
-    await refreshWishesFromServer();
+    async function refreshAllData() {
+        const catalogRows = await fetchUniversityCatalog();
+        hydrateCatalogState(catalogRows);
+        await refreshWishesFromServer();
+        refreshKpis();
+        renderDashboardTable();
+        renderUniversitiesAdminTable();
+        updateMap();
+    }
 
     function formatDateFR(dateValue) {
         if (!dateValue) return 'Non renseignee';
@@ -418,7 +517,6 @@ crossorigin=""/>
                 const searchable = [
                     row.fullname,
                     row.email,
-                    row.firstWishName,
                     ...row.wishes.map((w) => {
                         const uid = String(w.id_partner_university || '');
                         const uni = universitiesById.get(uid);
@@ -515,6 +613,223 @@ crossorigin=""/>
         body.innerHTML = html;
     }
 
+    function getSemesterLabel(annee) {
+        return Number(annee) === 4 ? 'S8' : 'S9';
+    }
+
+    function renderUniversitiesAdminTable() {
+        const body = document.getElementById('universitiesAdminBody');
+        const query = (document.getElementById('universityAdminSearch').value || '').trim().toLowerCase();
+
+        let rows = [...editableUniversities];
+        if (query) {
+            rows = rows.filter((u) => {
+                const text = [u.name, u.country, u.code, u.website].join(' ').toLowerCase();
+                return text.includes(query);
+            });
+        }
+
+        rows.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+
+        if (rows.length === 0) {
+            body.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-gray-500">Aucune universite ne correspond a la recherche.</td></tr>';
+            return;
+        }
+
+        body.innerHTML = rows.map((u) => {
+            const key = String(u.rowKey);
+            const isExpanded = expandedUniversityRows.has(key);
+            const wishesCount = wishesCountByUniversityId.get(String(u.id_partner_university || '')) || 0;
+            const filiereRows = (u.filieres || []).map((f, index) => {
+                const filiereText = f.nom_filiere || f.nom_long || `Filiere ${f.id_filiere}`;
+                return `
+                    <div class="grid grid-cols-1 lg:grid-cols-[2fr_1fr_auto] gap-2 items-center rounded border border-gray-200 bg-white p-2">
+                        <div class="text-xs text-gray-700">${escapeHtml(filiereText)} - ${escapeHtml(getSemesterLabel(f.annee))}</div>
+                        <input type="number" min="0" value="${escapeHtml(String(f.number_of_places ?? 0))}" class="border rounded px-2 py-1 text-xs" onchange="window.updateUniversityPlace('${escapeHtml(key)}', ${index}, this.value)" />
+                        <button type="button" class="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100" onclick="window.removeUniversityPlace('${escapeHtml(key)}', ${index})">Supprimer</button>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <tr class="hover:bg-gray-100 transition">
+                    <td class="px-6 py-4">
+                        <div class="font-semibold text-gray-900">${escapeHtml(u.name || 'Nouvelle universite')}</div>
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">${escapeHtml(u.country || '-')}</td>
+                    <td class="px-6 py-4 text-gray-600">${escapeHtml(u.code || '-')}</td>
+                    <td class="px-6 py-4 text-gray-900 font-semibold">${escapeHtml(String(wishesCount))}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center justify-end gap-2">
+                            <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 transition" onclick="window.toggleUniversityPlacesEditor('${escapeHtml(key)}')">Editer les places</button>
+                        </div>
+                    </td>
+                </tr>
+                ${isExpanded ? `
+                <tr class="bg-gray-50">
+                    <td colspan="5" class="px-6 py-4">
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-2">
+                                <input type="text" value="${escapeHtml(u.name || '')}" placeholder="Nom universite" class="border rounded px-2 py-1 text-xs" onchange="window.updateUniversityMeta('${escapeHtml(key)}', 'name', this.value)" />
+                                <input type="text" value="${escapeHtml(u.country || '')}" placeholder="Pays" class="border rounded px-2 py-1 text-xs" onchange="window.updateUniversityMeta('${escapeHtml(key)}', 'country', this.value)" />
+                                <input type="text" value="${escapeHtml(u.code || '')}" placeholder="Code" class="border rounded px-2 py-1 text-xs" onchange="window.updateUniversityMeta('${escapeHtml(key)}', 'code', this.value)" />
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-2">
+                                <select id="addPlaceFiliere-${escapeHtml(key)}" class="border rounded px-2 py-1 text-xs">
+                                    ${Array.from(filieresById.values()).sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere))).map((f) => `<option value="${escapeHtml(String(f.id_filiere))}">${escapeHtml(f.nom_filiere || f.nom_long || 'Filiere')}</option>`).join('')}
+                                </select>
+                                <select id="addPlaceSemestre-${escapeHtml(key)}" class="border rounded px-2 py-1 text-xs">
+                                    <option value="4">S8</option>
+                                    <option value="5">S9</option>
+                                </select>
+                                <button type="button" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300" onclick="window.addUniversityPlace('${escapeHtml(key)}')">Ajouter une place</button>
+                            </div>
+
+                            <div class="space-y-2">
+                                ${filiereRows || '<div class="text-xs text-gray-500">Aucune place configuree.</div>'}
+                            </div>
+
+                            <div class="flex items-center justify-end gap-2">
+                                <button type="button" class="text-xs px-3 py-1.5 rounded bg-green-600 text-white hover:bg-green-700" onclick="window.saveUniversityDraft('${escapeHtml(key)}')">Enregistrer</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                ` : ''}
+            `;
+        }).join('');
+    }
+
+    function getEditableUniversityByKey(rowKey) {
+        return editableUniversities.find((u) => String(u.rowKey) === String(rowKey));
+    }
+
+    async function parseApiError(response) {
+        try {
+            const data = await response.json();
+            return data?.detail || `Erreur ${response.status}`;
+        } catch {
+            return `Erreur ${response.status}`;
+        }
+    }
+
+    window.toggleUniversityPlacesEditor = function(rowKey) {
+        const key = String(rowKey);
+        if (expandedUniversityRows.has(key)) {
+            expandedUniversityRows.delete(key);
+        } else {
+            expandedUniversityRows.add(key);
+        }
+        renderUniversitiesAdminTable();
+    };
+
+    window.updateUniversityMeta = function(rowKey, field, value) {
+        const university = getEditableUniversityByKey(rowKey);
+        if (!university) return;
+        university[field] = value;
+    };
+
+    window.updateUniversityPlace = function(rowKey, placeIndex, value) {
+        const university = getEditableUniversityByKey(rowKey);
+        if (!university || !university.filieres[placeIndex]) return;
+        const parsed = Number.parseInt(value, 10);
+        university.filieres[placeIndex].number_of_places = Number.isNaN(parsed) ? 0 : Math.max(0, parsed);
+        const firstPlace = university.filieres[0];
+        if (firstPlace) {
+            university.number_of_places = firstPlace.number_of_places;
+            university.annee = firstPlace.annee;
+        }
+        updateMap();
+    };
+
+    window.removeUniversityPlace = function(rowKey, placeIndex) {
+        const university = getEditableUniversityByKey(rowKey);
+        if (!university) return;
+        university.filieres.splice(placeIndex, 1);
+        university.filiereIds = new Set(university.filieres.map((f) => String(f.id_filiere)));
+        renderUniversitiesAdminTable();
+        updateMap();
+    };
+
+    window.addUniversityPlace = function(rowKey) {
+        const university = getEditableUniversityByKey(rowKey);
+        if (!university) return;
+        const filiereSelectEl = document.getElementById(`addPlaceFiliere-${rowKey}`);
+        const semestreSelectEl = document.getElementById(`addPlaceSemestre-${rowKey}`);
+        if (!filiereSelectEl || !semestreSelectEl) return;
+
+        const filiereId = String(filiereSelectEl.value);
+        const filiereMeta = filieresById.get(filiereId);
+        const annee = Number.parseInt(semestreSelectEl.value, 10);
+
+        university.filieres.push({
+            id_filiere: Number.parseInt(filiereId, 10),
+            nom_filiere: filiereMeta?.nom_filiere || 'Filiere',
+            nom_long: filiereMeta?.nom_long || '',
+            annee,
+            number_of_places: 1,
+        });
+        university.filiereIds.add(filiereId);
+        const firstPlace = university.filieres[0];
+        if (firstPlace) {
+            university.number_of_places = firstPlace.number_of_places;
+            university.annee = firstPlace.annee;
+        }
+
+        renderUniversitiesAdminTable();
+        updateMap();
+    };
+
+    window.saveUniversityDraft = async function(rowKey) {
+        const university = getEditableUniversityByKey(rowKey);
+        if (!university) return;
+
+        const payload = {
+            name: String(university.name || '').trim(),
+            country: String(university.country || '').trim(),
+            code: university.code || null,
+            address: university.address || null,
+            latitude: Number(university.latitude || 0),
+            longitude: Number(university.longitude || 0),
+            website: university.website || null,
+            languages: university.languages || null,
+            note_min: university.note_min === null || university.note_min === undefined || university.note_min === ''
+                ? null
+                : Number(university.note_min),
+            type: university.type || 'ERASMUS',
+            places: (university.filieres || []).map((f) => ({
+                id_filiere: Number(f.id_filiere),
+                annee: Number(f.annee),
+                number_of_places: Math.max(0, Number.parseInt(f.number_of_places ?? 0, 10) || 0),
+            })),
+        };
+
+        if (!payload.name || !payload.country) {
+            window.alert('Nom et pays sont obligatoires.');
+            return;
+        }
+
+        const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + `/university/admin/${university.id_partner_university}`;
+        const method = 'PUT';
+
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            const detail = await parseApiError(response);
+            window.alert(`Enregistrement impossible: ${detail}`);
+            return;
+        }
+        await refreshAllData();
+    };
+
     function refreshKpis() {
         const rows = getDashboardRows();
         const submittedCount = rows.filter((row) => row.isSubmitted).length;
@@ -593,6 +908,92 @@ crossorigin=""/>
         `;
     }
 
+    function resetAddUniversityForm() {
+        document.getElementById('newUniName').value = '';
+        document.getElementById('newUniCountry').value = '';
+        document.getElementById('newUniCode').value = '';
+        document.getElementById('newUniAddress').value = '';
+        document.getElementById('newUniWebsite').value = '';
+        document.getElementById('newUniLanguages').value = 'Anglais';
+        document.getElementById('newUniLatitude').value = '48.85';
+        document.getElementById('newUniLongitude').value = '2.35';
+        document.getElementById('newUniNoteMin').value = '';
+        document.getElementById('newUniType').value = 'ERASMUS';
+        const placesRows = document.getElementById('newUniPlacesRows');
+        placesRows.innerHTML = '';
+        window.addNewUniversityPlaceRow();
+    }
+
+    window.addNewUniversityPlaceRow = function() {
+        const rowId = `new-place-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        const rowHtml = `
+            <div id="${rowId}" class="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_auto] gap-2 items-center">
+                <select class="new-uni-place-filiere border rounded px-2 py-1 text-xs">${buildFiliereOptionsHtml()}</select>
+                <select class="new-uni-place-annee border rounded px-2 py-1 text-xs">
+                    <option value="4">S8</option>
+                    <option value="5">S9</option>
+                </select>
+                <input type="number" min="0" value="1" class="new-uni-place-count border rounded px-2 py-1 text-xs" />
+                <button type="button" class="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100" onclick="document.getElementById('${rowId}').remove()">Supprimer</button>
+            </div>
+        `;
+        document.getElementById('newUniPlacesRows').insertAdjacentHTML('beforeend', rowHtml);
+    };
+
+    function collectNewUniversityPlaces() {
+        const placeRows = Array.from(document.querySelectorAll('#newUniPlacesRows > div'));
+        return placeRows.map((row) => {
+            const filiere = row.querySelector('.new-uni-place-filiere');
+            const annee = row.querySelector('.new-uni-place-annee');
+            const count = row.querySelector('.new-uni-place-count');
+            return {
+                id_filiere: Number(filiere?.value || 0),
+                annee: Number(annee?.value || 4),
+                number_of_places: Math.max(0, Number.parseInt(count?.value || '0', 10) || 0),
+            };
+        });
+    }
+
+    window.saveNewUniversity = async function() {
+        const payload = {
+            name: document.getElementById('newUniName').value.trim(),
+            country: document.getElementById('newUniCountry').value.trim(),
+            code: document.getElementById('newUniCode').value.trim() || null,
+            address: document.getElementById('newUniAddress').value.trim() || null,
+            website: document.getElementById('newUniWebsite').value.trim() || null,
+            languages: document.getElementById('newUniLanguages').value.trim() || null,
+            latitude: Number(document.getElementById('newUniLatitude').value || 0),
+            longitude: Number(document.getElementById('newUniLongitude').value || 0),
+            note_min: document.getElementById('newUniNoteMin').value === '' ? null : Number(document.getElementById('newUniNoteMin').value),
+            type: document.getElementById('newUniType').value || 'ERASMUS',
+            places: collectNewUniversityPlaces(),
+        };
+
+        if (!payload.name || !payload.country) {
+            window.alert('Nom et pays sont obligatoires.');
+            return;
+        }
+
+        const response = await fetch((window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + '/university/admin', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            const detail = await parseApiError(response);
+            window.alert(`Creation impossible: ${detail}`);
+            return;
+        }
+
+        document.getElementById('addUniversityPanel').classList.add('hidden');
+        await refreshAllData();
+        resetAddUniversityForm();
+    };
+
     
 
     window.flyToUniversity = function(uid) {
@@ -636,7 +1037,7 @@ crossorigin=""/>
         const selectedFiliere = document.getElementById('filiereSelect').value;
         const selectedNote = parseFloat(document.getElementById('noteMinRange').value);
 
-        const filtered = universities.filter(u => {
+        const filtered = editableUniversities.filter(u => {
             // Affiche univ si note_min <= selectedNote
             const uNote = u.note_min === null ? 0 : parseFloat(u.note_min);
             if (uNote > selectedNote) return false;
@@ -674,6 +1075,16 @@ crossorigin=""/>
     document.getElementById('wishesSearch').addEventListener('input', renderDashboardTable);
     document.getElementById('dossierStatusFilter').addEventListener('change', renderDashboardTable);
     document.getElementById('filiereSelect').addEventListener('change', updateMap);
+    document.getElementById('universityAdminSearch').addEventListener('input', renderUniversitiesAdminTable);
+    document.getElementById('addUniversityRowBtn').addEventListener('click', () => {
+        const panel = document.getElementById('addUniversityPanel');
+        panel.classList.toggle('hidden');
+    });
+    document.getElementById('cancelAddUniversityBtn').addEventListener('click', () => {
+        document.getElementById('addUniversityPanel').classList.add('hidden');
+    });
+    document.getElementById('addNewUniPlaceRowBtn').addEventListener('click', window.addNewUniversityPlaceRow);
+    document.getElementById('saveNewUniversityBtn').addEventListener('click', window.saveNewUniversity);
     document.getElementById('resetDashboardFilters').addEventListener('click', () => {
         document.getElementById('wishesSearch').value = '';
         document.getElementById('dossierStatusFilter').value = 'tous';
@@ -685,8 +1096,7 @@ crossorigin=""/>
         updateMap();
     });
 
-    refreshKpis();
-    renderDashboardTable();
-    updateMap();
+    resetAddUniversityForm();
+    await refreshAllData();
 </script>
 <?php $t->endSlot(); ?>
