@@ -318,6 +318,7 @@ def move_university_wish(
 
     return {"message": "Voeu deplace.", "direction": direction}
 
+
 @router.post("/university/etudiant/{id_etudiant:int}/wishes/submit",
             tags=["user", "mobility"],
             summary="Submit university wishes",
@@ -366,7 +367,62 @@ def submit_university_wishes(
     }
     db_request(current_user, SQLRequest(**update_request))
 
-    # ToDo : 
-    #    - Interface côté admin (RI)
-
     return {"message": "Voeux soumis avec succes."}
+
+
+
+@router.get("/university/admin/wishes",
+            tags=["user", "mobility"],
+            summary="All wishes for RI",
+            description="Return all student wishes (submitted and in progress) for International Relations admins")
+def list_all_wishes_ri(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request": """
+                        SELECT
+                            e.id_etudiant,
+                            e.nom AS etudiant_nom,
+                            e.prenom AS etudiant_prenom,
+                            e.mail AS etudiant_mail,
+                            w.priority,
+                            w.submission_date,
+                            u.id_partner_university,
+                            u.name AS university_name,
+                            u.country AS university_country,
+                            u.code AS university_code
+                        FROM MOB_wishes w
+                        JOIN LNM_etudiant e ON e.id_etudiant = w.id_etudiant
+                        JOIN MOB_partner_university u ON u.id_partner_university = w.id_partner_university
+                        ORDER BY e.nom ASC, e.prenom ASC, w.priority ASC
+                    """,
+        "allowedRolesRequester": ["relations_internationales"],
+    }
+    return db_request(current_user, SQLRequest(**request))
+
+
+@router.get("/university/admin/catalog",
+            tags=["user", "mobility"],
+            summary="University catalog for RI",
+            description="Return partner universities enriched with their available filieres for International Relations admins")
+def list_university_catalog_ri(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request": """
+                        SELECT
+                            u.*,
+                            pl.number_of_places,
+                            pr.annee,
+                            pr.id_filiere,
+                            f.nom_filiere,
+                            f.nom_long
+                        FROM MOB_partner_university_places pl
+                        JOIN MOB_partner_university u ON u.id_partner_university = pl.id_partner_university
+                        JOIN LNM_promo pr ON pr.id_promo = pl.id_promo
+                        JOIN LNM_filiere f ON f.id_filiere = pr.id_filiere
+                        ORDER BY u.name ASC, f.nom_filiere ASC, pr.annee ASC
+                    """,
+        "allowedRolesRequester": ["relations_internationales"],
+    }
+    return db_request(current_user, SQLRequest(**request))

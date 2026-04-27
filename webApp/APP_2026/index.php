@@ -65,6 +65,11 @@
         echo $t->render('dashboard/mobility-map');
     });
 
+    $t->router->get('/dashboard/mobility-admin', 'dashboard-mobility-admin', function () use ($t, $user) {
+        requireRole($user, "administratif", $t->router);
+        echo $t->render('dashboard/mobility-admin');
+    });
+
     $t->router->get('/dashboard/python', 'dashboard-python', function () use ($t, $user) {
         requireAuth($user, $t->router);
         echo $t->render('dashboard/python');

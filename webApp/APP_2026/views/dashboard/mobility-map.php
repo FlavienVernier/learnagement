@@ -33,7 +33,7 @@
             <div class="flex flex-wrap justify-center items-center gap-4">
                 <div class="flex flex-col">
                     <label for="semestreSelect" class="text-xs font-semibold text-gray-600 mb-1">Semestre</label>
-                    <select name="semestre" id="semestreSelect" onchange="updateMap()" class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary">
+                    <select name="semestre" id="semestreSelect" onchange="updateMap()" class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary min-w-24">
                     <option>Tous</option>
                     <option value="S8">S8</option>
                     <option value="S9">S9</option>

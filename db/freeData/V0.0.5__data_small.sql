@@ -2104,6 +2104,7 @@ UNLOCK TABLES;
 LOCK TABLES `LNM_administratif` WRITE;
 /*!40000 ALTER TABLE `LNM_administratif` DISABLE KEYS */;
 INSERT INTO `LNM_administratif` VALUES (1,'Tartampion','Pierre','pierre.tartampion@truc.com','$2y$10$zESfySbjXHm5w52l.eU4pe4L3lyiK5TPnLaNm7ca9Nqi9W74qxgVO',0);
+INSERT INTO `LNM_administratif` VALUES (2,'Rinbrowne','Kat','kat.rinbrowne@truc.com','$2y$10$zESfySbjXHm5w52l.eU4pe4L3lyiK5TPnLaNm7ca9Nqi9W74qxgVO',0);
 /*!40000 ALTER TABLE `LNM_administratif` ENABLE KEYS */;
 UNLOCK TABLES;
 
