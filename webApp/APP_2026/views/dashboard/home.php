@@ -18,7 +18,7 @@
 
     <section class="flex-1 flex flex-col gap-4">
         <!-- En-tête -->
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-between mb-4">
             <div>
                 <p class="text-xs text-slate-400 mb-0.5"><?= date('l j F Y') ?></p>
                 <h1 class="text-2xl font-medium text-[#0f2744]">
@@ -28,7 +28,7 @@
         </div>
         <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <?php if ($user['type'] !== 'administratif') : ?>
-                <a href="<?= ($user['type'] === 'etudiant') ? $t->router->href("dashboard-rendus-student") : $t->router->href("dashboard-rendus-enseignant") ?>" class="bg-white rounded-xl shadow p-6 hover:shadow-md transition space-y-2">
+                <a href="<?= ($user['type'] === 'etudiant') ? $t->router->href("dashboard-rendus-student") : $t->router->href("dashboard-rendus-enseignant") ?>" class="bg-white rounded-xl shadow p-4 hover:shadow-md transition space-y-2">
                     <h2 class="text-xl font-semibold text-blue-700">
                         📄 Rendus à venir
                     </h2>
@@ -40,7 +40,7 @@
 
             <?php if ($user['type'] === 'etudiant') : ?>
                 <a href="<?= $t->router->href("dashboard-profile") ?>"
-                class="bg-white rounded-xl shadow p-6 hover:shadow-md transition space-y-2">
+                class="bg-white rounded-xl shadow p-4 hover:shadow-md transition space-y-2">
                     <h2 class="text-xl font-semibold text-green-700">
                         ⭐ Polypoints
                     </h2>
@@ -51,7 +51,7 @@
             <?php endif; ?>
 
             <a href="<?= $t->router->href("dashboard-ressource") ?>"
-            class="bg-white rounded-xl shadow p-6 hover:shadow-md transition space-y-2">
+            class="bg-white rounded-xl shadow p-4 hover:shadow-md transition space-y-2">
                 <h2 class="text-xl font-semibold text-purple-700">
                     📚 Ressources
                 </h2>
@@ -63,12 +63,6 @@
 
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 grow">
             <div class="lg:col-span-2 bg-white rounded-xl shadow p-6 space-y-4 flex flex-col">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-2xl font-semibold text-indigo-700">
-                        📅 Agenda
-                    </h2>
-                </div>
-
                 <div class="bg-white border border-black/8 rounded-xl px-4 py-3 flex items-center justify-between gap-3 mb-4">
 
                 <!-- Navigation -->
@@ -152,6 +146,8 @@
             week: {
                 startDayOfWeek: 1,
                 dayNames: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+                taskView: false,
+                eventView: ['time'],
             },
             month: {
                 startDayOfWeek: 1,
