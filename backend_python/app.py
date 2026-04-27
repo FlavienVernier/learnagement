@@ -1,11 +1,12 @@
 from fastapi import Depends, FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import logging
 
 import init
 
 from system import authenticate, check
-from user import LNM_enseignant, LNM_etudiant, LNM_evaluation, LNM_filiere,  LNM_university, MAQUETTE_module
+from user import LNM_enseignant, LNM_etudiant, LNM_evaluation, LNM_filiere,LNM_calendar, LNM_university, MAQUETTE_module
 
 class bcolors:
     HEADER = '\033[95m'
@@ -26,7 +27,19 @@ class HealthFilter(logging.Filter):
 access_logger.addFilter(HealthFilter())
 
 #app = FastAPI(dependencies=[Depends(get_query_token)])
+origins = [
+    "*"
+]
 app = FastAPI()
+
+# 2. Ajouter le middleware à l'application
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,           # Autorise ton port 40080
+    allow_credentials=True,
+    allow_methods=["*"],              # Autorise GET, POST, OPTIONS, etc.
+    allow_headers=["*"],              # Autorise Authorization, Content-Type, etc.
+)
 
 app.include_router(authenticate.router)
 app.include_router(check.router)
@@ -36,6 +49,7 @@ app.include_router(LNM_university.router)
 app.include_router(LNM_filiere.router)
 app.include_router(MAQUETTE_module.router)
 app.include_router(LNM_evaluation.router)
+app.include_router(LNM_calendar.router)
 
 # app.include_router(
 #     authenticate.router,

@@ -1,10 +1,15 @@
 // ----------------------------------------------------------
 // CONFIG
 // ----------------------------------------------------------
-const API_URL = "http://127.0.0.1:5000";
+import { getCalendar, updateCalendar } from './endpoint.js';
+
+const USER_TOKEN = window.ENV.USER_TOKEN;
 
 // Start week at Monday
 let currentWeekStart = getMonday(new Date());
+
+// Base URL for API
+
 
 // Color palette for events
 const EVENT_COLORS = [
@@ -12,67 +17,167 @@ const EVENT_COLORS = [
     '#F44336', '#00BCD4', '#E91E63', '#3F51B5'
 ];
 
-// ----------------------------------------------------------
+/// ----------------------------------------------------------
 // INIT
 // ----------------------------------------------------------
-document.addEventListener("DOMContentLoaded", () => {
-    renderTimeScale();
-    renderWeekColumns(currentWeekStart);
-    loadEventsForWeek(currentWeekStart);
-
-    document.getElementById("prev-week").addEventListener("click", () => {
-        currentWeekStart.setDate(currentWeekStart.getDate() - 7);
-        renderWeekColumns(currentWeekStart);
-        loadEventsForWeek(currentWeekStart);
-    });
-
-    document.getElementById("next-week").addEventListener("click", () => {
-        currentWeekStart.setDate(currentWeekStart.getDate() + 7);
-        renderWeekColumns(currentWeekStart);
-        loadEventsForWeek(currentWeekStart);
-    });
-});
-
-// ----------------------------------------------------------
-// FETCH EVENTS FROM FLASK
-// ----------------------------------------------------------
-async function loadEventsForWeek(monday) {
-    const start = formatDate(monday);
-    const end = formatDate(addDays(monday, 7));
-
-    const url = `${API_URL}/events.json?start=${start}&end=${end}`;
-
-    console.log(`Fetching events from: ${url}`);
+document.addEventListener("DOMContentLoaded", async () => {
+    const calendarWrapper = document.getElementById("calendar-wrapper");
+    const calendarControls = document.getElementById("calendar-controls");
 
     try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Flask API error: ${response.status}`);
+        const data = await getCalendar(USER_TOKEN);
 
-        const events = await response.json();
-        console.log(`Loaded ${events.length} events:`, events);
-        
-        clearEvents();
-        placeEvents(events);
-
+        if (data && data.length > 0 && data[0].url) {
+            initCalendar(data[0].url); 
+        } else {
+            renderSetupTemplate(calendarWrapper, calendarControls);
+        }
     } catch (err) {
-        console.error("Failed to fetch from Flask API:", err);
-        // Show error message in UI
-        // showError("Impossible de charger les événements. Vérifiez que le serveur Flask est actif.");
+        console.error("Erreur lors de la récupération du calendrier :", err.message);
+        renderSetupTemplate(calendarWrapper, calendarControls);
+    }
+});
+
+async function initCalendar(userAdeUrl) {
+    const container = document.getElementById("calendar-container");
+    const controls = document.getElementById("calendar-controls");
+
+    if (controls) controls.style.display = "flex";
+    if (container) {
+
+        container.classList.remove("border-2", "border-dashed", "border-gray-300", "p-8", "text-center");
+        container.classList.add("p-4");
+    }
+
+    renderTimeScale();
+    renderWeekColumns(currentWeekStart);
+
+    await loadEventsForWeek(currentWeekStart, userAdeUrl);
+
+    document.getElementById("prev-week").onclick = () => {
+        currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+        renderWeekColumns(currentWeekStart);
+        loadEventsForWeek(currentWeekStart, userAdeUrl);
+    };
+
+    document.getElementById("next-week").onclick = () => {
+        currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+        renderWeekColumns(currentWeekStart);
+        loadEventsForWeek(currentWeekStart, userAdeUrl);
+    };
+}
+
+// ----------------------------------------------------------
+// RENDER SETUP : Affiche le formulaire (Template HTML)
+// ----------------------------------------------------------
+function renderSetupTemplate(wrapper, container) {
+
+    const prevBtn = document.getElementById("prev-week");
+    const nextBtn = document.getElementById("next-week");
+    const monthLabel = document.getElementById("current-month");
+    
+    if (prevBtn) prevBtn.style.display = "none";
+    if (nextBtn) nextBtn.style.display = "none";
+    if (monthLabel) monthLabel.style.display = "none";
+
+    if (container) {
+        container.classList.remove("border-dashed", "border-2", "text-gray-500", "p-8");
+    }
+    if (wrapper) {
+        wrapper.style.display = "block";
+        wrapper.innerHTML = "";
+    }
+    const template = document.getElementById("calendar-setup-template");
+    if (!template) {
+        console.error("Le template #calendar-setup-template est introuvable.");
+        return;
+    }
+    const clone = template.content.cloneNode(true);
+    wrapper.appendChild(clone);
+
+    const saveBtn = document.getElementById("save-calendar-btn");
+    if (saveBtn) {
+        saveBtn.addEventListener("click", async () => {
+            const urlInput = document.getElementById("ade-url-input");
+            const url = urlInput ? urlInput.value.trim() : "";
+            const success = await saveCalendarURL(url, "Mon Planning");
+            
+            if (success) {
+                window.location.reload();
+            } else {
+                alert("Erreur lors de l'enregistrement. Vérifiez votre connexion.");
+            }
+        
+        });
     }
 }
 
 // ----------------------------------------------------------
-// RENDER TIME SCALE (06:00 → 22:00)
+// API POST dans LNM_calendar
 // ----------------------------------------------------------
-function renderTimeScale() {
-    const timeScale = document.getElementById("time-scale");
-    timeScale.innerHTML = "";
+async function saveCalendarURL(url, urlName) {
+    try {
+        const payload = { 
+            url: url + "&nocache=", 
+            url_name: urlName 
+        };
 
-    for (let hour = 6; hour <= 22; hour++) {
-        const slot = document.createElement("div");
-        slot.className = "time-slot";
-        slot.textContent = hour.toString().padStart(2, "0") + ":00";
-        timeScale.appendChild(slot);
+        const result = await updateCalendar(USER_TOKEN, payload);
+        
+        return true; 
+    } catch (err) {
+        console.error("Erreur lors de la sauvegarde :", err.message);
+        alert("Erreur : " + err.message);
+        return false;
+    }
+}
+
+// ----------------------------------------------------------
+// FETCH EVENTS
+// ----------------------------------------------------------
+async function loadEventsForWeek(monday, adeUrl) {
+    if (!adeUrl) {
+        console.error("Aucune URL n'a été trouvée.");
+        return;
+    }
+
+    const proxyUrl = "https://corsproxy.io/?"; 
+    const url = proxyUrl + encodeURIComponent(adeUrl);
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Erreur lors de la récupération des données iCal");
+        
+        const icsData = await response.text();
+        const jcalData = ICAL.parse(icsData);
+        const comp = new ICAL.Component(jcalData);
+        const vevents = comp.getAllSubcomponents('vevent');
+
+        const events = vevents.map(vevent => {
+            const event = new ICAL.Event(vevent);
+            return {
+                title: event.summary,
+                start: event.startDate.toJSDate(),
+                end: event.endDate.toJSDate(),
+                location: event.location,
+                description: event.description
+            };
+        });
+
+        const weekEnd = addDays(monday, 7);
+        const filteredEvents = events.filter(ev => {
+            return ev.start >= monday && ev.start < weekEnd;
+        });
+
+        clearEvents();
+        placeEvents(filteredEvents);
+
+    } catch (err) {
+        console.error("Erreur de chargement iCal:", err);
+
+        if (typeof showError === "function") {
+            showError("Impossible de synchroniser le planning ADE.");
+        }
     }
 }
 
@@ -116,6 +221,25 @@ function renderWeekColumns(monday) {
         `${monday.toLocaleString("fr-FR", { month: "long" })} ${monday.getFullYear()}`;
 }
 
+function renderTimeScale() {
+    const timeScale = document.getElementById("time-scale");
+    
+    if (!timeScale) {
+        console.error("Élément #time-scale introuvable dans le DOM.");
+        return;
+    }
+    timeScale.innerHTML = "";
+
+    for (let hour = 7; hour <= 21; hour++) {
+        const slot = document.createElement("div");
+        slot.className = "time-slot";
+        
+        slot.textContent = hour.toString().padStart(2, "0") + ":00";
+        
+        timeScale.appendChild(slot);
+    }
+}
+
 // ----------------------------------------------------------
 // PLACE EVENTS IN THE CALENDAR
 // ----------------------------------------------------------
@@ -124,6 +248,10 @@ function placeEvents(events) {
         console.log("No events to display");
         return;
     }
+
+    // Configuration for vertical scaling
+    const PIXELS_PER_HOUR = 40; // Reduced from 60 to make the page shorter
+    const CALENDAR_START_HOUR = 7; // Matches your renderTimeScale start
 
     events.forEach((ev, index) => {
         try {
@@ -146,34 +274,41 @@ function placeEvents(events) {
 
             const div = document.createElement("div");
             div.className = "event-block";
+            
+            // --- FULL WIDTH STYLING ---
+            div.style.position = "absolute";
+            div.style.width = "100%";
+            div.style.left = "0";
+            div.style.boxSizing = "border-box"; // Ensures padding doesn't break width
+            // ---------------------------
+
             div.textContent = ev.title || "Sans titre";
 
-            // Use backgroundColor from event data, or fallback to color palette
+            // Colors
             const eventColor = ev.backgroundColor || EVENT_COLORS[hashString(ev.title || "") % EVENT_COLORS.length];
             div.style.backgroundColor = eventColor;
             div.style.borderLeft = `4px solid ${darkenColor(eventColor)}`;
 
-            // Position inside the column (adjusted for 6 AM start)
+            // Vertical Positioning
             const startHour = start.getHours() + start.getMinutes() / 60;
             const endHour = end.getHours() + end.getMinutes() / 60;
             const duration = endHour - startHour;
 
-            // Adjust position relative to 6 AM (0 position = 6 AM)
-            const adjustedStart = startHour - 6;
+            // Offset calculation relative to 7 AM
+            const adjustedStart = startHour - CALENDAR_START_HOUR;
             
-            div.style.top = `${adjustedStart * 60}px`; // 60px per hour, starting from 6 AM
-            div.style.height = `${Math.max(duration * 60, 20)}px`; // Minimum 20px height
+            div.style.top = `${adjustedStart * PIXELS_PER_HOUR}px`; 
+            div.style.height = `${Math.max(duration * PIXELS_PER_HOUR, 20)}px`;
 
-            // Add time to event text if event is short
+            // Text formatting for short events
             if (duration < 1) {
                 div.innerHTML = `<strong>${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}</strong> ${ev.title || "Sans titre"}`;
             }
 
-            // Tooltip on hover
+            // Tooltip and interactions
             div.addEventListener("mouseenter", (e) => showTooltip(ev, div, e));
             div.addEventListener("mouseleave", hideTooltip);
 
-            // Click to go to event detail (if you have event IDs)
             if (ev.id) {
                 div.style.cursor = "pointer";
                 div.addEventListener("click", () => {
