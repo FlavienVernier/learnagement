@@ -122,3 +122,63 @@ function get_seance_types($token) {
     $url = get_python_backend_url("seance_types/");
     return get_endpoint($url, $token);
 }
+
+function get_modules_responsables($token) {
+    $url = get_python_backend_url("modules/responsables/");
+    return get_endpoint($url, $token);
+}
+
+function get_modules_intervenants($token) {
+    $url = get_python_backend_url("modules/intervenants/");
+    return get_endpoint($url, $token);
+}
+
+function get_modules_responsable_by_id($id_responsable, $token) {
+    $url = get_python_backend_url("modules/responsables/" . $id_responsable);
+    return get_endpoint($url, $token);
+}
+
+function get_modules_etudiant($id_etudiant, $token) {
+    $url = get_python_backend_url("modules/etudiants/" . $id_etudiant . "/");
+    return get_endpoint($url, $token);
+}
+
+function get_modules_intervenant_by_id($id_intervenant, $token) {
+    $url = get_python_backend_url("modules/intervenants/" . $id_intervenant . "/");
+    return get_endpoint($url, $token);
+}
+
+
+function get_modules_m2c3($id_filiere, $id_statut, $token) {
+    $url = get_python_backend_url("m2c3/");
+    $data = [
+        "id_filiere" => $id_filiere,
+        "id_statut" => $id_statut
+    ];
+    return get_endpoint($url, $token, $data);
+}
+
+function get_data_gantt($id_responsable, $token) {
+    $url = get_python_backend_url("modules/gantt/" . $id_responsable . "/");
+    return get_endpoint($url, $token);
+}
+
+function get_data_gantt_etudiant($id_etudiant, $token) {
+    $url = get_python_backend_url("modules/gantt/etudiant/" . $id_etudiant . "/");
+    return get_endpoint($url, $token);
+}
+
+function get_module_dependencies($id_module, $token) {
+    $url = get_python_backend_url("modules/".$id_module."/dependencies/");
+    return get_endpoint($url, $token);
+}
+
+function get_disciplines($token) {
+    $url = get_python_backend_url("disciplines/");
+    return get_endpoint($url, $token);
+}
+
+function post_module($data, $token) {
+    $url = get_python_backend_url("modules/create/");
+    return post_endpoint($url, $data, $token);
+}

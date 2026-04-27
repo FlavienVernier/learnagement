@@ -21,7 +21,7 @@ pip install -r requirements.txt
 L'app se lance avec docker (pensez à lancer docker-desktop):
 ```bash
 source ./venv/bin/activate
-python learnagement.py -start
+python Learnagement.py -start
 ```
 
 Au 1e lancement, l'app vous demande le numéro d'instance 'I' compris entre 2 et 4. Trois services seront accessibles :  

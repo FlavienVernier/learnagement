@@ -7,8 +7,10 @@ class Template
     private string $viewsPath;
     private string $componentsPath;
     private string $assetsPath;
+    private string $scriptsPath;
     private array $globals = [];
 
+    private string $baseUrl;
     private ?string $parentLayout = null;
     private array $slots = [];
     private ?string $currentSlot = null;
@@ -19,16 +21,21 @@ class Template
         string $viewsPath,
         ?Router $router = null,
         string $componentsPath = '',
-        string $assetsPath = ''
+        string $scriptsPath = '',
+        string $assetsPath = '',
+        string $baseUrl = ''
         ) {
             $this->router = $router;
             $this->viewsPath = rtrim($viewsPath, '/');
             $this->assetsPath = rtrim($assetsPath, '/');
+            $this->baseUrl = rtrim($baseUrl, '/');
             $this->componentsPath = $componentsPath
                 ? rtrim($componentsPath, '/')
                 : $this->viewsPath . '/components';
-    }
-
+            $this->scriptsPath = $scriptsPath
+                ? rtrim($scriptsPath, '/')
+                : $this->viewsPath . '/scripts';
+        }
     public function share(string $key, mixed $value): void
     {
         $this->globals[$key] = $value;
@@ -91,6 +98,27 @@ class Template
     {
         $path = $this->assetsPath . '/' . ltrim($path, '/');
         return $this->renderFile($path, []);
+    }
+
+    public function script(string $name, array $props = []): string {
+        $path = $this->scriptsPath . '/' . str_replace('.', '/', $name) . '.js';
+        if (!file_exists($path)) {
+            throw new RuntimeException("Composant introuvable : {$path}");
+        }
+        return $this->renderFile($path, $props);
+    }
+
+    public function stylesheet(string $name): string {
+        $path = $this->viewsPath . '/' . str_replace('.', '/', $name) . '.css';
+        if (!file_exists($path)) {
+            throw new RuntimeException("Feuille de style introuvable : {$path}");
+        }
+        return $this->renderFile($path, []);
+    }
+
+    public function url(string $path): string
+    {
+        return $this->baseUrl . '/' . ltrim($path, '/');
     }
 
     public function partial(string $view, array $data = []): string

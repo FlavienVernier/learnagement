@@ -1,5 +1,6 @@
 <?php
 // Core properties
+$id = $id ?? null;
 $label = $label ?? '';
 $type = $type ?? 'button';
 
@@ -9,7 +10,7 @@ $sizeClass = !empty($size) ? " btn-" . htmlspecialchars($size) : "";
 $iconOnlyClass = (!empty($iconOnly) && $iconOnly === true) ? " btn-icon" : "";
 $loadingClass = (!empty($loading) && $loading === true) ? " loading" : "";
 
-$classes = "btn{$variantClass}{$sizeClass}{$iconOnlyClass}{$loadingClass}";
+$classes = "{$variantClass}{$sizeClass}{$iconOnlyClass}{$loadingClass}";
 
 // Attributes
 $disabledAttr = (!empty($disabled) && $disabled === true) ? " disabled" : "";

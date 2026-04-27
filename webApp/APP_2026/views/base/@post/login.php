@@ -40,6 +40,7 @@ try {
 
   if(!array_key_exists("access_token", $response_json)){
       echo "<script type='text/javascript'>window.alert('Incorrect login or password.');</script>". PHP_EOL;
+      Alert::error("Incorrect login or password.");
       $t->router->redirect('login');
   }
 
