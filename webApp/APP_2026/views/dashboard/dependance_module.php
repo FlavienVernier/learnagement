@@ -34,6 +34,8 @@
   sort($options_modules);
   sort($options_filieres);
 
+  var_dump($options_modules);
+
   array_unshift($options_semestres, "Année complète");
 ?>
 

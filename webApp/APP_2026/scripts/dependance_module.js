@@ -1,5 +1,14 @@
 const activeFilters = {};
 let myGantt = null;
+let tagsContainer = null;
+let ganttInitialized = false;
+let allTasksData = null;
+
+const FILTER_FIELD_MAP = {
+    'filiere-filter': ['filiere'],
+    'periode-filter': ['semester'],  
+    'module-filter':  ['name'],       
+};
 
 console.log("token", token);
 console.log("id utilisateur", userId);
@@ -19,7 +28,7 @@ function formatDate(dateObj) {
     return `${y}-${m}-${d}`;
 }
 
-// Vue Enseignant : On regroupe tout sur une seule année académique (2024-2025)
+// Vue Enseignant -> On regroupe tout sur une seule année académique (2024-2025)
 function semesterToDateEnseignant(semestre) {
     if (!semestre) return { start: "2024-09-01", end: "2025-06-30" };
     const num = parseInt(semestre.replace('S', ''));
@@ -52,7 +61,7 @@ function transformDataForDHTMLX(dataGantt, userType) {
     const links = [];
     let linkIdCounter = 1;
 
-    // Durée par défaut courte pour éviter que les blocs prennent tout le semestre
+    // Durée par défaut courte pour eviter que les blocs prennent tout le semestre
     const DEFAULT_DURATION_DAYS = 14; 
 
     // Création des liens 
@@ -67,11 +76,14 @@ function transformDataForDHTMLX(dataGantt, userType) {
             tasksMap.set(prvKey, {
                 id: prvKey,
                 text: prvKey,
-                start_date: dates.start, 
+                name: item.prv_nom,
+                start_date: dates.start,
                 duration: item.prv_duree_h ? Math.ceil(item.prv_duree_h / 2) : DEFAULT_DURATION_DAYS,
                 code_module: item.prv_code_module, 
                 duree_h: item.prv_duree_h,
-                type: item.prv_type
+                type: item.prv_type,
+                semester: item.prv_semestre,
+                filiere: item.prv_discipline
             });
         }
 
@@ -85,11 +97,14 @@ function transformDataForDHTMLX(dataGantt, userType) {
             tasksMap.set(nxtKey, {
                 id: nxtKey,
                 text: nxtKey,
+                name: item.nxt_nom,
                 start_date: dates.start,
                 duration: item.nxt_duree_h ? Math.ceil(item.nxt_duree_h / 2) : DEFAULT_DURATION_DAYS,
                 code_module: item.nxt_code_module, 
                 duree_h: item.nxt_duree_h,
-                type: item.nxt_type
+                type: item.nxt_type,
+                semester: item.nxt_semestre,
+                filiere: item.nxt_discipline
             });
         }
 
@@ -150,99 +165,166 @@ function updateGanttChart(tasksData) {
 
     if (!tasksData || tasksData.data.length === 0) {
         ganttContainer.innerHTML = "<p style='color: gray; padding: 20px;'>Aucune donnée trouvée.</p>";
+        ganttInitialized = false;
         return;
     }
 
-    ganttContainer.innerHTML = "";
+    // ── Configuration (toujours avant init) ──────────────────────
     gantt.config.date_format = "%Y-%m-%d";
     gantt.config.readonly = true;
-    
     gantt.config.scale_unit = "month";
     gantt.config.date_scale = "%M %Y";
     gantt.config.min_column_width = 70;
 
-    // Configuration de la grille à gauche
-    gantt.config.columns = [
-    {
-        name: "text", 
-        label: "Détails du module", 
-        width: "200", 
+    gantt.config.columns = [{
+        name: "text",
+        label: "Détails du module",
+        width: "200",
         tree: true,
         template: function(task) {
-            
             if (task.is_group) {
                 return `<strong style="color:#2c3e50; font-size:1.1em;">📁 ${task.text}</strong>`;
             }
             const code = task.code_module || "N/A";
             const duree = task.duree_h ? `${task.duree_h}h` : "";
             const typeBadge = task.type ? `<span class="badge-type">${task.type}</span>` : "";
-
-            // On retourne le HTML formaté
             return `
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <strong>${code}</strong> 
+                    <strong>${code}</strong>
                     <span style="color: gray; font-size: 0.85em;">${duree}</span>
                     ${typeBadge}
-                </div>
-            `;
+                </div>`;
         }
-    },
-];
+    }];
 
-    gantt.init("gantt-chart");
-    const observer = new ResizeObserver(() => gantt.setSizes());
-    observer.observe(document.getElementById('gantt-chart'));
+    // ── Init une seule fois ───────────────────────────────────────
+    if (!ganttInitialized) {
+        ganttContainer.innerHTML = ""; // on vide uniquement avant le premier init
+        gantt.init("gantt-chart");
+        const observer = new ResizeObserver(() => gantt.setSizes());
+        observer.observe(ganttContainer);
+        ganttInitialized = true;
+    }
+
+    // ── Toujours clearAll + parse pour rafraîchir ─────────────────
     gantt.clearAll();
 
+    // ── Construction de l'arbre ───────────────────────────────────
     const treeData = [];
     const processedModules = new Set();
 
-    // 1. On parcourt les tâches pour fabriquer l'arbre
     tasksData.data.forEach(task => {
         const moduleCode = task.code_module;
 
         if (moduleCode && !processedModules.has(moduleCode)) {
             treeData.push({
-                id: `group_${moduleCode}`,       // ID unique pour le parent
-                text: moduleCode,                // Le texte affiché
-                is_group: true,                  // Marqueur perso pour le template HTML
-                open: true,                      // Dossier ouvert par défaut
-                type: gantt.config.types.project // Définit la tâche comme un projet global
+                id: `group_${moduleCode}`,
+                text: `${moduleCode} (${task.name || "Module"  })`,
+                is_group: true,
+                open: true,
+                type: gantt.config.types.project
             });
             processedModules.add(moduleCode);
         }
 
-        // On indique à la tâche actuelle qui est son parent
-        if (moduleCode) {
-            task.parent = `group_${moduleCode}`;
-        }
-        
-        // On ajoute la vraie tâche à la nouvelle liste
+        if (moduleCode) task.parent = `group_${moduleCode}`;
         treeData.push(task);
     });
 
-    // On remplace les données plates par nos données hiérarchisées
     tasksData.data = treeData;
-
-
     gantt.parse(tasksData);
+}
 
+function checkTaskMatchesFilter(task, filterId, values) {
+    switch (filterId) {
+        case 'filiere-filter': return values.includes(String(task.filiere));
+        case 'periode-filter': return values.includes(String(task.semester));
+        case 'module-filter':  return values.includes(String(task.name)); 
+        case 'type-filter':    return values.includes(String(task.type));
+        default: return true;
+    }
+}
+
+function applyFiltersAndRefresh() {
+    if (!allTasksData) return;
+
+    let filteredTasks = allTasksData.data.filter(task => {
+        for (const [filterId, filterValue] of Object.entries(activeFilters)) {
+            if (!filterValue) continue;
+
+            let values = [];
+            if (filterValue instanceof Set && filterValue.size > 0) {
+                values = Array.from(filterValue).map(f => f.value);
+            } else if (filterValue.value) {
+                values = [filterValue.value];
+            }
+
+            if (values.length > 0 && !checkTaskMatchesFilter(task, filterId, values)) {
+                return false;
+            }
+        }
+        return true;
+    });
+
+    const filteredIds = new Set(filteredTasks.map(t => t.id));
+    const filteredLinks = allTasksData.links.filter(l =>
+        filteredIds.has(l.source) && filteredIds.has(l.target)
+    );
+
+    updateGanttChart({ data: [...filteredTasks], links: filteredLinks });
+}
+
+function createTag(filterId, text, value) {
+    const tag = document.createElement('div');
+    tag.classList.add('filter-tag');
+    tag.setAttribute('data-filter', filterId);
+    tag.setAttribute('data-value', value);
+
+    tag.innerHTML = `
+        <span class="tag-text">${text}</span>
+        <button class="remove-tag" aria-label="Supprimer le filtre">&times;</button>
+    `;
+
+    tag.querySelector('.remove-tag').addEventListener('click', function () {
+        tag.remove();
+
+        const isMultiple = (filterId === 'filiere-filter' || filterId === 'module-filter');
+        if (isMultiple) {
+            for (let item of activeFilters[filterId]) {
+                if (item.value === value) {
+                    activeFilters[filterId].delete(item);
+                    break;
+                }
+            }
+        } else {
+            activeFilters[filterId] = null;
+            const select = document.getElementById(filterId);
+            if (select) select.value = "";
+        }
+
+        applyFiltersAndRefresh();
+    });
+
+    tagsContainer.appendChild(tag);
+
+    applyFiltersAndRefresh();
 }
 
 
 document.addEventListener("DOMContentLoaded", () => {
+    tagsContainer = document.getElementById('active-tags-container');
     const dropdowns = document.querySelectorAll('.select');
-    const tagsContainer = document.getElementById('active-tags-container');
     const btnOpen = document.querySelector('.button-section button');
     const modal = document.getElementById('modal-ajout-module');
     const form = document.getElementById('form-ajout-module');
     const btnCancel_Cross = document.getElementById('btn-cancel-module-cross');
     const btnCancel = document.getElementById('btn-cancel-module');
 
-    if (typeof dataGantt !== 'undefined') {
-        const formattedData = transformDataForDHTMLX(dataGantt, userType);
-        updateGanttChart(formattedData);
-    } else {
+   if (typeof dataGantt !== 'undefined') {
+    allTasksData = transformDataForDHTMLX(dataGantt, userType); // ← stockage global
+    updateGanttChart({ data: [...allTasksData.data], links: allTasksData.links });
+    }
+    else {
         console.error("Les données dataGantt ne sont pas définies.");
     }
 
@@ -319,6 +401,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const filterId = this.id;
             const selectedText = this.options[this.selectedIndex].text;
             const selectedValue = this.value;
+            console.log(`Sélection dans ${filterId} :`, { value: selectedValue, text: selectedText });
 
             if (selectedValue === "") return;
 
@@ -337,7 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     createTag(filterId, selectedText, selectedValue);
                 }
                 
-                this.selectedIndex = 0; 
+                this.selectedIndex = 0;
                 
             } else {
                 activeFilters[filterId] = { value: selectedValue, text: selectedText };
@@ -349,6 +432,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                     existingTag.querySelector('.tag-text').textContent = selectedText;
                     existingTag.setAttribute('data-value', selectedValue);
+                    applyFiltersAndRefresh();
                 } else {
                 
                     createTag(filterId, selectedText, selectedValue);
@@ -356,38 +440,4 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
-
-    function createTag(filterId, text, value) {
-        const tag = document.createElement('div');
-            tag.classList.add('filter-tag');
-            tag.setAttribute('data-filter', filterId);
-            tag.setAttribute('data-value', value);
-
-            tag.innerHTML = `
-                <span class="tag-text">${text}</span>
-                <button class="remove-tag" aria-label="Supprimer le filtre">&times;</button>
-            `;
-
-            tag.querySelector('.remove-tag').addEventListener('click', function() {
-                tag.remove(); 
-
-                const isMultiple = (filterId === 'filiere' || filterId === 'module');
-                if (isMultiple) {
-                    for (let item of activeFilters[filterId]) {
-                        if (item.value === value) {
-                            activeFilters[filterId].delete(item);
-                            break;
-                        }
-                    }
-                } else {
-                    activeFilters[filterId] = null;
-                    document.getElementById(filterId).value = ""; 
-                }
-
-            });
-
-            tagsContainer.appendChild(tag);
-    }
-    const formattedData = transformDataForDHTMLX(dataGantt, userType);
-    updateGanttChart(formattedData);
 });
