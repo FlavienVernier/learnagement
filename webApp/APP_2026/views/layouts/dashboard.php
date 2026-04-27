@@ -9,7 +9,6 @@
         ["type" => "section", "label" => "International", "items" => []],
         ["type" => "section", "label" => "Administration", "items" => [
             ["type" => "item", "label" => "Ressources", "url" => $t->router->href('dashboard-ressource'), "icon" => $t->asset('icons/file.svg')],
-            ["type" => "item", "label" => "Carte de mobilité", "url" => $t->router->href('dashboard-mobility-map'), "icon" => $t->asset('icons/map.svg')],
             ["type" => "item", "label" => "Annuaire", "url" => $t->router->href('dashboard-annuaire'), "icon" => $t->asset('icons/list.svg')],
         ]],
         ["type" => "split"],
@@ -37,7 +36,7 @@
         $urls[3]['items'][] = ["type" => "item", "label" => "Gestion Mobilité (RI)", "url" => $t->router->href('dashboard-mobility-admin'), "icon" => $t->asset('icons/map.svg')];
     }
     if ($user && $user['type'] !== 'administratif') {
-        $urls[3]['items'][] = ["type" => "item", "label" => "Dépendance Module",    "url" => $t->router->href('dashboard-dependance-module'), "icon" => $t->asset('icons/dependance_module.svg')];
+        $urls[1]['items'][] = ["type" => "item", "label" => "Dépendance Module",    "url" => $t->router->href('dashboard-dependance-module'), "icon" => $t->asset('icons/dependance_module.svg')];
     }
 ?>
 <?= $t->slot('script.top') ?>
