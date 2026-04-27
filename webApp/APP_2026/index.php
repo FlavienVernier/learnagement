@@ -61,6 +61,11 @@
         echo $t->render('dashboard/home');
     });
 
+    $t->router->post('/profile/calendar', 'profile-calendar', function () use ($t, $user) {
+        requireAuth($user, $t->router);
+        echo $t->render('dashboard/@post/calendar');
+    });
+
     $t->router->get('/dashboard/profile', 'dashboard-profile', function () use ($t, $user) {
         requireRole($user, "etudiant", $t->router);
         echo $t->render('dashboard/profile');

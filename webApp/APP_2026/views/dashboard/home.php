@@ -8,6 +8,21 @@
 
 <?php $t->startSlot('content'); ?>
     <?php
+        $type = $user['type'];
+        $id_etudiant = $type === 'etudiant' ? $user['id'] : null;
+        $id_enseignant = $type === 'enseignant' ? $user['id'] : null;
+        $id_administratif = $type === 'administratif' ? $user['id'] : null;
+
+        $sql = "SELECT * FROM `LNM_calendar` WHERE 
+                (id_etudiant = ? OR (? IS NULL AND id_etudiant IS NULL)) AND
+                (id_enseignant = ? OR (? IS NULL AND id_enseignant IS NULL)) AND
+                (id_administratif = ? OR (? IS NULL AND id_administratif IS NULL))";
+        $stmt = mysqli_prepare($pdo, $sql);
+        mysqli_stmt_bind_param($stmt, "iiiiii", $id_etudiant, $id_etudiant, $id_enseignant, $id_enseignant, $id_administratif, $id_administratif);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+    ?>
+    <?php
         $heure   = (int) date('H');
         $salut   = match(true) {
             $heure < 12 => 'Bonjour',
@@ -64,9 +79,8 @@
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 grow">
             <div class="lg:col-span-2 bg-white rounded-xl shadow p-6 space-y-4 flex flex-col">
                 <div class="bg-white border border-black/8 rounded-xl px-4 py-3 flex items-center justify-between gap-3 mb-4">
-
-                <!-- Navigation -->
-                <div class="flex items-center gap-1">
+                    <!-- Navigation -->
+                    <div class="flex items-center gap-1">
                         <button id="prevbtn"
                                 class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#0f2744] transition-colors">
                             <svg width="15" height="15" fill="none" viewBox="0 0 24 24">
@@ -84,8 +98,35 @@
                             </svg>
                         </button>
                     </div>
+
                     <!-- Titre de la période courante -->
                     <span id="calendar-title" class="text-sm font-medium text-[#0f2744] flex-1 text-center"></span>
+
+                    <!-- Input lien + submit -->
+                    <div class="flex items-center gap-2">
+                        <form method="POST" action="<?= $t->router->href('profile-calendar') ?>"
+                            class="flex items-center gap-0 rounded-lg overflow-hidden border border-slate-200 bg-white focus-within:ring-2 focus-within:ring-[#0f2744] focus-within:border-transparent transition-all">
+                            <input type="hidden" name="hasAgenda" value="<?= (int)!empty($result) ?>">
+                            <div class="flex items-center pl-2.5 text-slate-400">
+                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
+                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <input id="calendar-link-input"
+                                type="url"
+                                name="url"
+                                placeholder="Coller un lien..."
+                                class="h-8 pl-2 pr-2 text-xs text-slate-700 placeholder-slate-400 bg-transparent outline-none w-48 border-0" />
+                            <button id="calendar-link-submit" type="submit"
+                                    class="h-8 px-3 text-xs font-medium text-white bg-[#0f2744] hover:bg-[#1a3a6b] transition-colors">
+                                Ajouter
+                            </button>
+                        </form>
+                    </div>
+                        
                     <!-- Sélecteur de vue -->
                     <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5">
                         <button data-view="day"
@@ -103,7 +144,6 @@
                     </div>
                 </div>
                 <div id="calendar" class="flex-1"></div>
-
             </div>
 
             <!-- ACTUALITÉS -->
@@ -138,7 +178,11 @@
 
 <?= $t->startSlot('script.bottom') ?>
     <script>
-        const url = "https://ade-usmb-ro.grenet.fr/jsp/custom/modules/plannings/direct_cal.jsp?data=b5cfb898a9c27be94975c12c6eb30e9233bdfae22c1b52e2cd88eb944acf5364c69e3e5921f4a6ebe36e93ea9658a08f,1&resources=2393&projectId=5&calType=ical&lastDate=2042-08-14";
+        const urls = [
+            <?php foreach($result as $agenda) : ?>
+                "<?= $agenda['url'] ?>"
+            <?php endforeach; ?>
+        ]    
         // TODO: CHANGER LE LIEN
         const Calendar = tui.Calendar;
         const calendar = new Calendar('#calendar', {
@@ -184,45 +228,47 @@
             });
         });
 
-        fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`)
-            .then(response => response.text())
-            .then(data => {
-                const rawEvents = data.match(/BEGIN:VEVENT[\s\S]*?END:VEVENT/g);
-                const events = rawEvents.map(block => {
-                    const dtstart = block.match(/^DTSTART[^:]*:(.+)/m)?.[1].trim();
-                    const dtend = block.match(/^DTEND[^:]*:(.+)/m)?.[1].trim();
-                    const summary = block.match(/^SUMMARY:(.+)/m)?.[1].trim();
-                    const location = block.match(/^LOCATION:(.+)/m)?.[1].trim();
-
-                    const unfolded = block.replace(/\r?\n[ \t]/g, '');
-                    const description = unfolded.match(/^DESCRIPTION:(.+)/m)?.[1].trim()
-                        ?.replace(/\\n/g, '\n')   // sauts de ligne
-                        ?.replace(/\\,/g, ',')    // virgules
-                        ?.replace(/\\;/g, ';')    // points-virgules
-                        ?.replace(/\\\\/g, '\\'); // backslash
-
-                    const formatDate = (str) => {
-                        return new Date(
-                            str.replace(
-                                /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/,
-                                "$1-$2-$3T$4:$5:$6"
-                            ))
-                    }
-                    
-                    return {
-                        id: crypto.randomUUID(),
-                        calendarId: '1',
-                        title: summary,
-                        category: 'time',
-                        start: formatDate(dtstart),
-                        end: formatDate(dtend),
-                        body: description,
-                        location: location,
-                    };
-                });
-                console.log(events);
-                calendar.createEvents(events);
-            })
-            .catch(error => console.error('Error fetching calendar data:', error));
+        urls.forEach(url => {
+            fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`)
+                .then(response => response.text())
+                .then(data => {
+                    const rawEvents = data.match(/BEGIN:VEVENT[\s\S]*?END:VEVENT/g);
+                    const events = rawEvents.map(block => {
+                        const dtstart = block.match(/^DTSTART[^:]*:(.+)/m)?.[1].trim();
+                        const dtend = block.match(/^DTEND[^:]*:(.+)/m)?.[1].trim();
+                        const summary = block.match(/^SUMMARY:(.+)/m)?.[1].trim();
+                        const location = block.match(/^LOCATION:(.+)/m)?.[1].trim();
+    
+                        const unfolded = block.replace(/\r?\n[ \t]/g, '');
+                        const description = unfolded.match(/^DESCRIPTION:(.+)/m)?.[1].trim()
+                            ?.replace(/\\n/g, '\n')   // sauts de ligne
+                            ?.replace(/\\,/g, ',')    // virgules
+                            ?.replace(/\\;/g, ';')    // points-virgules
+                            ?.replace(/\\\\/g, '\\'); // backslash
+    
+                        const formatDate = (str) => {
+                            return new Date(
+                                str.replace(
+                                    /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/,
+                                    "$1-$2-$3T$4:$5:$6"
+                                ))
+                        }
+                        
+                        return {
+                            id: crypto.randomUUID(),
+                            calendarId: '1',
+                            title: summary,
+                            category: 'time',
+                            start: formatDate(dtstart),
+                            end: formatDate(dtend),
+                            body: description,
+                            location: location,
+                        };
+                    });
+                    console.log(events);
+                    calendar.createEvents(events);
+                })
+                .catch(error => console.error('Error fetching calendar data:', error));
+        });
     </script>
 <?php $t->endSlot(); ?>
