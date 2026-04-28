@@ -33,7 +33,7 @@ COLORS = {
 
 KNOWN_COMPETENCES = ["COMP_IDU1", "COMP_IDU2", "COMP_IDU3", "COMP_IDU4"]
 KNOWN_NIVEAUX = [1, 2, 3]
-KNOWN_TYPES_LIEN = ["Requis", "Recommandé", "Complémentaire", "Non associé"]
+KNOWN_TYPES_LIEN = ["Requis", "Recommandé", "Complémentaire"]
 
 
 def get_competence_color(comp):
@@ -119,7 +119,7 @@ def create_heatmap_for_global(df_pivot_global):
         )
     fig.update_layout(
         title=dict(
-            text="Répartition des apprentissages critiques<br>"
+            text="Répartition des compétences<br>"
                  "<sub>Cliquez sur un niveau pour voir les modules</sub>",
             x=0.5, xanchor="center",
             font=dict(size=20, family="Inter, sans-serif"),

@@ -37,20 +37,41 @@ reseau_gaps_content = html.Div(
                 ),
                 html.Div(
                     [
-                        html.Label(
-                            "Filtrer par compétence",
-                            style={"fontWeight": "500", "fontSize": "13px", "marginBottom": "6px", "display": "block"},
+                        html.Div(
+                            [
+                                html.Label(
+                                    "Filtrer par compétence",
+                                    style={"fontWeight": "500", "fontSize": "13px", "marginBottom": "6px", "display": "block"},
+                                ),
+                                dcc.Dropdown(
+                                    id="reseau-comp-filter",
+                                    options=[{"label": c, "value": c} for c in KNOWN_COMPETENCES],
+                                    value=KNOWN_COMPETENCES,
+                                    multi=True,
+                                    placeholder="Toutes les compétences",
+                                ),
+                            ],
+                            style={"flex": "1"},
                         ),
-                        dcc.Dropdown(
-                            id="reseau-comp-filter",
-                            options=[{"label": c, "value": c} for c in KNOWN_COMPETENCES],
-                            value=KNOWN_COMPETENCES,
-                            multi=True,
-                            placeholder="Toutes les compétences",
-                            style={"maxWidth": "520px"},
+                        html.Div(
+                            [
+                                html.Label(
+                                    "Rechercher un module",
+                                    style={"fontWeight": "500", "fontSize": "13px", "marginBottom": "6px", "display": "block"},
+                                ),
+                                dcc.Dropdown(
+                                    id="reseau-search-module",
+                                    options=[],
+                                    value=None,
+                                    searchable=True,
+                                    clearable=True,
+                                    placeholder="Tapez le nom ou code d'un module...",
+                                ),
+                            ],
+                            style={"flex": "1"},
                         ),
                     ],
-                    style={"marginBottom": "14px"},
+                    style={"display": "flex", "gap": "16px", "marginBottom": "14px"},
                 ),
 
                 # Graphe + bouton reset superposé
@@ -131,20 +152,56 @@ reseau_gaps_content = html.Div(
 
 def register_callbacks(app):
 
-    # ── Mise à jour du nœud sélectionné (clic ou reset) ──────────
+    # ── Peuplement du dropdown de recherche ──────────────────────
     @app.callback(
-        Output("reseau-selected-node", "data"),
-        Input("reseau-graph",      "clickData"),
-        Input("reseau-reset-btn",  "n_clicks"),
-        Input("reseau-comp-filter","value"),
+        Output("reseau-search-module", "options"),
+        Input("apc-ens-raw-store", "data"),
+        prevent_initial_call=False,
+    )
+    def populate_search_options(raw_data):
+        if not raw_data:
+            return []
+        module_names = raw_data.get("module_names", {})
+        return [
+            {"label": label, "value": mid}
+            for mid, label in sorted(module_names.items(), key=lambda x: x[1])
+            if mid != "0"
+        ]
+
+    # ── Vidage du dropdown sur reset ou changement de filtre ─────
+    @app.callback(
+        Output("reseau-search-module", "value"),
+        Input("reseau-reset-btn",   "n_clicks"),
+        Input("reseau-comp-filter", "value"),
         prevent_initial_call=True,
     )
-    def update_selected_node(click_data, _reset, _filter):
+    def clear_search(_reset, _filter):
+        return None
+
+    # ── Mise à jour du nœud sélectionné (clic, recherche ou reset) ──
+    @app.callback(
+        Output("reseau-selected-node", "data"),
+        Input("reseau-graph",         "clickData"),
+        Input("reseau-reset-btn",     "n_clicks"),
+        Input("reseau-comp-filter",   "value"),
+        Input("reseau-search-module", "value"),
+        prevent_initial_call=True,
+    )
+    def update_selected_node(click_data, _reset, _filter, search_value):
         ctx = callback_context
         triggered = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
 
         # Reset ou changement de filtre → on efface la sélection
         if triggered in ("reseau-reset-btn", "reseau-comp-filter"):
+            return None
+
+        # Sélection via le dropdown de recherche
+        if triggered == "reseau-search-module":
+            if search_value is not None:
+                try:
+                    return float(search_value)
+                except (ValueError, TypeError):
+                    pass
             return None
 
         # Clic sur le graphe
