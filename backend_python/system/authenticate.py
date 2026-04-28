@@ -1,5 +1,6 @@
 import os
 import dotenv
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -18,10 +19,6 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_SECONDS = int(os.getenv("SESSION_TIMEOUT"))
 
 router = APIRouter()
-
-
-#password_hash = PasswordHash((BcryptHasher(),))
-
 
 @router.post("/token",
     tags=["Auth"],
