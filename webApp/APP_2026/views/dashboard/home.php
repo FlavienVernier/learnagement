@@ -76,9 +76,9 @@
             </a>
         </section>
 
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 grow">
+        <section class="grid grid-cols-1 gap-6 grow">
             <div class="lg:col-span-2 bg-white rounded-xl shadow p-6 space-y-4 flex flex-col">
-                <div class="bg-white border border-black/8 rounded-xl px-4 py-3 flex items-center justify-between gap-3 mb-4">
+                <div class="bg-white border border-black/8 rounded-xl px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-3 mb-4">
                     <!-- Navigation -->
                     <div class="flex items-center gap-1">
                         <button id="prevbtn"
@@ -144,28 +144,6 @@
                     </div>
                 </div>
                 <div id="calendar" class="flex-1"></div>
-            </div>
-
-            <!-- ACTUALITÉS -->
-            <div class="bg-white rounded-xl shadow p-6 space-y-4">
-                <h2 class="text-2xl font-semibold text-orange-600">
-                    📰 Actualités
-                </h2>
-                <!-- Liste des actualités #idée -->
-                <ul class="space-y-3">
-                    <li class="border-l-4 border-orange-400 pl-3">
-                        <p class="font-medium">Ouverture des inscriptions sport</p>
-                        <p class="text-sm text-gray-500">10 janvier 2025</p>
-                    </li>
-                    <li class="border-l-4 border-orange-400 pl-3">
-                        <p class="font-medium">Fermeture exceptionnelle de la BU</p>
-                        <p class="text-sm text-gray-500">18 janvier 2025</p>
-                    </li>
-                    <li class="border-l-4 border-orange-400 pl-3">
-                        <p class="font-medium">Semaine de sensibilisation VSS</p>
-                        <p class="text-sm text-gray-500">Du 22 au 26 janvier</p>
-                    </li>
-                </ul>
             </div>
         </section>
     </section>
