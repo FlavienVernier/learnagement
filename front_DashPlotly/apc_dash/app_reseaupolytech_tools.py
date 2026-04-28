@@ -72,4 +72,7 @@ for school, formations in data.items():
         })
 
 df          = pd.DataFrame(records)
-df_filtered = df[df['Nombre de Compétences'] > 0].copy()
+if not df.empty:
+    df_filtered = df[df['Nombre de Compétences'] > 0].copy()
+else:
+    df_filtered = None

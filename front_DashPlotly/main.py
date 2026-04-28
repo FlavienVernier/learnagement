@@ -90,7 +90,9 @@ def import_apps():
 LOGO = "https://placehold.co/100x100"
 apps = import_apps()
 
-# MENU DE LA SIDEBAR (EDITABLE)
+environment =  SECRET_KEY = os.getenv("ENV") # prod or dev
+# Prod config
+# Default sidebar menu
 menu_items = {
     'administratif': [
         ('Absences', 'app3_administratif'),
@@ -112,16 +114,20 @@ menu_items = {
       
     ],
     'etudiant': [
+        ('Stages', 'app10_etudiant'),
+    ]
+}
+
+if environment == "dev":
+    menu_items['etudiant'] += [
         ('Compétences', 'app2'),
         ('Absences', 'app3_etudiant'),
         ('Notes', 'app4_etudiant'),
         ('Dépendance Séances', 'app11'),
         ('Charge de travail', 'app7_etudiant'),
         ('Avancement rendus', 'app9'),
-        ('Stages', 'app10_etudiant'),
         ('Approche par compétences', 'apc20_hub'),
     ]
-}
 
 #SECRET_KEY = os.getenv("INSTANCE_SECRET").encode()
 

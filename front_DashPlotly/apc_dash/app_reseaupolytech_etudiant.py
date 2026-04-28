@@ -194,7 +194,10 @@ def register_reseau_polytech_callbacks(app):
         visible = {'display': 'block'}
         if not selected_school or selected_school == 'ALL':
             return [], "", hidden, hidden, [], []
-        filieres = app_reseaupolytech_tools.df_filtered[app_reseaupolytech_tools.df_filtered['Ecole'] == selected_school]['Formation'].tolist()
+        if app_reseaupolytech_tools.df_filtered:
+            filieres = app_reseaupolytech_tools.df_filtered[app_reseaupolytech_tools.df_filtered['Ecole'] == selected_school]['Formation'].tolist()
+        else:
+            filieres = []
         boutons = [
             html.Div(f, id={'type': 'filiere-item', 'index': f}, n_clicks=0,
                      style={'padding': '8px 16px', 'borderRadius': '99px', 'cursor': 'pointer',
