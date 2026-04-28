@@ -11,6 +11,10 @@ Architecture :
 from dash import html, dcc, Input, Output, State, no_update
 import dash_bootstrap_components as dbc
 
+from apc_dash.polytech_rag.app.ui.layout import create_layout as create_rag_layout
+
+from apc_dash.polytech_rag.app.ui.callbacks import register_callbacks as reg_rag_orientation
+
 # ── Imports des sous-pages APC ────────────────────────────────────────────────
 from apc_dash.apc20_heatmap_apc import (
     heatmap_apc_layout,
@@ -134,9 +138,15 @@ SUBPAGES = {
     'layout': contribution_content,
     'register': reg_contribution,
 },
+'orientation_rag': {
+    'label': 'Assistant orientation',
+    'icon': 'fa-solid fa-robot',
+    'layout': create_rag_layout(),
+    'register': reg_rag_orientation,
+},
 }
 ROLE_SUBPAGES = {
-    "etudiant":["reseau","competence", "heatmap", "trajectoire", "orientation"],
+    "etudiant":["reseau","competence", "heatmap", "trajectoire", "orientation","orientation_rag"],
     "enseignant": ["competence", "poids","fiche_module","couverture_apc","reseau_trous","ma_contribution",],
     "administratif": ["competence", "poids","couverture_apc","reseau_trous"],
 }
