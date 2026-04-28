@@ -168,7 +168,6 @@ apc_layout = html.Div(
     style={
         "padding": "30px",
         "backgroundColor": "#f4f6fb",
-        "minHeight": "100vh",
         "fontFamily": "Arial, sans-serif",
     },
 )

@@ -41,6 +41,24 @@ from apc_dash.apc20_metier_orientation import (
     register_callbacks as reg_orientation,
 )
 
+from apc_dash.apc20_ens_fiche_module import (
+    fiche_module_content,
+    register_callbacks as reg_fiche,
+)
+from apc_dash.apc20_ens_couverture import (
+    couverture_content,
+    register_callbacks as reg_couverture,
+)
+from apc_dash.apc20_ens_reseau_gaps import (
+    reseau_gaps_content,
+    register_callbacks as reg_reseau_gaps,
+)
+from apc_dash.apc20_ens_contribution import (
+    contribution_content,
+    register_callbacks as reg_contribution,
+)
+from apc_dash.apc20_ens_data_loader import register_ens_data_loader
+
 
 # ── Définition des sous-pages ─────────────────────────────────────────────────
 # 'kpi' n'apparaît PAS ici car il sera affiché en haut de toutes les sous-pages
@@ -53,17 +71,27 @@ SUBPAGES = {
         'register': register_reseau_polytech_callbacks,
     },
     'heatmap': {
-        'label': 'Heatmap',
+        'label': 'Cartographie des compétences',
         'icon': 'fa-solid fa-fire',
         'layout': heatmap_apc_layout,
         'register': reg_heatmap,
     },
     'competence': {
-        'label': 'Compétences AC',
-        'icon': 'fa-solid fa-graduation-cap',
-        'layout': apc20_competence_ac_layout,
-        'register': reg_competence,
-    },
+    'label': 'Analyse des compétences',
+    'icon': 'fa-solid fa-graduation-cap',
+    'layout': html.Div([
+        html.Div(kpi_layout, style={
+            "marginBottom": "25px",
+            "padding": "16px",
+            "backgroundColor": "white",
+            "borderRadius": "8px",
+            "boxShadow": "0 1px 4px rgba(0,0,0,0.08)"
+        }),
+
+        html.Div(apc20_competence_ac_layout)
+    ]),
+    'register': reg_competence,
+},
     'trajectoire': {
         'label': "Trajectoire d'étude",
         'icon': 'fa-solid fa-route',
@@ -82,15 +110,42 @@ SUBPAGES = {
         'layout': audit_poids_modules_layout,
         'register': register_poids_modules_callbacks,
     },
-    'kpi': {
-        'label': 'KPI (vue détaillée)',
-        'icon': 'fa-solid fa-chart-line',
-        'layout': kpi_layout,
-        'register': reg_kpi,
-    },
+    'fiche_module': {
+    'label': 'Fiche Module',
+    'icon': 'fa-solid fa-file-lines',
+    'layout': fiche_module_content,
+    'register': reg_fiche,
+},
+'couverture_apc': {
+    'label': 'Couverture APC',
+    'icon': 'fa-solid fa-table-cells',
+    'layout': couverture_content,
+    'register': reg_couverture,
+},
+'reseau_trous': {
+    'label': 'Réseau et Trous',
+    'icon': 'fa-solid fa-diagram-project',
+    'layout': reseau_gaps_content,
+    'register': reg_reseau_gaps,
+},
+'ma_contribution': {
+    'label': 'Ma Contribution',
+    'icon': 'fa-solid fa-person-chalkboard',
+    'layout': contribution_content,
+    'register': reg_contribution,
+},
+}
+ROLE_SUBPAGES = {
+    "etudiant":["reseau","competence", "heatmap", "trajectoire", "orientation", "poids"],
+    "enseignant": ["competence", "poids","fiche_module","couverture_apc","reseau_trous","ma_contribution",],
+    "administratif": ["competence", "poids","couverture_apc","reseau_trous"],
 }
 
-DEFAULT_SUBPAGE = 'reseau'
+DEFAULT_SUBPAGE_BY_ROLE = {
+    "enseignant": "competence",
+    "etudiant": "reseau",
+    "administratif": "competence",
+}
 
 
 # ── Styles de la navbar interne ───────────────────────────────────────────────
@@ -145,6 +200,8 @@ apc_hub_layout = html.Div([
 
 # ── Callbacks ─────────────────────────────────────────────────────────────────
 def register_apc_hub_callbacks(app):
+    reg_kpi(app)
+    register_ens_data_loader(app)
     # 1) Enregistrer les callbacks de toutes les sous-pages, une seule fois
     for key, page in SUBPAGES.items():
         if page['register']:
@@ -168,22 +225,36 @@ def register_apc_hub_callbacks(app):
 
         role = parts[0]
         # parts[2] = sous-page choisie, sinon défaut
-        subpage_key = parts[2] if len(parts) >= 3 and parts[2] in SUBPAGES else DEFAULT_SUBPAGE
+        allowed_pages = ROLE_SUBPAGES.get(role, [])
+
+        if not allowed_pages:
+            return [], html.Div("Aucune page APC disponible pour ce rôle.")
+
+        default_subpage = DEFAULT_SUBPAGE_BY_ROLE.get(role, allowed_pages[0])
+
+        requested_subpage = parts[2] if len(parts) >= 3 else default_subpage
+
+        if requested_subpage in allowed_pages:
+            subpage_key = requested_subpage
+        else:
+            subpage_key = default_subpage
 
         # Construire la navbar avec dcc.Link (pas de rechargement de page)
         # On préserve la query string (?jwt_token=...) pour garder l'auth
         query = search or ''
         navbar_children = [
             dcc.Link(
-                children=[
-                    html.I(className=page['icon'], style={'marginRight': '8px'}),
-                    page['label'],
-                ],
+            children=[
+            html.I(className=page['icon'], style={'marginRight': '8px'}),
+            page['label'],
+            ],
                 href=f"/{role}/apc20_hub/{key}{query}",
-                style=TAB_ACTIVE if key == subpage_key else TAB_INACTIVE,
-            )
-            for key, page in SUBPAGES.items()
-        ]
+            style=TAB_ACTIVE if key == subpage_key else TAB_INACTIVE,
+        )
+    for key, page in SUBPAGES.items()
+    if key in allowed_pages
+]
+        
 
         # Contenu de la sous-page
         content = SUBPAGES[subpage_key]['layout']
