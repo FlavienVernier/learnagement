@@ -136,7 +136,7 @@ SUBPAGES = {
 },
 }
 ROLE_SUBPAGES = {
-    "etudiant":["reseau","competence", "heatmap", "trajectoire", "orientation", "poids"],
+    "etudiant":["reseau","competence", "heatmap", "trajectoire", "orientation"],
     "enseignant": ["competence", "poids","fiche_module","couverture_apc","reseau_trous","ma_contribution",],
     "administratif": ["competence", "poids","couverture_apc","reseau_trous"],
 }
