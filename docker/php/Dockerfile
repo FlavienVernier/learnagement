@@ -11,6 +11,8 @@ WORKDIR /var/www/html
 RUN a2enmod rewrite
 RUN a2enmod ssl
 
+COPY apache.conf /etc/apache2/sites-available/000-default.conf
+
 # Working directory
 WORKDIR /var/www/html
 

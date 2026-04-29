@@ -251,6 +251,8 @@ def db_request(requester: User, request: SQLRequest):
         logger.info(f"Anonymous user requests {request}")
 
     rows = []
+    connection = None
+    cursor = None
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)
@@ -262,15 +264,20 @@ def db_request(requester: User, request: SQLRequest):
             cursor.execute(request.request)
             #cursor.execute(sqlalchemy.text(request.request))
 
-        rows = cursor.fetchall()
+        if getattr(cursor, "with_rows", False):
+            rows = cursor.fetchall()
+        else:
+            rows = []
         #logger.info(f"User {requester.id} has {rows}")
         connection.commit()
-        connection.close()
     except Exception as e:
         logger.exception(e)
+        raise HTTPException(status_code=500, detail=f"Database request failed: {e}")
     finally:
-        cursor.close()
-        connection.close()
+        if cursor is not None:
+            cursor.close()
+        if connection is not None:
+            connection.close()
     #return json.dumps([dict(ix) for ix in rows]) # return string
     return [dict(ix) for ix in rows] # return list that will be converted to json
 
