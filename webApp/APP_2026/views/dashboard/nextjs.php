@@ -13,7 +13,8 @@
 
 <?php
     $protocol = $_ENV['ENV'] === 'prod' ? 'https' : 'http';
-    $dash_url = $protocol . '://' . $_SERVER['SERVER_NAME'] . ':' . $_ENV['FRONT_DASH_PORT'] . '/' . $type . '/?jwt_token=' . $_SESSION["jwt_token"];
+    $protocol = 'http'; // https not yet supported by nextjs app
+    $dash_url = $protocol . '://' . $_SERVER['SERVER_NAME'] . ':' . $_ENV['FRONT_NEXTAUTH_PORT'] . '/?jwt_token=' . $_SESSION["jwt_token"];
 ?>
 
 <iframe src="<?= $dash_url ?>"

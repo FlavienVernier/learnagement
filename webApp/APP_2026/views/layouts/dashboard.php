@@ -12,7 +12,8 @@
             ["type" => "item", "label" => "Annuaire", "url" => $t->router->href('dashboard-annuaire'), "icon" => $t->asset('icons/list.svg')],
         ]],
         ["type" => "split"],
-        ["type" => "item", "label" => "Ancien Dashboard", "url" => $t->router->href('dashboard-python'), "icon" => $t->asset('icons/console.svg')],
+        ["type" => "item", "label" => "Dashboard Dash-Plotly", "url" => $t->router->href('dashboard-python'), "icon" => $t->asset('icons/console.svg')],
+        ["type" => "item", "label" => "Dashboard NextJS", "url" => $t->router->href('dashboard-nextjs'), "icon" => $t->asset('icons/console.svg')],
         ["type" => "item", "label" => "Déconnexion", "url" => $t->router->href('logout'), "icon" => $t->asset('icons/out-door.svg')],
         ];
         

@@ -116,6 +116,11 @@
         echo $t->render('dashboard/python');
     });
 
+    $t->router->get('/dashboard/nextjs', 'dashboard-nextjs', function () use ($t, $user) {
+        requireAuth($user, $t->router);
+        echo $t->render('dashboard/nextjs');
+    });
+
     $t->router->get('/dashboard/ressource', 'dashboard-ressource', function () use ($t, $user) {
         requireAuth($user, $t->router);
         echo $t->render('dashboard/ressource');
