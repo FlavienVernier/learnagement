@@ -2,9 +2,7 @@ from bs4 import BeautifulSoup as bs
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
-import time
 import chromedriver_autoinstaller
-import csv
 
 import lien_db
 
@@ -69,11 +67,11 @@ driver.close()
 # print(semestres_csv)
 
 #Sauvegarde des données dans la bd
-bd=lien_db.get_db("logs_db.txt")
+bd= lien_db.get_db("logs_db.txt")
 for elt in (semestres):
     query= f"INSERT INTO LNM_semestre (id_semestre) VALUES ('{elt}')"
-    lien_db.execute_query(bd,query)
+    lien_db.execute_query(bd, query)
 
-print(lien_db.get_data(bd,"LNM_semestre"))
+print(lien_db.get_data(bd, "LNM_semestre"))
 lien_db.close_db(bd)
             

@@ -3,8 +3,6 @@ from bs4 import BeautifulSoup as bs
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
-import time
-import random 
 import chromedriver_autoinstaller
 import csv
 import json
@@ -107,7 +105,7 @@ with open("modules.json", "w",encoding='utf8') as f:
     json.dump(data, f,indent=4,ensure_ascii=False)
    
 #Sauvegarde des données dans la bd
-bd=lien_db.get_db()
+bd= lien_db.get_db()
 for i in range (len(data)):
     key = f"'{i}'"
     print(data[key].keys())
@@ -116,14 +114,14 @@ for i in range (len(data)):
     #print(lien_db.execute_query(bd,query))
     if "Nb heures Cours" in (data[key].keys()):
         query=f"UPDATE MAQUETTE_module SET hCM={data[key]['Nb heures Cours']} WHERE code_module LIKE '{data[key]['Code']}'"
-        lien_db.execute_query(bd,query)
+        lien_db.execute_query(bd, query)
     if "Nb heures TD" in (data[key].keys()):
         query=f"UPDATE MAQUETTE_module SET hTD={data[key]['Nb heures TD']} WHERE code_module LIKE '{data[key]['Code']}'"
-        lien_db.execute_query(bd,query)
+        lien_db.execute_query(bd, query)
     if "Nb heures TP" in (data[key].keys()):
         query=f"UPDATE MAQUETTE_module SET hTP={data[key]['Nb heures TP']} WHERE code_module LIKE '{data[key]['Code']}'"
-        lien_db.execute_query(bd,query)
+        lien_db.execute_query(bd, query)
     
-print(lien_db.get_data(bd,"MAQUETTE_module"))
+print(lien_db.get_data(bd, "MAQUETTE_module"))
 lien_db.close_db(bd)
 

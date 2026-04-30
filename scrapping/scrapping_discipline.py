@@ -7,7 +7,6 @@ from selenium.webdriver.common.keys import Keys
 
 import time
 import chromedriver_autoinstaller
-import csv
 
 import lien_db
 
@@ -67,11 +66,11 @@ driver.close()
 #         writer.writerow(row)
         
 #Sauvegarde des données dans la bd
-bd=lien_db.get_db()
+bd= lien_db.get_db()
 for elt in (disciplines):
     query= f"INSERT INTO MAQUETTE_discipline (nom) VALUES ('{elt}')"
     print(query)
-    lien_db.execute_query(bd,query)
+    lien_db.execute_query(bd, query)
 
-print(lien_db.get_data(bd,"MAQUETTE_discipline"))
+print(lien_db.get_data(bd, "MAQUETTE_discipline"))
 lien_db.close_db(bd)

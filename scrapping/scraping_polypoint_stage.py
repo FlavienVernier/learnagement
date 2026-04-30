@@ -4,9 +4,7 @@
 """
 
 ### import des bibliothèques ###
-import csv
 import getpass
-import os
 import chromedriver_autoinstaller
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -110,7 +108,7 @@ print(informations_stage)
 driver.close()
 # enregistrement des informations dans la base de donnée
 
-bd=lien_db.get_db()
+bd= lien_db.get_db()
 #enregistrement des polypoints
 '''for info in informations_polypoint:
     intitule=info[0]
@@ -136,8 +134,8 @@ for info in informations_stage:
 
     query= f"INSERT INTO LNM_stage (entreprise, ville, date_debut, date_fin, nature, id_etudiant, id_enseignant) SELECT '{entreprise}', '{ville}', '{date_debut}', '{date_fin}', '{nature}', (SELECT id_etudiant FROM LNM_etudiant WHERE mail='{email}'), '{id_enseignant}';"
     print(query)
-    print(lien_db.execute_query(bd,query))
+    print(lien_db.execute_query(bd, query))
 
-print(lien_db.get_data(bd,"LNM_stage"))
+print(lien_db.get_data(bd, "LNM_stage"))
 
 lien_db.close_db(bd)

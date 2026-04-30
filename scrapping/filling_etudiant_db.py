@@ -8,7 +8,7 @@ query ="CREATE TABLE IF NOT EXISTS TEST_etudiant(id_etudiant INT NOT NULL AUTO_I
 #TODO : code à reprendre entièrement => ne fonctionne pas avec la BDD
 
 db = lien_db.get_db()
-print(lien_db.execute_query(db,query))
+print(lien_db.execute_query(db, query))
 
 # Ouvrir le fichier CSV en mode lecture
 with open('liste_etudiants.csv', 'r') as fichier:
@@ -49,7 +49,7 @@ with open('liste_etudiants.csv', 'r') as fichier:
         # puis SELECT id_promo FROM LNM_promo WHERE LNM_promo.id_filiere=id_filiere AND LNM_promo.annee=annee
         
         id_promo = f"SELECT id_promo FROM LNM_promo WHERE LNM_promo.id_filiere=(SELECT id_filiere FROM LNM_filiere WHERE nom_filiere='{filiere}') AND LNM_promo.annee='{annee}'"
-        promo=lien_db.get_data(db,id_promo, "LNM_promo")
+        promo= lien_db.get_data(db, id_promo, "LNM_promo")
         print(promo)
         
         '''
