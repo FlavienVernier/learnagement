@@ -9,6 +9,7 @@
     // Direct SQL queries are deprecated. Use backend API endpoints instead.
     /////////////////
 
+    $token = $user["jwt_token"];
     $id = $user['id'];
 
     function groupBy(array $items, string $key): array {
@@ -23,38 +24,13 @@
     }
     
     // Get student info
-    $sql = "SELECT e.*, f.nom_filiere, s.nom_statut FROM LNM_etudiant e
-        JOIN LNM_promo p on p.id_promo = e.id_promo
-        JOIN LNM_statut s on s.id_statut = p.id_statut
-        JOIN LNM_filiere f on f.id_filiere = p.id_filiere
-        WHERE id_etudiant = ?;";
-    $stmt = mysqli_prepare($pdo, $sql);
-    mysqli_stmt_bind_param($stmt, 'i', $id);
-    mysqli_stmt_execute($stmt);
-    $student = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+    $student = get_etudiant($token, $id)[0];
 
     // Get polypoints info
-    $sql = "SELECT * FROM ETU_polypoint
-        WHERE id_etudiant = ?
-        ORDER BY annee_universitaire DESC;";
-    $stmt = mysqli_prepare($pdo, $sql);
-    mysqli_stmt_bind_param($stmt, 'i', $id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    $polypoints = [];
-    while ($row = mysqli_fetch_assoc($result))
-        $polypoints[] = $row;
+    $polypoints = get_polypoints($token, $id);
 
     // Get stages info
-    $sql="SELECT date_debut, date_fin, entreprise, nature FROM LNM_stage s
-        WHERE s.id_etudiant = ?;";
-    $stmt = mysqli_prepare($pdo, $sql);
-    mysqli_stmt_bind_param($stmt, 'i', $id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    $stages = [];
-    while ($row = mysqli_fetch_assoc($result))
-        $stages[] = $row;
+    $stages = get_stages_etudiant($token, $id);
 ?>
 
 <?php $t->startSlot('content'); ?>
@@ -77,7 +53,9 @@
     </div>
 </div>
 
-<!-- POLYPOINTS -->
+
+
+    <!-- POLYPOINTS -->
 <section class="mb-8">
 
     <div class="flex items-center justify-between mb-4">

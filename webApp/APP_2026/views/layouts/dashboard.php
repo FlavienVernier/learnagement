@@ -5,7 +5,7 @@
     $urls = [
         ["type" => "item", "label" => "Dashboard", "url" => $t->router->href('dashboard'), "icon" => $t->asset('icons/square2x2.svg')],
         ["type" => "section", "label" => "Principale", "items" => []],
-        ["type" => "section", "label" => "Professeur", "items" => []],
+        ["type" => "section", "label" => "Stages", "items" => []],
         ["type" => "section", "label" => "International", "items" => []],
         ["type" => "section", "label" => "Administration", "items" => [
             ["type" => "item", "label" => "Ressources", "url" => $t->router->href('dashboard-ressource'), "icon" => $t->asset('icons/file.svg')],
@@ -22,18 +22,24 @@
         $urls[1]['items'][] = ["type" => "item", "label" => "Rendus", "url" => $t->router->href('dashboard-rendus-student'), "icon" => $t->asset('icons/file.svg')];
         $urls[3]['items'][] = ["type" => "item", "label" => "Carte de mobilité", "url" => $t->router->href('dashboard-mobility-map'), "icon" => $t->asset('icons/map.svg')];
     }
-    if ($user && $user['type'] !== 'etudiant') {
+    /*if ($user && $user['type'] !== 'etudiant') {
         $urls[2]['items'][] = ["type" => "dropdown", "label" => "Stage", "icon" => $t->asset('icons/company.svg'), "items" => [
             ["type" => "item", "label" => "Gérer les stages", "url" => $t->router->href('dashboard-stage')],
             ["type" => "item", "label" => "Nouveau stage",    "url" => $t->router->href('dashboard-create-stage')],
         ]];
-    }
+    }*/
 
     if ($user && $user['type'] === 'enseignant') {
-        $urls[2]['items'][] = ["type" => "item", "label" => "Rendus", "url" => $t->router->href('dashboard-rendus-enseignant'), "icon" => $t->asset('icons/file.svg')];
+        $urls[2]['items'][] = ["type" => "item", "label" => "Gérer les stages", "url" => $t->router->href('dashboard-stage'), "icon" => $t->asset('icons/company.svg')];
+        // Not Yet operational
+        //$urls[1]['items'][] = ["type" => "item", "label" => "Rendus", "url" => $t->router->href('dashboard-rendus-enseignant'), "icon" => $t->asset('icons/file.svg')];
     }
 
     if ($user && $user['type'] === 'administratif') {
+        $urls[2]['items'][] = ["type" => "dropdown", "label" => "Stage", "icon" => $t->asset('icons/company.svg'), "items" => [
+            ["type" => "item", "label" => "Gérer les stages", "url" => $t->router->href('dashboard-stage')],
+            ["type" => "item", "label" => "Nouveau stage",    "url" => $t->router->href('dashboard-create-stage')],
+        ]];
         $urls[3]['items'][] = ["type" => "item", "label" => "Gestion Mobilité (RI)", "url" => $t->router->href('dashboard-mobility-admin'), "icon" => $t->asset('icons/map.svg')];
     }
     if ($user && $user['type'] !== 'administratif') {

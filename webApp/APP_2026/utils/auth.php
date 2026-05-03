@@ -83,5 +83,15 @@
             $_SESSION["email"] = null;
             $_SESSION["type"] = null;
             $_SESSION["id"] = null;
+
+            $cookieFile = '/tmp/intranet_cookies_' . session_id() . '.txt';
+
+            // Supprime le fichier de cookies
+            if (file_exists($cookieFile)) {
+                unlink($cookieFile);
+            }
+
+            // Détruit la session PHP
+            session_destroy();
         }
     }

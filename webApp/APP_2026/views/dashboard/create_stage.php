@@ -10,24 +10,26 @@
     // Direct SQL queries are deprecated. Use backend API endpoints instead.
     /////////////////
 
-    $sql = "SELECT e.id_etudiant, e.nom, e.prenom FROM LNM_etudiant e;";
+    $token = $user["jwt_token"];
+    /*$sql = "SELECT e.id_etudiant, e.nom, e.prenom FROM LNM_etudiant e;";
     $stmt = mysqli_prepare($pdo, $sql);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
     $etudiants = mysqli_fetch_all($result, MYSQLI_ASSOC);
     usort($etudiants, function ($a, $b) {
         return strcmp($a['nom'], $b['nom']);
-    });
+    });*/
+    $etudiants = get_etudiants($token);
 
-    $sql = "SELECT e.id_enseignant, e.nom, e.prenom FROM LNM_enseignant e;";
+    /*$sql = "SELECT e.id_enseignant, e.nom, e.prenom FROM LNM_enseignant e;";
     $stmt = mysqli_prepare($pdo, $sql);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
     $enseignants = mysqli_fetch_all($result, MYSQLI_ASSOC);
     usort($enseignants, function ($a, $b) {
         return strcmp($a['nom'], $b['nom']);
-    });
-
+    });*/
+    $enseignants = get_enseignants($token)
 ?>
 
 <!-- En-tête -->

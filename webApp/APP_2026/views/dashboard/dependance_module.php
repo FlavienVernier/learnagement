@@ -98,7 +98,7 @@
       </div>
       <div id="active-tags-container" class="tags-container"></div>
       <div class="gantt-container-with-button">
-          <?php if ($user_type === 'enseignant') { ?>
+          <?php if ($user_type === 'administratif') { ?>
             <div class="button-section">
                 <?= $t->component("button", props: [
                     "id" => "btn-add-module", 

@@ -5,41 +5,11 @@
 <?php $t->startSlot('content'); ?>
 
 <?php
-    /////////////////
-    // WARNING !!!!
-    // Direct SQL queries are deprecated. Use backend API endpoints instead.
-    /////////////////
+    $token = $user["jwt_token"];
 
-$sql = "SELECT e.id_enseignant, e.nom, e.prenom FROM LNM_enseignant e;";
-$stmt = mysqli_prepare($pdo, $sql);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$enseignants = mysqli_fetch_all($result, MYSQLI_ASSOC);
-usort($enseignants, function ($a, $b) {
-    return strcmp($a['nom'], $b['nom']);
-});
+    $enseignants = get_enseignants($token);
 
-$sql = "SELECT 
-            s.*,
-            CONCAT(UPPER(e.nom), ' ', e.prenom) AS student_fullname,
-            e.mail,
-            CONCAT(f.nom_filiere, p.annee) AS filiere,
-            CONCAT(UPPER(en.nom), ' ', en.prenom) AS teacher_fullname,
-            en.mail AS teacher_mail,
-            CASE
-                WHEN s.id_stage IS NULL THEN 'no-internship'
-                WHEN en.id_enseignant IS NULL THEN 'pending'
-                ELSE 'completed'
-            END AS status
-        FROM LNM_etudiant e
-        JOIN LNM_promo p ON p.id_promo = e.id_promo
-        JOIN LNM_filiere f ON f.id_filiere = p.id_filiere
-        LEFT JOIN LNM_stage s ON s.id_etudiant = e.id_etudiant
-        LEFT JOIN LNM_enseignant en ON en.id_enseignant = s.id_enseignant;";
-$stmt = mysqli_prepare($pdo, $sql);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$etudiants = mysqli_fetch_all($result, MYSQLI_ASSOC);
+$etudiants = get_stages($token);
 
 $total       = count($etudiants);
 $sans_stage  = array_values(array_filter($etudiants, fn($e) => $e['status'] === 'no-internship'));
@@ -466,7 +436,7 @@ if ($recherche !== '' || $filtre_enseignant !== '') {
                         <div>
                             <label class="block mb-2 text-sm font-medium text-gray-900">Date de début <span class="text-red-500">*</span></label>
                             <input type="date" name="date_debut"
-                                value="<?= $t->e($e['date_debut'] ?? '') ?>"
+                                value="<?= $t->e($e['date_debut'] ?? $e['date_debut']) ?>"
                                 required
                                 <?= $isEdit ? '' : 'disabled' ?>
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"/>

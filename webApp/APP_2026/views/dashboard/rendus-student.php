@@ -4,17 +4,10 @@
 
 <?php $t->startSlot('content'); ?>
 <?php
-    /////////////////
-    // WARNING !!!!
-    // Direct SQL queries are deprecated. Use backend API endpoints instead.
-    /////////////////
-    $rendus = [];
-    $sql = "SELECT re.id_rendu_module AS id, r.description AS description, r.date AS date FROM `LNM_rendu_module_as_etudiant` re
-    JOIN LNM_rendu_module r ON r.id_rendu_module=re.id_rendu_module WHERE re.date_depot is NULL 
-    ORDER BY date ASC";
-    $result = mysqli_query($pdo, $sql);
-    while ($row = mysqli_fetch_assoc($result))
-        $rendus[] = $row;
+    $token = $user["jwt_token"];
+    $id = $user['id'];
+
+    $rendus = get_rendus_etudiant($token, $id);
 ?>
 
 <div class="p-4 space-y-8">

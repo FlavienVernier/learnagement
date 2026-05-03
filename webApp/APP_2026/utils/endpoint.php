@@ -97,6 +97,25 @@ function get_etudiants($token) {
     $url = get_python_backend_url("etudiants/");
     return get_endpoint($url, $token);
 }
+function get_etudiant($token, $id_etudiant) {
+    $url = get_python_backend_url("etudiants/". $id_etudiant);
+    return get_endpoint($url, $token);
+}
+
+function get_polypoints($token, $id_etudiant){
+    $url = get_python_backend_url("etudiants/". $id_etudiant . "/polypoints/");
+    return get_endpoint($url, $token);
+}
+
+function get_rendus_etudiant($token, $id_etudiant){
+    $url = get_python_backend_url("etudiants/". $id_etudiant . "/rendus/");
+    return get_endpoint($url, $token);
+}
+
+function get_stages($token){
+$url = get_python_backend_url("etudiants/stages/");
+return get_endpoint($url, $token);
+}
 
 function get_filieres($token) {
     $url = get_python_backend_url("filieres/");
@@ -181,4 +200,9 @@ function get_disciplines($token) {
 function post_module($data, $token) {
     $url = get_python_backend_url("modules/create/");
     return post_endpoint($url, $data, $token);
+}
+
+function get_stages_etudiant($token, $id_etudiant) {
+    $url = get_python_backend_url("etudiants/" . $id_etudiant . "/stages");
+    return get_endpoint($url, $token);
 }

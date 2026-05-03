@@ -5,6 +5,7 @@
     require __DIR__ . '/utils/auth.php';
     require __DIR__ . '/utils/session.php';
     require __DIR__ . "/utils/endpoint.php";
+    require_once __DIR__ . "/../config.php";
     include __DIR__ . "/utils/connectDB.php";
 
     create_session();

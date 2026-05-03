@@ -4,11 +4,14 @@
 
 <?php $t->startSlot('content'); ?>
 <?php
+    $token = $user["jwt_token"];
+    $id = $user['id'];
+
     /////////////////
     // WARNING !!!!
     // Direct SQL queries are deprecated. Use backend API endpoints instead.
     /////////////////
-    $rendus = [];
+    /*$rendus = [];
     $sql="SELECT r.date, r.description, p.parcour AS promo
     FROM LNM_rendu_module r 
         JOIN LNM_rendu_module_as_enseignant e ON r.id_rendu_module = e.id_rendu_module 
@@ -20,7 +23,9 @@
     ORDER BY date ASC";
     $result = mysqli_query($pdo, $sql);
     while ($row = mysqli_fetch_assoc($result))
-        $rendus[] = $row;
+        $rendus[] = $row;*/
+
+    $rendus = get_rendus_enseignant($token, $id)
 ?>
 
 <div class="p-4 space-y-8">
