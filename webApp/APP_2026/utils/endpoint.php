@@ -206,3 +206,8 @@ function get_stages_etudiant($token, $id_etudiant) {
     $url = get_python_backend_url("etudiants/" . $id_etudiant . "/stages");
     return get_endpoint($url, $token);
 }
+
+function get_calendars($token, $id) {
+    $url = get_python_backend_url("user/" . $id . "/calendars/");
+    return get_endpoint($url, $token);
+}

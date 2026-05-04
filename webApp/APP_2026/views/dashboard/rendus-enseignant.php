@@ -25,7 +25,9 @@
     while ($row = mysqli_fetch_assoc($result))
         $rendus[] = $row;*/
 
-    $rendus = get_rendus_enseignant($token, $id)
+    // ToDo
+    //$rendus = get_rendus_enseignant($token, $id)
+    $rendus = []
 ?>
 
 <div class="p-4 space-y-8">

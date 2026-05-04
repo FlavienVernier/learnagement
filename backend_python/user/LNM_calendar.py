@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -53,29 +54,37 @@ def get_user_role_and_id(current_user: User):
 #
 ######################################################
 
-@router.get("/user/calendar/",
+@router.get("/user/{id:int}/calendars/",
             tags=["user", "calendar"],
             summary="Get User Calendar URLs",
             description="Returns all ADE iCal URLs for the currently logged-in user")
 def get_user_calendar_urls(
+    id: int,
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     # 1. On récupère le bon ID et la bonne colonne via notre Helper
-    role_id, role_col, _ = get_user_role_and_id(current_user)
-    
+    #role_id, role_col, _ = get_user_role_and_id(current_user)
+    fields = f"id_{current_user.main_role}"
     # 2. On cherche le calendrier en utilisant spécifiquement cette colonne
     request = {
+        # "request": f"""
+        #     SELECT url_name, url
+        #     FROM LNM_calendar
+        #     WHERE {role_col} = %(role_id)s
+        #     ORDER BY url_name ASC;
+        # """,
         "request": f"""
-            SELECT url_name, url 
+            SELECT *
             FROM LNM_calendar 
-            WHERE {role_col} = %(role_id)s 
+            WHERE {fields} = %(role_id)s 
             ORDER BY url_name ASC;
         """,
         "params": {
-            "role_id": role_id,
+            "role_id": id,
         },
         "allowedRolesRequester": ["user"],
     }
+
     return db_request(current_user, SQLRequest(**request))
 
 

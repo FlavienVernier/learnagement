@@ -37,6 +37,7 @@ class User(BaseModel):
     nom: str
     mail: str | None = None
     ExplicitSecondaryK: str
+    main_role: str
     roles: list = []
     password2update: bool = False
 
@@ -95,7 +96,8 @@ def get_administratif(user_login: str, method: str = "byMail"):
         if not user_dict.get("password"):
             logger.warning(f"Inactive user '{user_login}' try to connect")
             return None
-        user_dict["roles"] = ["user", "administratif", users[0]['ExplicitSecondaryK']]
+        user_dict["main_role"] = "administratif"
+        user_dict["roles"] = ["user", user_dict["main_role"], users[0]['ExplicitSecondaryK']]
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor()
         cursor.execute(
@@ -135,7 +137,8 @@ def get_enseignant(user_login: str, method: str = "byMail"):
         if not user_dict.get("password"):
             logger.warning(f"Inactive user '{user_login}' try to connect")
             return None
-        user_dict["roles"] = ["user", "enseignant", users[0]['ExplicitSecondaryK']]
+        user_dict["main_role"] = "enseignant"
+        user_dict["roles"] = ["user", user_dict["main_role"], users[0]['ExplicitSecondaryK']]
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor()
         cursor.execute(
@@ -175,7 +178,8 @@ def get_etudiant(user_login: str, method: str = "byMail"):
         if not user_dict.get("password"):
             logger.warning(f"Inactive user '{user_login}' try to connect")
             return None
-        user_dict["roles"] = ["user", "etudiant", users[0]['ExplicitSecondaryK']]
+        user_dict["main_role"] = "etudiant"
+        user_dict["roles"] = ["user", user_dict["main_role"], users[0]['ExplicitSecondaryK']]
         return UserInDB(**user_dict)
     return None
 

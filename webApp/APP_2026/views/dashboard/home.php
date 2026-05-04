@@ -8,19 +8,10 @@
 
 <?php $t->startSlot('content'); ?>
     <?php
-        $type = $user['type'];
-        $id_etudiant = $type === 'etudiant' ? $user['id'] : null;
-        $id_enseignant = $type === 'enseignant' ? $user['id'] : null;
-        $id_administratif = $type === 'administratif' ? $user['id'] : null;
+        $token = $user["jwt_token"];
+        $id = $user['id'];
 
-        $sql = "SELECT * FROM `LNM_calendar` WHERE 
-                (id_etudiant = ? OR (? IS NULL AND id_etudiant IS NULL)) AND
-                (id_enseignant = ? OR (? IS NULL AND id_enseignant IS NULL)) AND
-                (id_administratif = ? OR (? IS NULL AND id_administratif IS NULL))";
-        $stmt = mysqli_prepare($pdo, $sql);
-        mysqli_stmt_bind_param($stmt, "iiiiii", $id_etudiant, $id_etudiant, $id_enseignant, $id_enseignant, $id_administratif, $id_administratif);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
+        $result = get_calendars($token, $id);
     ?>
     <?php
         $heure   = (int) date('H');
@@ -106,7 +97,7 @@
                     <div class="flex items-center gap-2">
                         <form method="POST" action="<?= $t->router->href('profile-calendar') ?>"
                             class="flex items-center gap-0 rounded-lg overflow-hidden border border-slate-200 bg-white focus-within:ring-2 focus-within:ring-[#0f2744] focus-within:border-transparent transition-all">
-                            <input type="hidden" name="hasAgenda" value="<?= mysqli_num_rows($result) > 0 ?>">
+                            <input type="hidden" name="hasAgenda" value="<?= count($result) > 0 ?>">
                             <div class="flex items-center pl-2.5 text-slate-400">
                                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
                                     <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
