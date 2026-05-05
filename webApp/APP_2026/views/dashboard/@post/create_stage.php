@@ -3,6 +3,7 @@
     // WARNING !!!!
     // Direct SQL queries are deprecated. Use backend API endpoints instead.
     /////////////////
+    $token = $user["jwt_token"];
     $params = [];
     try {
         $dateDebut = new DateTime($_POST['date_debut']);
@@ -18,12 +19,7 @@
         $idEnseignant = $_POST['id_enseignant'] !== '' ? (int) $_POST['id_enseignant'] : null;
         $idEtudiant   = (int) $_POST['id_etudiant'];
 
-        $sql = "INSERT INTO `LNM_stage`
-                (`entreprise`, `intitulé`, `description`, `adresse`, `ville`, `code_postal`, `pays`, `date_debut`, `date_fin`, `nature`, `id_etudiant`, `id_enseignant`)
-            VALUES
-                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt = mysqli_prepare($pdo, $sql);
-        mysqli_stmt_bind_param($stmt, "ssssssssssii",
+        post_stage($token,
             $_POST['entreprise'],
             $_POST['intitule'],
             $_POST['description'],
@@ -35,9 +31,7 @@
             $_POST['date_fin'],
             $_POST['nature'],
             $idEtudiant,
-            $idEnseignant
-        );
-        mysqli_stmt_execute($stmt);
+            $idEnseignant );
         Alert::success("Stage créé avec succès.");
     } catch (\Throwable $th) {
         if (!isset($params['error']))

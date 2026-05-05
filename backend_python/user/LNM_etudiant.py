@@ -400,8 +400,8 @@ def get_etudiants_stages(
                    LNM_stage.`intitulé`, 
                    LNM_stage.`description`, 
                    LNM_stage.`ville`, 
-                   DATE_FORMAT(LNM_stage.`date_debut`, '%Y-%m-%dT%H:%i') AS date_debut, 
-                   DATE_FORMAT(LNM_stage.`date_fin`, '%Y-%m-%dT%H:%i') AS date_fin, 
+                   DATE_FORMAT(LNM_stage.`date_debut`, '%Y-%m-%d') AS date_debut, 
+                   DATE_FORMAT(LNM_stage.`date_fin`, '%Y-%m-%d') AS date_fin, 
                    LNM_stage.`nature`, 
                    ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK AS "enseignant"
             FROM `LNM_stage` 

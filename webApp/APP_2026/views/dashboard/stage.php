@@ -344,6 +344,7 @@ if ($recherche !== '' || $filtre_enseignant !== '') {
                                                 <input type="hidden" name="code_postal" value="<?= $t->e($e['code_postal'] ?? '') ?>">
                                                 <input type="hidden" name="ville" value="<?= $t->e($e['ville'] ?? '') ?>">
                                                 <input type="hidden" name="pays" value="<?= $t->e($e['pays'] ?? '') ?>">
+                                                <input type="hidden" name="id_etudiant" value="<?= $t->e($e['id_etudiant'] ?? '') ?>">
                                                 <input type="hidden" name="id_enseignant" value="<?= $user['id'] === $e['id_enseignant'] ? '' : $t->e($user['id']) ?>">
 
                                                 
@@ -404,6 +405,7 @@ if ($recherche !== '' || $filtre_enseignant !== '') {
                 <!-- Formulaire -->
                 <form action="<?= $t->router->href("dashboard-stage-post") ?>" method="POST" class="p-6 space-y-5">
                     <input type="hidden" name="id_stage" value="<?= $t->e($e['id_stage'] ?? '') ?>">
+                    <input type="hidden" name="id_etudiant" value="<?= $e['id_etudiant'] ?>">
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="col-span-full">

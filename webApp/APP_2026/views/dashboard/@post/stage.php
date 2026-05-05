@@ -1,8 +1,6 @@
 <?php
-    /////////////////
-    // WARNING !!!!
-    // Direct SQL queries are deprecated. Use backend API endpoints instead.
-    /////////////////
+
+    $token = $user["jwt_token"];
     $params = [];
     try {
         $dateDebut = new DateTime($_POST['date_debut']);
@@ -18,22 +16,8 @@
         $idEnseignant = $_POST['id_enseignant'] !== '' ? (int) $_POST['id_enseignant'] : null;
         $idStage   = (int) $_POST['id_stage'];
 
-        $sql = "UPDATE `LNM_stage`
-            SET
-                `entreprise`= ?,
-                `intitulé`= ?,
-                `description`= ?,
-                `adresse`= ?,
-                `ville`= ?,
-                `code_postal`= ?,
-                `pays`= ?,
-                `date_debut`= ?,
-                `date_fin`= ?,
-                `nature`= ?,
-                `id_enseignant`= ?
-            WHERE id_stage = ?;";
-        $stmt = mysqli_prepare($pdo, $sql);
-        mysqli_stmt_bind_param($stmt, "ssssssssssii",
+        patch_stage($token,
+            $idStage,
             $_POST['entreprise'],
             $_POST['intitulé'],
             $_POST['description'],
@@ -44,10 +28,8 @@
             $_POST['date_debut'],
             $_POST['date_fin'],
             $_POST['nature'],
-            $idEnseignant,      // null si vide
-            $idStage            // int, vient de l'URL
-        );
-        mysqli_stmt_execute($stmt);
+            $_POST['id_etudiant'],
+            $idEnseignant);
         Alert::success("Stage mis à jour avec succès.");
     } catch (\Throwable $th) {
         if (!isset($params['error']))

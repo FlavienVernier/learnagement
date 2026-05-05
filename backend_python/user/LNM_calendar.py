@@ -94,32 +94,57 @@ def get_user_calendar_urls(
 #
 ######################################################
 
-@router.post("/user/calendar/update/",
+@router.post("/user/{id:int}/calendars/",
              tags=["user", "calendar"],
              summary="Update User Calendar URL",
-             description="Saves or updates a specific ADE iCal URL")
+             description="Saves a specific iCal URL")
 def update_user_calendar_url(
+    id: int,
     data: CalendarUpdate,
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
-    # 1. On récupère le bon ID et la bonne colonne via notre Helper
-    role_id, role_col, user_type = get_user_role_and_id(current_user)
-        
-    print(f"DEBUG: Email {current_user.mail} | Rôle: {user_type} | Vrai ID: {role_id} | Colonne: {role_col}")
+    fields = f"id_{current_user.main_role}"
 
-    # 2. Requête finale d'insertion / mise à jour avec le vrai role_id
-    insert_req = {
+    request = {
         "request": f"""
-            INSERT INTO LNM_calendar (url_name, {role_col}, url) 
+            INSERT INTO LNM_calendar (url_name, {fields}, url) 
             VALUES (%(url_name)s, %(role_id)s, %(url)s)
             ON DUPLICATE KEY UPDATE url = %(url)s, url_name = %(url_name)s;
         """,
         "params": {
             "url_name": data.url_name,
-            "role_id": role_id, 
+            "role_id": id,
             "url": data.url,
         },
         "allowedRolesRequester": ["user"],
     }
     
-    return db_request(current_user, SQLRequest(**insert_req))
+    return db_request(current_user, SQLRequest(**request))
+
+@router.patch("/user/{id:int}/calendars/{id_calendar:int}",
+             tags=["user", "calendar"],
+             summary="Update User Calendar URL",
+             description="Updates a specific iCal URL")
+def update_user_calendar_url(
+    id: int,
+    id_calendar: int,
+    data: CalendarUpdate,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request": f"""
+            UPDATE `LNM_calendar` 
+            SET `url_name` = %(url_name)s,
+                `url` = %(url)s
+            WHERE id_calendar = %(id_calendar)s
+        """,
+        "params": {
+            "url_name": data.url_name,
+            "url": data.url,
+            "id_calendar": id_calendar,
+        },
+        "allowedRolesRequester": ["user"],
+    }
+    logging.info(request)
+
+    return db_request(current_user, SQLRequest(**request))

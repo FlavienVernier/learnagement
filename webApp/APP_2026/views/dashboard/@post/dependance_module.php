@@ -4,13 +4,17 @@ header('Content-Type: application/json');
 $body = json_decode(file_get_contents('php://input'), true);
 
 if ($body) {
-    $sql = "INSERT INTO MAQUETTE_module (
+    /*
+     * DEPRECATED Direct access to BD is forbiden
+     */
+    /*$sql = "INSERT INTO MAQUETTE_module (
                 code_module, nom, hCM, hTD, hTP, hPROJ, hPersonnelle, ECTS, id_semestre, id_responsable, id_discipline
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
     $stmt = mysqli_prepare($pdo, $sql);
 
     if ($stmt) {
+
         $code = $body['code_module'] ?? '';
         $nom = $body['nom'] ?? ''; // ou 'nom' selon ce que vous envoyez
         $hCM = $body['hCM'] ?? 0;
@@ -36,8 +40,9 @@ if ($body) {
         mysqli_stmt_close($stmt);
     } else {
         http_response_code(500);
-        echo json_encode(["detail" => "Erreur de préparation SQL : " . mysqli_error($pdo)]);
-    }
+        //echo json_encode(["detail" => "Erreur de préparation SQL : " . mysqli_error($pdo)]);
+    }*/
+    echo json_encode(["detail" => "Not implemented yet"]);
 } else {
     http_response_code(400);
     echo json_encode(["detail" => "Aucune donnée reçue."]);

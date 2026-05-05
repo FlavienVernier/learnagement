@@ -23,7 +23,7 @@ function delete_endpoint($url, $token) {
 }
 
 function python_endpoint($method, $url, $data, $token) {
-
+error_log("methode: " . $method . ", url: " . $url . ", data " . $data . ", token: " . $token);
     $headers = [
         "Authorization: Bearer $token"
     ];
@@ -54,6 +54,7 @@ function python_endpoint($method, $url, $data, $token) {
     if ($response === false) {
         error_log("Connection error: " . curl_error($ch));
         curl_close($ch);
+        throw new Exception("Connection error: " . curl_error($ch));
         return [];
     }
 
@@ -203,11 +204,66 @@ function post_module($data, $token) {
 }
 
 function get_stages_etudiant($token, $id_etudiant) {
-    $url = get_python_backend_url("etudiants/" . $id_etudiant . "/stages");
+    $url = get_python_backend_url("etudiants/" . $id_etudiant . "/stages/");
     return get_endpoint($url, $token);
 }
 
 function get_calendars($token, $id) {
     $url = get_python_backend_url("user/" . $id . "/calendars/");
     return get_endpoint($url, $token);
+}
+
+function post_calendar($token, $id, $url_name, $url_calendar) {
+    $url = get_python_backend_url("user/" . $id . "/calendars/");
+    $data = [
+        "url_name" => $url_name,
+        "url" => $url_calendar
+    ];
+    return post_endpoint($url, $data, $token);
+}
+
+function patch_calendar($token, $id, $id_calendar, $url_name, $url_calendar) {
+    $url = get_python_backend_url("user/" . $id . "/calendars/" . $id_calendar);
+    $data = [
+        "url_name" => $url_name,
+        "url" => $url_calendar
+    ];
+    return patch_endpoint($url, $data, $token);
+}
+
+function post_stage($token, $entreprise, $sujet, $mission, $adresse, $ville, $codePostal, $pays, $start_date, $end_date, $nature, $id_etudiant, $id_enseignant) {
+    $url = get_python_backend_url("etudiants/" . $id_etudiant . "/stage");
+    $data = [
+        "entreprise" => $entreprise,
+        "intitule" => $sujet,
+        "description" => $mission,
+        "adresse" => $adresse,
+        "ville" => $ville,
+        "codePostal" => $codePostal,
+        "pays" => $pays,
+        "date_debut" => $start_date,
+        "date_fin" => $end_date,
+        "nature" => $nature,
+        "id_etudiant" => $id_etudiant,
+        "id_enseignant" => $id_enseignant
+    ];
+    return post_endpoint($url, $data, $token);
+}
+
+function patch_stage($token, $id_stage, $entreprise, $sujet, $mission, $adresse, $ville, $codePostal, $pays, $start_date, $end_date, $nature, $id_etudiant, $id_enseignant) {
+    $url = get_python_backend_url("etudiants/" . $id_etudiant . "/stages/" . $id_stage);
+    $data = [
+        "entreprise" => $entreprise,
+        "intitule" => $sujet,
+        "description" => $mission,
+        "adresse" => $adresse,
+        "ville" => $ville,
+        "codePostal" => $codePostal,
+        "pays" => $pays,
+        "date_debut" => $start_date,
+        "date_fin" => $end_date,
+        "nature" => $nature,
+        "id_enseignant" => $id_enseignant
+    ];
+    return patch_endpoint($url, $data, $token);
 }

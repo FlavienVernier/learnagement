@@ -6,7 +6,7 @@
     require __DIR__ . '/utils/session.php';
     require __DIR__ . "/utils/endpoint.php";
     require_once __DIR__ . "/../config.php";
-    include __DIR__ . "/utils/connectDB.php";
+    include __DIR__ . "/utils/connectDB.php"; # must be refactored to load env here
 
     create_session();
     $r = new Router('/APP_2026');
@@ -21,7 +21,7 @@
     $user = getCurrentUser();
 
     // Global variables for templates
-    $t->share('pdo', $pdo); # depreciated, prefer API
+    //$t->share('pdo', $pdo); # depreciated, prefer API
     $t->share('user', $user);
     $t->share('toasts', []);
 

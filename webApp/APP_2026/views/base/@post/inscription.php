@@ -1,5 +1,10 @@
 <?php
 try {
+    $t->router->redirect('login');
+    /*
+     * DEPRECATED Password management is out of front scop
+     */
+    /*
     [
         "email" => $email,
         "password" => $password,
@@ -18,6 +23,7 @@ try {
     $_SESSION["connecte"] = true;
     $_SESSION["email"] = $email;
     $t->router->redirect('dashboard');
+    */
 } catch (Exception $e) {
     #todo: log
     $t->router->redirect('login');
