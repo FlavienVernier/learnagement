@@ -62,14 +62,23 @@
                 <div id='<?= $list == 'prof' ? 'enseignants' : 'etudiants' ?>'>
                     <?php foreach ($rows as $row) : ?>
                         <div class='<?= $list == 'prof' ? 'enseignant' : 'etudiant' ?>'>
-                            <div id='<?= $list == 'prof' ? 'info_prof' : 'nom_prenom' ?>'>
+                            <div id='<?= $list == 'prof' ? 'info_prof' : 'info_etu' ?>'>
                                 <?= $row['nom'] . " " . $row['prenom'] ?>
                             </div>
                             <?php if ($list == 'prof') : ?>
                                 <a id='mail_prof' href='mailto:<?= $row['mail'] ?>'>
                                     <?= $row['mail'] ?>
                                 </a>
+                            <?php else: ?>
+                                <a id='mail_etu' href='mailto:<?= $row['mail'] ?>'>
+                                    <?= $row['mail'] ?>
+                                </a>
                             <?php endif; ?>
+                            <div id='<?= $list == 'prof' ? 'photo_prof' : 'photo_etu' ?>'>
+                                <img src='<?= $list == 'prof' ? $t->e(getenv("PERS_TROMBI_DIR")) : $t->e(getenv("ETU_TROMBI_DIR"))?><?= strtolower($row['nom']) . "_" . strtolower($row['prenom']) . ".jpg" ?>'
+                                     onerror="this.src='<?= $t->e(getenv("DEFAULT_TROMBI_PICTURE"))?>'; this.onerror=null;"
+                                     alt='<?= $list == 'prof' ? $t->e(getenv("PERS_TROMBI_DIR")) : $t->e(getenv("ETU_TROMBI_DIR"))?><?= strtolower($row['nom']) . "_" . strtolower($row['prenom']) . ".jpg or default image not found" ?>'>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>

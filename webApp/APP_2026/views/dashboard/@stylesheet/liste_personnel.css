@@ -106,6 +106,7 @@
 }
 
 #info_prof,
+#info_etu,
 #nom_prenom {
     font-weight: 700;
     font-size: 1.1rem;
@@ -114,16 +115,34 @@
 }
 
 #mail_prof,
+#mail_etu,
 #annee_filiere {
     color: var(--secondary);
     font-size: 0.95rem;
 }
 
+#mail_etu:hover,
 #mail_prof:hover {
     color: var(--accent);
     text-decoration: underline;
 }
 
+#photo_prof,
+#photo_etu{
+    width: 100px;
+    height: 100px;
+}
+#photo_prof:hover,
+#photo_etu:hover{
+    width: 200px;
+    height: 200px;
+}
+
+#photo_prof img,
+#photo_etu img{
+    width: auto;
+    height: 100%;
+}
 /* ========================================= */
 /*       FORMS & BUTTONS                     */
 /* ========================================= */
