@@ -32,9 +32,11 @@ def get_etudiants(
                             LNM_etudiant.`nom`,
                             LNM_etudiant.`prenom`,
                             LNM_etudiant.`mail`,
-                            ExplicitSecondaryK
+                            ExplicitSecondaryKs_LNM_etudiant.ExplicitSecondaryK,
+                            ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK as 'promo'
                         FROM LNM_etudiant
                         JOIN ExplicitSecondaryKs_LNM_etudiant ON ExplicitSecondaryKs_LNM_etudiant.id_etudiant = LNM_etudiant.id_etudiant
+                        LEFT JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_etudiant.id_promo
                         ORDER BY ExplicitSecondaryK;
                     """,
         "allowedRolesRequester" : ["user"],

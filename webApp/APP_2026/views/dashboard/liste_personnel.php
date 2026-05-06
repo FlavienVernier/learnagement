@@ -73,6 +73,9 @@
                                 <a id='mail_etu' href='mailto:<?= $row['mail'] ?>'>
                                     <?= $row['mail'] ?>
                                 </a>
+                                <p id='annee_filiere'>
+                                    <?= $row['promo'] ?>
+                                </p>
                             <?php endif; ?>
                             <div id='<?= $list == 'prof' ? 'photo_prof' : 'photo_etu' ?>'>
                                 <img src='<?= $list == 'prof' ? $t->e(getenv("PERS_TROMBI_DIR")) : $t->e(getenv("ETU_TROMBI_DIR"))?><?= strtolower($row['nom']) . "_" . strtolower($row['prenom']) . ".jpg" ?>'
