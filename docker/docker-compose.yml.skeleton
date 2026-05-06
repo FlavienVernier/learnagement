@@ -7,7 +7,7 @@ services:
         restart: always
         networks:
             - learnagement_back_${INSTANCE_NAME}
-            - learnagement_front_${INSTANCE_NAME}  # ToDo remove when all dependencies, except CRUD backend, will be removed
+            # - learnagement_front_${INSTANCE_NAME}  # ToDo remove when all dependencies, except CRUD backend, will be removed
         command: --mysql-native-password=ON
         environment:
             - MYSQL_DATABASE=${MYSQL_DB}
