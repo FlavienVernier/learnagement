@@ -107,7 +107,7 @@ def __generate_env():
 
         # MySQL
         content = update_env_variable(content, key="MYSQL_SERVER", value=f"learnagement_mysql_{instance_name}")
-        content = update_env_variable(content, key="MYSQL_ROOT_PASSWORD ", value=getpass("Give the MySQL Root password: "))
+        content = update_env_variable(content, key="MYSQL_ROOT_PASSWORD", value=getpass("Give the MySQL Root password: "))
         content = update_env_variable(content, key="MYSQL_USER_PASSWORD", value=getpass("Give the MySQL User password: "))
 
         # Backend
