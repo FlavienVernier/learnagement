@@ -60,6 +60,7 @@ def import_apps():
     from app10_stage_enseignant import app10_enseignant_layout, register_callbacks as register_callbacks_app10_enseignant
     from app10_stage_etudiant import app10_etudiant_layout, register_callbacks as register_callbacks_app10_etudiant
     from app11_dag_dependance import app11_layout, register_callbacks as register_callbacks_app11
+    from app11_dag_dependance_new import app11_new_layout, register_callbacks as register_callbacks_app11_new
     from app13_mccc_administratif import app13_administratif_layout, register_callbacks as register_callbacks_app13_administratif
     from app14_check_administratif import app14_administratif_layout, register_callbacks as register_callbacks_app14_administratif    
     from apc_dash.apc_hub import apc_hub_layout, register_apc_hub_callbacks
@@ -81,6 +82,7 @@ def import_apps():
         'app10_enseignant': (app10_enseignant_layout, register_callbacks_app10_enseignant),
         'app10_etudiant': (app10_etudiant_layout, register_callbacks_app10_etudiant),
         'app11': (app11_layout, register_callbacks_app11),
+        'app11_new': (app11_new_layout, register_callbacks_app11_new),
         'app13_administratif': (app13_administratif_layout, register_callbacks_app13_administratif),
         'app14_administratif': (app14_administratif_layout, register_callbacks_app14_administratif),
         'apc20_hub': (apc_hub_layout, register_apc_hub_callbacks),
@@ -106,6 +108,7 @@ menu_items = {
         ('Vue modules', 'app5_enseignant_view'),
         ('MaJ modules', 'app5_enseignant_edit'),
         ('Dépendance Séances', 'app11'),
+        ('MaJ Dépendance Séances', 'app11_new'),
         ('Absences', 'app3_enseignant'),
         ('Notes', 'app4_enseignant'),
         ('Charge de travail', 'app7_enseignant'),

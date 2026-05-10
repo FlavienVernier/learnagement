@@ -445,7 +445,7 @@ def get_module_sequence_dependencies(
 ):
     request = {
         "request": f"""
-            SELECT MAQUETTE_module_sequence.id_module_sequence, LNM_seance_type.type, MAQUETTE_module.code_module, MAQUETTE_module.nom, MAQUETTE_module_sequence.commentaire 
+            SELECT MAQUETTE_module_sequence.id_module_sequence, MAQUETTE_module_sequence.numero_ordre, LNM_seance_type.type, MAQUETTE_module.code_module, MAQUETTE_module.nom, MAQUETTE_module_sequence.commentaire 
 			FROM MAQUETTE_module_sequence 
                 JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage 
                 JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_sequencage.id_module 

@@ -1,6 +1,8 @@
 #!/bin/sh
 # Be careful don't use bash and bash command
 
+apt-get update && apt-get install -y graphviz && rm -rf /var/lib/apt/lists/*
+
 cd /app
 
 python -m venv docker_venv
