@@ -877,6 +877,34 @@ def create_module(
 
     return db_request(current_user, SQLRequest(**request))
 
+@router.post("/modules/{id_module}/dependencies/",
+            tags=["module"],
+            summary="Update module",
+            description="Update module according to parameters")
+def add_dependencies(
+    id_module: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    data: Dict[str, Any],):
+    request = {
+        "request" : f"""
+            INSERT INTO MAQUETTE_dependance_sequence ( 
+                id_sequence_prev, 
+                id_sequence_next
+            )
+            VALUES (
+                %(id_sequence_prev)s, 
+                %(id_sequence_next)s
+            )
+        """,
+        "params": {
+            "id_sequence_prev": data['id_sequence_prev'],
+            "id_sequence_next": data['id_sequence_next'],
+        },
+    }
+    request["allowedRolesRequester"] = ["responsable_etudes"]
+    if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    return db_request(current_user, SQLRequest(**request))
 
 #####################################
 #
@@ -902,6 +930,34 @@ def delete_sequencage(
         """,
         "params": {
             "id_sequencage": id_sequencage,
+        },
+        "allowedRolesRequester" : [],
+    }
+    if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    return db_request(current_user, SQLRequest(**request))
+
+@router.delete("/modules/{id_module}/dependencies/{id_sequence_prev}/{id_sequence_next}",
+            tags=["module"],
+            summary="Update module",
+            description="Update module according to parameters")
+def delete_dependencies(
+    id_module: int,
+    id_sequence_prev: int,
+    id_sequence_next: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+
+    request = {
+        # ToDo refactor next when SQLAlchemy Core is up
+        "request" : f"""
+            DELETE FROM MAQUETTE_dependance_sequence
+            WHERE id_sequence_prev = %(id_sequence_prev)s
+                AND id_sequence_next =  %(id_sequence_next)s
+        """,
+        "params": {
+            "id_sequence_prev": id_sequence_prev,
+            "id_sequence_next": id_sequence_next,
         },
         "allowedRolesRequester" : [],
     }

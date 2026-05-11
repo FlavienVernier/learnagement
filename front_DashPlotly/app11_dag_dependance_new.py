@@ -22,7 +22,6 @@ app11_new_layout = html.Div([
         options=[],
         placeholder="Sélectionnez un module",
     ),
-    html.Div(id='app11_new_dag_container', children=[]),
     html.Div(id='sortie_evenements',
              children=["Attente d'une interaction... saved: True"]),
     dash_flows.DashFlows(
@@ -53,17 +52,29 @@ def register_callbacks(app):
         Output('app11_new_dag', 'nodes'),
         Output('app11_new_dag', 'edges', allow_duplicate=True),
         Output('app11_edges_precedents', 'data', allow_duplicate=True),  # mémoriser l'état
+        Output('sortie_evenements', 'children', allow_duplicate=True),
         Input('app11_new_filtre_module', 'value'),
         State('token', 'data'),
         prevent_initial_call=True,
     )
     def update_graph(id_module, token):
+        message = " "
         if id_module:
+            labels = {}
+            df = app11_dag_dependance_tools.get_list_sequence_dependance_by_idModule(token, id_module)
+            if not df.empty:
+                labels = {
+                    str(row["id_module_sequence"]):
+                        f"{row['code_module']} - {row['type']}-{row['numero_ordre']}"
+                    for _, row in df.iterrows()
+                }
+            else:
+                message = "Aucune sequence, faite votre séquençage avant"
+            nodes = []
             edges=[]
-            logging.info(id_module)
+            G = nx.DiGraph()
             df = app11_dag_dependance_tools.get_list_dependance_by_idModule(token, id_module)
             if not df.empty:
-                G = nx.DiGraph()
                 edges = [(str(row["id_sequence_prev"]), str(row["id_sequence_next"])) for _, row in df.iterrows() if row["id_sequence_next"] is not None]
                 G.add_edges_from(edges)
 
@@ -85,15 +96,6 @@ def register_callbacks(app):
                     for u, v in G.edges()
                 ]
 
-            df = app11_dag_dependance_tools.get_list_sequence_dependance_by_idModule(token, id_module)
-            nodes = []
-            if not df.empty:
-                labels = {
-                    str(row["id_module_sequence"]):
-                        f"{row['code_module']} - {row['type']}-{row['numero_ordre']}"
-                    for _, row in df.iterrows()
-                }
-
                 nodes = [
                     {
                         "id": node,
@@ -105,22 +107,22 @@ def register_callbacks(app):
                     }
                     for node in G.nodes()
                 ]
-                unlinked_nodes = [n for n in labels.keys() if n not in G.nodes()]
-                x=0
-                nodes += [
-                    {
-                        "id": node,
-                        "data": {"label": labels.get(str(node), str(node))},
-                        "position": {
-                            "x": i*200,
-                            "y": 0
-                        }
+            unlinked_nodes = [n for n in labels.keys() if n not in G.nodes()]
+            x=0
+            nodes += [
+                {
+                    "id": node,
+                    "data": {"label": labels.get(str(node), str(node))},
+                    "position": {
+                        "x": i*200,
+                        "y": 0
                     }
-                    for i, node in enumerate(unlinked_nodes)
-                ]
+                }
+                for i, node in enumerate(unlinked_nodes)
+            ]
 
-            return nodes, edges, edges
-        return [],[]
+            return nodes, edges, edges, message
+        return [],[], [], "No module selected"
 
     # Callback pour réagir aux interactions
     @app.callback(
@@ -129,9 +131,11 @@ def register_callbacks(app):
         Output('app11_edges_precedents', 'data'),  # mémoriser l'état
         Input('app11_new_dag', 'edges'),
         State('app11_edges_precedents', 'data'),
+        State('app11_new_filtre_module', 'value'),
+        State('token', 'data'),
         prevent_initial_call=True,
     )
-    def gerer_interactions(edges_actuels, edges_precedents):
+    def gerer_interactions(edges_actuels, edges_precedents, id_module, token):
         if edges_actuels is None:
             raise dash.exceptions.PreventUpdate
 
@@ -149,9 +153,25 @@ def register_callbacks(app):
 
         messages = []
         for e in nouveaux:
-            messages.append(f"Lien créé : {e['source']} → {e['target']}")
+            #messages.append(f"Lien créé : {e['source']} → {e['target']}")
+            messages.append(
+                app11_dag_dependance_tools.add_dependance_to_idModule(
+                    token=token,
+                    id_module=id_module,
+                    id_sequence_prev=e['source'],
+                    id_sequence_next=e['target']
+                )
+            )
         for e in supprimes:
-            messages.append(f"Lien supprimé : {e['source']} → {e['target']}")
+            #messages.append(f"Lien supprimé : {e['source']} → {e['target']}")
+            messages.append(
+                app11_dag_dependance_tools.delete_dependencie_to_idModule(
+                    token=token,
+                    id_module=id_module,
+                    id_sequence_prev=e['source'],
+                    id_sequence_next=e['target']
+                )
+            )
 
         # --- Coloriage selon sélection ---
         edges_mis_a_jour = []
