@@ -19,4 +19,10 @@ ALTER TABLE `MOB_partner_university`
     DROP COLUMN `S9_EIT`,
     DROP COLUMN `S9_IDU`,
     DROP COLUMN `S9_ESB`,
-    DROP COLUMN `S9_AM`;
+    DROP COLUMN `S9_AM`,
+    ADD `max_places` INT NULL AFTER `country`,
+    ADD `link_to_info` VARCHAR(250) NULL AFTER `type`;
+
+ALTER TABLE `LNM_etudiant`
+    ADD `mobility_completed` BOOLEAN NOT NULL DEFAULT FALSE AFTER `id_origine`,
+    add `mobility_note` INT NULL AFTER `mobility_completed`;
