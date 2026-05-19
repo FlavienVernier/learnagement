@@ -227,15 +227,17 @@ def add_university_to_wishes(
 
     next_priority = max_priority + 1
 
+    # ToDo manage semester !!! default stub set as 8
     request = {
         "request": """
-                        INSERT INTO MOB_wishes (id_etudiant, id_partner_university, priority)
-                        VALUES (%(id_etudiant)s, %(id_partner_university)s, %(priority)s)
+                        INSERT INTO MOB_wishes (id_etudiant, id_partner_university, priority, id_semestre)
+                        VALUES (%(id_etudiant)s, %(id_partner_university)s, %(priority)s, %(id_semestre)s
                     """,
         "params": {
             "id_etudiant": id_etudiant,
             "id_partner_university": id_partner_university,
             "priority": next_priority,
+            "id_semestre": 8,
         },
         "allowedRolesRequester": ["etudiant"],
     }

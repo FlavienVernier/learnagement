@@ -26,3 +26,7 @@ ALTER TABLE `MOB_partner_university`
 ALTER TABLE `LNM_etudiant`
     ADD `mobility_completed` BOOLEAN NOT NULL DEFAULT FALSE AFTER `id_origine`,
     add `mobility_note` INT NULL AFTER `mobility_completed`;
+
+ALTER TABLE `MOB_wishes`
+    ADD `id_semestre` TINYINT NOT NULL AFTER `id_partner_university`,
+    ADD CONSTRAINT `FK_wishes_as_semestre` FOREIGN KEY (`id_semestre`) REFERENCES `LNM_semestre`(`id_semestre`) ON DELETE RESTRICT ON UPDATE RESTRICT;
