@@ -14,5 +14,17 @@ else
     echo "✅ Composer dependencies already installed."
 fi
 
+# Activer le vhost SSL uniquement en production
+if [ -f .env ]; then
+    INSTANCE_NAME=$(grep -E '^INSTANCE_NAME=' .env | cut -d '=' -f2 | tr -d '\r')
+fi
+
+if [ "$INSTANCE_NAME" = "prod" ]; then
+    echo "🔒 Production détectée — activation du vhost SSL..."
+    a2ensite ssl.conf
+else
+    echo "ℹ️  Environnement non-prod ($INSTANCE_NAME) — SSL vhost ignoré."
+fi
+
 echo "🌐 Starting Apache..."
 exec apache2-foreground

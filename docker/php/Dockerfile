@@ -21,7 +21,7 @@ COPY ssl.conf /etc/apache2/sites-available/ssl.conf
 #COPY default.conf /etc/apache2/sites-available/000-default.conf
 
 # Activer le site SSL
-RUN a2ensite ssl.conf
+# RUN a2ensite ssl.conf
 
 # Copy entrypoint
 COPY entrypoint.sh /entrypoint.sh
