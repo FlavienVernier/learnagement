@@ -6,7 +6,7 @@ import logging
 import init
 
 from system import authenticate, check
-from user import LNM_enseignant, LNM_etudiant, LNM_evaluation, LNM_filiere,  LNM_university, MAQUETTE_module, LNM_calendar, APC_data, apc_KPI_competence, apc_competence
+from user import LNM_enseignant, LNM_etudiant, LNM_evaluation, LNM_filiere,  LNM_university, LNM_mobility_assignment, MAQUETTE_module, LNM_calendar, APC_data, apc_KPI_competence, apc_competence
 
 
 class bcolors:
@@ -54,6 +54,7 @@ app.include_router(APC_data.router)
 app.include_router(apc_KPI_competence.router)
 app.include_router(apc_competence.router)
 app.include_router(LNM_calendar.router)
+app.include_router(LNM_mobility_assignment.router)
 
 
 # Classical health

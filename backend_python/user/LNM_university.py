@@ -231,7 +231,7 @@ def add_university_to_wishes(
     request = {
         "request": """
                         INSERT INTO MOB_wishes (id_etudiant, id_partner_university, priority, id_semestre)
-                        VALUES (%(id_etudiant)s, %(id_partner_university)s, %(priority)s, %(id_semestre)s
+                        VALUES (%(id_etudiant)s, %(id_partner_university)s, %(priority)s, %(id_semestre)s)
                     """,
         "params": {
             "id_etudiant": id_etudiant,
