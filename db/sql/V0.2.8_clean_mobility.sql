@@ -52,3 +52,9 @@ ALTER TABLE `MOB_partner_university`
     ADD `logement_et_vie_quotidienne` TEXT NULL,
     ADD `organisation_et_demarches` TEXT NULL,
     ADD `experience_globale` TEXT NULL;
+
+-- Ajout du faux choix pour les stages
+INSERT INTO `MOB_partner_university` 
+    (`name`, `code`, `latitude`, `longitude`, `address`, `country`, `languages`,`type`) 
+VALUES 
+    ('Polytech Annecy-Chambery', 'MOB_STAGE', 45.919731, 6.157739, '5 chemin de Bellevue, 74940 Annecy-le-Vieux', 'France', 'francais','stage');

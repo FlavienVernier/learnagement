@@ -145,7 +145,15 @@ def list_universities_etudiant(
                             FROM LNM_etudiant e 
                             JOIN LNM_promo e_pr ON e_pr.id_promo = e.id_promo 
                             WHERE e.id_etudiant = %(id_etudiant)s
-                        );
+                        )
+                        UNION
+                        SELECT u.*, 999 as number_of_places, 4 as annee
+                        FROM MOB_partner_university u
+                        WHERE u.type = 'stage'
+                        UNION
+                        SELECT u.*, 999 as number_of_places, 5 as annee
+                        FROM MOB_partner_university u
+                        WHERE u.type = 'stage';
                     """,
         "params": {
             "id_etudiant": id_etudiant
