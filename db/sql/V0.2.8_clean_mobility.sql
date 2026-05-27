@@ -53,7 +53,7 @@ ALTER TABLE `MOB_partner_university`
     ADD `organisation_et_demarches` TEXT NULL,
     ADD `experience_globale` TEXT NULL;
 
-Ajout du faux choix pour les stages
+-- Ajout du faux choix pour les stages
 INSERT INTO `MOB_partner_university` 
     (`name`, `code`, `latitude`, `longitude`, `address`, `country`, `languages`,`type`) 
 VALUES 
