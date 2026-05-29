@@ -44,17 +44,22 @@ CREATE TABLE `MOB_assignment` (
     CONSTRAINT `FK_assignment_semestre` FOREIGN KEY (`id_semestre`) REFERENCES `LNM_semestre` (`id_semestre`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-ALTER TABLE `MOB_partner_university`
-    ADD `important` TEXT NULL,
-    ADD `commentaire` TEXT NULL,
-    ADD `criteres_academiques` TEXT NULL,
-    ADD `integration_et_vie_sociale` TEXT NULL,
-    ADD `logement_et_vie_quotidienne` TEXT NULL,
-    ADD `organisation_et_demarches` TEXT NULL,
-    ADD `experience_globale` TEXT NULL;
+-- ALTER TABLE `MOB_partner_university`
+--    ADD `important` TEXT NULL,
+--    ADD `commentaire` TEXT NULL,
+--    ADD `criteres_academiques` TEXT NULL,
+--    ADD `integration_et_vie_sociale` TEXT NULL,
+--    ADD `logement_et_vie_quotidienne` TEXT NULL,
+--    ADD `organisation_et_demarches` TEXT NULL,
+--    ADD `experience_globale` TEXT NULL;
 
 -- Ajout du faux choix pour les stages
 INSERT INTO `MOB_partner_university` 
     (`name`, `code`, `latitude`, `longitude`, `address`, `country`, `languages`,`type`) 
 VALUES 
     ('Polytech Annecy-Chambery', 'MOB_STAGE', 45.919731, 6.157739, '5 chemin de Bellevue, 74940 Annecy-le-Vieux', 'France', 'francais','stage');
+
+-- Ajouter un faux vœu pour forcer l'apparition de l'étudiant dans le test
+INSERT INTO MOB_wishes (id_etudiant, id_partner_university, id_semestre, priority, status, submission_date) 
+VALUES (123, 1, 4, 1, 'pending', NOW());
+-- (Remplacez 123 par un vrai id_etudiant de 4ème année)
