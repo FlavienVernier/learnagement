@@ -58,8 +58,3 @@ INSERT INTO `MOB_partner_university`
     (`name`, `code`, `latitude`, `longitude`, `address`, `country`, `languages`,`type`) 
 VALUES 
     ('Polytech Annecy-Chambery', 'MOB_STAGE', 45.919731, 6.157739, '5 chemin de Bellevue, 74940 Annecy-le-Vieux', 'France', 'francais','stage');
-
--- Ajouter un faux vœu pour forcer l'apparition de l'étudiant dans le test
-INSERT INTO MOB_wishes (id_etudiant, id_partner_university, id_semestre, priority, status, submission_date) 
-VALUES (123, 1, 4, 1, 'pending', NOW());
--- (Remplacez 123 par un vrai id_etudiant de 4ème année)
