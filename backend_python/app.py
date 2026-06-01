@@ -1,11 +1,12 @@
-from fastapi import Depends, FastAPI, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import logging
 
 import init
 
-from system import authenticate, check
+from system import check, access_auth
+from auth import authenticate
 from user import LNM_enseignant, LNM_etudiant, LNM_evaluation, LNM_filiere,  LNM_university, MAQUETTE_module, LNM_calendar, APC_data, apc_KPI_competence, apc_competence
 
 
@@ -44,6 +45,7 @@ app.add_middleware(
 
 app.include_router(authenticate.router)
 app.include_router(check.router)
+app.include_router(access_auth.router)
 app.include_router(LNM_enseignant.router)
 app.include_router(LNM_etudiant.router)
 app.include_router(LNM_university.router)

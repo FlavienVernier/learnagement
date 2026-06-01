@@ -100,8 +100,10 @@ def python_endpoint(method, url, data, token):
         # Parser la réponse JSON
         data = resp.json()
 
-        if data:
+        if data and isinstance(data, list):
             return pd.DataFrame(data)
+        elif data and isinstance(data, dict) and data["success"]:
+            return data["data"]
         else:
             return pd.DataFrame()
 

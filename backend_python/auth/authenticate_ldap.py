@@ -6,7 +6,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from dependencies import logger, get_user, Token
-from system.authenticate_tools import create_access_token
+from auth.authenticate_tools import create_access_token
 
 dotenv.load_dotenv(".env")
 

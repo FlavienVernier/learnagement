@@ -65,3 +65,16 @@ def check_session_corruption(token):
         url = app_tools.get_python_backend_url("session_reference_corruption"),
         token=token)
     return df
+
+def get_access_auth(token)->pd.DataFrame:
+    df = app_tools.get_endpoint(
+        url = app_tools.get_python_backend_url("access_auth/"),
+        token=token)
+    return df
+
+
+def get_access_auth_tree_sqlglot(token)->dict:
+    data = app_tools.get_endpoint(
+        url = app_tools.get_python_backend_url("access_auth_tree_sqlglot/"),
+        token=token)
+    return data

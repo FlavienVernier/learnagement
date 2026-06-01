@@ -19,7 +19,7 @@ router = APIRouter()
 ######################################################
 
 @router.get("/etudiants/",
-            tags=["user", "student"],
+            tags=["student"],
             summary="Students",
             description="Return the list of students")
 def get_etudiants(
@@ -39,7 +39,7 @@ def get_etudiants(
                         LEFT JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_etudiant.id_promo
                         ORDER BY ExplicitSecondaryK;
                     """,
-        "allowedRolesRequester" : ["user"],
+        "allowedRolesRequester" : ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -166,7 +166,7 @@ def get_etudiants_stages(
 ######################################################
 
 @router.get("/etudiants/{id_etudiant:int}",
-            tags=["student","user"],
+            tags=["student"],
             summary="Students",
             description="Return the list of students")
 def get_etudiant(
@@ -194,7 +194,7 @@ def get_etudiant(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester" : ["user"],
+        "allowedRolesRequester" : ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -328,7 +328,7 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -350,7 +350,7 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -381,7 +381,7 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 

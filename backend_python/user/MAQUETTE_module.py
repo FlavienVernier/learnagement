@@ -27,7 +27,7 @@ def __get_module_responsible_id(id_module: int,
         "params": {
             "id_module": id_module,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -47,7 +47,7 @@ def __participate(id_module: int, id_etudiant: int, current_user: Annotated[User
             "id_module": id_module,
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     res = db_request(current_user, SQLRequest(**request))
     print(("res", res), flush=True)
@@ -59,7 +59,7 @@ def __participate(id_module: int, id_etudiant: int, current_user: Annotated[User
 #####################################
 
 @router.get("/m2c3/",
-            tags=["user", "module"],
+            tags=["module"],
             summary="M2c3",
             description="Return maquette et modalités de contrôle de connaissances et compétences")
 def get_m2c3(
@@ -96,7 +96,7 @@ def get_m2c3(
             "id_filiere": id_filiere,
             "id_statut": id_statut,
         },
-        "allowedRolesRequester" : ["user"],
+        "allowedRolesRequester" : ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -128,7 +128,7 @@ def get_modules_responsables(
                     LEFT JOIN MAQUETTE_module_sequence ON MAQUETTE_module_sequence.id_module_sequencage = MAQUETTE_module_sequencage.id_module_sequencage
                     LEFT JOIN CLASS_session ON CLASS_session.id_module_sequence = MAQUETTE_module_sequence.id_module_sequence
                     LEFT JOIN LNM_enseignant ON LNM_enseignant.id_enseignant = CLASS_session.id_enseignant""",
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -165,7 +165,7 @@ def get_modules_responsable(
         "params": {
             "id_responsable": id_responsable,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -207,7 +207,7 @@ def get_modules_intervenants(
                 LEFT JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
                 LEFT JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = CLASS_session.id_enseignant
             """,
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -254,7 +254,7 @@ SELECT
         "params": {
             "id_intervenant": id_intervenant,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -282,7 +282,7 @@ def get_modules_etudiant(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -314,7 +314,7 @@ def get_sequencages_responsable(
         "params": {
             "id_responsable": id_responsable,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -352,7 +352,7 @@ def get_sequences_responsable(
         "params": {
             "id_responsable": id_responsable,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -396,7 +396,7 @@ def get_sessions_responsable(
         "params": {
             "id_responsable": id_responsable,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -430,7 +430,7 @@ def get_module_dependencies(
             "id_module_prev": id_module,
             "id_module_next": id_module,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -476,7 +476,7 @@ def get_module_sequence_dependencies(
             "id_module_prev": id_module,
             "id_module_next": id_module,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -527,7 +527,7 @@ def get_data_gantt_endpoint(
             "id_responsable_prv": id_responsable,
             "id_responsable_nxt": id_responsable,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -600,7 +600,7 @@ def get_data_gantt_endpoint_etudiant(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -616,7 +616,7 @@ def get_disciplines(
                 SELECT
                     * 
                 FROM `MAQUETTE_discipline`""",
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 

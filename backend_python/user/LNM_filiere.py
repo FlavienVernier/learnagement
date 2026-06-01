@@ -1,4 +1,5 @@
 import logging
+import inspect
 
 from fastapi import APIRouter, Depends
 from typing import Annotated
@@ -10,82 +11,40 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-@router.get("/filieres/",
-            tags=["user", "filiere"],
-            summary="Filiere",
-            description="Return the list of filieres")
-def filieres(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-):
-    request = {
+requests = {
+    "get_filieres" : {
         "request" : """
                         SELECT LNM_filiere.*, ExplicitSecondaryKs_LNM_filiere.ExplicitSecondaryK
                         FROM LNM_filiere
                         JOIN ExplicitSecondaryKs_LNM_filiere ON ExplicitSecondaryKs_LNM_filiere.id_filiere = LNM_filiere.id_filiere
                     """,
-        "allowedRolesRequester" : ["user"],
-    }
-    return db_request(current_user, SQLRequest(**request))
-
-@router.get("/statuts/",
-            tags=["user", "filiere"],
-            summary="Status",
-            description="Return the list of statuts")
-def statuts(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-):
-    request = {
+        "allowedRolesRequester" : ["connected_user"],
+    },
+    "get_statuts" : {
         "request" : """
                         SELECT LNM_statut.*, ExplicitSecondaryKs_LNM_statut.ExplicitSecondaryK
                         FROM LNM_statut
                         JOIN ExplicitSecondaryKs_LNM_statut ON ExplicitSecondaryKs_LNM_statut.id_statut = LNM_statut.id_statut
                     """,
-        "allowedRolesRequester" : ["user"],
-    }
-    return db_request(current_user, SQLRequest(**request))
-
-@router.get("/groupe_types/",
-            tags=["user", "filiere"],
-            summary="Status",
-            description="Return the list of groupe types")
-def groupe_types(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-):
-    request = {
+        "allowedRolesRequester" : ["connected_user"],
+    },
+    "get_groupe_types" : {
         "request" : """
                         SELECT LNM_groupe_type.*, ExplicitSecondaryKs_LNM_groupe_type.ExplicitSecondaryK
                         FROM LNM_groupe_type
                         JOIN ExplicitSecondaryKs_LNM_groupe_type ON ExplicitSecondaryKs_LNM_groupe_type.id_groupe_type = LNM_groupe_type.id_groupe_type;
                     """,
-        "allowedRolesRequester" : ["user"],
-    }
-    return db_request(current_user, SQLRequest(**request))
-
-@router.get("/seance_types/",
-            tags=["user", "filiere"],
-            summary="Status",
-            description="Return the list of seance types")
-def seance_types(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-):
-    request = {
+        "allowedRolesRequester" : ["connected_user"],
+    },
+    "get_seance_types" : {
         "request" : """
                         SELECT LNM_seance_type.*, ExplicitSecondaryKs_LNM_seance_type.ExplicitSecondaryK
                         FROM LNM_seance_type
                         JOIN ExplicitSecondaryKs_LNM_seance_type ON ExplicitSecondaryKs_LNM_seance_type.id_seance_type = LNM_seance_type.id_seance_type;
                     """,
-        "allowedRolesRequester" : ["user"],
-    }
-    return db_request(current_user, SQLRequest(**request))
-
-@router.get("/filieres/dags",
-            tags=["anonymous", "filiere"],
-            summary="Filiere",
-            description="Return the list of filieres")
-def dags(
-        #current_user = None,  #current_user: Annotated[User, Depends(get_current_active_user)],
-):
-    request = {
+        "allowedRolesRequester" : ["connected_user"],
+    },
+    "get_dags" : {
         "request" : """
                         SELECT 
                             LNM_filiere.nom_filiere, 
@@ -112,22 +71,73 @@ def dags(
                                  JOIN APC_competence ON APC_competence.id_competence = APC_niveau.id_competence
                     """,
         "allowedRolesRequester" : ["anonymous"],
-    }
-    return db_request(None, SQLRequest(**request))
-
-@router.get("/promos/",
-            tags=["user", "filiere"],
-            summary="promos",
-            description="Return the list of promos")
-def promos(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-):
-    request = {
+    },
+    "get_promos" : {
         "request" : """
                         SELECT LNM_promo.`id_promo`, ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK AS promo
                         FROM `LNM_promo`
                         JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_promo.id_promo;
                     """,
-        "allowedRolesRequester" : ["user"],
-    }
+        "allowedRolesRequester" : ["connected_user"],
+    },
+}
+
+@router.get("/filieres/",
+            tags=["filiere"],
+            summary="Filiere",
+            description="Return the list of filieres")
+def filieres(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request =  requests["get_" + inspect.currentframe().f_code.co_name]
+    return db_request(current_user, SQLRequest(**request))
+
+@router.get("/statuts/",
+            tags=["filiere"],
+            summary="Status",
+            description="Return the list of statuts")
+def statuts(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request =  requests["get_" + inspect.currentframe().f_code.co_name]
+    return db_request(current_user, SQLRequest(**request))
+
+@router.get("/groupe_types/",
+            tags=["filiere"],
+            summary="Status",
+            description="Return the list of groupe types")
+def groupe_types(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = requests["get_" + inspect.currentframe().f_code.co_name]
+    return db_request(current_user, SQLRequest(**request))
+
+@router.get("/seance_types/",
+            tags=["filiere"],
+            summary="Status",
+            description="Return the list of seance types")
+def seance_types(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = requests["get_" + inspect.currentframe().f_code.co_name]
+    return db_request(current_user, SQLRequest(**request))
+
+@router.get("/filieres/dags",
+            tags=["anonymous", "filiere"],
+            summary="Filiere",
+            description="Return the list of filieres")
+def dags(
+        #current_user = None,  #current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = requests["get_" + inspect.currentframe().f_code.co_name]
+    return db_request(None, SQLRequest(**request))
+
+@router.get("/promos/",
+            tags=["filiere"],
+            summary="promos",
+            description="Return the list of promos")
+def promos(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = requests["get_" + inspect.currentframe().f_code.co_name]
     return db_request(current_user, SQLRequest(**request))

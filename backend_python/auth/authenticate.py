@@ -6,9 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from dependencies import logger, get_user, Token
-import system.authenticate_lnm as authenticate_lnm
-#import system.authenticate_ldap
-#import system.authenticate_proxy_cas
+import auth.authenticate_lnm as authenticate_lnm
+#import auth.authenticate_ldap
+#import auth.authenticate_proxy_cas
 
 from typing import Annotated
 

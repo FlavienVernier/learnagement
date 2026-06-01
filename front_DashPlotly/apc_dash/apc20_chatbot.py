@@ -11,7 +11,8 @@ from .apc20_chatbot_backend import process_message
 # ── Helpers de rendu ──────────────────────────────────────────────
 
 def _bubble(role: str, text: str):
-    is_user = role == "user"
+    # ToDo refactoring required: group checking in front code feature ; just allowed in front code entry
+    is_user = role == "connected_user"
     return html.Div(
         [
             html.Div(
@@ -282,12 +283,12 @@ def register_callbacks(app):
 
         if not token or token == "none":
             new_history = history + [
-                {"role": "user",      "content": message.strip()},
+                {"role": "connected_user",      "content": message.strip()},
                 {"role": "assistant", "content": "⚠️ Session non authentifiée. Veuillez vous reconnecter."},
             ]
             return new_history, _render_messages(new_history), ""
 
-        new_history = history + [{"role": "user", "content": message.strip()}]
+        new_history = history + [{"role": "connected_user", "content": message.strip()}]
         response    = process_message(message.strip(), history, token)
         new_history = new_history + [{"role": "assistant", "content": response}]
 

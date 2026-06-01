@@ -26,7 +26,7 @@ def get_user_role_and_id(current_user: User):
         # Assure-toi que l'attribut s'appelle bien "mail" dans ton modèle User.
         # Si c'est "mail" ou "username", modifie la ligne ci-dessous.
         "params": {"mail": current_user.mail}, 
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     
     response = db_request(current_user, SQLRequest(**req))
@@ -55,7 +55,7 @@ def get_user_role_and_id(current_user: User):
 ######################################################
 
 @router.get("/user/{id:int}/calendars/",
-            tags=["user", "calendar"],
+            tags=["calendar"],
             summary="Get User Calendar URLs",
             description="Returns all ADE iCal URLs for the currently logged-in user")
 def get_user_calendar_urls(
@@ -82,7 +82,7 @@ def get_user_calendar_urls(
         "params": {
             "role_id": id,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
 
     return db_request(current_user, SQLRequest(**request))
@@ -95,7 +95,7 @@ def get_user_calendar_urls(
 ######################################################
 
 @router.post("/user/{id:int}/calendars/",
-             tags=["user", "calendar"],
+             tags=["calendar"],
              summary="Update User Calendar URL",
              description="Saves a specific iCal URL")
 def update_user_calendar_url(
@@ -116,13 +116,13 @@ def update_user_calendar_url(
             "role_id": id,
             "url": data.url,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     
     return db_request(current_user, SQLRequest(**request))
 
 @router.patch("/user/{id:int}/calendars/{id_calendar:int}",
-             tags=["user", "calendar"],
+             tags=["calendar"],
              summary="Update User Calendar URL",
              description="Updates a specific iCal URL")
 def update_user_calendar_url(
@@ -143,7 +143,7 @@ def update_user_calendar_url(
             "url": data.url,
             "id_calendar": id_calendar,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     logging.info(request)
 

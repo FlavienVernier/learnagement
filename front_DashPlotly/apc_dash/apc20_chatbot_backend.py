@@ -64,7 +64,7 @@ def process_message(message: str, history: list, token: str) -> str:
     messages = [{"role": "system", "content": _SYSTEM}]
     for msg in history:
         messages.append({"role": msg["role"], "content": msg["content"]})
-    messages.append({"role": "user", "content": message})
+    messages.append({"role": "connected_user", "content": message})
 
     headers = {
         "Authorization": f"Bearer {api_key}",

@@ -8,7 +8,7 @@ from pwdlib import PasswordHash
 from pwdlib.hashers.bcrypt import BcryptHasher
 
 from dependencies import logger, get_user, Token
-from system.authenticate_tools import create_access_token
+from auth.authenticate_tools import create_access_token
 
 
 password_hash = PasswordHash((BcryptHasher(),))

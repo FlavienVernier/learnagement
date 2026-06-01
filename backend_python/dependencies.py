@@ -97,7 +97,7 @@ def get_administratif(user_login: str, method: str = "byMail"):
             logger.warning(f"Inactive user '{user_login}' try to connect")
             return None
         user_dict["main_role"] = "administratif"
-        user_dict["roles"] = ["user", user_dict["main_role"], users[0]['ExplicitSecondaryK']]
+        user_dict["roles"] = ["connected_user", user_dict["main_role"], users[0]['ExplicitSecondaryK']]
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor()
         cursor.execute(
@@ -138,7 +138,7 @@ def get_enseignant(user_login: str, method: str = "byMail"):
             logger.warning(f"Inactive user '{user_login}' try to connect")
             return None
         user_dict["main_role"] = "enseignant"
-        user_dict["roles"] = ["user", user_dict["main_role"], users[0]['ExplicitSecondaryK']]
+        user_dict["roles"] = ["connected_user", user_dict["main_role"], users[0]['ExplicitSecondaryK']]
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor()
         cursor.execute(
@@ -179,7 +179,7 @@ def get_etudiant(user_login: str, method: str = "byMail"):
             logger.warning(f"Inactive user '{user_login}' try to connect")
             return None
         user_dict["main_role"] = "etudiant"
-        user_dict["roles"] = ["user", user_dict["main_role"], users[0]['ExplicitSecondaryK']]
+        user_dict["roles"] = ["connected_user", user_dict["main_role"], users[0]['ExplicitSecondaryK']]
         return UserInDB(**user_dict)
     return None
 
@@ -192,11 +192,36 @@ def get_user(user_login: str, method: str = "byMail"):
     )
 
     if user is not None:
-        logger.info(f"User {user_login} logged as {user} with {method}")
+        logger.info(f"User {user_login} logged with {method}")
     else:
         logger.error(f"Logging error with login: {user_login}, with method: {method}")
 
     return user
+
+# ToDo Utiliser get_user_cached dans get_current_user en interface entre get_current_user et get_user pour avoir un cache Redis et limiter les requesters SQL relative à l'utilisateur
+# import redis
+# import pickle
+#
+# redis_client = redis.Redis(host="localhost", port=6379, db=0)
+# _CACHE_TTL = 300
+#
+#
+# def get_user_cached(user_login: str, method: str = "byMail") -> UserInDB | None:
+#     cache_key = f"user:{method}:{user_login}"
+#
+#     cached = redis_client.get(cache_key)
+#     if cached:
+#         return pickle.loads(cached)
+#
+#     user = get_user(user_login, method)
+#     if user:
+#         redis_client.setex(cache_key, _CACHE_TTL, pickle.dumps(user))
+#     return user
+
+# def invalidate_user_cache(user_login: str):
+#     for method in ["byMail", "byLoggin"]:
+#         redis_client.delete(f"user:{method}:{user_login}")
+# # À appeler dans vos endpoints de modification d'utilisateur, logout, voire périodiquement "timeout".
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     credentials_exception = HTTPException(

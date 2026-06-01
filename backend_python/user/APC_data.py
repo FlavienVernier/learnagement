@@ -22,7 +22,7 @@ def get_competences(
             SELECT id_competence, libelle_competence, code_competence, description
             FROM APC_competence
         """,
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -39,7 +39,7 @@ def get_niveaux(
             SELECT id_niveau, id_competence, niveau, libelle_niveau
             FROM APC_niveau
         """,
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -56,7 +56,7 @@ def get_apprentissages(
             SELECT id_apprentissage_critique, id_niveau, libelle_apprentissage
             FROM APC_apprentissage_critique
         """,
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -73,7 +73,7 @@ def get_ac_modules(
             SELECT id_apprentissage_critique, id_module, type_lien
             FROM APC_apprentissage_critique_as_module
         """,
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -91,7 +91,7 @@ def get_apc_modules(
                    hCM, hTD, hTP, hPROJ, hPersonnelle, id_responsable, commentaire
             FROM MAQUETTE_module
         """,
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -108,7 +108,7 @@ def get_composantes(
             SELECT id_composante_essentielle, id_competence, libelle_composante_essentielle
             FROM APC_composante_essentielle
         """,
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -125,6 +125,6 @@ def get_situations(
             SELECT id_situation_professionnelle, id_competence, libelle_situation
             FROM APC_situation_professionnelle
         """,
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))

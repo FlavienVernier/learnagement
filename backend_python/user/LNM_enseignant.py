@@ -17,7 +17,7 @@ router = APIRouter()
 ######################################################
 
 @router.get("/enseignants/",
-            tags=["user", "enseignant"],
+            tags=["enseignant"],
             summary="Teachers",
             description="Return the list of teachers")
 def enseignants(
@@ -35,12 +35,12 @@ def enseignants(
                         JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = LNM_enseignant.id_enseignant
                         ORDER BY ExplicitSecondaryK;
                     """,
-        "allowedRolesRequester" : ["user"],
+        "allowedRolesRequester" : ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/enseignant_responsabilite/",
-             tags=["user", "enseignant"],
+             tags=["enseignant"],
              summary="Teachers responsibilities",
              description="Return the list of teachers' responsibilities")
 def enseignants_responsabilities(
@@ -56,7 +56,7 @@ def enseignants_responsabilities(
                         JOIN `MAQUETTE_module` ON `MAQUETTE_module`.`id_responsable` = `LNM_enseignant`.`id_enseignant`
                         GROUP BY `LNM_enseignant`.`nom`, `LNM_enseignant`.`prenom`;
                     """,
-        "allowedRolesRequester" : ["user"],
+        "allowedRolesRequester" : ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 

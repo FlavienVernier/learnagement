@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 @router.get("/competence/",
-            tags=["user"],
+            tags=["competence"],
             summary="Universities",
             description="Return the list of partner universities")
 def tree_competence(
@@ -39,7 +39,7 @@ def tree_competence(
                         JOIN MAQUETTE_module ON MAQUETTE_module.id_module = APC_apprentissage_critique_as_module.id_module
                         WHERE 1;
                     """,
-        "allowedRolesRequester" : ["user"],
+        "allowedRolesRequester" : ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 

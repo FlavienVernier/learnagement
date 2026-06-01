@@ -112,7 +112,7 @@ def _sync_university_places(
 
 
 @router.get("/university/",
-            tags=["user", "mobility"],
+            tags=["mobility"],
             summary="Universities",
             description="Return the list of partner universities")
 def list_universities(
@@ -122,12 +122,12 @@ def list_universities(
         "request" : """
                         SELECT * FROM MOB_partner_university
                     """,
-        "allowedRolesRequester" : ["user"],
+        "allowedRolesRequester" : ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/university/etudiant/{id_etudiant:int}",
-            tags=["user", "mobility"],
+            tags=["mobility"],
             summary="Universities for student",
             description="Return the list of partner universities with the number of places for the student")
 def list_universities_etudiant(
@@ -156,7 +156,7 @@ def list_universities_etudiant(
 
 
 @router.get("/university/etudiant/{id_etudiant:int}/wishes",
-            tags=["user", "mobility"],
+            tags=["mobility"],
             summary="Wishes for student",
             description="Return the student's current mobility wishes")
 def list_university_wishes_etudiant(
@@ -183,7 +183,7 @@ def list_university_wishes_etudiant(
 
 
 @router.post("/university/etudiant/{id_etudiant:int}/wish/{id_partner_university:int}",
-            tags=["user", "mobility"],
+            tags=["mobility"],
             summary="Add university to wishes",
             description="Add a partner university to the student's mobility wishes")
 def add_university_to_wishes(
@@ -245,7 +245,7 @@ def add_university_to_wishes(
 
 
 @router.delete("/university/etudiant/{id_etudiant:int}/wish/{id_partner_university:int}",
-            tags=["user", "mobility"],
+            tags=["mobility"],
             summary="Delete university from wishes",
             description="Delete a partner university from the student's mobility wishes")
 def delete_university_from_wishes(
@@ -311,7 +311,7 @@ def delete_university_from_wishes(
 
 
 @router.post("/university/etudiant/{id_etudiant:int}/wish/{id_partner_university:int}/move/{direction}",
-            tags=["user", "mobility"],
+            tags=["mobility"],
             summary="Move university wish",
             description="Move a wish up or down in the student's priority list")
 def move_university_wish(
@@ -423,7 +423,7 @@ def move_university_wish(
 
 
 @router.post("/university/etudiant/{id_etudiant:int}/wishes/submit",
-            tags=["user", "mobility"],
+            tags=["mobility"],
             summary="Submit university wishes",
             description="Submit the student's mobility wishes for processing")
 def submit_university_wishes(
@@ -475,7 +475,7 @@ def submit_university_wishes(
 
 
 @router.get("/university/admin/wishes",
-            tags=["user", "mobility"],
+            tags=["mobility"],
             summary="All wishes for RI",
             description="Return all student wishes (submitted and in progress) for International Relations admins")
 def list_all_wishes_ri(
@@ -505,7 +505,7 @@ def list_all_wishes_ri(
 
 
 @router.get("/university/admin/catalog",
-            tags=["user", "mobility"],
+            tags=["mobility"],
             summary="University catalog for RI",
             description="Return partner universities enriched with their available filieres for International Relations admins")
 def list_university_catalog_ri(
@@ -532,7 +532,7 @@ def list_university_catalog_ri(
 
 
 @router.post("/university/admin",
-            tags=["user", "mobility"],
+            tags=["mobility"],
             summary="Create partner university for RI",
             description="Create a partner university and its places by filiere/semester for International Relations admins")
 def create_university_ri(
@@ -605,7 +605,7 @@ def create_university_ri(
 
 
 @router.put("/university/admin/{id_partner_university:int}",
-            tags=["user", "mobility"],
+            tags=["mobility"],
             summary="Update partner university for RI",
             description="Update a partner university and its places by filiere/semester for International Relations admins")
 def update_university_ri(

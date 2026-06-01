@@ -44,7 +44,7 @@ def get_metier_ac(
                 ON semestre.id_semestre = module.id_semestre
             WHERE metier.id_situation_professionnelle = {id_metier}
         """,
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
 
     return db_request(current_user, SQLRequest(**request))
@@ -61,7 +61,7 @@ def get_metier(
                     SELECT metier.id_situation_professionnelle,metier.libelle_situation 
                     FROM APC_situation_professionnelle metier
                     """,
-        "allowedRolesRequester" : ["user"],
+        "allowedRolesRequester" : ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -77,14 +77,14 @@ def get_competence(
     SELECT COUNT(DISTINCT id_competence) AS nb_competences
     FROM APC_competence
 """,
-        "allowedRolesRequester" : ["user"],
+        "allowedRolesRequester" : ["connected_user"],
     }
     requestmodule = {
         "request": """
     SELECT COUNT(DISTINCT id_module) AS nb_module
     FROM APC_apprentissage_critique_as_module
 """,
-        "allowedRolesRequester" : ["user"],
+        "allowedRolesRequester" : ["connected_user"],
     }
 
     request_ac = {
@@ -92,7 +92,7 @@ def get_competence(
             SELECT COUNT(DISTINCT id_apprentissage_critique) AS nb_ac
             FROM APC_apprentissage_critique
         """,
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
 
     request_composante = {
@@ -100,7 +100,7 @@ def get_competence(
             SELECT COUNT(DISTINCT id_composante_essentielle) AS nb_composante_essentielle
             FROM APC_composante_essentielle
         """,
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     resulat_comp= db_request(current_user, SQLRequest(**request_com))
     resulat_module= db_request(current_user, SQLRequest(**requestmodule))

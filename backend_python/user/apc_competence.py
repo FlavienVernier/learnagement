@@ -24,7 +24,7 @@ def get_competence_ac(
                     C.id_competence,C.libelle_competence , C.code_competence ,AC.id_apprentissage_critique, AC.libelle_apprentissage 
                     FROM APC_competence C join APC_niveau N ON C.id_competence=N.id_competence JOIN APC_apprentissage_critique AC ON AC.id_niveau=N.id_niveau;
                     """,
-        "allowedRolesRequester" : ["user"],
+        "allowedRolesRequester" : ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -48,6 +48,6 @@ def get_competence_ce(
                     JOIN APC_composante_essentielle CE
                         ON C.id_competence = CE.id_competence;
                     """,
-        "allowedRolesRequester" : ["user"],
+        "allowedRolesRequester" : ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
