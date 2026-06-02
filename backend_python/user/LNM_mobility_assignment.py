@@ -155,7 +155,8 @@ def run_round_robin_assignment(students: List[dict], wishes: List[dict], places:
     Étape 5: Logique d'affectation Round-Robin.
     Retourne la liste des affectations validées.
     """
-    pass
+    assignments = []
+    return assignments
 
 def save_assignments(assignments: List[dict], current_user: User) -> None:
     """

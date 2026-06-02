@@ -480,6 +480,24 @@ def submit_university_wishes(
 
     return {"message": "Voeux soumis avec succes."}
 
+@router.post("/university/admin/wishes/force-submit",
+            tags=["admin", "mobility"],
+            summary="Force submit all incomplete wishes",
+            description="Force the submission of all existing student wishes that have not been submitted yet.")
+def force_submit_wishes(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    update_request = {
+        "request": """
+                        UPDATE MOB_wishes
+                        SET submission_date = NOW()
+                        WHERE submission_date IS NULL
+                    """,
+        "params": None,
+        "allowedRolesRequester": ["relations_internationales"],
+    }
+    db_request(current_user, SQLRequest(**update_request))
+    return {"message": "Tous les voeux incomplets ont ete clotures avec succes."}
 
 
 @router.get("/university/admin/wishes",
