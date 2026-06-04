@@ -81,6 +81,18 @@
                 </div>
             </div>
         </div>
+        <div class="mb-4 flex flex-wrap gap-4">
+            <button onclick="document.getElementById('procedureModal').classList.remove('hidden')" class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 hover:shadow transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Centre de Contrôle : Procédure
+            </button>
+            <button onclick="window.toggleDiagnostics()" class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition">
+                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+                Diagnostique & Statistiques
+            </button>
+        </div>
+
+        <!-- Modal replaced the inline panel. The button is kept. -->
 
         <div class="rounded-2xl border overflow-hidden mb-8">
             <div class="overflow-x-auto">
@@ -221,6 +233,152 @@
             <div id="streetViewPanoramaModal" style="width: 100%; height: 100%;"></div>
         </div>
     </div>
+
+    <!-- Procedure Modal -->
+    <div id="procedureModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[2000] flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Centre de Contrôle : Mobilité
+            </h3>
+            
+            <div class="space-y-6">
+
+                <!-- ETAPE 1 -->
+                <div>
+                    <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2 flex items-center gap-2">
+                        <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 1</span>
+                        Clôture des soumissions
+                    </h4>
+                    <p class="text-xs text-gray-500 mb-3">Verrouille tous les dossiers pour figer les données et force la soumission des vœux incomplets.</p>
+                    <button onclick="window.forceSubmitWishes()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        Clôturer les soumissions
+                    </button>
+                </div>
+                
+                <hr class="border-gray-200">
+
+                <!-- ETAPE 2 -->
+                <div>
+                    <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2 flex items-center gap-2">
+                        <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 2</span>
+                        Exécution de l'algorithme
+                    </h4>
+                    <p class="text-xs text-gray-500 mb-4">Calcule les affectations (Round-Robin) selon le Z-score et les préférences. Paramétrez les filtres ci-dessous avant de lancer.</p>
+                    
+                    <div class="space-y-4 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Statuts éligibles</label>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <label class="flex items-center gap-2"><input type="checkbox" value="1" class="assign-statut" checked> Initial</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="2" class="assign-statut" checked> Apprenti</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="3" class="assign-statut" checked> Formation Continue</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" value="4" class="assign-statut" checked> Contrat Pro</label>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                                <input type="checkbox" id="assignMobilityCompleted" checked>
+                                Exclure les étudiants ayant déjà validé leur mobilité
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button onclick="window.runAssignment()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                            Lancer l'affectation automatique
+                        </button>
+                    </div>
+                </div>
+
+                <hr class="border-gray-200">
+
+                <!-- ETAPE 3 -->
+                <div>
+                    <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2 flex items-center gap-2">
+                        <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 3</span>
+                        Exportation des Résultats
+                    </h4>
+                    <p class="text-xs text-gray-500 mb-3">Téléchargez les listes finales pour communication aux universités partenaires.</p>
+                    <div class="flex gap-3">
+                        <button onclick="exportWishes()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            Vœux (XLSX)
+                        </button>
+                        <button onclick="exportAssignments()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            Affectations (XLSX)
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="mt-8 flex justify-end">
+                <button onclick="document.getElementById('procedureModal').classList.add('hidden')" class="px-5 py-2 text-sm font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition">Fermer le centre</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Diagnostics Modal -->
+    <div id="diagnosticsModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[2000] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-5xl p-6 max-h-[95vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+                    Diagnostique & Statistiques (Telling Story)
+                </h3>
+                <button onclick="document.getElementById('diagnosticsModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Graphe 1 -->
+                <div class="bg-gray-50 border rounded-xl p-4 shadow-sm flex flex-col items-center">
+                    <h4 class="font-bold text-gray-700 mb-2 text-center text-sm">1. Statut Global de la Mobilité</h4>
+                    <p class="text-xs text-gray-500 mb-4 text-center">La population totale de la promotion étudiée.</p>
+                    <div class="w-full relative h-48 flex justify-center">
+                        <canvas id="chartGlobalStatus"></canvas>
+                    </div>
+                    <div class="mt-4 flex gap-4 text-xs font-semibold text-indigo-600">
+                        <a href="#" onclick="exportDiagnosticData('validated')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> Validés</a>
+                        <a href="#" onclick="exportDiagnosticData('remaining')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> À traiter</a>
+                    </div>
+                </div>
+
+                <!-- Graphe 2 -->
+                <div class="bg-gray-50 border rounded-xl p-4 shadow-sm flex flex-col items-center">
+                    <h4 class="font-bold text-gray-700 mb-2 text-center text-sm">2. Avancement des étudiants à traiter</h4>
+                    <p class="text-xs text-gray-500 mb-4 text-center">Ceux qui n'ont pas encore validé leur mobilité.</p>
+                    <div class="w-full relative h-48 flex justify-center">
+                        <canvas id="chartWishesStatus"></canvas>
+                    </div>
+                    <div class="mt-4 flex gap-3 text-[11px] font-semibold text-indigo-600 flex-wrap justify-center">
+                        <a href="#" onclick="exportDiagnosticData('submitted')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> Soumis</a>
+                        <a href="#" onclick="exportDiagnosticData('in_progress')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> En cours</a>
+                        <a href="#" onclick="exportDiagnosticData('retardataires')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> Retardataires</a>
+                    </div>
+                </div>
+
+                <!-- Graphe 3 -->
+                <div class="bg-gray-50 border rounded-xl p-4 shadow-sm flex flex-col items-center">
+                    <h4 class="font-bold text-gray-700 mb-2 text-center text-sm">3. Nombre de choix effectués</h4>
+                    <p class="text-xs text-gray-500 mb-4 text-center">Répartition du nombre de vœux enregistrés.</p>
+                    <div class="w-full relative h-48 flex justify-center">
+                        <canvas id="chartWishesDistribution"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 flex justify-end">
+                <button onclick="document.getElementById('diagnosticsModal').classList.add('hidden')" class="px-5 py-2 text-sm font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition">Fermer</button>
+            </div>
+        </div>
+    </div>
 </section>
 <?php $t->endSlot(); ?>
 
@@ -255,6 +413,8 @@ crossorigin=""/>
 <script src="/APP_2026/theme/mobility-map-streetview.js"></script>
 
 <!-- ToDo : Déplacer dans un fichier global ex db.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
     window.ENV = {
         BACKEND_URL: "http://127.0.0.1",
@@ -463,7 +623,9 @@ crossorigin=""/>
             const wishes = [...entry.wishes].sort((a, b) => (a.priority || 99) - (b.priority || 99));
             const submissionDate = entry.student.submission_date ? new Date(entry.student.submission_date) : null;
             const isRecent = submissionDate ? (Date.now() - submissionDate.getTime()) <= (7 * 24 * 60 * 60 * 1000) : false;
-            const isSubmitted = Boolean(entry.student.submission_date);
+            // OLD CODE (Buggy: considérait parfois undefined ou "null" comme true)
+            // const isSubmitted = Boolean(entry.student.submission_date);
+            const isSubmitted = Boolean(entry.student.submission_date) && entry.student.submission_date !== 'null' && entry.student.submission_date !== 'None';
             const status = isSubmitted && wishes.length >= 5 ? 'complet' : 'incomplet';
 
             return {
@@ -1098,5 +1260,273 @@ crossorigin=""/>
 
     resetAddUniversityForm();
     await refreshAllData();
+
+    window.forceSubmitWishes = async function() {
+        if (!confirm("Êtes-vous sûr de vouloir forcer la clôture de tous les dossiers de vœux incomplets ?\n\nTous les étudiants ayant fait au moins 1 choix verront leur dossier verrouillé et soumis.")) return;
+
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/wishes/force-submit", {
+                method: 'POST',
+                headers: {
+                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (!response.ok) {
+                const err = await parseApiError(response);
+                alert("Erreur: " + err);
+                return;
+            }
+
+            alert("Tous les vœux incomplets ont été clôturés avec succès.");
+            refreshAllData();
+        } catch (error) {
+            alert("Erreur de connexion.");
+        }
+    };
+
+    window.runAssignment = async function() {
+        const annee = 4; // Procédure exclusive aux 4ème année
+        const excludeCompleted = document.getElementById('assignMobilityCompleted').checked;
+        
+        const statuts = [];
+        document.querySelectorAll('.assign-statut:checked').forEach(cb => statuts.push(parseInt(cb.value, 10)));
+
+        if (statuts.length === 0) {
+            alert("Veuillez sélectionner au moins un statut.");
+            return;
+        }
+
+        const payload = {
+            annee_eligible: annee,
+            statuts_eligibles: statuts,
+            mobility_completed: !excludeCompleted
+        };
+
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/assignment/run", {
+                method: 'POST',
+                headers: {
+                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const err = await parseApiError(response);
+                alert("Erreur lors de l'affectation: " + err);
+                return;
+            }
+
+            const data = await response.json();
+            document.getElementById('procedureModal').classList.add('hidden');
+            alert("Algorithme lancé ! (Affectations enregistrées)");
+            refreshAllData();
+        } catch (error) {
+            alert("Erreur de connexion.");
+        }
+    };
+
+    window.exportWishes = async function() {
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/wishes/export", {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
+                }
+            });
+            if (!response.ok) {
+                alert("Erreur lors de l'exportation des vœux");
+                return;
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `Export_Voeux_Mobilite_${new Date().toISOString().slice(0,10)}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            alert("Erreur de connexion.");
+        }
+    };
+
+    window.exportAssignments = async function() {
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/assignments/export", {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
+                }
+            });
+            if (!response.ok) {
+                alert("Erreur lors de l'exportation des affectations");
+                return;
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `Export_Affectations_Mobilite_${new Date().toISOString().slice(0,10)}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            alert("Erreur de connexion.");
+        }
+    };
+
+    // Diagnostics Logic
+    window.exportDiagnosticData = async function(category) {
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/diagnostics/export/" + category, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
+                }
+            });
+            if (!response.ok) {
+                alert("Erreur lors de l'exportation des données de diagnostique");
+                return;
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `Export_Mobilite_Stats_${category}_${new Date().toISOString().slice(0,10)}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            alert("Erreur de connexion.");
+        }
+    };
+
+    let chartGlobal = null;
+    let chartWishes = null;
+    let chartDist = null;
+
+    window.toggleDiagnostics = function() {
+        const modal = document.getElementById('diagnosticsModal');
+        if (modal.classList.contains('hidden')) {
+            modal.classList.remove('hidden');
+            window.loadDiagnostics();
+        } else {
+            modal.classList.add('hidden');
+        }
+    };
+
+    window.loadDiagnostics = async function() {
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/diagnostics", {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
+                }
+            });
+            
+            if (!response.ok) return;
+            
+            const data = await response.json();
+            
+            if (chartGlobal) chartGlobal.destroy();
+            if (chartWishes) chartWishes.destroy();
+            if (chartDist) chartDist.destroy();
+
+            // 1. Graphe Global (Pie Chart)
+            const ctxGlobal = document.getElementById('chartGlobalStatus').getContext('2d');
+            chartGlobal = new Chart(ctxGlobal, {
+                type: 'pie',
+                data: {
+                    labels: ['Mobilités déjà validées', 'Étudiants à traiter'],
+                    datasets: [{
+                        data: [data.validated_mobility, data.remaining_students],
+                        backgroundColor: ['#3b82f6', '#9ca3af'], // blue, gray
+                        borderWidth: (data.validated_mobility > 0 && data.remaining_students > 0) ? 1 : 0
+                    }]
+                },
+                plugins: [ChartDataLabels],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: 'bold', size: 14 },
+                            formatter: function(value) {
+                                return value > 0 ? value : null;
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 2. Graphe Avancement (Pie Chart)
+            const ctxWishes = document.getElementById('chartWishesStatus').getContext('2d');
+            let activeWishesSlices = [data.wishes_submitted, data.wishes_in_progress, data.retardataires].filter(v => v > 0).length;
+            chartWishes = new Chart(ctxWishes, {
+                type: 'pie',
+                data: {
+                    labels: ['Vœux soumis', 'En cours (non soumis)', 'Retardataires (0 vœu)'],
+                    datasets: [{
+                        data: [data.wishes_submitted, data.wishes_in_progress, data.retardataires],
+                        backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'], // green, amber, red
+                        borderWidth: activeWishesSlices > 1 ? 1 : 0
+                    }]
+                },
+                plugins: [ChartDataLabels],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: 'bold', size: 14 },
+                            formatter: function(value) {
+                                return value > 0 ? value : null;
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 3. Graphe Distribution (Bar Chart)
+            const ctxDist = document.getElementById('chartWishesDistribution').getContext('2d');
+            const dist = data.wishes_distribution;
+            chartDist = new Chart(ctxDist, {
+                type: 'bar',
+                data: {
+                    labels: ['1 vœu', '2 vœux', '3 vœux', '4 vœux', '5 vœux'],
+                    datasets: [{
+                        label: 'Nombre d\'étudiants',
+                        data: [dist["1"], dist["2"], dist["3"], dist["4"], dist["5"]],
+                        backgroundColor: '#6366f1', // indigo
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error("Erreur lors du chargement des diagnostiques:", error);
+        }
+    };
 </script>
 <?php $t->endSlot(); ?>

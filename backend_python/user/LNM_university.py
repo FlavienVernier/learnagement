@@ -1,6 +1,10 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
+import io
+import openpyxl
+from datetime import datetime
 from typing import Annotated
 from typing import Any, Dict, List, Optional, Tuple
 from pydantic import BaseModel, Field
@@ -703,3 +707,298 @@ def update_university_ri(
         "message": "Universite mise a jour.",
         "id_partner_university": id_partner_university,
     }
+
+@router.get("/university/admin/wishes/export",
+            tags=["admin", "mobility"],
+            summary="Export student mobility wishes to Excel")
+def export_admin_wishes(
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    sql_request = SQLRequest(
+        request='''
+            SELECT
+                e.nom AS Nom,
+                e.prenom AS Prenom,
+                e.mail AS Email,
+                f.nom_filiere AS Filiere,
+                p.annee AS Annee,
+                s.nom_statut AS Statut,
+                IFNULL(e.mobility_note, 'N/A') AS Note,
+                w.priority AS Priorite,
+                u.name AS Universite_Partenaire,
+                u.country AS Pays,
+                sem.semestre AS Semestre_Demande,
+                w.submission_date AS Date_Soumission
+            FROM MOB_wishes w
+            JOIN LNM_etudiant e ON e.id_etudiant = w.id_etudiant
+            JOIN LNM_promo p ON p.id_promo = e.id_promo
+            JOIN LNM_filiere f ON f.id_filiere = p.id_filiere
+            JOIN LNM_statut s ON s.id_statut = p.id_statut
+            JOIN MOB_partner_university u ON u.id_partner_university = w.id_partner_university
+            JOIN LNM_semestre sem ON sem.id_semestre = w.id_semestre
+            ORDER BY e.nom ASC, e.prenom ASC, w.priority ASC
+        ''',
+        params=None,
+        allowedRolesRequester=["relations_internationales"]
+    )
+    result = db_request(current_user, sql_request)
+    
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Voeux Etudiants"
+    
+    headers = [
+        "Nom", "Prénom", "Email", "Filière", "Année", "Statut", 
+        "Note de Mobilité", "Priorité", "Université Partenaire", 
+        "Pays", "Semestre Demandé", "Date de Soumission"
+    ]
+    ws.append(headers)
+    
+    for row in result:
+        ws.append([
+            row.get("Nom", ""), row.get("Prenom", ""), row.get("Email", ""),
+            row.get("Filiere", ""), row.get("Annee", ""), row.get("Statut", ""),
+            row.get("Note", ""), row.get("Priorite", ""), row.get("Universite_Partenaire", ""),
+            row.get("Pays", ""), row.get("Semestre_Demande", ""),
+            str(row.get("Date_Soumission", "")) if row.get("Date_Soumission") else "Non Soumis"
+        ])
+        
+    stream = io.BytesIO()
+    wb.save(stream)
+    stream.seek(0)
+    
+    filename = f"Export_Voeux_Mobilite_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    headers_dict = {
+        'Content-Disposition': f'attachment; filename="{filename}"'
+    }
+    return StreamingResponse(
+        stream, 
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+        headers=headers_dict
+    )
+
+@router.get("/university/admin/assignments/export",
+            tags=["admin", "mobility"],
+            summary="Export student mobility assignments to Excel")
+def export_admin_assignments(
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    sql_request = SQLRequest(
+        request='''
+            SELECT
+                e.nom AS Nom,
+                e.prenom AS Prenom,
+                e.mail AS Email,
+                f.nom_filiere AS Filiere,
+                p.annee AS Annee,
+                s.nom_statut AS Statut,
+                IFNULL(e.mobility_note, 'N/A') AS Note,
+                u.name AS Universite_Affectee,
+                u.country AS Pays,
+                sem.semestre AS Semestre_Affecte,
+                a.status AS Statut_Affectation
+            FROM MOB_assignment a
+            JOIN LNM_etudiant e ON e.id_etudiant = a.id_etudiant
+            JOIN LNM_promo p ON p.id_promo = e.id_promo
+            JOIN LNM_filiere f ON f.id_filiere = p.id_filiere
+            JOIN LNM_statut s ON s.id_statut = p.id_statut
+            JOIN MOB_partner_university u ON u.id_partner_university = a.id_partner_university
+            JOIN LNM_semestre sem ON sem.id_semestre = a.id_semestre
+            ORDER BY e.nom ASC, e.prenom ASC
+        ''',
+        params=None,
+        allowedRolesRequester=["relations_internationales"]
+    )
+    result = db_request(current_user, sql_request)
+    
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Affectations Etudiants"
+    
+    headers = [
+        "Nom", "Prénom", "Email", "Filière", "Année", "Statut", 
+        "Note de Mobilité", "Université Affectée", "Pays", 
+        "Semestre Affecté", "Statut de l'affectation"
+    ]
+    ws.append(headers)
+    
+    for row in result:
+        ws.append([
+            row.get("Nom", ""), row.get("Prenom", ""), row.get("Email", ""),
+            row.get("Filiere", ""), row.get("Annee", ""), row.get("Statut", ""),
+            row.get("Note", ""), row.get("Universite_Affectee", ""),
+            row.get("Pays", ""), row.get("Semestre_Affecte", ""), row.get("Statut_Affectation", "")
+        ])
+        
+    stream = io.BytesIO()
+    wb.save(stream)
+    stream.seek(0)
+    
+    filename = f"Export_Affectations_Mobilite_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    headers_dict = {
+        'Content-Disposition': f'attachment; filename="{filename}"'
+    }
+    return StreamingResponse(
+        stream, 
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+        headers=headers_dict
+    )
+
+@router.get("/university/admin/mobility/diagnostics",
+            tags=["admin", "mobility"],
+            summary="Get statistics and diagnostics for mobility procedure")
+def get_mobility_diagnostics(
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    sql_request = SQLRequest(
+        request='''
+            SELECT 
+                e.id_etudiant,
+                e.mobility_completed,
+                (SELECT COUNT(w.id_partner_university) FROM MOB_wishes w WHERE w.id_etudiant = e.id_etudiant) as wish_count,
+                (SELECT MAX(w.submission_date) FROM MOB_wishes w WHERE w.id_etudiant = e.id_etudiant) as last_submission_date
+            FROM LNM_etudiant e 
+            JOIN LNM_promo p ON e.id_promo = p.id_promo 
+            WHERE p.annee = 4
+        ''',
+        params=None,
+        allowedRolesRequester=["relations_internationales"]
+    )
+    result = db_request(current_user, sql_request)
+    
+    validated_mobility = 0
+    remaining_students = 0
+    
+    wishes_submitted = 0
+    wishes_in_progress = 0
+    retardataires = 0
+    
+    wishes_distribution = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0}
+
+    if result:
+        for row in result:
+            if row.get("mobility_completed") == 1:
+                validated_mobility += 1
+            else:
+                remaining_students += 1
+                wish_count = row.get("wish_count", 0)
+                last_sub = row.get("last_submission_date")
+                
+                # Distribution of wishes (only for remaining students)
+                if wish_count == 0:
+                    retardataires += 1
+                else:
+                    last_sub_str = str(last_sub).strip().lower() if last_sub is not None else ""
+                    if last_sub_str and last_sub_str not in ["none", "null", "0000-00-00 00:00:00", "0000-00-00", "0"]:
+                        wishes_submitted += 1
+                    else:
+                        wishes_in_progress += 1
+                    
+                    # Update distribution (clamp to max 5)
+                    w_key = str(min(wish_count, 5))
+                    wishes_distribution[w_key] = wishes_distribution.get(w_key, 0) + 1
+
+    return {
+        "validated_mobility": validated_mobility,
+        "remaining_students": remaining_students,
+        "wishes_submitted": wishes_submitted,
+        "wishes_in_progress": wishes_in_progress,
+        "retardataires": retardataires,
+        "wishes_distribution": wishes_distribution
+    }
+
+@router.get("/university/admin/mobility/diagnostics/export/{category}",
+            tags=["admin", "mobility"],
+            summary="Export specific diagnostic category to Excel")
+def export_mobility_diagnostics(
+    category: str,
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    sql_request = SQLRequest(
+        request='''
+            SELECT 
+                e.id_etudiant,
+                e.nom,
+                e.prenom,
+                e.mail,
+                f.nom_filiere,
+                e.mobility_note,
+                e.mobility_completed,
+                (SELECT COUNT(w.id_partner_university) FROM MOB_wishes w WHERE w.id_etudiant = e.id_etudiant) as wish_count,
+                (SELECT MAX(w.submission_date) FROM MOB_wishes w WHERE w.id_etudiant = e.id_etudiant) as last_submission_date
+            FROM LNM_etudiant e 
+            JOIN LNM_promo p ON e.id_promo = p.id_promo 
+            JOIN LNM_filiere f ON p.id_filiere = f.id_filiere
+            WHERE p.annee = 4
+            ORDER BY e.nom ASC, e.prenom ASC
+        ''',
+        params=None,
+        allowedRolesRequester=["relations_internationales"]
+    )
+    result = db_request(current_user, sql_request)
+    
+    filtered_students = []
+    
+    if result:
+        for row in result:
+            wish_count = row.get("wish_count", 0)
+            last_sub = row.get("last_submission_date")
+            is_completed = row.get("mobility_completed") == 1
+            
+            last_sub_str = str(last_sub).strip().lower() if last_sub is not None else ""
+            is_submitted = last_sub_str and last_sub_str not in ["none", "null", "0000-00-00 00:00:00", "0000-00-00", "0"]
+            
+            match = False
+            if category == "validated" and is_completed:
+                match = True
+            elif category == "remaining" and not is_completed:
+                match = True
+            elif category == "submitted" and not is_completed and wish_count > 0 and is_submitted:
+                match = True
+            elif category == "in_progress" and not is_completed and wish_count > 0 and not is_submitted:
+                match = True
+            elif category == "retardataires" and not is_completed and wish_count == 0:
+                match = True
+                
+            if match:
+                filtered_students.append(row)
+                
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = f"Export {category.capitalize()}"
+    
+    headers = [
+        "ID Etudiant", "Nom", "Prénom", "Email", "Filière", "Note de Mobilité"
+    ]
+    if category not in ["retardataires", "validated"]:
+        headers.append("Nombre de vœux enregistrés")
+        
+    ws.append(headers)
+    
+    for student in filtered_students:
+        row_data = [
+            student.get("id_etudiant", ""),
+            student.get("nom", ""),
+            student.get("prenom", ""),
+            student.get("mail", ""),
+            student.get("nom_filiere", ""),
+            student.get("mobility_note", "")
+        ]
+        if category not in ["retardataires", "validated"]:
+            row_data.append(student.get("wish_count", 0))
+            
+        ws.append(row_data)
+        
+    stream = io.BytesIO()
+    wb.save(stream)
+    stream.seek(0)
+    
+    filename = f"Export_{category}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    headers_dict = {
+        'Content-Disposition': f'attachment; filename="{filename}"'
+    }
+    return StreamingResponse(
+        stream, 
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+        headers=headers_dict
+    )
