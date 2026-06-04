@@ -54,7 +54,7 @@ Actuellement 3 instances en parallèle sont possibles.
 
 L'app s'arrête, sans perte de donnée, via la commande :  
 ```bash
-python learnagement.py -stop
+python Learnagement.py -stop
 ```
 
 ## Stop or Clean up from scratch the app
@@ -62,8 +62,8 @@ python learnagement.py -stop
 
 To destroy, remove all data to restart from scratch:  
 ```bash
-python Learnagement -stop
-python Learnagement -fromScratch
+python Learnagement.py -stop
+python Learnagement.py -fromScratch
 ```
 
 [Doc](Doc/doc.md) - [ToDo Lists](./ToDo/ToDo.md) - [CRediT](./CREDITS.md)

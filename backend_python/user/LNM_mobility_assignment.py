@@ -155,13 +155,39 @@ def run_round_robin_assignment(students: List[dict], wishes: List[dict], places:
     Étape 5: Logique d'affectation Round-Robin.
     Retourne la liste des affectations validées.
     """
-    pass
+    assignments = []
+    return assignments
 
 def save_assignments(assignments: List[dict], current_user: User) -> None:
     """
     Étape 6: Sauvegarder les affectations (statut 'pending') dans MOB_assignment.
     """
-    pass
+    if not assignments:
+        return
+        
+    values_clause = []
+    params = {}
+    for i, assign in enumerate(assignments):
+        values_clause.append(f"(%(e{i})s, %(u{i})s, %(s{i})s, 'pending')")
+        params[f"e{i}"] = assign["id_etudiant"]
+        params[f"u{i}"] = assign["id_partner_university"]
+        params[f"s{i}"] = assign["id_semestre"]
+        
+    query = f"""
+        INSERT INTO MOB_assignment (id_etudiant, id_partner_university, id_semestre, status)
+        VALUES {", ".join(values_clause)}
+        ON DUPLICATE KEY UPDATE 
+            id_partner_university = VALUES(id_partner_university),
+            id_semestre = VALUES(id_semestre),
+            status = VALUES(status)
+    """
+    
+    sql_request = SQLRequest(
+        request=query,
+        params=params,
+        allowedRolesRequester=["relations_internationales"]
+    )
+    db_request(current_user, sql_request)
 
 @router.post("/university/admin/assignment/run",
             tags=["admin", "mobility"],

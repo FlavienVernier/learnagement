@@ -208,7 +208,9 @@ crossorigin=""/>
 
         wishesEmpty.classList.add('hidden');
         
-        const isSubmitted = wishes.some(w => w.submission_date !== null);
+        // OLD CODE (Buggy: ne gère pas bien undefined ou les chaînes "null"):
+        // const isSubmitted = wishes.some(w => w.submission_date !== null);
+        const isSubmitted = wishes.some(w => Boolean(w.submission_date) && w.submission_date !== 'null' && w.submission_date !== 'None');
 
         wishesList.innerHTML = wishes
             .map((wish, index) => `
@@ -287,7 +289,9 @@ crossorigin=""/>
     function popupText(university) {
         const alreadyInWishes = wishedUniversities.has(university.id_partner_university);
         const uid = String(university.id_partner_university);
-        const isSubmitted = Array.from(wishedUniversities.values()).some(w => w.submission_date !== null);
+        // OLD CODE (Buggy: ne gère pas bien undefined ou les chaînes "null"):
+        // const isSubmitted = Array.from(wishedUniversities.values()).some(w => w.submission_date !== null);
+        const isSubmitted = Array.from(wishedUniversities.values()).some(w => Boolean(w.submission_date) && w.submission_date !== 'null' && w.submission_date !== 'None');
 
         window.MobilityMapState.popupState.set(uid, {
             photos: null,
