@@ -844,6 +844,169 @@ def export_admin_assignments(
         headers=headers_dict
     )
 
+@router.get("/university/admin/mobility/submitted-students",
+            tags=["admin", "mobility"],
+            summary="Get list of students who have submitted wishes")
+def get_submitted_students(
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    sql_request = SQLRequest(
+        request='''
+            SELECT e.id_etudiant, e.nom, e.prenom, e.mail, f.nom_filiere
+            FROM LNM_etudiant e
+            JOIN LNM_promo p ON e.id_promo = p.id_promo
+            JOIN LNM_filiere f ON p.id_filiere = f.id_filiere
+            WHERE p.annee = 4
+              AND e.mobility_completed = 0
+              AND EXISTS (
+                  SELECT 1 FROM MOB_wishes w 
+                  WHERE w.id_etudiant = e.id_etudiant 
+                    AND w.submission_date IS NOT NULL
+              )
+            ORDER BY e.nom ASC, e.prenom ASC
+        ''',
+        params=None,
+        allowedRolesRequester=["relations_internationales"]
+    )
+    result = db_request(current_user, sql_request)
+    return result if result else []
+
+@router.post("/university/admin/mobility/reset-wishes/{id_etudiant}",
+             tags=["admin", "mobility"],
+             summary="Reset submission date for a student's wishes")
+def reset_student_wishes(
+    id_etudiant: int,
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    check_request = SQLRequest(
+        request='''
+            SELECT 1 FROM LNM_etudiant e
+            JOIN LNM_promo p ON e.id_promo = p.id_promo
+            WHERE e.id_etudiant = %(id)s AND p.annee = 4 AND e.mobility_completed = 0
+        ''',
+        params={"id": id_etudiant},
+        allowedRolesRequester=["relations_internationales"]
+    )
+    if not db_request(current_user, check_request):
+        raise HTTPException(status_code=400, detail="Étudiant invalide ou non éligible.")
+
+    sql_request = SQLRequest(
+        request='''
+            UPDATE MOB_wishes
+            SET submission_date = NULL
+            WHERE id_etudiant = %(id)s
+        ''',
+        params={"id": id_etudiant},
+        allowedRolesRequester=["relations_internationales"]
+    )
+    db_request(current_user, sql_request)
+    return {"message": "La soumission a été annulée avec succès."}
+
+class UpdateAssignmentStatusPayload(BaseModel):
+    id_assignment: int
+    new_status: str
+
+@router.get("/university/admin/mobility/assigned-students",
+            tags=["admin", "mobility"],
+            summary="Get list of students who have an assignment")
+def get_assigned_students(
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    sql_request = SQLRequest(
+        request='''
+            SELECT a.id_assignment, a.id_etudiant, a.status, e.nom, e.prenom, e.mail, 
+                   f.nom_filiere, u.name as university_name
+            FROM MOB_assignment a
+            JOIN LNM_etudiant e ON a.id_etudiant = e.id_etudiant
+            JOIN LNM_promo p ON e.id_promo = p.id_promo
+            JOIN LNM_filiere f ON p.id_filiere = f.id_filiere
+            JOIN MOB_partner_university u ON a.id_partner_university = u.id_partner_university
+            ORDER BY e.nom ASC, e.prenom ASC
+        ''',
+        params=None,
+        allowedRolesRequester=["relations_internationales"]
+    )
+    result = db_request(current_user, sql_request)
+    return result if result else []
+
+@router.get("/university/admin/mobility/assigned-students/export/{status}",
+            tags=["admin", "mobility"],
+            summary="Export assigned students by status")
+def export_assigned_students_status(
+    status: str,
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    if status not in ['accepted', 'pending', 'declined']:
+        raise HTTPException(status_code=400, detail="Invalid status")
+        
+    sql_request = SQLRequest(
+        request='''
+            SELECT a.id_etudiant, a.status, e.nom, e.prenom, e.mail, 
+                   f.nom_filiere, u.name as university_name, u.country
+            FROM MOB_assignment a
+            JOIN LNM_etudiant e ON a.id_etudiant = e.id_etudiant
+            JOIN LNM_promo p ON e.id_promo = p.id_promo
+            JOIN LNM_filiere f ON p.id_filiere = f.id_filiere
+            JOIN MOB_partner_university u ON a.id_partner_university = u.id_partner_university
+            WHERE a.status = %(status)s
+            ORDER BY e.nom ASC, e.prenom ASC
+        ''',
+        params={"status": status},
+        allowedRolesRequester=["relations_internationales"]
+    )
+    result = db_request(current_user, sql_request)
+    
+    import openpyxl
+    import io
+    from fastapi.responses import StreamingResponse
+    
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = f"Affectations {status.capitalize()}"
+    
+    headers = ["ID Etudiant", "Nom", "Prénom", "Email", "Filière", "Université Attribuée", "Pays", "Statut"]
+    ws.append(headers)
+    
+    if result:
+        for row in result:
+            ws.append([
+                row.get("id_etudiant", ""),
+                row.get("nom", ""),
+                row.get("prenom", ""),
+                row.get("mail", ""),
+                row.get("nom_filiere", ""),
+                row.get("university_name", ""),
+                row.get("country", ""),
+                row.get("status", "")
+            ])
+            
+    stream = io.BytesIO()
+    wb.save(stream)
+    stream.seek(0)
+    
+    headers_res = {
+        'Content-Disposition': f'attachment; filename="Export_Affectations_{status}.xlsx"'
+    }
+    return StreamingResponse(iter([stream.getvalue()]), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers=headers_res)
+
+@router.post("/university/admin/mobility/update-assignment-status",
+             tags=["admin", "mobility"],
+             summary="Update assignment status")
+def update_assignment_status(
+    payload: UpdateAssignmentStatusPayload,
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    if payload.new_status not in ['pending', 'accepted', 'declined']:
+        raise HTTPException(status_code=400, detail="Invalid status")
+        
+    sql_request = SQLRequest(
+        request='UPDATE MOB_assignment SET status = %(status)s WHERE id_assignment = %(id)s',
+        params={"status": payload.new_status, "id": payload.id_assignment},
+        allowedRolesRequester=["relations_internationales"]
+    )
+    db_request(current_user, sql_request)
+    return {"message": "Assignment status updated successfully"}
+
 @router.get("/university/admin/mobility/diagnostics",
             tags=["admin", "mobility"],
             summary="Get statistics and diagnostics for mobility procedure")

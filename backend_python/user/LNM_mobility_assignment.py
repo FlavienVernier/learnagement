@@ -14,33 +14,25 @@ from pydantic import BaseModel
 
 class AssignmentRunPayload(BaseModel):
     annee_eligible: int = 4
-    statuts_eligibles: List[int] = [1, 2, 3, 4]
-    mobility_completed: bool = False
+    filiere_limits: Dict[str, int] = {}
 
-def get_eligible_students(current_user: User, annee: int, statuts: List[int], mobility_completed: bool) -> List[dict]:
+def get_eligible_students(current_user: User, annee: int) -> List[dict]:
     """
     Étape 1: Récupérer les étudiants éligibles.
     Retourne une liste de dictionnaires avec id_etudiant, mobility_note, id_promo, id_filiere et submission_date.
     """
-    if not statuts:
-        return []
-
-    statuts_str = ", ".join(str(int(s)) for s in statuts)
     query = f"""
         SELECT e.id_etudiant, e.mobility_note, e.id_promo, p.id_filiere, MAX(w.submission_date) as submission_date
         FROM LNM_etudiant e
         JOIN LNM_promo p ON e.id_promo = p.id_promo
         JOIN MOB_wishes w ON e.id_etudiant = w.id_etudiant
-        WHERE e.mobility_completed = %(mobility_completed)s
-          AND p.annee = %(annee)s
-          AND p.id_statut IN ({statuts_str})
+        WHERE p.annee = %(annee)s
           AND w.submission_date IS NOT NULL
         GROUP BY e.id_etudiant, e.mobility_note, e.id_promo, p.id_filiere
     """
     request = {
         "request": query,
         "params": {
-            "mobility_completed": int(mobility_completed),
             "annee": annee
         },
         "allowedRolesRequester": ["relations_internationales"]
@@ -150,7 +142,7 @@ def get_available_places(current_user: User) -> dict:
         "stages": stages_list
     }
 
-def run_round_robin_assignment(students: List[dict], wishes: List[dict], places: dict) -> List[dict]:
+def run_round_robin_assignment(students: List[dict], wishes: List[dict], places: dict, filiere_limits: Dict[str, int] = None) -> List[dict]:
     """
     Étape 5: Logique d'affectation Round-Robin.
     Retourne la liste des affectations validées.
@@ -205,9 +197,7 @@ def run_mobility_assignment(
     # Étape 1 : Récupérer les étudiants
     students = get_eligible_students(
         current_user=current_user,
-        annee=payload.annee_eligible,
-        statuts=payload.statuts_eligibles,
-        mobility_completed=payload.mobility_completed
+        annee=payload.annee_eligible
     )
     # return {"eligible_students": students}
     
@@ -221,7 +211,7 @@ def run_mobility_assignment(
     places = get_available_places(current_user)
     
     # Étape 5 : Exécuter l'algorithme Round-Robin
-    assignments = run_round_robin_assignment(sorted_students, wishes, places)
+    assignments = run_round_robin_assignment(sorted_students, wishes, places, payload.filiere_limits)
     
     # Étape 6 : Sauvegarder les résultats
     save_assignments(assignments, current_user)

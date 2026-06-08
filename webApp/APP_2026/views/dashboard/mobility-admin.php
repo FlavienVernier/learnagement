@@ -82,7 +82,7 @@
             </div>
         </div>
         <div class="mb-4 flex flex-wrap gap-4">
-            <button onclick="document.getElementById('procedureModal').classList.remove('hidden')" class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 hover:shadow transition">
+            <button onclick="window.openProcedureModal()" class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 hover:shadow transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 Centre de Contrôle : Procédure
             </button>
@@ -236,22 +236,49 @@
 
     <!-- Procedure Modal -->
     <div id="procedureModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[2000] flex items-center justify-center">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
-            <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                Centre de Contrôle : Mobilité
-            </h3>
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-6xl p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-6">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Centre de Contrôle : Mobilité
+                </h3>
+                <button onclick="document.getElementById('procedureModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
             
-            <div class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-0">
+                <!-- COLONNE 1 -->
+                <div class="space-y-6 lg:border-r lg:border-gray-200 lg:pr-8">
 
                 <!-- ETAPE 1 -->
                 <div>
                     <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2 flex items-center gap-2">
                         <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 1</span>
-                        Clôture des soumissions
+                        Gestion des soumissions
                     </h4>
+
+                    <!-- Annulation individuelle -->
+                    <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                        <h5 class="text-xs font-bold text-gray-700 mb-2">Annulation de soumission individuelle</h5>
+                        <p class="text-[11px] text-gray-500 mb-3">Redonner la main à un étudiant pour modifier ses choix avant la clôture finale.</p>
+                        <select id="resetStudentSelect" onchange="window.onResetStudentChange()" class="w-full text-sm border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 mb-3">
+                            <option value="">Sélectionnez un étudiant...</option>
+                        </select>
+                        <div id="resetStudentDetails" class="hidden bg-white p-3 rounded border text-xs text-gray-600 mb-3">
+                            <p><strong>Nom complet:</strong> <span id="rsName"></span></p>
+                            <p><strong>Email:</strong> <span id="rsEmail"></span></p>
+                            <p><strong>Filière:</strong> <span id="rsFiliere"></span></p>
+                        </div>
+                        <button id="btnResetWishes" onclick="window.resetStudentWishes()" class="hidden inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            Annuler la soumission
+                        </button>
+                    </div>
+
+                    <h5 class="text-xs font-bold text-gray-700 mb-2">Clôture globale</h5>
                     <p class="text-xs text-gray-500 mb-3">Verrouille tous les dossiers pour figer les données et force la soumission des vœux incomplets.</p>
-                    <button onclick="window.forceSubmitWishes()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
+                    <button onclick="window.forceSubmitWishesUI()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                         Clôturer les soumissions
                     </button>
@@ -265,56 +292,111 @@
                         <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 2</span>
                         Exécution de l'algorithme
                     </h4>
-                    <p class="text-xs text-gray-500 mb-4">Calcule les affectations (Round-Robin) selon le Z-score et les préférences. Paramétrez les filtres ci-dessous avant de lancer.</p>
-                    
-                    <div class="space-y-4 bg-gray-50 p-4 rounded-lg border border-gray-100">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Statuts éligibles</label>
-                            <div class="grid grid-cols-2 gap-2 text-sm">
-                                <label class="flex items-center gap-2"><input type="checkbox" value="1" class="assign-statut" checked> Initial</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="2" class="assign-statut" checked> Apprenti</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="3" class="assign-statut" checked> Formation Continue</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" value="4" class="assign-statut" checked> Contrat Pro</label>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                                <input type="checkbox" id="assignMobilityCompleted" checked>
-                                Exclure les étudiants ayant déjà validé leur mobilité
-                            </label>
+                    <div class="bg-blue-50 text-blue-800 text-xs p-3 rounded-lg border border-blue-100 mb-4 flex gap-2 items-start">
+                        <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        L'algorithme sera exécuté pour tous les étudiants de 4ème année ayant soumis leurs vœux, peu importe leur statut (Initial, Apprenti...) ou s'ils ont déjà effectué une mobilité par le passé.
+                    </div>
+
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-100 mb-4">
+                        <h5 class="text-xs font-bold text-gray-700 mb-2">Quotas de rétention par filière</h5>
+                        <p class="text-[11px] text-gray-500 mb-3">Indiquez le nombre d'étudiants à conserver en local pour chaque filière (0 par défaut).</p>
+                        <div id="filiereQuotasContainer" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <span class="text-xs text-gray-400 italic">Chargement des filières...</span>
                         </div>
                     </div>
                     
                     <div class="mt-4">
-                        <button onclick="window.runAssignment()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">
+                        <button onclick="window.runAssignmentUI()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
                             Lancer l'affectation automatique
                         </button>
                     </div>
                 </div>
+                </div>
 
-                <hr class="border-gray-200">
-
-                <!-- ETAPE 3 -->
+                <!-- COLONNE 2 -->
+                <div class="space-y-6 lg:pl-8">
+                    <!-- ETAPE 3 -->
                 <div>
                     <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2 flex items-center gap-2">
                         <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 3</span>
-                        Exportation des Résultats
+                        Validation manuelle des affectations
                     </h4>
-                    <p class="text-xs text-gray-500 mb-3">Téléchargez les listes finales pour communication aux universités partenaires.</p>
-                    <div class="flex gap-3">
-                        <button onclick="exportWishes()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                            Vœux (XLSX)
-                        </button>
-                        <button onclick="exportAssignments()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                            Affectations (XLSX)
-                        </button>
+                    <p class="text-xs text-gray-500 mb-3">Modifiez manuellement le statut d'un étudiant s'il vous confirme sa décision en personne.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                        <!-- Colonne de gauche : Modification -->
+                        <div>
+                            <div class="mb-4">
+                                <label for="validationStudentSelect" class="block text-xs font-semibold text-gray-700 mb-1">Sélectionnez un étudiant affecté :</label>
+                                <select id="validationStudentSelect" onchange="window.onValidationStudentChange()" class="w-full text-sm border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Chargement...</option>
+                                </select>
+                            </div>
+
+                            <div id="validationStudentDetails" class="hidden bg-gray-50 p-3 rounded border border-gray-200 mb-3 text-sm">
+                                <div class="grid grid-cols-2 gap-2 mb-3">
+                                    <p><strong>Nom:</strong> <span id="vsNom"></span></p>
+                                    <p><strong>Filière:</strong> <span id="vsFiliere"></span></p>
+                                    <p class="col-span-2"><strong>Affectation:</strong> <span id="vsUniversity"></span></p>
+                                    <p class="col-span-2 flex items-center gap-2">
+                                        <strong>Statut:</strong> 
+                                        <span id="vsStatusBadge" class="px-2 py-0.5 rounded text-xs font-bold text-white"></span>
+                                    </p>
+                                </div>
+                                
+                                <div class="flex gap-2">
+                                    <button id="btnForceAccept" onclick="window.updateAssignmentStatusUI('accepted')" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700 transition">
+                                        Forcer l'acceptation
+                                    </button>
+                                    <button id="btnForcePending" onclick="window.updateAssignmentStatusUI('pending')" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-amber-600 rounded hover:bg-amber-700 transition">
+                                        Remettre en attente
+                                    </button>
+                                    <button id="btnForceDecline" onclick="window.updateAssignmentStatusUI('declined')" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700 transition">
+                                        Forcer le refus
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Colonne de droite : Graphe et Export -->
+                        <div class="bg-gray-50 border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center">
+                            <h4 class="font-bold text-gray-700 mb-2 text-center text-sm">Statut des Affectations</h4>
+                            <div class="w-full relative h-40 flex justify-center">
+                                <canvas id="chartEtape3Status"></canvas>
+                            </div>
+                            <div class="mt-4 flex gap-3 text-[11px] font-semibold text-indigo-600 flex-wrap justify-center">
+                                <a href="#" onclick="exportAssignedData('accepted')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> Acceptés</a>
+                                <a href="#" onclick="exportAssignedData('pending')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> En attente</a>
+                                <a href="#" onclick="exportAssignedData('declined')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> Refusés</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
+                <hr class="border-gray-200">
+
+
+
+                    <!-- ETAPE 4 -->
+                    <div>
+                        <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2 flex items-center gap-2">
+                            <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 4</span>
+                            Exportation des Résultats
+                        </h4>
+                        <p class="text-xs text-gray-500 mb-3">Téléchargez les listes finales pour communication aux universités partenaires.</p>
+                        <div class="flex gap-3">
+                            <button onclick="exportWishes()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                Vœux (XLSX)
+                            </button>
+                            <button onclick="exportAssignments()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                Affectations (XLSX)
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="mt-8 flex justify-end">
@@ -376,6 +458,23 @@
             
             <div class="mt-8 flex justify-end">
                 <button onclick="document.getElementById('diagnosticsModal').classList.add('hidden')" class="px-5 py-2 text-sm font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition">Fermer</button>
+            </div>
+        </div>
+    </div>
+    <!-- Confirmation Code Modal -->
+    <div id="confirmActionModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-[3000] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 text-center">
+            <h3 class="text-lg font-bold text-red-600 mb-2">Action Critique</h3>
+            <p class="text-sm text-gray-600 mb-4" id="confirmActionDescription"></p>
+            
+            <div class="bg-gray-100 p-3 rounded mb-4 font-mono text-xl tracking-[0.2em] font-bold text-gray-800 select-none" id="confirmActionCodeDisplay"></div>
+            
+            <p class="text-xs text-gray-500 mb-2">Veuillez recopier le code ci-dessus pour confirmer :</p>
+            <input type="text" id="confirmActionCodeInput" class="w-full text-center text-lg font-mono border-gray-300 rounded focus:ring-red-500 focus:border-red-500 mb-4 uppercase" placeholder="Entrez le code" autocomplete="off">
+            
+            <div class="flex gap-3 justify-center">
+                <button onclick="document.getElementById('confirmActionModal').classList.add('hidden')" class="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-200 hover:bg-gray-300 rounded transition">Annuler</button>
+                <button id="confirmActionButton" class="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded transition opacity-50 cursor-not-allowed" disabled>Confirmer</button>
             </div>
         </div>
     </div>
@@ -1261,7 +1360,7 @@ crossorigin=""/>
     resetAddUniversityForm();
     await refreshAllData();
 
-    window.forceSubmitWishes = async function() {
+    window.forceSubmitWishesExec = async function() {
         if (!confirm("Êtes-vous sûr de vouloir forcer la clôture de tous les dossiers de vœux incomplets ?\n\nTous les étudiants ayant fait au moins 1 choix verront leur dossier verrouillé et soumis.")) return;
 
         try {
@@ -1286,22 +1385,18 @@ crossorigin=""/>
         }
     };
 
-    window.runAssignment = async function() {
-        const annee = 4; // Procédure exclusive aux 4ème année
-        const excludeCompleted = document.getElementById('assignMobilityCompleted').checked;
-        
-        const statuts = [];
-        document.querySelectorAll('.assign-statut:checked').forEach(cb => statuts.push(parseInt(cb.value, 10)));
-
-        if (statuts.length === 0) {
-            alert("Veuillez sélectionner au moins un statut.");
-            return;
-        }
+    window.runAssignmentExec = async function() {
+        const filiere_limits = {};
+        document.querySelectorAll('.filiere-quota-input').forEach(input => {
+            const val = parseInt(input.value, 10);
+            if (val > 0) {
+                filiere_limits[input.getAttribute('data-filiere')] = val;
+            }
+        });
 
         const payload = {
-            annee_eligible: annee,
-            statuts_eligibles: statuts,
-            mobility_completed: !excludeCompleted
+            annee_eligible: 4, // Procédure exclusive aux 4ème année
+            filiere_limits: filiere_limits
         };
 
         try {
@@ -1379,6 +1474,349 @@ crossorigin=""/>
         } catch (error) {
             alert("Erreur de connexion.");
         }
+    };
+
+    // Procedure Modal & Reset Logic
+    window.openProcedureModal = function() {
+        document.getElementById('procedureModal').classList.remove('hidden');
+        window.fetchSubmittedStudents();
+        window.fetchAssignedStudents();
+    };
+
+    window.submittedStudentsList = [];
+
+    window.fetchSubmittedStudents = async function() {
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/submitted-students", {
+                headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+            });
+            if (response.ok) {
+                window.submittedStudentsList = await response.json();
+                
+                // Populate Reset Student Dropdown
+                const select = document.getElementById('resetStudentSelect');
+                select.innerHTML = '<option value="">Sélectionnez un étudiant...</option>';
+                window.submittedStudentsList.forEach(student => {
+                    const opt = document.createElement('option');
+                    opt.value = student.id_etudiant;
+                    opt.textContent = `${student.id_etudiant} - ${student.nom} ${student.prenom}`;
+                    select.appendChild(opt);
+                });
+                document.getElementById('resetStudentDetails').classList.add('hidden');
+                document.getElementById('btnResetWishes').classList.add('hidden');
+
+                // Populate Filiere Quotas
+                const filieres = [...new Set(window.submittedStudentsList.map(s => s.nom_filiere))].filter(Boolean).sort();
+                const container = document.getElementById('filiereQuotasContainer');
+                if (filieres.length > 0) {
+                    container.innerHTML = '';
+                    filieres.forEach(filiere => {
+                        const id_safe = 'quota_' + filiere.replace(/[^a-zA-Z0-9]/g, '_');
+                        container.innerHTML += `
+                            <div class="bg-white border border-gray-200 rounded p-2 flex flex-col justify-between">
+                                <label for="${id_safe}" class="text-xs font-semibold text-gray-700 mb-1 truncate" title="${filiere}">${filiere}</label>
+                                <input type="number" id="${id_safe}" data-filiere="${filiere}" class="filiere-quota-input w-full text-sm border-gray-300 rounded px-2 py-1" value="0" min="0">
+                            </div>
+                        `;
+                    });
+                } else {
+                    container.innerHTML = '<span class="text-xs text-gray-400 italic">Aucune filière trouvée.</span>';
+                }
+            }
+        } catch (error) {
+            console.error("Erreur chargement des étudiants soumis", error);
+        }
+    };
+
+    window.onResetStudentChange = function() {
+        const select = document.getElementById('resetStudentSelect');
+        const id = select.value;
+        const detailsDiv = document.getElementById('resetStudentDetails');
+        const btn = document.getElementById('btnResetWishes');
+        
+        if (!id) {
+            detailsDiv.classList.add('hidden');
+            btn.classList.add('hidden');
+            return;
+        }
+
+        const student = window.submittedStudentsList.find(s => s.id_etudiant == id);
+        if (student) {
+            document.getElementById('rsName').textContent = `${student.nom} ${student.prenom}`;
+            document.getElementById('rsEmail').textContent = student.mail;
+            document.getElementById('rsFiliere').textContent = student.nom_filiere;
+            detailsDiv.classList.remove('hidden');
+            btn.classList.remove('hidden');
+        }
+    };
+
+    window.resetStudentWishes = async function() {
+        const select = document.getElementById('resetStudentSelect');
+        const id = select.value;
+        if (!id) return;
+
+        if (!confirm("Êtes-vous sûr de vouloir annuler la soumission de cet étudiant ? Il repassera en statut 'En cours'.")) {
+            return;
+        }
+
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/reset-wishes/" + id, {
+                method: 'POST',
+                headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+            });
+
+            if (response.ok) {
+                alert("Soumission annulée avec succès.");
+                window.fetchSubmittedStudents();
+                if (typeof refreshAllData === 'function') {
+                    refreshAllData();
+                }
+            } else {
+                alert("Erreur lors de l'annulation.");
+            }
+        } catch (error) {
+            alert("Erreur de connexion.");
+        }
+    };
+
+    // --- Validation manuelle des affectations (Etape 3) ---
+    window.assignedStudentsList = [];
+
+    window.fetchAssignedStudents = async function() {
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/assigned-students", {
+                headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+            });
+            if (response.ok) {
+                window.assignedStudentsList = await response.json();
+                
+                const select = document.getElementById('validationStudentSelect');
+                select.innerHTML = '<option value="">Sélectionnez un étudiant...</option>';
+                window.assignedStudentsList.forEach(student => {
+                    const opt = document.createElement('option');
+                    opt.value = student.id_assignment; // On se base sur id_assignment
+                    opt.textContent = `${student.id_etudiant} - ${student.nom} ${student.prenom}`;
+                    select.appendChild(opt);
+                });
+                document.getElementById('validationStudentDetails').classList.add('hidden');
+                
+                if (typeof Chart !== 'undefined') {
+                    window.renderEtape3Chart();
+                }
+            }
+        } catch (error) {
+            console.error("Erreur chargement des affectations", error);
+        }
+    };
+
+    window.onValidationStudentChange = function() {
+        const select = document.getElementById('validationStudentSelect');
+        const id_assignment = select.value;
+        const detailsDiv = document.getElementById('validationStudentDetails');
+        
+        if (!id_assignment) {
+            detailsDiv.classList.add('hidden');
+            return;
+        }
+
+        const student = window.assignedStudentsList.find(s => s.id_assignment == id_assignment);
+        if (student) {
+            document.getElementById('vsNom').textContent = `${student.nom} ${student.prenom}`;
+            document.getElementById('vsFiliere').textContent = student.nom_filiere;
+            document.getElementById('vsUniversity').textContent = student.university_name;
+            
+            const badge = document.getElementById('vsStatusBadge');
+            
+            const btnAccept = document.getElementById('btnForceAccept');
+            const btnDecline = document.getElementById('btnForceDecline');
+            const btnPending = document.getElementById('btnForcePending');
+
+            btnAccept.classList.remove('hidden');
+            btnDecline.classList.remove('hidden');
+            btnPending.classList.remove('hidden');
+
+            if (student.status === 'accepted') {
+                badge.textContent = 'Accepté';
+                badge.className = 'px-2 py-0.5 rounded text-xs font-bold text-white bg-green-500';
+                btnAccept.classList.add('hidden');
+            } else if (student.status === 'declined') {
+                badge.textContent = 'Refusé';
+                badge.className = 'px-2 py-0.5 rounded text-xs font-bold text-white bg-red-500';
+                btnDecline.classList.add('hidden');
+            } else {
+                badge.textContent = 'En attente';
+                badge.className = 'px-2 py-0.5 rounded text-xs font-bold text-white bg-amber-500';
+                btnPending.classList.add('hidden');
+            }
+            
+            detailsDiv.classList.remove('hidden');
+        }
+    };
+
+    window.updateAssignmentStatusExec = async function(id_assignment, new_status) {
+        try {
+            const payload = {
+                id_assignment: parseInt(id_assignment, 10),
+                new_status: new_status
+            };
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/update-assignment-status", {
+                method: 'POST',
+                headers: {
+                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                alert("Statut mis à jour avec succès.");
+                window.fetchAssignedStudents();
+                if (typeof refreshAllData === 'function') {
+                    refreshAllData();
+                }
+            } else {
+                alert("Erreur lors de la mise à jour.");
+            }
+        } catch (error) {
+            alert("Erreur de connexion.");
+        }
+    };
+
+    window.updateAssignmentStatusUI = function(new_status) {
+        const id_assignment = document.getElementById('validationStudentSelect').value;
+        if (!id_assignment) return;
+        
+        let actionStr = "";
+        if (new_status === 'accepted') actionStr = "l'acceptation";
+        else if (new_status === 'declined') actionStr = "le refus";
+        else actionStr = "la remise en attente";
+
+        window.requireConfirmation(
+            `Vous êtes sur le point de forcer ${actionStr} de cette affectation.`,
+            () => window.updateAssignmentStatusExec(id_assignment, new_status)
+        );
+    };
+
+    window.chartEtape3 = null;
+    
+    window.renderEtape3Chart = function() {
+        const ctx = document.getElementById('chartEtape3Status');
+        if (!ctx) return;
+        
+        let countAcc = 0, countPend = 0, countDec = 0;
+        window.assignedStudentsList.forEach(s => {
+            if (s.status === 'accepted') countAcc++;
+            else if (s.status === 'declined') countDec++;
+            else countPend++;
+        });
+
+        if (window.chartEtape3) {
+            window.chartEtape3.destroy();
+        }
+
+        window.chartEtape3 = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Acceptés', 'En attente', 'Refusés'],
+                datasets: [{
+                    data: [countAcc, countPend, countDec],
+                    backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+                }
+            }
+        });
+    };
+
+    window.exportAssignedData = async function(status) {
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/assigned-students/export/" + status, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
+                }
+            });
+            if (!response.ok) {
+                alert("Erreur lors de l'exportation des données.");
+                return;
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `Export_Affectations_${status}_${new Date().toISOString().slice(0,10)}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            alert("Erreur de connexion.");
+        }
+    };
+
+    // Security Logic for Critical Actions
+    let currentActionCallback = null;
+    let expectedCode = "";
+
+    window.requireConfirmation = function(description, callback) {
+        const modal = document.getElementById('confirmActionModal');
+        const descEl = document.getElementById('confirmActionDescription');
+        const codeDisplay = document.getElementById('confirmActionCodeDisplay');
+        const codeInput = document.getElementById('confirmActionCodeInput');
+        const btnConfirm = document.getElementById('confirmActionButton');
+
+        // Generate random 6 character alphanumeric code
+        expectedCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        
+        descEl.textContent = description;
+        codeDisplay.textContent = expectedCode;
+        codeInput.value = "";
+        btnConfirm.disabled = true;
+        btnConfirm.classList.add('opacity-50', 'cursor-not-allowed');
+        
+        currentActionCallback = callback;
+        modal.classList.remove('hidden');
+        
+        setTimeout(() => codeInput.focus(), 100);
+    };
+
+    document.getElementById('confirmActionCodeInput').addEventListener('input', function(e) {
+        const val = e.target.value.trim().toUpperCase();
+        const btnConfirm = document.getElementById('confirmActionButton');
+        if (val === expectedCode) {
+            btnConfirm.disabled = false;
+            btnConfirm.classList.remove('opacity-50', 'cursor-not-allowed');
+        } else {
+            btnConfirm.disabled = true;
+            btnConfirm.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    });
+
+    document.getElementById('confirmActionButton').addEventListener('click', function() {
+        if (!document.getElementById('confirmActionButton').disabled && currentActionCallback) {
+            document.getElementById('confirmActionModal').classList.add('hidden');
+            currentActionCallback();
+        }
+    });
+
+    window.forceSubmitWishesUI = function() {
+        window.requireConfirmation(
+            "Vous êtes sur le point de clôturer définitivement toutes les soumissions de vœux. Tous les étudiants ayant fait au moins 1 choix verront leur dossier verrouillé.", 
+            window.forceSubmitWishesExec
+        );
+    };
+
+    window.runAssignmentUI = function() {
+        window.requireConfirmation(
+            "Vous êtes sur le point de lancer l'algorithme d'affectation automatique. Ceci écrase les affectations précédentes non validées.", 
+            window.runAssignmentExec
+        );
     };
 
     // Diagnostics Logic
