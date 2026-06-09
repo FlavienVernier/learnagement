@@ -7,7 +7,6 @@ services:
         restart: always
         networks:
             - learnagement_back_${INSTANCE_NAME}
-            - learnagement_front_${INSTANCE_NAME}  # ToDo remove when all dependencies, except CRUD backend, will be removed
         command: --mysql-native-password=ON
         environment:
             - MYSQL_DATABASE=${MYSQL_DB}
@@ -67,10 +66,11 @@ services:
         networks:
               - learnagement_front_${INSTANCE_NAME}
         ports:
-            - "${INSTANCE_NUMBER}0080:80"
+            - "${FRONT_PHP_PORT}:${FRONT_PHP_DOCKER_PORT}"
         volumes:
             - ../webApp:/var/www/html
             - ./log/php:/var/log/apache2
+            - ${SSL_DIR}:${DOCKER_SSL_DIR}:ro
         depends_on:
             backend_python_${INSTANCE_NAME}:
                 condition: service_healthy
@@ -86,6 +86,7 @@ services:
         volumes:
             - ../front_NextJS:/app
             - ../front_NextJS/node_modules:/app/node_modules
+            - ${SSL_DIR}:${DOCKER_SSL_DIR}:ro
         depends_on:
             backend_python_${INSTANCE_NAME}:
                 condition: service_healthy
@@ -100,6 +101,7 @@ services:
         volumes:
             - ../front_DashPlotly/:/app/
             - ../front_DashPlotly/data/:/data/
+            - ${SSL_DIR}:${DOCKER_SSL_DIR}:ro
         depends_on:
             backend_python_${INSTANCE_NAME}:
                 condition: service_healthy

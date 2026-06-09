@@ -2,6 +2,7 @@ import os
 import dotenv
 import logging
 import json
+import inspect
 
 from fastapi import APIRouter, Depends
 from typing import Annotated
@@ -12,68 +13,29 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-##################
-# Enseignant
-##################
-@router.get("/enseignant_sans_cours/",
-             tags=["check"],
-            summary="Teacher without session",
-            description="Check teacher without session.")
-def checkLNM_enseignant_sans_cours(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-):
-    request = {
-        "request" : """SELECT `prenom`, `nom`, `mail`, `statut`, `composante`
+requests = {
+    "get_checkLNM_enseignant_sans_cours" : {
+        "request" : """SELECT LNM_enseignant.`prenom`, LNM_enseignant.`nom`, LNM_enseignant.`mail`, LNM_enseignant.`statut`, LNM_enseignant.`composante`
             FROM LNM_enseignant
             WHERE LNM_enseignant.id_enseignant
                       NOT IN (  SELECT CLASS_session.id_enseignant
                                 FROM CLASS_session
                                 WHERE CLASS_session.id_enseignant IS NOT null);""",
         "allowedRolesRequester" : ["administratif"],
-    }
-    return db_request(current_user, SQLRequest(**request))
-
-#########################
-# Module
-#########################
-@router.get("/module_sans_unite_d_enseignement/",
-             tags=["check"],
-            summary="Module without learning unit",
-            description="Check module not link to a learning unit.")
-def  checkMAQUETTE_moduleWithoutLearningUnit(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-):
-    request = {
-        "request" : """SELECT `code_module`, `nom`
+    },
+    "get_checkMAQUETTE_moduleWithoutLearningUnit" : {
+        "request" : """SELECT MAQUETTE_module.`code_module`, MAQUETTE_module.`nom`
             FROM `MAQUETTE_module`
             WHERE `id_module` NOT IN (SELECT `id_module` FROM MAQUETTE_module_as_learning_unit);""",
         "allowedRolesRequester" : ["administratif"],
-    }
-    return db_request(current_user, SQLRequest(**request))
-
-@router.get("/module_sans_apprentissage_critique/",
-             tags=["check"],
-            summary="Module without apprentissage critique",
-            description="Check module without apprentissage critique.")
-def module_sans_apprentissage_critique(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-):
-    request = {
-        "request" : """SELECT `code_module`, `nom`
+    },
+    "get_module_sans_apprentissage_critique" : {
+        "request" : """SELECT MAQUETTE_module.`code_module`, MAQUETTE_module.`nom`
             FROM `MAQUETTE_module`
             WHERE `id_module` NOT IN (SELECT id_module FROM APC_apprentissage_critique_as_module);""",
         "allowedRolesRequester" : ["administratif"],
-    }
-    return db_request(current_user, SQLRequest(**request))
-
-@router.get("/module_detail_ects/",
-             tags=["check"],
-            summary="ECTs weight",
-            description="Check ratio hours ECTs.")
-def  module_detail_ects(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-):
-    request = {
+    },
+    "get_module_detail_ects" : {
         "request" : """SELECT
                 `MAQUETTE_module`.`code_module` AS `code_module`,
                 `MAQUETTE_module`.`nom` AS `nom`,
@@ -89,21 +51,8 @@ def  module_detail_ects(
                 GROUP BY `MAQUETTE_module`.`id_module`
                 ORDER BY `MAQUETTE_module`.`code_module`;""",
         "allowedRolesRequester" : ["administratif"],
-    }
-    return db_request(current_user, SQLRequest(**request))
-
-########################
-# Class
-########################
-
-@router.get("/session_sans_intervenant/",
-             tags=["check"],
-            summary="Session without teacher",
-            description="Check session without teacher.")
-def  session_sans_intervenant(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-):
-    request = {
+    },
+    "get_session_sans_intervenant" : {
         "request" : """SELECT
                 CLASS_session.id_groupe,
                 LNM_groupe.nom_groupe,
@@ -133,18 +82,8 @@ def  session_sans_intervenant(
                 LEFT JOIN LNM_groupe_type ON LNM_groupe_type.id_groupe_type = MAQUETTE_module_sequencage.id_groupe_type
             WHERE CLASS_session.id_enseignant IS NULL;""",
         "allowedRolesRequester" : ["administratif"],
-    }
-    return db_request(current_user, SQLRequest(**request))
-
-
-@router.get("/session_reference_corruption/",
-             tags=["check"],
-            summary="Session foreign K coruption",
-            description="Check session not linked to module.")
-def session_reference_corruption(
-        current_user: Annotated[User, Depends(get_current_active_user)],
-):
-    request = {
+    },
+    "get_session_reference_corruption" : {
         "request": """
             SELECT
                 CLASS_session.`id_session`,
@@ -154,18 +93,8 @@ def session_reference_corruption(
             LEFT JOIN MAQUETTE_module_sequence ON MAQUETTE_module_sequence.id_module_sequence = CLASS_session.id_module_sequence
             WHERE MAQUETTE_module_sequence.id_module_sequence IS NULL;""",
         "allowedRolesRequester" : ["administratif"],
-    }
-    return db_request(current_user, SQLRequest(**request))
-
-# ToDo to finished
-@router.get("/maquette_vs_sequencage/",
-            tags=["check"],
-            summary="Session hours Vs Program",
-            description="Check whether the number of sequencage hours corresponds to the program.")
-def maquette_vs_sequencage(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-):
-    request = {
+    },
+    "get_maquette_vs_sequencage" : {
         "request" : """
                         SELECT hMaquette.ExplicitSecondaryK, 
                                hMaquette.code_module,
@@ -212,19 +141,8 @@ def maquette_vs_sequencage(
                         ON hMaquette.code_module = hSession.code_module AND hMaquette.ExplicitSecondaryK = hSession.ExplicitSecondaryK
                     """,
         "allowedRolesRequester" : ["administratif", "responsable_etudes"],
-    }
-    return db_request(current_user, SQLRequest(**request))
-
-
-@router.get("/maquette_vs_sequencage/{id_responsable}/",
-            tags=["check"],
-            summary="Session hours Vs Program",
-            description="Check whether the number of sequencage hours corresponds to the program.")
-def maquette_vs_sequencage_by_idResp(
-        id_responsable: int,
-        current_user: Annotated[User, Depends(get_current_active_user)],
-):
-    request = {
+    },
+    "get_maquette_vs_sequencage_by_idResp" : {
         "request": """
                     SELECT DISTINCT
                         MAQUETTE_module.id_module,
@@ -268,11 +186,110 @@ def maquette_vs_sequencage_by_idResp(
                         GROUP BY code_module) PROJsequenced ON  PROJsequenced.code_module = MAQUETTE_module.code_module
                     WHERE MAQUETTE_module.id_responsable = %(id_responsable)s
                     """,
-        "params": {
-            "id_responsable": id_responsable,
-        },
-        "allowedRolesRequester": ["administratif", "responsable_etudes"],
-    }
-    if current_user.id == id_responsable:
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        "params":
+            lambda id_responsable: {"id_responsable": id_responsable},
+        #"allowedRolesRequester": ["administratif", "responsable_etudes"],
+        "allowedRolesRequester": lambda id_responsable, current_user: [current_user.ExplicitSecondaryK] if id_responsable and current_user.id == id_responsable else ["administratif", "responsable_etudes"],
+
+    },
+}
+
+##################
+# Enseignant
+##################
+@router.get("/enseignant_sans_cours/",
+             tags=["check"],
+            summary="Teacher without session",
+            description="Check teacher without session.")
+def checkLNM_enseignant_sans_cours(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = requests["get_" + inspect.currentframe().f_code.co_name]
     return db_request(current_user, SQLRequest(**request))
+
+#########################
+# Module
+#########################
+@router.get("/module_sans_unite_d_enseignement/",
+             tags=["check"],
+            summary="Module without learning unit",
+            description="Check module not link to a learning unit.")
+def  checkMAQUETTE_moduleWithoutLearningUnit(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request =  requests["get_" + inspect.currentframe().f_code.co_name]
+    return db_request(current_user, SQLRequest(**request))
+
+@router.get("/module_sans_apprentissage_critique/",
+             tags=["check"],
+            summary="Module without apprentissage critique",
+            description="Check module without apprentissage critique.")
+def module_sans_apprentissage_critique(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request =  requests["get_" + inspect.currentframe().f_code.co_name]
+    return db_request(current_user, SQLRequest(**request))
+
+@router.get("/module_detail_ects/",
+             tags=["check"],
+            summary="ECTs weight",
+            description="Check ratio hours ECTs.")
+def  module_detail_ects(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request =  requests["get_" + inspect.currentframe().f_code.co_name]
+    return db_request(current_user, SQLRequest(**request))
+
+########################
+# Class
+########################
+
+@router.get("/session_sans_intervenant/",
+             tags=["check"],
+            summary="Session without teacher",
+            description="Check session without teacher.")
+def  session_sans_intervenant(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request =  requests["get_" + inspect.currentframe().f_code.co_name]
+    return db_request(current_user, SQLRequest(**request))
+
+
+@router.get("/session_reference_corruption/",
+             tags=["check"],
+            summary="Session foreign K coruption",
+            description="Check session not linked to module.")
+def session_reference_corruption(
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request =  requests["get_" + inspect.currentframe().f_code.co_name]
+    return db_request(current_user, SQLRequest(**request))
+
+# ToDo to finished
+@router.get("/maquette_vs_sequencage/",
+            tags=["check"],
+            summary="Session hours Vs Program",
+            description="Check whether the number of sequencage hours corresponds to the program.")
+def maquette_vs_sequencage(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request =  requests["get_" + inspect.currentframe().f_code.co_name]
+    return db_request(current_user, SQLRequest(**request))
+
+
+@router.get("/maquette_vs_sequencage/{id_responsable}/",
+            tags=["check"],
+            summary="Session hours Vs Program",
+            description="Check whether the number of sequencage hours corresponds to the program.")
+def maquette_vs_sequencage_by_idResp(
+        id_responsable: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request =  requests["get_" + inspect.currentframe().f_code.co_name]
+    request["params"] = request["params"](id_responsable) if callable(request["params"]) else request["params"]
+    request["allowedRolesRequester"] = request["allowedRolesRequester"](id_responsable, current_user) if callable(request["allowedRolesRequester"]) else request["allowedRolesRequester"]
+    # if id_responsable and current_user.id == id_responsable:
+    #     request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    return db_request(current_user, SQLRequest(**request))
+
+

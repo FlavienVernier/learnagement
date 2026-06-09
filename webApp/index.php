@@ -1,3 +1,14 @@
+<?php
+    require_once("config.php");
+    loadEnv(".");
+
+    // Redirection to load only prod app
+    if ($_ENV["ENV"] == "prod") {
+        header('Location: ./APP_2026');
+        exit();
+    }
+    ?>
+<!DOCTYPE html>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -10,14 +21,10 @@
   </head>
   <body>
     <main>
-      <h1>Choose your app</h1>
-      <a href="./rawWebApp/activateAccount.php">Gen Hash Pwd</a></br>
-      <a href="./APP_2026/learnagement.php">APP 2026</a></br>
-        <?php
-            require_once("config.php");
-            loadEnv(".");
-            print("<a href=" . $_ENV["NEXTAUTH_URL"] . ">L3 INFO SCEM 2025</a></br>")
-        ?>
+        <h1>Choose your app</h1>
+        <a href="./rawWebApp/activateAccount.php">Gen Hash Pwd</a></br>
+        <a href="./APP_2026">APP 2026</a></br>
+        <a href="<?= $_ENV['INSTANCE_URL'] . ':' . $_ENV['FRONT_NEXTAUTH_PORT'] ?>">L3 INFO SCEM 2025</a><br>
     </main>
   </body>
 </html>

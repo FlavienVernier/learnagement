@@ -37,6 +37,7 @@ class User(BaseModel):
     nom: str
     mail: str | None = None
     ExplicitSecondaryK: str
+    main_role: str
     roles: list = []
     password2update: bool = False
 
@@ -72,64 +73,80 @@ def db_connexion():
         logger.exception(e)
         raise e
 
-def get_administratif(user_login: str):
+def get_administratif(user_login: str, method: str = "byMail"):
+    if method == "byMail":
+        login_field = "mail"
+    elif method == "byLoggin":
+        login_field = "login"
     users=[]
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("""SELECT LNM_administratif.id_administratif AS id, 
+        cursor.execute(f"""SELECT LNM_administratif.id_administratif AS id, 
                                  LNM_administratif.*, 
                                  ExplicitSecondaryKs_LNM_administratif.ExplicitSecondaryK
                           FROM LNM_administratif 
                           JOIN ExplicitSecondaryKs_LNM_administratif ON ExplicitSecondaryKs_LNM_administratif.id_administratif = LNM_administratif.id_administratif
-                          WHERE mail = %s""", (user_login,))
+                          WHERE {login_field} = %s""", (user_login,))
         users = cursor.fetchall()
     except Exception as e:
         logger.exception(e)
     if len(users) != 0:
         user_dict = users[0]
-        user_dict["roles"] = ["user", "administratif", users[0]['ExplicitSecondaryK']]
+        if not user_dict.get("password"):
+            logger.warning(f"Inactive user '{user_login}' try to connect")
+            return None
+        user_dict["main_role"] = "administratif"
+        user_dict["roles"] = ["connected_user", user_dict["main_role"], users[0]['ExplicitSecondaryK']]
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor()
         cursor.execute(
-            """SELECT LNM_role.role 
+            f"""SELECT LNM_role.role 
                         FROM LNM_administratif 
                         JOIN LNM_administratif_as_role on LNM_administratif_as_role.id_administratif = LNM_administratif.id_administratif
                         JOIN LNM_role on LNM_role.id_role = LNM_administratif_as_role.id_role
-                        WHERE mail = %s""",
+                        WHERE {login_field} = %s""",
             (user_login,))
         roles = cursor.fetchall()
         user_dict["roles"] += [item for t in roles for item in t]
         return UserInDB(**user_dict)
     return None
 
-def get_enseignant(user_login: str):
+def get_enseignant(user_login: str, method: str = "byMail"):
+    if method == "byMail":
+        login_field = "mail"
+    elif method == "byLoggin":
+        login_field = "login"
     users=[]
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("""
+        cursor.execute(f"""
                        SELECT LNM_enseignant.id_enseignant AS id, 
                               LNM_enseignant.*,
                               ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK
                        FROM LNM_enseignant 
                        JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = LNM_enseignant.id_enseignant
-                       WHERE mail = %s""",
+                       WHERE {login_field} = %s""",
                        (user_login,))
         users = cursor.fetchall()
     except Exception as e:
         logger.exception(e)
     if len(users) != 0:
         user_dict = users[0]
-        user_dict["roles"] = ["user", "enseignant", users[0]['ExplicitSecondaryK']]
+        if not user_dict.get("password"):
+            logger.warning(f"Inactive user '{user_login}' try to connect")
+            return None
+        user_dict["main_role"] = "enseignant"
+        user_dict["roles"] = ["connected_user", user_dict["main_role"], users[0]['ExplicitSecondaryK']]
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor()
         cursor.execute(
-            """SELECT LNM_role.role 
+            f"""SELECT LNM_role.role 
                         FROM LNM_enseignant 
                         JOIN LNM_enseignant_as_role on LNM_enseignant_as_role.id_enseignant = LNM_enseignant.id_enseignant
                         JOIN LNM_role on LNM_role.id_role = LNM_enseignant_as_role.id_role
-                        WHERE mail = %s""",
+                        WHERE {login_field} = %s""",
             (user_login,))
         roles = cursor.fetchall()
         user_dict["roles"] += [item for t in roles for item in t]
@@ -137,45 +154,74 @@ def get_enseignant(user_login: str):
     return None
 
 
-def get_etudiant(user_login: str):
+def get_etudiant(user_login: str, method: str = "byMail"):
+    if method == "byMail":
+        login_field = "mail"
+    elif method == "byLoggin":
+        login_field = "login"
     users=[]
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("""SELECT LNM_etudiant.id_etudiant AS id, 
+        cursor.execute(f"""SELECT LNM_etudiant.id_etudiant AS id, 
                                  LNM_etudiant.*,
                                  ExplicitSecondaryKs_LNM_etudiant.ExplicitSecondaryK
                           FROM LNM_etudiant 
                           JOIN ExplicitSecondaryKs_LNM_etudiant ON ExplicitSecondaryKs_LNM_etudiant.id_etudiant = LNM_etudiant.id_etudiant
-                          WHERE mail = %s""",
+                          WHERE {login_field} = %s""",
                        (user_login,))
         users = cursor.fetchall()
     except Exception as e:
         logger.exception(e)
     if len(users) != 0:
         user_dict = users[0]
-        user_dict["roles"] = ["user", "etudiant", users[0]['ExplicitSecondaryK']]
+        if not user_dict.get("password"):
+            logger.warning(f"Inactive user '{user_login}' try to connect")
+            return None
+        user_dict["main_role"] = "etudiant"
+        user_dict["roles"] = ["connected_user", user_dict["main_role"], users[0]['ExplicitSecondaryK']]
         return UserInDB(**user_dict)
     return None
 
-def get_user(user_login: str):
-    administratif = get_administratif(user_login)
-    user = None
-    if administratif is not None:
-        user = get_administratif(user_login)
+def get_user(user_login: str, method: str = "byMail"):
+    fetchers = [get_administratif, get_enseignant, get_etudiant]
 
-    enseignant = get_enseignant(user_login)
-    if enseignant is not None:
-        user = get_enseignant(user_login)
+    user = next(
+        filter(None, (f(user_login, method) for f in fetchers)),
+        None
+    )
 
-    etudiant = get_etudiant(user_login)
-    if etudiant is not None:
-        user = get_etudiant(user_login)
     if user is not None:
-        logger.info(f"User {user_login} logged as {user}")
+        logger.info(f"User {user_login} logged with {method}")
     else:
-        logger.error(f"Logging error with login: {user_login}")
+        logger.error(f"Logging error with login: {user_login}, with method: {method}")
+
     return user
+
+# ToDo Utiliser get_user_cached dans get_current_user en interface entre get_current_user et get_user pour avoir un cache Redis et limiter les requesters SQL relative à l'utilisateur
+# import redis
+# import pickle
+#
+# redis_client = redis.Redis(host="localhost", port=6379, db=0)
+# _CACHE_TTL = 300
+#
+#
+# def get_user_cached(user_login: str, method: str = "byMail") -> UserInDB | None:
+#     cache_key = f"user:{method}:{user_login}"
+#
+#     cached = redis_client.get(cache_key)
+#     if cached:
+#         return pickle.loads(cached)
+#
+#     user = get_user(user_login, method)
+#     if user:
+#         redis_client.setex(cache_key, _CACHE_TTL, pickle.dumps(user))
+#     return user
+
+# def invalidate_user_cache(user_login: str):
+#     for method in ["byMail", "byLoggin"]:
+#         redis_client.delete(f"user:{method}:{user_login}")
+# # À appeler dans vos endpoints de modification d'utilisateur, logout, voire périodiquement "timeout".
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     credentials_exception = HTTPException(
@@ -186,12 +232,12 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     #print(token, flush=True)
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        userlogin = payload.get("email")
+        user_login = payload.get("email")
         #print("userlogin", userlogin, flush=True)
-        if userlogin is None:
+        if user_login is None:
             logger.error(f"Login error with payload: {payload}")
             raise credentials_exception
-        token_data = TokenData(mail=userlogin)
+        token_data = TokenData(mail=user_login)
         #print("token_data", token_data, flush=True)
     except InvalidTokenError as e:
         logger.error(f"Invalid token : {e}")
@@ -234,6 +280,8 @@ def db_request(requester: User, request: SQLRequest):
         logger.info(f"Anonymous user requests {request}")
 
     rows = []
+    connection = None
+    cursor = None
     try:
         connection = mysql.connector.connect(**db_connexion())
         cursor = connection.cursor(dictionary=True)
@@ -245,15 +293,20 @@ def db_request(requester: User, request: SQLRequest):
             cursor.execute(request.request)
             #cursor.execute(sqlalchemy.text(request.request))
 
-        rows = cursor.fetchall()
+        if getattr(cursor, "with_rows", False):
+            rows = cursor.fetchall()
+        else:
+            rows = []
         #logger.info(f"User {requester.id} has {rows}")
         connection.commit()
-        connection.close()
     except Exception as e:
         logger.exception(e)
+        raise HTTPException(status_code=500, detail=f"Database request failed: {e}")
     finally:
-        cursor.close()
-        connection.close()
+        if cursor is not None:
+            cursor.close()
+        if connection is not None:
+            connection.close()
     #return json.dumps([dict(ix) for ix in rows]) # return string
     return [dict(ix) for ix in rows] # return list that will be converted to json
 

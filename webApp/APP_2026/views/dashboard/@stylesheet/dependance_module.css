@@ -1,0 +1,565 @@
+/* ===================== FILTERS SECTION ===================== */
+
+/* Le conteneur des filtres */
+body .dependance-module-container .main-content #filters-section,
+body .dependance-module-container #filters-section {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: flex-end !important;
+    gap: 16px !important;
+    padding: 14px 16px !important;
+    background: var(--surface) !important;
+    border: 0.5px solid var(--border) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-sm) !important;
+    margin-bottom: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Chaque input-wrap dans les filtres prend sa place naturellement */
+body .dependance-module-container #filters-section .input-wrap {
+    width: auto !important;
+    flex: 1 1 220px !important;
+    min-width: 180px !important;
+    max-width: 340px !important;
+}
+
+/* Le select lui-même */
+body .dependance-module-container #filters-section .input-wrap .select-wrap .select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 100% !important;
+    padding: 9px 36px 9px 12px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: var(--text-primary) !important;
+    background-color: var(--surface) !important;
+    background-image: none !important;
+    border: 1.5px solid var(--border) !important;
+    border-radius: var(--radius-lg) !important;
+    cursor: pointer !important;
+    outline: none !important;
+    line-height: 1.5 !important;
+    transition: border-color var(--transition), box-shadow var(--transition), background-color var(--transition) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+body .dependance-module-container #filters-section .input-wrap .select-wrap .select:hover {
+    border-color: var(--border-strong) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+body .dependance-module-container #filters-section .input-wrap .select-wrap .select:focus {
+    border-color: var(--border-strong) !important;
+    box-shadow: var(--focus-ring) !important;
+    background-color: var(--surface-subtle) !important;
+}
+
+/* Chevron dans les filtres */
+body .dependance-module-container #filters-section .input-wrap .select-wrap .select-chevron {
+    position: absolute !important;
+    right: 11px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: var(--text-primary) !important;
+    font-size: 15px !important;
+    pointer-events: none !important;
+    transition: transform var(--transition) !important;
+    line-height: 1 !important;
+}
+
+body .dependance-module-container #filters-section .input-wrap .select-wrap:focus-within .select-chevron {
+    transform: translateY(-50%) rotate(180deg) !important;
+}
+
+body .dependance-module-container .tags-container {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    min-height: 0 !important;
+    margin-bottom: 10px !important;
+}
+
+body .dependance-module-container .tags-container:empty {
+    display: none !important;
+}
+
+body .dependance-module-container .input-wrap {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px;
+    width: 30%;
+}
+
+/* ── Label ── */
+body .dependance-module-container .input-wrap .input-label {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+    letter-spacing: 0.3px !important;
+}
+
+/* ── Select-wrap ── */
+body .dependance-module-container .input-wrap .select-wrap {
+    position: relative !important;
+    width: 100% !important;
+}
+
+/* ── Le <select> ── */
+body .dependance-module-container .input-wrap .select-wrap .select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    display: block !important;
+    width: 100% !important;
+    padding: 10px 38px 10px 14px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: var(--text-primary) !important;
+    background-color: var(--surface) !important;
+    background-image: none !important;
+    border: 1.5px solid var(--border) !important;
+    border-radius: var(--radius-lg) !important;
+    cursor: pointer !important;
+    outline: none !important;
+    line-height: 1.5 !important;
+    transition: border-color var(--transition), box-shadow var(--transition), background-color var(--transition) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+/* Tailles variables */
+body .dependance-module-container .input-wrap .select-wrap .select-sm {
+    padding: 6px 34px 6px 10px !important;
+    font-size: 12px !important;
+    border-radius: var(--radius-md) !important;
+}
+body .dependance-module-container .input-wrap .select-wrap .select-lg {
+    padding: 13px 42px 13px 16px !important;
+    font-size: 15px !important;
+    border-radius: var(--radius-xl) !important;
+}
+
+/* Hover */
+body .dependance-module-container .input-wrap .select-wrap .select:hover {
+    border-color: var(--border-strong) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+/* Focus */
+body .dependance-module-container .input-wrap .select-wrap .select:focus {
+    border-color: var(--border-strong) !important;
+    box-shadow: var(--focus-ring) !important;
+    background-color: var(--surface-subtle) !important;
+}
+
+/* ── Chevron ── */
+body .dependance-module-container .input-wrap .select-wrap .select-chevron {
+    position: absolute !important;
+    right: 13px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: var(--text-primary) !important;
+    font-size: 16px !important;
+    pointer-events: none !important;
+    transition: transform var(--transition) !important;
+    line-height: 1 !important;
+}
+
+body .dependance-module-container .input-wrap .select-wrap:focus-within .select-chevron {
+    transform: translateY(-50%) rotate(180deg) !important;
+}
+
+/* ── Options ── */
+body .dependance-module-container .input-wrap .select-wrap .select option {
+    background-color: var(--surface) !important;
+    color: var(--text-primary) !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+}
+
+body .dependance-module-container .input-wrap .select-wrap .select option:checked {
+    background-color: var(--primary) !important;
+    color: var(--on-primary) !important;
+}
+
+/* ===================== FILTER TAGS ===================== */
+
+body .dependance-module-container .tags-container {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    min-height: 0 !important;
+    margin-bottom: 10px !important;
+    transition: all var(--transition) !important;
+}
+
+body .dependance-module-container .tags-container:empty {
+    display: none !important;
+    margin-bottom: 0 !important;
+}
+
+/* Tag individuel */
+body .dependance-module-container .tags-container .filter-tag {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 4px 10px 4px 12px !important;
+    background-color: color-mix(in srgb, var(--primary) 10%, var(--surface)) !important;
+    border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent) !important;
+    border-radius: var(--radius-pill) !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: var(--text-primary) !important;
+    transition: all var(--transition) !important;
+    animation: tag-in 0.2s ease !important;
+}
+
+body .dependance-module-container .tags-container .filter-tag:hover {
+    background-color: color-mix(in srgb, var(--primary) 18%, var(--surface)) !important;
+    border-color: var(--primary) !important;
+}
+
+/* Texte du tag */
+body .dependance-module-container .tags-container .filter-tag .tag-text {
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+/* Bouton × */
+body .dependance-module-container .tags-container .filter-tag .remove-tag {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 16px !important;
+    height: 16px !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 50% !important;
+    background: color-mix(in srgb, var(--primary) 20%, transparent) !important;
+    color: var(--text-primary) !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    transition: all var(--transition) !important;
+    flex-shrink: 0 !important;
+}
+
+body .dependance-module-container .tags-container .filter-tag .remove-tag:hover {
+    background: var(--primary) !important;
+    color: var(--on-primary) !important;
+    transform: scale(1.15) !important;
+}
+
+/* Animation d'apparition */
+@keyframes tag-in {
+    from { opacity: 0; transform: scale(0.8) translateY(-4px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Animation de disparition (via JS : tag.classList.add('removing')) */
+body .dependance-module-container .tags-container .filter-tag.removing {
+    animation: tag-out 0.18s ease forwards !important;
+}
+
+@keyframes tag-out {
+    from { opacity: 1; transform: scale(1); }
+    to   { opacity: 0; transform: scale(0.7); }
+}
+
+/* ===================== BOUTONS (button-section) ===================== */
+
+.dependance-module-container .button-section {
+    display: flex;
+    gap: 12px;
+    flex-direction: row;
+    width: 30%;
+    padding-bottom: 3px;
+}
+
+.dependance-module-container .button-section button {
+    position: relative;
+    padding: 6px 11px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all var(--transition);
+    max-height: 35px;
+    background-color: var(--primary);
+    color: var(--on-primary);
+    box-shadow: var(--shadow-btn);
+}
+
+/* Shimmer */
+.dependance-module-container .button-section button::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.15), transparent);
+    transition: left 0.4s ease;
+}
+
+.dependance-module-container .button-section button:hover {
+    background-color: color-mix(in srgb, var(--primary) 70%, white);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.dependance-module-container .button-section button:hover::before {
+    left: 150%;
+}
+
+.dependance-module-container .button-section button:active {
+    transform: translateY(0px);
+    box-shadow: var(--shadow-sm);
+    background-color: color-mix(in srgb, var(--primary) 85%, black);
+}
+
+/* Variante outline */
+.dependance-module-container .button-section button.btn-outline {
+    background-color: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    box-shadow: none;
+}
+
+.dependance-module-container .button-section button.btn-outline:hover {
+    background-color: var(--primary);
+    color: var(--on-primary);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+
+/* ===================== GANTT ===================== */
+
+body .dependance-module-container .gantt-container-with-button {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+}
+
+body .dependance-module-container .gantt-wrapper,
+body .dependance-module-container #gantt-chart,
+body .dependance-module-container .gantt-chart {
+    /* ✅ height explicite — c'est ça qui débloquerait dhtmlx */
+    height: 700px !important;
+    min-height: 700px !important;
+    max-height: 900px !important;
+    width: 100% !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    overflow: auto !important;
+    resize: vertical !important;
+}
+
+/* dhtmlx injecte ses propres divs — on les force aussi */
+body .dependance-module-container .gantt_container,
+body .dependance-module-container .gantt_container > div {
+    height: 100% !important;
+    min-height: 100% !important;
+}
+
+
+/* ===================== MODAL ===================== */
+
+#modal-ajout-module {
+    border: none;
+    border-radius: var(--radius-xl);
+    padding: 0;
+    width: 100%;
+    max-width: 520px;
+    background: var(--surface);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    color: var(--text-primary);
+}
+
+#modal-ajout-module::backdrop {
+    background: rgba(0,0,0,0.4);
+}
+
+#modal-ajout-module .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 14px;
+    border-bottom: 0.5px solid var(--border);
+}
+
+#modal-ajout-module .modal-header h2 {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+#modal-ajout-module .modal-body {
+    padding: 20px 24px;
+}
+
+#modal-ajout-module .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 0 24px 20px;
+}
+
+
+/* ===================== FORMULAIRE ===================== */
+
+#form-ajout-module .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 16px;
+}
+
+#form-ajout-module .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#form-ajout-module .form-group.full {
+    grid-column: 1 / -1;
+}
+
+#form-ajout-module .input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+}
+
+#form-ajout-module label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+}
+
+#form-ajout-module input[type="text"],
+#form-ajout-module input[type="number"],
+#form-ajout-module select,
+#form-ajout-module textarea {
+    height: 36px;
+    padding: 0 10px;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    width: 100%;
+    background: var(--surface);
+    color: var(--text-primary);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+}
+
+#form-ajout-module input:focus,
+#form-ajout-module select:focus,
+#form-ajout-module textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+#form-ajout-module textarea {
+    height: 72px;
+    padding: 8px 10px;
+    resize: vertical;
+}
+
+/* Pills semestre */
+#form-ajout-module .semestre-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+#form-ajout-module .pill-input {
+    display: none !important;
+}
+
+#form-ajout-module .pill-label {
+    display: inline-flex;
+    align-items: center;
+    height: 30px;
+    padding: 0 12px;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+#form-ajout-module .pill-input:checked + .pill-label {
+    background: #EEEDFE;
+    color: #3C3489;
+    border-color: #AFA9EC;
+}
+
+[data-theme="dark"] #form-ajout-module .pill-input:checked + .pill-label {
+    background: rgba(99, 102, 241, 0.2);
+    color: #a5b4fc;
+    border-color: rgba(99, 102, 241, 0.4);
+}
+
+
+/* ===================== BOUTONS GÉNÉRIQUES (.btn) ===================== */
+
+.dependance-module-container .btn,
+#modal-ajout-module .btn {
+    height: 36px;
+    padding: 0 18px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 0.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text-primary);
+    transition: background var(--transition), color var(--transition), box-shadow var(--transition);
+}
+
+.dependance-module-container .btn:hover,
+#modal-ajout-module .btn:hover {
+    background: var(--accent);
+    color: var(--on-accent);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+}
+
+#modal-ajout-module .btn-primary {
+    background: var(--accent);
+    color: var(--on-accent);
+    border-color: var(--accent);
+}
+
+#modal-ajout-module .btn-primary:hover {
+    filter: brightness(0.9);
+}
+
+#modal-ajout-module .btn-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--text-muted);
+    line-height: 1;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--transition);
+}
+
+#modal-ajout-module .btn-close:hover {
+    color: var(--text-primary);
+}

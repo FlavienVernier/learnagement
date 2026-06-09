@@ -19,7 +19,7 @@ router = APIRouter()
 ######################################################
 
 @router.get("/etudiants/",
-            tags=["user", "student"],
+            tags=["student"],
             summary="Students",
             description="Return the list of students")
 def get_etudiants(
@@ -32,12 +32,14 @@ def get_etudiants(
                             LNM_etudiant.`nom`,
                             LNM_etudiant.`prenom`,
                             LNM_etudiant.`mail`,
-                            ExplicitSecondaryK
+                            ExplicitSecondaryKs_LNM_etudiant.ExplicitSecondaryK,
+                            ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK as 'promo'
                         FROM LNM_etudiant
                         JOIN ExplicitSecondaryKs_LNM_etudiant ON ExplicitSecondaryKs_LNM_etudiant.id_etudiant = LNM_etudiant.id_etudiant
+                        LEFT JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_etudiant.id_promo
                         ORDER BY ExplicitSecondaryK;
                     """,
-        "allowedRolesRequester" : ["user"],
+        "allowedRolesRequester" : ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -90,7 +92,7 @@ def get_etudiants_absences(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/etudiants/stages",
+@router.get("/etudiants/stages/",
             tags=["administratif", "student",  "internship",],
             summary="Students",
             description="Return the list of students")
@@ -99,31 +101,42 @@ def get_etudiants_stages(
 ):
     request = {
         "request" : """
-            SELECT LNM_stage.`id_stage`, 
-                   LNM_etudiant.id_etudiant, 
-                   ExplicitSecondaryKs_LNM_etudiant.ExplicitSecondaryK AS "étudiant", 
-                   ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK AS "promo", 
-                   LNM_stage.`entreprise`, 
-                   LNM_stage.`intitulé`, 
-                   LNM_stage.`description`, 
-                   LNM_stage.`ville`, 
-                   DATE_FORMAT(LNM_stage.`date_debut`, '%Y-%m-%dT%H:%i') AS date_debut, 
-                   DATE_FORMAT(LNM_stage.`date_fin`, '%Y-%m-%dT%H:%i') AS date_fin, 
-                   LNM_stage.`nature`, 
-                   ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK AS "enseignant"
-            FROM `LNM_stage` 
-                     JOIN LNM_etudiant ON LNM_etudiant.id_etudiant = LNM_stage.id_etudiant
-                     LEFT JOIN LNM_enseignant ON LNM_enseignant.id_enseignant = LNM_stage.id_enseignant
-                     JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_etudiant.id_promo
-                     JOIN ExplicitSecondaryKs_LNM_etudiant ON ExplicitSecondaryKs_LNM_etudiant.id_etudiant = LNM_etudiant.id_etudiant
-                     LEFT JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = LNM_enseignant.id_enseignant;
+            SELECT 
+                LNM_stage.id_stage,
+                LNM_stage.`entreprise`, 
+                LNM_stage.`intitulé`, 
+                LNM_stage.`description`, 
+                LNM_stage.`ville`, 
+                DATE_FORMAT(LNM_stage.`date_debut`, '%Y-%m-%d') AS date_debut, 
+                DATE_FORMAT(LNM_stage.`date_fin`, '%Y-%m-%d') AS date_fin, 
+                LNM_stage.`nature`,
+                ExplicitSecondaryKs_LNM_etudiant.ExplicitSecondaryK AS student_fullname,
+                LNM_etudiant.mail,
+                LNM_etudiant.id_etudiant,
+                ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK AS filiere,
+                ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK AS teacher_fullname,
+                LNM_enseignant.id_enseignant,
+                LNM_enseignant.mail AS teacher_mail,
+                CASE
+                    WHEN LNM_stage.id_stage IS NULL THEN 'no-internship'
+                    WHEN LNM_enseignant.id_enseignant IS NULL THEN 'pending'
+                    ELSE 'completed'
+                END AS status
+            FROM LNM_etudiant
+            JOIN ExplicitSecondaryKs_LNM_etudiant ON ExplicitSecondaryKs_LNM_etudiant.id_etudiant = LNM_etudiant.id_etudiant
+            JOIN LNM_promo ON LNM_promo.id_promo = LNM_etudiant.id_promo
+            JOIN LNM_filiere ON LNM_filiere.id_filiere = LNM_promo.id_filiere
+            JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_promo.id_promo
+            LEFT JOIN LNM_stage ON LNM_stage.id_etudiant = LNM_etudiant.id_etudiant
+            LEFT JOIN LNM_enseignant ON LNM_enseignant.id_enseignant = LNM_stage.id_enseignant
+            LEFT JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = LNM_enseignant.id_enseignant;
                     """,
-        "allowedRolesRequester": ["responsable_etudes", "responsable_stages"],
+        "allowedRolesRequester": ["responsable_etudes", "responsable_stages", "enseignant"],
     }
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/etudiants/without_stage",
+@router.get("/etudiants/without_stage/",
             tags=["administratif", "student", "internship"],
             summary="Students",
             description="Return the list of students")
@@ -153,7 +166,7 @@ def get_etudiants_stages(
 ######################################################
 
 @router.get("/etudiants/{id_etudiant:int}",
-            tags=["student","user"],
+            tags=["student"],
             summary="Students",
             description="Return the list of students")
 def get_etudiant(
@@ -168,19 +181,24 @@ def get_etudiant(
                             LNM_etudiant.`prenom`,
                             LNM_etudiant.`mail`,
                             LNM_etudiant.`password_updated`,
-                            ExplicitSecondaryK
+                            ExplicitSecondaryK,
+                            LNM_filiere.nom_filiere,
+                            LNM_statut.nom_statut
                         FROM LNM_etudiant
                                  JOIN ExplicitSecondaryKs_LNM_etudiant ON ExplicitSecondaryKs_LNM_etudiant.id_etudiant = LNM_etudiant.id_etudiant
+                                 JOIN LNM_promo ON LNM_promo.id_promo = LNM_etudiant.id_promo
+                                 JOIN LNM_filiere ON LNM_filiere.id_filiere = LNM_promo.id_filiere
+                                 JOIN LNM_statut ON LNM_statut.id_statut=LNM_promo.id_statut
                         WHERE LNM_etudiant.id_etudiant = %(id_etudiant)s;
                     """,
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester" : ["user"],
+        "allowedRolesRequester" : ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/etudiants/{id_etudiant:int}/absences",
+@router.get("/etudiants/{id_etudiant:int}/absences/",
             tags=["administratif", "student",],
             summary="Students",
             description="Return the list of students")
@@ -310,7 +328,29 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
+    }
+    return db_request(current_user, SQLRequest(**request))
+
+@router.get("/etudiants/{id_etudiant}/polypoints/",
+            tags=["student", ],
+            summary="Students",
+            description="Return the list of students")
+def get_etudiant_pastedt(
+        id_etudiant: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    # ToDo convert parameters to be SQLAlchemy Core compatible when it will be up
+    request = {
+        "request": f"""
+            SELECT * FROM ETU_polypoint
+            WHERE id_etudiant = %(id_etudiant)s
+            ORDER BY annee_universitaire DESC; 
+            """,
+        "params": {
+            "id_etudiant": id_etudiant,
+        },
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -328,7 +368,8 @@ def get_etudiant_pastedt(
             SELECT rm.description, 
             module.nom, 
             ue.learning_unit_name, 
-            rm_etu.avancement
+            rm_etu.avancement,
+            rm.date
             FROM LNM_rendu_module as rm 
                 JOIN LNM_rendu_module_as_etudiant as rm_etu ON rm_etu.id_rendu_module=rm.id_rendu_module 
                 JOIN LNM_etudiant as etu ON etu.id_etudiant=rm_etu.id_etudiant 
@@ -340,11 +381,11 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["user"],
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/etudiants/{id_etudiant:int}/stages",
+@router.get("/etudiants/{id_etudiant:int}/stages/",
             tags=["administratif", "student",  "internship",],
             summary="Students",
             description="Return the list of students")
@@ -361,8 +402,8 @@ def get_etudiants_stages(
                    LNM_stage.`intitulé`, 
                    LNM_stage.`description`, 
                    LNM_stage.`ville`, 
-                   DATE_FORMAT(LNM_stage.`date_debut`, '%Y-%m-%dT%H:%i') AS date_debut, 
-                   DATE_FORMAT(LNM_stage.`date_fin`, '%Y-%m-%dT%H:%i') AS date_fin, 
+                   DATE_FORMAT(LNM_stage.`date_debut`, '%Y-%m-%d') AS date_debut, 
+                   DATE_FORMAT(LNM_stage.`date_fin`, '%Y-%m-%d') AS date_fin, 
                    LNM_stage.`nature`, 
                    ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK AS "enseignant"
             FROM `LNM_stage` 
