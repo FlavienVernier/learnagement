@@ -27,12 +27,6 @@ YELLOW='\033[0;33m'
 #White='\033[0;37m'
 NC = "\033[0m"  # No color
 
-ENVIRONMENT= "dev"
-#INSTANCE_NAME=None
-#INSTANCE_NUMBER=None
-#DOCKER_COMMAND=[]
-#DOCKER_COMPOSE_COMMAND=[]
-
 containers = ["docker", "backend_python", "webApp", "front_DashPlotly", "front_NextJS", ]
 
 
@@ -52,13 +46,6 @@ def __generate_secret__() -> bytes:
     derived_key = hkdf.derive(base_secret.encode('utf-8'))
     return derived_key
 
-# def load_dotenv():
-#     dotenv.load_dotenv()
-#     global DOCKER_COMMAND
-#     DOCKER_COMMAND=os.environ["DOCKER_COMMAND"].split(' ')
-#     global DOCKER_COMPOSE_COMMAND
-#     DOCKER_COMPOSE_COMMAND=os.environ["DOCKER_COMPOSE_COMMAND"].split(' ')
-
 def update_env_variable(env_variables, key=None, value=None):
     updated = re.sub(
         rf'^{key}=.*$',
@@ -68,59 +55,154 @@ def update_env_variable(env_variables, key=None, value=None):
     )
     return updated
 
+
+def __load_env_file(filepath: str) -> dict:
+    """
+    Lit un fichier env et retourne son contenu sous forme de dictionnaire.
+    Ignore les lignes vides et les commentaires (commençant par #).
+
+    Args:
+        filepath: Chemin vers le fichier .env
+
+    Returns:
+        Dictionnaire {clé: valeur} des variables d'environnement
+    """
+    env_vars = {}
+
+    with open(filepath, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+
+            # Ignorer les lignes vides et les commentaires
+            if not line or line.startswith('#'):
+                continue
+
+            # Séparer sur le premier '=' uniquement
+            if '=' not in line:
+                continue
+
+            key, _, value = line.partition('=')
+            key = key.strip()
+            value = value.strip()
+
+            # Supprimer les guillemets entourants si présents
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
+                value = value[1:-1]
+
+            env_vars[key] = value
+
+    return env_vars
+
+
+def save_env_file(env_vars: dict, filepath: str) -> None:
+    """
+    Sauvegarde un dictionnaire sous forme de fichier .env.
+
+    Args:
+        env_vars: Dictionnaire {clé: valeur} des variables d'environnement
+        filepath: Chemin vers le fichier .env à créer/écraser
+    """
+    with open(filepath, 'w', encoding='utf-8') as f:
+        for key, value in env_vars.items():
+            # Ajouter des guillemets si la valeur contient des espaces
+            if ' ' in str(value):
+                f.write(f'{key}="{value}"\n')
+            else:
+                f.write(f'{key}={value}\n')
+
+
+def __set_env(env_vars: dict, filepath: str) -> dict:
+    """
+    Met à jour un dictionnaire de variables d'environnement avec les valeurs
+    contenues dans un fichier .env. Seules les clés déjà présentes dans le
+    dictionnaire sont mises à jour.
+
+    Args:
+        env_vars: Dictionnaire de référence {clé: valeur}
+        filepath: Chemin vers le fichier .env source
+
+    Returns:
+        Nouveau dictionnaire avec les valeurs mises à jour
+    """
+    file_vars = __load_env_file(filepath)
+
+    return {
+        key: file_vars.get(key, value)
+        for key, value in env_vars.items()
+    }
+
+
+# Generate default env variables
+
+def __generate_base_env():
+    default_env_vars = __load_env_file("env_skeleton.env")
+
+    # Instance
+
+    instance_name = input("Give the intance name (lowercase): ").lower()
+    default_env_vars["INSTANCE_NAME"] = instance_name
+    default_env_vars["COMPOSE_PROJECT_NAME"] = f"learnagement_{instance_name}"
+
+    # Due to ports generation, and as ports 1XXXX are locked in some OS, instance number 1 cannot be used
+    # instance_number = "-1"
+    # while not instance_number in ["0", "2", "3", "4"]:
+    #     try:
+    #         instance_number = input("Give the instance number (0,2,3 or 4 -- not 1): ")
+    #     except:
+    #         instance_number = "-1"
+    # default_env_vars["INSTANCE_NUMBER"] = instance_number
+
+    # Compute ports
+    #phpmyadmin_port = int(instance_number) * 10000 + int(default_env_vars["PHPMYADMIN_PORT"])
+    #backend_python_port = int(instance_number) * 10000 + int(default_env_vars["BACKEND_PYTHON_DOCKER_PORT"])
+    #front_php_port = int(instance_number) * 10000 + int(default_env_vars["FRONT_PHP_DOCKER_PORT"])
+    #front_dash_port = int(instance_number) * 10000 + int(default_env_vars["FRONT_DASH_DOCKER_PORT"])
+    #front_nextauth_port = int(instance_number) * 10000 + int(default_env_vars["FRONT_NEXTAUTH_DOCKER_PORT"])
+    #instance_port = front_php_port
+
+    default_env_vars["COMPOSE_PROJECT_NAME"] = f"learnagement_{instance_name}"
+
+    default_env_vars["INSTANCE_SECRET"] = str(__generate_secret__().hex())
+    protocol = "http"
+    default_env_vars["FRONT_PHP_PROTOCOL"] = protocol
+    default_env_vars["INSTANCE_URL"] = protocol + "://" + socket.gethostname()
+    #default_env_vars["INSTANCE_PORT"] = str(instance_port)
+
+    # MySQL
+    default_env_vars["MYSQL_SERVER"] = f"learnagement_mysql_{instance_name}"
+    default_env_vars["MYSQL_ROOT_PASSWORD"] = getpass("Give the MySQL Root password: ")
+    default_env_vars["MYSQL_USER_PASSWORD"] = getpass("Give the MySQL User password: ")
+
+    # PhPMyAdmin
+    #default_env_vars["PHPMYADMIN_PORT"] = str(phpmyadmin_port)
+
+    # Backend
+    default_env_vars["BACKEND_PYTHON_DOCKER_URL"] = f"http://learnagement_backend_python_{instance_name}"
+    #default_env_vars["BACKEND_PYTHON_PORT"] = str(backend_python_port)
+
+    # Fronts
+    #default_env_vars["FRONT_PHP_PORT"] = str(front_php_port)
+    #default_env_vars["FRONT_DASH_PORT"] = str(front_dash_port)
+    #default_env_vars["FRONT_NEXTAUTH_PORT"] = str(front_nextauth_port)
+
+    return default_env_vars
+
+
 # Generate default .env for dev environment
-def __generate_env():
+def __generate_env(env="dev"):
     if not os.path.exists(".env"):
-        dotenv.load_dotenv("env_default.env")
-        with open("env_skeleton.env", 'r') as f:
-            content = f.read()
 
-        # Instance
+        env_vars = __generate_base_env()
 
-        instance_name = input("Give the intance name (lowercase): ").lower()
-        content = update_env_variable(content, key="INSTANCE_NAME", value=instance_name)
-        content = update_env_variable(content, key="COMPOSE_PROJECT_NAME", value=f"learnagement_{instance_name}")
+        env_vars = __set_env(env_vars, "env_default.env")
 
-        # Due to ports generation, and as ports 1XXXX are locked in some OS, instance number 1 cannot be used
-        instance_number = "-1"
-        while not instance_number in ["0", "2", "3", "4"]:
-            try:
-                instance_number = input("Give the instance number (0,2,3 or 4 -- not 1): ")
-            except:
-                instance_number = "-1"
-        content=update_env_variable(content, key="INSTANCE_NUMBER", value=instance_number)
+        if(env == "dev"):
+            env_vars = __set_env(env_vars, "env_dev.env")
+        elif(env == "prod"):
+            env_vars = __set_env(env_vars, "env_prod.env")
 
-        # Compute ports
-        backend_python_port  = int(instance_number) * 10000 + int(os.environ["BACKEND_PYTHON_DOCKER_PORT"])
-        front_php_port = int(instance_number) * 10000 + int(os.environ["FRONT_PHP_DOCKER_PORT"])
-        front_dash_port = int(instance_number) * 10000 + int(os.environ["FRONT_DASH_DOCKER_PORT"])
-        front_nextauth_port = int(instance_number) * 10000 + int(os.environ["FRONT_NEXTAUTH_DOCKER_PORT"])
-        instance_port = front_php_port
+        save_env_file(env_vars, ".env")
 
-        content = update_env_variable(content, key="COMPOSE_PROJECT_NAME", value=f"learnagement_{instance_name}")
-
-        content = update_env_variable(content, key="INSTANCE_SECRET", value=str(__generate_secret__().hex()))
-        protocol="http"
-        content = update_env_variable(content, key="FRONT_PHP_PROTOCOL", value =protocol)
-        content = update_env_variable(content, key="INSTANCE_URL", value = protocol + "://" + socket.gethostname())
-        content = update_env_variable(content, key="INSTANCE_PORT", value = str(instance_port))
-
-        # MySQL
-        content = update_env_variable(content, key="MYSQL_SERVER", value=f"learnagement_mysql_{instance_name}")
-        content = update_env_variable(content, key="MYSQL_ROOT_PASSWORD", value=getpass("Give the MySQL Root password: "))
-        content = update_env_variable(content, key="MYSQL_USER_PASSWORD", value=getpass("Give the MySQL User password: "))
-
-        # Backend
-        content = update_env_variable(content, key="BACKEND_PYTHON_DOCKER_URL", value=f"http://learnagement_backend_python_{instance_name}")
-        content = update_env_variable(content, key="BACKEND_PYTHON_PORT", value=str(backend_python_port))
-
-        # Fronts
-        content = update_env_variable(content, key="FRONT_PHP_PORT", value=str(front_php_port))
-        content = update_env_variable(content, key="FRONT_DASH_PORT", value=str(front_dash_port))
-        content = update_env_variable(content, key="FRONT_NEXTAUTH_PORT", value=str(front_nextauth_port))
-
-        with open(".env", 'w') as f:
-            f.write(content)
     updateEnv()
     dotenv.load_dotenv()
 
@@ -227,9 +309,17 @@ def __docker_configuration__():
     if not os.path.exists("docker-compose.yml"):
         shutil.copy("docker-compose.yml.skeleton", "docker-compose.yml")
         __searchReplaceInFile__("docker-compose.yml", "${INSTANCE_NAME}", os.environ["INSTANCE_NAME"])
-        __searchReplaceInFile__("docker-compose.yml", "${INSTANCE_NUMBER}", str(os.environ["INSTANCE_NUMBER"]))
+        #__searchReplaceInFile__("docker-compose.yml", "${INSTANCE_NUMBER}", str(os.environ["INSTANCE_NUMBER"]))
+        __searchReplaceInFile__("docker-compose.yml", "${PHPMYADMIN_PORT}", str(os.environ["PHPMYADMIN_PORT"]))
+        __searchReplaceInFile__("docker-compose.yml", "${PHPMYADMIN_DOCKER_PORT}", str(os.environ["PHPMYADMIN_DOCKER_PORT"]))
+        __searchReplaceInFile__("docker-compose.yml", "${BACKEND_PYTHON_PORT}", str(os.environ["BACKEND_PYTHON_PORT"]))
+        __searchReplaceInFile__("docker-compose.yml", "${BACKEND_PYTHON_DOCKER_PORT}", str(os.environ["BACKEND_PYTHON_DOCKER_PORT"]))
         __searchReplaceInFile__("docker-compose.yml", "${FRONT_PHP_PORT}", str(os.environ["FRONT_PHP_PORT"]))
         __searchReplaceInFile__("docker-compose.yml", "${FRONT_PHP_DOCKER_PORT}", str(os.environ["FRONT_PHP_DOCKER_PORT"]))
+        __searchReplaceInFile__("docker-compose.yml", "${FRONT_DASH_PORT}", str(os.environ["FRONT_DASH_PORT"]))
+        __searchReplaceInFile__("docker-compose.yml", "${FRONT_DASH_DOCKER_PORT}", str(os.environ["FRONT_DASH_DOCKER_PORT"]))
+        __searchReplaceInFile__("docker-compose.yml", "${FRONT_NEXTAUTH_PORT}", str(os.environ["FRONT_NEXTAUTH_PORT"]))
+        __searchReplaceInFile__("docker-compose.yml", "${FRONT_NEXTAUTH_DOCKER_PORT}", str(os.environ["FRONT_NEXTAUTH_DOCKER_PORT"]))
         __searchReplaceInFile__("docker-compose.yml", "${SSL_DIR}", str(os.environ["SSL_DIR"]))
         __searchReplaceInFile__("docker-compose.yml", "${DOCKER_SSL_DIR}", str(os.environ["DOCKER_SSL_DIR"]))
     elif(os.path.getmtime("docker-compose.yml.skeleton") > os.path.getmtime("docker-compose.yml")):
@@ -289,7 +379,7 @@ async def start(docker_option = None):
     task = asyncio.create_task(__docker_run__(docker_option))
     
     print(f"{GREEN}Web Apps will run on: {os.environ['INSTANCE_URL']}{NC}")
-    print(f"{GREEN}PHPMyAdmin will run on: http://127.0.0.1:{os.environ['INSTANCE_NUMBER']}8080{NC}")
+    print(f"{GREEN}PHPMyAdmin will run on: http://127.0.0.1:{os.environ['PHPMYADMIN_PORT']}{NC}")
 
     await task
 
@@ -489,34 +579,57 @@ def destroy():
 
 def from_env(environment=None):
     if environment:
-        global ENVIRONMENT
-        ENVIRONMENT=environment
-
-        # buils .env if not exist
-        #__mainConfiguration__()
-        __generate_env()
-
         # remove configuration files that depends on .env
         try:
             os.remove(os.path.join("docker", "docker-compose.yml"))
         except FileNotFoundError as e:
             print(e)
 
-        # Reset environment variable according to dev or prod environment
-        update_env_file_variable(key="ENV", value=environment)
+        env_vars = __load_env_file(".env")
         if environment == "prod":
-            # ToDo refactor so that default parameters are in prod.env file
-            port = 443
-            update_env_file_variable(key="FRONT_PHP_PROTOCOL", value="https")
-        else:
-            port = 80
-            update_env_file_variable(key="FRONT_PHP_PROTOCOL", value="http")
+            env_vars = __set_env(env_vars, "env_prod.env")
 
-        update_env_file_variable(key="FRONT_PHP_DOCKER_PORT", value=port)
-        update_env_file_variable(key="FRONT_PHP_PORT", value=int(os.environ["INSTANCE_NUMBER"]) * 10000 + port)
+        else:
+            env_vars = __set_env(env_vars, "env_dev.env")
+
+        save_env_file(env_vars, ".env")
 
     # Update .env for each sub-app
     updateEnv()
+# def from_env_old(environment=None):
+#     if environment:
+#
+#         # buils .env if not exist
+#         #__mainConfiguration__()
+#         __generate_env()
+#
+#         # remove configuration files that depends on .env
+#         try:
+#             os.remove(os.path.join("docker", "docker-compose.yml"))
+#         except FileNotFoundError as e:
+#             print(e)
+#
+#         # Reset environment variable according to dev or prod environment
+#         update_env_file_variable(key="ENV", value=environment)
+#         if environment == "prod":
+#             # ToDo refactor so that default parameters are in prod.env file
+#             # Switch to https
+#             port = 443
+#             update_env_file_variable(key="FRONT_PHP_PROTOCOL", value="https")
+#             # restrict backend access to local host
+#             update_env_file_variable(key="BACKEND_PYTHON_PORT", value="127.0.0.1:" + str(int(os.environ["INSTANCE_NUMBER"]) * 10000 + int(os.environ["BACKEND_PYTHON_DOCKER_PORT"])))
+#             update_env_file_variable(key="PHPMYADMIN_PORT", value="127.0.0.1:" + str(int(os.environ["INSTANCE_NUMBER"]) * 10000 + int(os.environ["PHPMYADMIN_DOCKER_PORT"])))
+#
+#         else:
+#             port = 80
+#             update_env_file_variable(key="FRONT_PHP_PROTOCOL", value="http")
+#             # restrict backend access to local host
+#
+#         update_env_file_variable(key="FRONT_PHP_DOCKER_PORT", value=port)
+#         update_env_file_variable(key="FRONT_PHP_PORT", value=int(os.environ["INSTANCE_NUMBER"]) * 10000 + port)
+#
+#     # Update .env for each sub-app
+#     updateEnv()
 
 def from_scratch():
 
@@ -528,6 +641,7 @@ def from_scratch():
     print(f"{RED}Clean up App from scratch{NC}")
     print(f"{RED}The application must be stopped{NC}")
 
+    # ToDo Check if app runs
     
     if "YES" == input("Are you sure (YES/NO)? NO INITIAL DATA OR CUSTOMIZED CONFIGURATION CAN BE RECOVERED! ") and "YES" == input("Are you realy sure(YES/NO)? don't cry if you've lost anything! "):
         try:
@@ -592,11 +706,12 @@ def __help(argv):
         {GREEN}Usage:{NC} {argv[0]} [OPTION]
         
         {GREEN}Options:{NC}
+          -genEnv [dev|prod]    Generate environment without starting the application
           -start                Start the application (default if no option given)
           -build                Start the application and rebuild Docker images
           -stop                 Stop the application
           -backupDB             Backup the database (structure, data and triggers)
-          -fromEnv [dev|prod]   Reset the application to to use new .env , app must be stopped before. Without env it propagate root .env to all apps.
+          -fromEnv [dev|prod]   Reset the application to use new .env , app must be stopped before. Without env it propagate root .env to all apps.
           -fromScratch          Reset the application to its initial state (IRREVERSIBLE), app must be stopped before
           -exportInstance       Export the current instance as a zip archive
           -importInstance FILE  Import an instance from a zip archive
@@ -611,8 +726,13 @@ def __help(argv):
     """)
 
 def main(argv):
-    # if script parameter is destroy
-    if len(argv)==1 or (len(argv)==2 and argv[1] == "-start"):
+    # if script parameter is destroyed
+    if len(argv) in [2, 3] and argv[1] == "-genEnv":
+        if len(argv)==2:
+            __generate_env()
+        elif argv[2] in ["dev","prod"]:
+            __generate_env(argv[2])
+    elif len(argv)==1 or (len(argv)==2 and argv[1] == "-start"):
         asyncio.run(start())
     elif len(argv)==2 and argv[1] == "-backupDB":
         backupDB()
