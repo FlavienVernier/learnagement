@@ -1,5 +1,6 @@
 # coding=utf-8
 import glob
+import logging
 import os
 import sys
 import shutil
@@ -10,6 +11,7 @@ import datetime
 import dotenv
 import re
 import asyncio
+import click
 #from dotenv import load_dotenv
 from getpass import getpass
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
@@ -28,7 +30,37 @@ YELLOW='\033[0;33m'
 NC = "\033[0m"  # No color
 
 containers = ["docker", "backend_python", "webApp", "front_DashPlotly", "front_NextJS", ]
+envs = ["dev", "prod"]
 
+
+
+#############################################################
+# Lernagement security
+
+def __get_git_branch():
+    try:
+        branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            stderr=subprocess.DEVNULL
+        ).decode("utf-8").strip()
+        return branch
+    except Exception:
+        return None
+
+def __security_check():
+    dotenv.load_dotenv()
+    git_branch = __get_git_branch()
+    if git_branch == "main" :
+        if os.environ["ENV"] !="prod" :
+            print(f"{RED}SECURITY ALERT: App run from main branch without 'ENV' environment variable set as 'prod'{NC}")
+            exit(1)
+
+    elif git_branch == "prerelease":
+        if os.environ["ENV"] != "prod":
+            print(f"{YELLOW}SECURITY WARNING: App run from prerelease branch without 'ENV' environment variable set as 'prod'{NC}")
+
+    else:
+        print(f"{GREEN}App run from '{git_branch}' branch with '{os.environ['ENV']}' environment{NC}")
 
 #def generate_nextauth_secret(base_secret: str) -> bytes:
 def __generate_secret__() -> bytes:
@@ -45,6 +77,10 @@ def __generate_secret__() -> bytes:
     )
     derived_key = hkdf.derive(base_secret.encode('utf-8'))
     return derived_key
+
+
+#############################################################
+# Lernagement env management
 
 def update_env_variable(env_variables, key=None, value=None):
     updated = re.sub(
@@ -188,24 +224,6 @@ def __generate_base_env():
     return default_env_vars
 
 
-# Generate default .env for dev environment
-def __generate_env(env="dev"):
-    if not os.path.exists(".env"):
-
-        env_vars = __generate_base_env()
-
-        env_vars = __set_env(env_vars, "env_default.env")
-
-        if(env == "dev"):
-            env_vars = __set_env(env_vars, "env_dev.env")
-        elif(env == "prod"):
-            env_vars = __set_env(env_vars, "env_prod.env")
-
-        save_env_file(env_vars, ".env")
-
-    updateEnv()
-    dotenv.load_dotenv()
-
 def update_env_file_variable(env_file=".env", key=None, value=None):
     if key and value:
         with open(env_file, 'r') as f:
@@ -221,7 +239,7 @@ def update_env_file_variable(env_file=".env", key=None, value=None):
     # Load environment variables from the .env file
     dotenv.load_dotenv()
 
-def updateEnv():
+def propagate_env():
     source_path = os.path.join("./", ".env")
 
     for container in containers:
@@ -229,7 +247,11 @@ def updateEnv():
         shutil.copy(source_path, target_path)
         print(f"Copied: {source_path} -> {target_path}")
 
-        
+
+
+#############################################################
+# Lernagement BD
+
 def __dbConfiguration__():
 
     init_db_folder = os.path.join("db", "docker-entrypoint-initdb.d")
@@ -297,6 +319,11 @@ def __dbData_configuration__():
     subprocess.run([sys.executable, "insertPrivateData.py"], check=True)
     os.chdir("..")
 
+
+
+#############################################################
+# Lernagement Dockers
+
 def __docker_configuration__():
     
     ##########
@@ -329,7 +356,7 @@ def __docker_configuration__():
 
 
 
-async def __docker_run__(docker_option):
+async def __run_dockers__(docker_option):
     
     ##########
     # Run Docker
@@ -361,13 +388,152 @@ async def __docker_run__(docker_option):
     os.chdir("..")
     return "done"
 
-    
 
-async def start(docker_option = None):
+def __is_compose_running(project_name: str, docker_compose_command: str = "docker compose") -> bool:
+    """
+    Vérifie si un docker compose est en cours d'exécution.
+
+    Args:
+        project_name: Nom du projet docker compose (COMPOSE_PROJECT_NAME)
+        docker_compose_command: Commande docker compose à utiliser
+
+    Returns:
+        True si au moins un container du projet est en cours d'exécution
+    """
+    try:
+        result = subprocess.run(
+            [*docker_compose_command.split(), "ls", "--filter", f"name={project_name}", "--format", "json"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+
+        import json
+        projects = json.loads(result.stdout)
+
+        return any(
+            p["Name"] == project_name and p["Status"].startswith("running")
+            for p in projects
+        )
+
+    except subprocess.CalledProcessError:
+        return False
+
+def __validate_env__(ctx, param, value):
+    if not value in envs:
+        logging.error(f"{RED}env must be :" + ", ".join(envs) + "{NC}")
+        raise click.BadParameter("env must be :" + ", ".join(envs))
+    return value
+
+
+#############################################################
+# Lernagement command options
+
+
+def __generate_env__(env="dev"):
+    if not os.path.exists(".env"):
+        logging.error(f"{GREEN}env doesn't exist, generate it with {env} environnement {NC}")
+
+        env_vars = __generate_base_env()
+
+        env_vars = __set_env(env_vars, "env_default.env")
+
+        if(env == "dev"):
+            env_vars = __set_env(env_vars, "env_dev.env")
+        elif(env == "prod"):
+            env_vars = __set_env(env_vars, "env_prod.env")
+
+        save_env_file(env_vars, ".env")
+
+    propagate_env()
+    dotenv.load_dotenv()
+
+def __from_env__(env=None):
+    if env:
+
+        logging.info(f"Using env: {env}")
+
+        # remove configuration files that depends on .env
+        try:
+            os.remove(os.path.join("docker", "docker-compose.yml"))
+        except FileNotFoundError as e:
+            print(e)
+
+        env_vars = __load_env_file(".env")
+        if env == "prod":
+            env_vars = __set_env(env_vars, "env_prod.env")
+
+        else:
+            env_vars = __set_env(env_vars, "env_dev.env")
+
+        save_env_file(env_vars, ".env")
+
+    # Update .env for each sub-app
+    propagate_env()
+
+def __from_scratch__():
+    dotenv.load_dotenv()
+
+    if __is_compose_running(os.environ["COMPOSE_PROJECT_NAME"], os.environ["DOCKER_COMPOSE_COMMAND"]):
+        logging.warning(f"{YELLOW}Instance running, it cannot be reset from scratch{NC}")
+        return
+
+    ##########
+    # Clean up App from scratch
+    print("##########")
+    print(f"{RED}Clean up App from scratch{NC}")
+    print(f"{RED}The application must be stopped{NC}")
+
+    # ToDo Check if app runs
+
+    if "YES" == input(
+            "Are you sure (YES/NO)? NO INITIAL DATA OR CUSTOMIZED CONFIGURATION CAN BE RECOVERED! ") and "YES" == input(
+            "Are you realy sure(YES/NO)? don't cry if you've lost anything! "):
+        try:
+            if os.name == 'nt':
+                prog = subprocess.Popen(os.environ["DOCKER_COMMAND"].split(" ") + ['volume', 'rm', os.environ[
+                    "COMPOSE_PROJECT_NAME"] + '_learnagement_persistent_db_' + os.environ["INSTANCE_NAME"]])
+                prog.communicate()
+            else:
+                subprocess.run(os.environ["DOCKER_COMMAND"].split(" ") + ["volume", "rm", os.environ[
+                    "COMPOSE_PROJECT_NAME"] + "_learnagement_persistent_db_" + os.environ["INSTANCE_NAME"]], check=True)
+        except subprocess.CalledProcessError as e:
+            print(e.output)
+
+        try:
+            shutil.rmtree(os.path.join("db", "data"), ignore_errors=True)
+            shutil.rmtree(os.path.join("db", "docker-entrypoint-initdb.d"), ignore_errors=True)
+            os.remove(os.path.join("docker", "docker-compose.yml"))
+        except FileNotFoundError as e:
+            print(e)
+        try:
+            os.remove(".env")
+        except FileNotFoundError as e:
+            print(e)
+
+        for container in containers:
+            try:
+                target_path = os.path.join(container, ".env")
+                os.remove(target_path)
+            except FileNotFoundError as e:
+                print(e)
+
+        logging.info(f"{GREEN}The application was reset to its initial state.{NC}")
+
+
+async def __start__(docker_option=None):
+    dotenv.load_dotenv()
+
+    # Check if instance is not already running
+    if "COMPOSE_PROJECT_NAME" in os.environ.keys() and __is_compose_running(os.environ["COMPOSE_PROJECT_NAME"],
+                                                                            os.environ["DOCKER_COMPOSE_COMMAND"]):
+        logging.warning(f"{YELLOW}Instance already running{NC}")
+        return
+
     if not docker_option:
         docker_option = []
-    #__mainConfiguration__()
-    __generate_env()
+    # __mainConfiguration__()
+    __generate_env__()
 
     dotenv.load_dotenv()
 
@@ -376,18 +542,73 @@ async def start(docker_option = None):
 
     __docker_configuration__()
     __security_check()
-    task = asyncio.create_task(__docker_run__(docker_option))
-    
+    task = asyncio.create_task(__run_dockers__(docker_option))
+
     print(f"{GREEN}Web Apps will run on: {os.environ['INSTANCE_URL']}{NC}")
     print(f"{GREEN}PHPMyAdmin will run on: http://127.0.0.1:{os.environ['PHPMYADMIN_PORT']}{NC}")
 
     await task
 
-    # Population avec des données libres
-    # subprocess.run(["sh", "populationScript.sh"], check=True)
+def __stop__():
+    dotenv.load_dotenv()
+    ##########
+    # Stop App
+    print("##########")
+    print(f"{GREEN}Stop App{NC}")
 
-    # Population via ADE
-    # subprocess.run([sys.executable, "ade2sql.py"], check=True)
+    os.chdir("docker")
+
+    if os.name == 'nt':
+        # prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose up'],stdin=subprocess.PIPE)
+        # prog.stdin.write(b'password')
+        prog = subprocess.Popen(os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + ['down'])
+        prog.communicate()
+    else:
+        subprocess.run(os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + ["down"], check=True)
+
+    os.chdir("..")
+
+############################################
+# Lernagement commands
+
+@click.group()
+def cli(): pass
+
+# Generate default .env for dev environment
+@cli.command(help="Generate environment without starting the application")
+@click.option("--env", type=click.Choice(envs), default="dev", help="Environment to use: " + ", ".join(envs))
+def generate_env(env="dev"):
+    __generate_env__(env)
+
+
+@cli.command(help="Start the application")
+@click.option("--docker_option", default=None, help="See docker compose options")
+@click.option("--restart", is_flag=True, help="Restart the application")
+@click.option("--rebuild", is_flag=True, help="Rebuild Docker images")
+@click.option("--test", is_flag=True, help="Test options without starting the application")
+@click.option("--from_scratch", is_flag=True, help="Reset the application to its initial state (IRREVERSIBLE)")
+@click.option("--env", type=click.Choice(envs), default=None, help="Environment to use, (use previously used if not set)")
+def start(docker_option=None, restart:bool=False, rebuild:bool=False, test:bool=False, from_scratch:bool=False, env=None):
+    if not docker_option:
+        docker_option = []
+    if restart:
+        if test:
+            logging.warning(f"{YELLOW}You cannot test restart.{NC}")
+            return
+        __stop__()
+
+    if from_scratch:
+        __from_scratch__()
+
+    if env:
+        __from_env__(env)
+
+    if rebuild and not test:
+        asyncio.run(start(docker_option=["--build"] + docker_option))
+        return
+    if not test:
+        asyncio.run(__start__(docker_option))
+
 
 def __filecmp__(file1, file2):
     """Compare deux fichiers pour vérifier s'ils sont identiques."""
@@ -406,6 +627,8 @@ def __searchReplaceInFile__(fileName, patern, value):
     with open(fileName, 'w') as file:
         file.write(filedata)
 
+@cli.command(help="Backup the database (structure, data and triggers)")
+@click.option("--backup_folder")
 def backupDB(backup_folder="db/backup"):
 
     """
@@ -418,11 +641,6 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
     # Backup DB
     print("##########")
     print(f"{GREEN}BackUp DB{NC}")
-
-    #f="listOfTable.txt"
-    #cmd=["docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysql",  "-u",  "root", "-p"+configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"], "-e", "'SELECT", "table_name", "FROM", "information_schema.tables", "WHERE", "TABLE_SCHEMA", "=", "\"learnagement\"", "AND", "TABLE_TYPE", "=", "\"BASE TABLE\"'", "> db/backup/"+f]
-    #cmd=["docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysql",  "-u",  "root", "-p"+configurationSettings["INSTANCE_MYSQL_ROOT_PASSWORD"], "-e", "'SELECT", "table_name", "FROM", "information_schema.tables", "WHERE", "TABLE_SCHEMA", "=", "\"learnagement\"", "AND", "TABLE_TYPE", "=", "\"BASE TABLE\"'"]
-    #cmd=["docker", "exec", "-it", "learnagement_mysql_"+configurationSettings["INSTANCE_NAME"], "mysql",  "-u",  "root", "-p", "-e", "'SELECT", "table_name", "FROM", "information_schema.tables", "WHERE", "TABLE_SCHEMA", "=", "\"learnagement\"", "AND", "TABLE_TYPE", "=", "\"BASE TABLE\"'"]
 
     now = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
     
@@ -477,6 +695,7 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
         with open(triggerFile, 'w') as fout:
             fout.writelines(data[1:])
 
+@cli.command(help="Export the current instance as a zip archive")
 def exportInstance():
     dotenv.load_dotenv()
     now = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
@@ -501,8 +720,17 @@ def exportInstance():
     except OSError as error:
         print(error)
 
+@cli.command(help="Import an instance from a zip archive")
+@click.option("--file", required=True)
 def import_instance(instanceArchive):
-    # Check if instance is not already running from .
+
+    dotenv.load_dotenv()
+
+    # Check if instance is not already running
+    if __is_compose_running(os.environ["COMPOSE_PROJECT_NAME"], os.environ["DOCKER_COMPOSE_COMMAND"]):
+        logging.warning(f"{YELLOW}Instance running, you cannot import new instance{NC}")
+        return
+
     # ToDo
     # If no instance running
     import_dir_path = Path(instanceArchive).stem
@@ -510,7 +738,7 @@ def import_instance(instanceArchive):
     shutil.unpack_archive(instanceArchive)
     # Move .env from import directory to .
     shutil.copy(os.path.join(import_dir_path, "env"), ".env")
-    updateEnv()
+    propagate_env()
     # Copy docker-compose to docker directory
     shutil.copy(os.path.join(import_dir_path, "docker-compose.yml"), "docker")
     # Move BD files into the appropriate directories
@@ -525,236 +753,9 @@ def import_instance(instanceArchive):
     # Run instance
     # ToDo
 
+@cli.command(help="Stop application")
 def stop():
-    dotenv.load_dotenv()
-    ##########
-    # Stop App
-    print("##########")
-    print(f"{GREEN}Stop App{NC}")
-    
-    os.chdir("docker")
-    
-    if os.name == 'nt':
-        #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose up'],stdin=subprocess.PIPE)
-        #prog.stdin.write(b'password')
-        prog = subprocess.Popen(os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + ['down'])
-        prog.communicate()
-    else:    
-        subprocess.run(os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + ["down"], check=True)
-    
-    os.chdir("..")
-    
-def destroy():
-
-    dotenv.load_dotenv()
-
-    ##########
-    # Destroy App
-    print("##########")
-    print(f"{RED}DEPRECATED (use from scratch): Destroy App{NC}")
-    
-
-    if "YES" == input("Are you sure (YES/NO)? NO DATA CAN BE RECOVERED! ") and "YES" == input("Are you realy sure(YES/NO)? don't cry if you've lost your data! "):
-    
-        #stop()
-
-        try:
-    
-            if os.name == 'nt':
-                prog = subprocess.Popen(['docker', 'volume', 'rm', os.environ["COMPOSE_PROJECT_NAME"] + '_learnagement_persistent_db_'+os.environ["INSTANCE_NAME"]])
-                prog.communicate()
-                prog = subprocess.Popen(["rm", "db/sql/5_*"])
-                prog.communicate()
-            else:
-                subprocess.run(os.environ["DOCKER_COMMAND"].split(" ") + ["volume", "rm", os.environ["COMPOSE_PROJECT_NAME"] + "_learnagement_persistent_db_"+os.environ["INSTANCE_NAME"]], check=True)
-                subprocess.run(["pwd"], check=True)
-                subprocess.run(["rm", "db/sql/5_*"], check=True)
-            print(f"{RED}App destroyed{NC}")
-            
-        except subprocess.CalledProcessError as e:
-            print(e.output)
-            print(f"{GREEN}App not destroyed{NC}")
-    else:
-        print(f"{GREEN}App not destroyed{NC}")
-
-def from_env(environment=None):
-    if environment:
-        # remove configuration files that depends on .env
-        try:
-            os.remove(os.path.join("docker", "docker-compose.yml"))
-        except FileNotFoundError as e:
-            print(e)
-
-        env_vars = __load_env_file(".env")
-        if environment == "prod":
-            env_vars = __set_env(env_vars, "env_prod.env")
-
-        else:
-            env_vars = __set_env(env_vars, "env_dev.env")
-
-        save_env_file(env_vars, ".env")
-
-    # Update .env for each sub-app
-    updateEnv()
-# def from_env_old(environment=None):
-#     if environment:
-#
-#         # buils .env if not exist
-#         #__mainConfiguration__()
-#         __generate_env()
-#
-#         # remove configuration files that depends on .env
-#         try:
-#             os.remove(os.path.join("docker", "docker-compose.yml"))
-#         except FileNotFoundError as e:
-#             print(e)
-#
-#         # Reset environment variable according to dev or prod environment
-#         update_env_file_variable(key="ENV", value=environment)
-#         if environment == "prod":
-#             # ToDo refactor so that default parameters are in prod.env file
-#             # Switch to https
-#             port = 443
-#             update_env_file_variable(key="FRONT_PHP_PROTOCOL", value="https")
-#             # restrict backend access to local host
-#             update_env_file_variable(key="BACKEND_PYTHON_PORT", value="127.0.0.1:" + str(int(os.environ["INSTANCE_NUMBER"]) * 10000 + int(os.environ["BACKEND_PYTHON_DOCKER_PORT"])))
-#             update_env_file_variable(key="PHPMYADMIN_PORT", value="127.0.0.1:" + str(int(os.environ["INSTANCE_NUMBER"]) * 10000 + int(os.environ["PHPMYADMIN_DOCKER_PORT"])))
-#
-#         else:
-#             port = 80
-#             update_env_file_variable(key="FRONT_PHP_PROTOCOL", value="http")
-#             # restrict backend access to local host
-#
-#         update_env_file_variable(key="FRONT_PHP_DOCKER_PORT", value=port)
-#         update_env_file_variable(key="FRONT_PHP_PORT", value=int(os.environ["INSTANCE_NUMBER"]) * 10000 + port)
-#
-#     # Update .env for each sub-app
-#     updateEnv()
-
-def from_scratch():
-
-    dotenv.load_dotenv()
-
-    ##########
-    # Clean up App from scratch
-    print("##########")
-    print(f"{RED}Clean up App from scratch{NC}")
-    print(f"{RED}The application must be stopped{NC}")
-
-    # ToDo Check if app runs
-    
-    if "YES" == input("Are you sure (YES/NO)? NO INITIAL DATA OR CUSTOMIZED CONFIGURATION CAN BE RECOVERED! ") and "YES" == input("Are you realy sure(YES/NO)? don't cry if you've lost anything! "):
-        try:
-            if os.name == 'nt':
-                prog = subprocess.Popen(os.environ["DOCKER_COMMAND"].split(" ") + ['volume', 'rm', os.environ["COMPOSE_PROJECT_NAME"] + '_learnagement_persistent_db_' + os.environ["INSTANCE_NAME"]])
-                prog.communicate()
-            else:
-                subprocess.run(os.environ["DOCKER_COMMAND"].split(" ") + ["volume", "rm", os.environ["COMPOSE_PROJECT_NAME"] + "_learnagement_persistent_db_" + os.environ["INSTANCE_NAME"]], check=True)
-        except subprocess.CalledProcessError as e:
-            print(e.output)
-
-        try:
-            shutil.rmtree(os.path.join("db", "data"), ignore_errors=True)
-            shutil.rmtree(os.path.join("db", "docker-entrypoint-initdb.d"), ignore_errors=True)
-            os.remove(os.path.join("docker", "docker-compose.yml"))
-        except FileNotFoundError as e:
-            print(e)
-        try:
-            os.remove(".env")
-        except FileNotFoundError as e:
-            print(e)
-
-        for container in containers:
-            try:
-                target_path = os.path.join(container, ".env")
-                os.remove(target_path)
-            except FileNotFoundError as e:
-                print(e)
-
-        print(f"{GREEN}The application was reset to its initial state.{NC}")
-
-
-
-def __get_git_branch():
-    try:
-        branch = subprocess.check_output(
-            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-            stderr=subprocess.DEVNULL
-        ).decode("utf-8").strip()
-        return branch
-    except Exception:
-        return None
-
-def __security_check():
-    dotenv.load_dotenv()
-    git_branch = __get_git_branch()
-    if git_branch == "main" :
-        if os.environ["ENV"] !="prod" :
-            print(f"{RED}SECURITY ALERT: App run from main branch without 'ENV' environment variable set as 'prod'{NC}")
-            exit(1)
-
-    elif git_branch == "prerelease":
-        if os.environ["ENV"] != "prod":
-            print(f"{YELLOW}SECURITY WARNING: App run from prerelease branch without 'ENV' environment variable set as 'prod'{NC}")
-
-    else:
-        print(f"{GREEN}App run from '{git_branch}' branch with '{os.environ['ENV']}' environment{NC}")
-
-
-def __help(argv):
-    print(f"""
-        {GREEN}Usage:{NC} {argv[0]} [OPTION]
-        
-        {GREEN}Options:{NC}
-          -genEnv [dev|prod]    Generate environment without starting the application
-          -start                Start the application (default if no option given)
-          -build                Start the application and rebuild Docker images
-          -stop                 Stop the application
-          -backupDB             Backup the database (structure, data and triggers)
-          -fromEnv [dev|prod]   Reset the application to use new .env , app must be stopped before. Without env it propagate root .env to all apps.
-          -fromScratch          Reset the application to its initial state (IRREVERSIBLE), app must be stopped before
-          -exportInstance       Export the current instance as a zip archive
-          -importInstance FILE  Import an instance from a zip archive
-          -help                 Show this help message
-        
-        {YELLOW}Examples:{NC}
-          {argv[0]} -start
-          {argv[0]} -stop
-          {argv[0]} -importInstance Learnagement_myinstance_20240101.zip
-        
-        {RED}WARNING:{NC} -fromScratch will delete all data and configuration. Use with caution.
-    """)
-
-def main(argv):
-    # if script parameter is destroyed
-    if len(argv) in [2, 3] and argv[1] == "-genEnv":
-        if len(argv)==2:
-            __generate_env()
-        elif argv[2] in ["dev","prod"]:
-            __generate_env(argv[2])
-    elif len(argv)==1 or (len(argv)==2 and argv[1] == "-start"):
-        asyncio.run(start())
-    elif len(argv)==2 and argv[1] == "-backupDB":
-        backupDB()
-    elif len(argv)==2 and argv[1] == "-stop":
-        stop()
-    elif len(argv)==2 and argv[1] == "-build":
-        asyncio.run(start(docker_option = ["--build"]))
-    elif len(argv)==2 and argv[1] == "-fromScratch":
-        from_scratch()
-    elif len(argv) in [2, 3] and argv[1] == "-fromEnv":
-        if len(argv)==2:
-            from_env()
-        elif argv[2] in ["dev","prod"]:
-            from_env(argv[2])
-    elif len(argv)==2 and argv[1] == "-exportInstance":
-        exportInstance()
-    elif len(argv)==3 and argv[1] == "-importInstance":
-        import_instance(argv[2])
-    elif len(argv) == 2 and argv[1] == "-help":
-        __help(argv)
-    else:
-        __help(argv)
+    __stop__()
 
 if __name__ == "__main__":
-    main(sys.argv)
+    cli()
