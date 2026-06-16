@@ -73,7 +73,7 @@ services:
         volumes:
             - ../webApp:/var/www/html
             - ./log/php:/var/log/apache2
-            - ${SSL_DIR}:${DOCKER_SSL_DIR}:ro
+            - ../${SSL_DIR}:${DOCKER_SSL_DIR}:ro
         depends_on:
             backend_python_${INSTANCE_NAME}:
                 condition: service_healthy
@@ -89,7 +89,7 @@ services:
         volumes:
             - ../front_NextJS:/app
             - ../front_NextJS/node_modules:/app/node_modules
-            - ${SSL_DIR}:${DOCKER_SSL_DIR}:ro
+            - ../${SSL_DIR}:${DOCKER_SSL_DIR}:ro
         depends_on:
             backend_python_${INSTANCE_NAME}:
                 condition: service_healthy
@@ -104,7 +104,7 @@ services:
         volumes:
             - ../front_DashPlotly/:/app/
             - ../front_DashPlotly/data/:/data/
-            - ${SSL_DIR}:${DOCKER_SSL_DIR}:ro
+            - ../${SSL_DIR}:${DOCKER_SSL_DIR}:ro
         depends_on:
             backend_python_${INSTANCE_NAME}:
                 condition: service_healthy

@@ -8,6 +8,8 @@ import subprocess
 import time
 import socket
 import datetime
+from time import sleep
+
 import dotenv
 import re
 import asyncio
@@ -32,7 +34,7 @@ NC = "\033[0m"  # No color
 containers = ["docker", "backend_python", "webApp", "front_DashPlotly", "front_NextJS", ]
 envs = ["dev", "prod"]
 
-
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
 #############################################################
 # Lernagement security
@@ -47,20 +49,26 @@ def __get_git_branch():
     except Exception:
         return None
 
+def __check_certificates():
+    dotenv.load_dotenv()
+    if os.environ["ENV"] != "prod" and (not os.path.exists(os.environ["SSL_DIR"] + "learnagement/cert.pem") or  not os.path.exists(os.environ["SSL_DIR"] + "learnagement/key.pem")):
+        logging.error("Certificate not found. Please run learnagement.py first.")
+        sys.exit(1)
+
 def __security_check():
     dotenv.load_dotenv()
     git_branch = __get_git_branch()
     if git_branch == "main" :
         if os.environ["ENV"] !="prod" :
-            print(f"{RED}SECURITY ALERT: App run from main branch without 'ENV' environment variable set as 'prod'{NC}")
+            logging.error(f"{RED}SECURITY ALERT: App run from main branch without 'ENV' environment variable set as 'prod'{NC}")
             exit(1)
 
     elif git_branch == "prerelease":
         if os.environ["ENV"] != "prod":
-            print(f"{YELLOW}SECURITY WARNING: App run from prerelease branch without 'ENV' environment variable set as 'prod'{NC}")
+            logging.warning(f"{YELLOW}SECURITY WARNING: App run from prerelease branch without 'ENV' environment variable set as 'prod'{NC}")
 
     else:
-        print(f"{GREEN}App run from '{git_branch}' branch with '{os.environ['ENV']}' environment{NC}")
+        logging.info(f"{GREEN}App run from '{git_branch}' branch with '{os.environ['ENV']}' environment{NC}")
 
 #def generate_nextauth_secret(base_secret: str) -> bytes:
 def __generate_secret__() -> bytes:
@@ -179,47 +187,20 @@ def __generate_base_env():
     default_env_vars["INSTANCE_NAME"] = instance_name
     default_env_vars["COMPOSE_PROJECT_NAME"] = f"learnagement_{instance_name}"
 
-    # Due to ports generation, and as ports 1XXXX are locked in some OS, instance number 1 cannot be used
-    # instance_number = "-1"
-    # while not instance_number in ["0", "2", "3", "4"]:
-    #     try:
-    #         instance_number = input("Give the instance number (0,2,3 or 4 -- not 1): ")
-    #     except:
-    #         instance_number = "-1"
-    # default_env_vars["INSTANCE_NUMBER"] = instance_number
-
-    # Compute ports
-    #phpmyadmin_port = int(instance_number) * 10000 + int(default_env_vars["PHPMYADMIN_PORT"])
-    #backend_python_port = int(instance_number) * 10000 + int(default_env_vars["BACKEND_PYTHON_DOCKER_PORT"])
-    #front_php_port = int(instance_number) * 10000 + int(default_env_vars["FRONT_PHP_DOCKER_PORT"])
-    #front_dash_port = int(instance_number) * 10000 + int(default_env_vars["FRONT_DASH_DOCKER_PORT"])
-    #front_nextauth_port = int(instance_number) * 10000 + int(default_env_vars["FRONT_NEXTAUTH_DOCKER_PORT"])
-    #instance_port = front_php_port
-
     default_env_vars["COMPOSE_PROJECT_NAME"] = f"learnagement_{instance_name}"
 
     default_env_vars["INSTANCE_SECRET"] = str(__generate_secret__().hex())
     protocol = "http"
     default_env_vars["FRONT_PHP_PROTOCOL"] = protocol
     default_env_vars["INSTANCE_URL"] = protocol + "://" + socket.gethostname()
-    #default_env_vars["INSTANCE_PORT"] = str(instance_port)
 
     # MySQL
     default_env_vars["MYSQL_SERVER"] = f"learnagement_mysql_{instance_name}"
     default_env_vars["MYSQL_ROOT_PASSWORD"] = getpass("Give the MySQL Root password: ")
     default_env_vars["MYSQL_USER_PASSWORD"] = getpass("Give the MySQL User password: ")
 
-    # PhPMyAdmin
-    #default_env_vars["PHPMYADMIN_PORT"] = str(phpmyadmin_port)
-
     # Backend
     default_env_vars["BACKEND_PYTHON_DOCKER_URL"] = f"http://learnagement_backend_python_{instance_name}"
-    #default_env_vars["BACKEND_PYTHON_PORT"] = str(backend_python_port)
-
-    # Fronts
-    #default_env_vars["FRONT_PHP_PORT"] = str(front_php_port)
-    #default_env_vars["FRONT_DASH_PORT"] = str(front_dash_port)
-    #default_env_vars["FRONT_NEXTAUTH_PORT"] = str(front_nextauth_port)
 
     return default_env_vars
 
@@ -234,7 +215,7 @@ def update_env_file_variable(env_file=".env", key=None, value=None):
         with open(env_file, 'w') as f:
             f.write(updated)
 
-        print(f"{YELLOW}Warning: environment variables changed!{NC}")
+        logging.warning(f"{YELLOW}Environment variables changed!{NC}")
 
     # Load environment variables from the .env file
     dotenv.load_dotenv()
@@ -245,7 +226,7 @@ def propagate_env():
     for container in containers:
         target_path = os.path.join(container, ".env")
         shutil.copy(source_path, target_path)
-        print(f"Copied: {source_path} -> {target_path}")
+        logging.info(f"{GREEN}Copied: {source_path} -> {target_path}{NC}")
 
 
 
@@ -269,14 +250,13 @@ def __dbConfiguration__():
                  shutil.copy(source_path, target_path)
 
     except OSError as error:
-        print(f"{GREEN}DB already exist initialized!{NC}")
+        logging.info(f"{GREEN}DB already exist initialized!{NC}")
 
 def __dbData_configuration__():
 
     ##########
     # Création du répertoire de données initiales
-    print("##########")
-    print("Configure the initial data folder")
+    logging.info(f"{GREEN}Configure the initial data folder{NC}")
     
     # Création du répertoire de données initiales s'il n'existe pas
     data_folder = os.path.join("db", "data")
@@ -304,7 +284,7 @@ def __dbData_configuration__():
         #             print(f"Copied: {source_path} -> {target_path}")
             
     except OSError as error:
-        print(f"{GREEN}Data already exist in 'db/data'!{NC}")
+        logging.info(f"{GREEN}Data already exist in 'db/data'!{NC}")
         
     # # Chemin vers le fichier db/data/README
     # readme_path = os.path.join(data_folder, "README")
@@ -328,8 +308,7 @@ def __docker_configuration__():
     
     ##########
     # Docker configuration
-    print("##########")
-    print("Docker configuration")
+    logging.info(f"{GREEN}Docker configuration{NC}")
     
     os.chdir("docker")
     
@@ -350,7 +329,7 @@ def __docker_configuration__():
         __searchReplaceInFile__("docker-compose.yml", "${SSL_DIR}", str(os.environ["SSL_DIR"]))
         __searchReplaceInFile__("docker-compose.yml", "${DOCKER_SSL_DIR}", str(os.environ["DOCKER_SSL_DIR"]))
     elif(os.path.getmtime("docker-compose.yml.skeleton") > os.path.getmtime("docker-compose.yml")):
-        print(f"{YELLOW}WARNING: docker-compose.yml.skeleton has been updated, your docker-compose.yml can be deprecated{NC}")
+        logging.warning(f"{YELLOW}docker-compose.yml.skeleton has been updated, your docker-compose.yml can be deprecated{NC}")
     
     os.chdir("..")
 
@@ -360,8 +339,7 @@ async def __run_dockers__(docker_option):
     
     ##########
     # Run Docker
-    print("##########")
-    print("Run Docker")
+    logging.info(f"{GREEN}Run Docker{NC}")
     
     os.chdir("docker")
     
@@ -432,7 +410,7 @@ def __validate_env__(ctx, param, value):
 
 def __generate_env__(env="dev"):
     if not os.path.exists(".env"):
-        logging.error(f"{GREEN}env doesn't exist, generate it with {env} environnement {NC}")
+        logging.warning(f"{YELLOW}env file doesn't exist, generate it with '{env}' environnement {NC}")
 
         env_vars = __generate_base_env()
 
@@ -449,15 +427,16 @@ def __generate_env__(env="dev"):
     dotenv.load_dotenv()
 
 def __from_env__(env=None):
+    __generate_env__()
     if env:
 
-        logging.info(f"Using env: {env}")
+        logging.info(f"{GREEN}Switch to env: {env}{NC}")
 
         # remove configuration files that depends on .env
         try:
             os.remove(os.path.join("docker", "docker-compose.yml"))
         except FileNotFoundError as e:
-            print(e)
+            logging.exception(e)
 
         env_vars = __load_env_file(".env")
         if env == "prod":
@@ -480,9 +459,8 @@ def __from_scratch__():
 
     ##########
     # Clean up App from scratch
-    print("##########")
-    print(f"{RED}Clean up App from scratch{NC}")
-    print(f"{RED}The application must be stopped{NC}")
+    logging.warning(f"{RED}Clean up App from scratch{NC}")
+    logging.warning(f"{RED}The application must be stopped{NC}")
 
     # ToDo Check if app runs
 
@@ -498,25 +476,25 @@ def __from_scratch__():
                 subprocess.run(os.environ["DOCKER_COMMAND"].split(" ") + ["volume", "rm", os.environ[
                     "COMPOSE_PROJECT_NAME"] + "_learnagement_persistent_db_" + os.environ["INSTANCE_NAME"]], check=True)
         except subprocess.CalledProcessError as e:
-            print(e.output)
+            logging.exception(e.output)
 
         try:
             shutil.rmtree(os.path.join("db", "data"), ignore_errors=True)
             shutil.rmtree(os.path.join("db", "docker-entrypoint-initdb.d"), ignore_errors=True)
             os.remove(os.path.join("docker", "docker-compose.yml"))
         except FileNotFoundError as e:
-            print(e)
+            logging.exception(e)
         try:
             os.remove(".env")
         except FileNotFoundError as e:
-            print(e)
+            logging.exception(e)
 
         for container in containers:
             try:
                 target_path = os.path.join(container, ".env")
                 os.remove(target_path)
             except FileNotFoundError as e:
-                print(e)
+                logging.exception(e)
 
         logging.info(f"{GREEN}The application was reset to its initial state.{NC}")
 
@@ -544,8 +522,8 @@ async def __start__(docker_option=None):
     __security_check()
     task = asyncio.create_task(__run_dockers__(docker_option))
 
-    print(f"{GREEN}Web Apps will run on: {os.environ['INSTANCE_URL']}{NC}")
-    print(f"{GREEN}PHPMyAdmin will run on: http://127.0.0.1:{os.environ['PHPMYADMIN_PORT']}{NC}")
+    logging.info(f"{GREEN}Web Apps will run on: {os.environ['INSTANCE_URL']}{NC}")
+    logging.info(f"{GREEN}PHPMyAdmin will run on: http://127.0.0.1:{os.environ['PHPMYADMIN_PORT']}{NC}")
 
     await task
 
@@ -553,8 +531,7 @@ def __stop__():
     dotenv.load_dotenv()
     ##########
     # Stop App
-    print("##########")
-    print(f"{GREEN}Stop App{NC}")
+    logging.info(f"{GREEN}Stop App{NC}")
 
     os.chdir("docker")
 
@@ -567,6 +544,8 @@ def __stop__():
         subprocess.run(os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + ["down"], check=True)
 
     os.chdir("..")
+
+    logging.info(f"{GREEN}App stopped{NC}")
 
 ############################################
 # Lernagement commands
@@ -589,13 +568,19 @@ def generate_env(env="dev"):
 @click.option("--from_scratch", is_flag=True, help="Reset the application to its initial state (IRREVERSIBLE)")
 @click.option("--env", type=click.Choice(envs), default=None, help="Environment to use, (use previously used if not set)")
 def start(docker_option=None, restart:bool=False, rebuild:bool=False, test:bool=False, from_scratch:bool=False, env=None):
+
+    logging.info(f"{GREEN}Starting application with: {locals()} {NC}" )
+
     if not docker_option:
         docker_option = []
     if restart:
         if test:
             logging.warning(f"{YELLOW}You cannot test restart.{NC}")
             return
+        #ToDo check restart with switch env
+        logging.warning(f"{YELLOW}Restart sometimes unstable.{NC}")
         __stop__()
+
 
     if from_scratch:
         __from_scratch__()
@@ -635,17 +620,15 @@ def backupDB(backup_folder="db/backup"):
 SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagement" AND TABLE_TYPE = "BASE TABLE"
     """
     dotenv.load_dotenv()
-    print(os.environ)
 
     ##########
     # Backup DB
-    print("##########")
-    print(f"{GREEN}BackUp DB{NC}")
+    logging.info(f"{GREEN}BackUp DB{NC}")
 
     now = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
     
     if os.name == 'nt':
-        print ("Not yet implemented for Windows.")
+        logging.warning(f"{YELLOW}Not yet implemented for Windows.{NC}")
     else:
         # Création du répertoire de données initiales s'il n'existe pas
         #backup_folder = "db/backup"
@@ -661,22 +644,22 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
         # get Learnagement db schemas
         structureFile = os.path.join(backup_folder,"0_struct_" + now + ".sql")
         cmd = os.environ["DOCKER_COMMAND"].split(" ") + ["exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-data", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "--no-tablespaces", "learnagement", ">", structureFile]
-        print(" ".join(cmd))
-        print("Enter MySQL password:")
+        #print(" ".join(cmd))
+        #print("Enter MySQL password:")
         os.system(" ".join(cmd))
 
         # get Learnagement DB data
         dataFile = os.path.join(backup_folder,"5_data_" + now + ".sql")
         cmd = os.environ["DOCKER_COMMAND"].split(" ") + ["exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-create-info", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "--no-tablespaces", "learnagement", ">", dataFile]
-        print(" ".join(cmd))
-        print("Enter MySQL password:")
+        #print(" ".join(cmd))
+        #print("Enter MySQL password:")
         os.system(" ".join(cmd))
 
         # get Learnagement db triggers
         triggerFile = os.path.join(backup_folder,"99_trigger_" + now + ".sql")
         cmd = os.environ["DOCKER_COMMAND"].split(" ") + ["exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-create-info", "--ignore-views", "--no-data", "--skip-comments", "--skip-extended-insert", "--no-tablespaces", "learnagement", ">", triggerFile]
-        print(" ".join(cmd))
-        print("Enter MySQL password:")
+        #print(" ".join(cmd))
+        #print("Enter MySQL password:")
         os.system(" ".join(cmd))
 
         # Bidouille
@@ -718,7 +701,7 @@ def exportInstance():
         # Remove export directory
         shutil.rmtree(export_dir_path)
     except OSError as error:
-        print(error)
+        logging.exception(error)
 
 @cli.command(help="Import an instance from a zip archive")
 @click.option("--file", required=True)
