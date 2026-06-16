@@ -32,7 +32,7 @@ YELLOW='\033[0;33m'
 NC = "\033[0m"  # No color
 
 containers = ["docker", "backend_python", "webApp", "front_DashPlotly", "front_NextJS", ]
-envs = ["dev", "prod"]
+envs = set()
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
@@ -89,6 +89,12 @@ def __generate_secret__() -> bytes:
 
 #############################################################
 # Lernagement env management
+
+def __scan_envs(directory="."):
+    for filename in os.listdir(directory):
+        match = re.match(r'^\.env_(.+)\.env$', filename)
+        if match:
+            envs.add(match.group(1))
 
 def update_env_variable(env_variables, key=None, value=None):
     updated = re.sub(
@@ -179,7 +185,7 @@ def __set_env(env_vars: dict, filepath: str) -> dict:
 # Generate default env variables
 
 def __generate_base_env():
-    default_env_vars = __load_env_file("env_skeleton.env")
+    default_env_vars = __load_env_file("__env_skeleton.env")
 
     # Instance
 
@@ -407,19 +413,29 @@ def __validate_env__(ctx, param, value):
 #############################################################
 # Lernagement command options
 
-
 def __generate_env__(env="dev"):
     if not os.path.exists(".env"):
+
+        if not os.path.exists("env_dev.env"):
+            shutil.copy("__env_default_dev.env", ".env_dev.env")
+        if not os.path.exists("env_prod.env"):
+            shutil.copy("__env_default_prod.env", ".env_prod.env")
+
         logging.warning(f"{YELLOW}env file doesn't exist, generate it with '{env}' environnement {NC}")
 
         env_vars = __generate_base_env()
 
-        env_vars = __set_env(env_vars, "env_default.env")
+        #env_vars = __set_env(env_vars, "env_default.env")
 
-        if(env == "dev"):
-            env_vars = __set_env(env_vars, "env_dev.env")
-        elif(env == "prod"):
-            env_vars = __set_env(env_vars, "env_prod.env")
+        # if(env == "dev"):
+        #     env_vars = __set_env(env_vars, "env_dev.env")
+        # elif(env == "prod"):
+        #     env_vars = __set_env(env_vars, "env_prod.env")
+
+        if not os.path.exists(f".env_{env}.env"):
+            logging.error(f"{RED}Specific env file '.env_{env}.env' doesn't exist{NC}")
+            exit()
+        env_vars = __set_env(env_vars, f".env_{env}.env")
 
         save_env_file(env_vars, ".env")
 

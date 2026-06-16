@@ -21,14 +21,18 @@ pip install -r requirements.txt
 L'app se lance avec docker (pensez à lancer docker-desktop):
 ```bash
 source ./venv/bin/activate
-python Learnagement.py -start
+python Learnagement.py start
 ```
 
-Au 1e lancement, l'app vous demande le numéro d'instance 'I' compris entre 2 et 4. Trois services seront accessibles :  
-- L'app web : 127.0.0.1:```i```0080;
-- PhPMyAdmin : 127.0.0.1:```i```8080; root/<mot de passe défini à l'installation>
+To configure your instance, edit specific env_XXX.env files and restarts the app with:
+```bash
+python Learnagement.py start --env XXX
+```
 
-en remplaçant ```i``` par votre numéro d'instance.
+For any help
+```bash
+python Learnagement.py --help
+```
 
 ## Utilisation
 
@@ -48,7 +52,7 @@ Si vous souhaitez lancer plusieurs instances de Learnagement sur la même machin
 - Re-cloner le dépot GIT
 - Re-faire la procédure de lancement initiale en changeant le nom et le numéro d'instance
 
-Actuellement 3 instances en parallèle sont possibles.
+Actuellement 4 instances en parallèle sont possibles.
 
 ## Arrêt de l'app
 
@@ -62,8 +66,31 @@ python learnagement.py -stop
 
 To destroy, remove all data to restart from scratch:  
 ```bash
-python Learnagement -stop
-python Learnagement -fromScratch
+python Learnagement.py stop
+python Learnagement.py start --from_scratch
+```
+
+## Major upgrade
+
+- step 1: back-up your DB
+```bash 
+python Learnagement.py backupdb
+```
+- step 3: stop the current instance
+```bash
+python Learnagement.py stop
+```
+- step 4: deactivate your python environment
+- step 4: move out of your Learnagement directory, get a new clone of Learnagement git, create, activate a new python environment and install requirements 
+- step 5: move into the new repository and switch to the required branch
+- step 6: create "./db/data/" directory and copy your backed-up data into
+```bash 
+mkdir ./db/data/
+cp /[INITIAL PATH TO LEARNAGEMENT]/db/backup/VX.X.X__data_XXX[CURENT DATE].sql ./db/data/
+```
+- step 7: start the new instance (it will start like 1st time, so given the same port to the old instance to keep the service continuity)
+```bash
+python Learnagement.py start
 ```
 
 [Doc](Doc/doc.md) - [ToDo Lists](./ToDo/ToDo.md) - [CRediT](./CREDITS.md)

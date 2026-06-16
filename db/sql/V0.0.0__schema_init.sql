@@ -582,7 +582,7 @@ DROP TABLE IF EXISTS `MAQUETTE_module`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `MAQUETTE_module` (
   `id_module` int NOT NULL AUTO_INCREMENT,
-  `code_module` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `code_module` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `nom` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `ECTS` decimal(10,1) DEFAULT NULL,
   `id_discipline` int NOT NULL,
