@@ -92,7 +92,6 @@ crossorigin=""/>
 <script src="/theme/mobility-map-streetview.js"></script>
 
 <!-- ToDo : Déplacer dans un fichier global ex db.js -->
-<?php require_once "./config.php"; ?>
 <script>
     window.ENV = {
         BACKEND_URL: "<?= getenv('INSTANCE_URL') ?>",
