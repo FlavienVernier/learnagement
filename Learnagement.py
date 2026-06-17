@@ -31,7 +31,7 @@ YELLOW='\033[0;33m'
 #White='\033[0;37m'
 NC = "\033[0m"  # No color
 
-containers = ["docker", "backend_python", "webApp", "front_DashPlotly", "front_NextJS", ]
+containers = ["docker", "backend_python", "front_PHP", "front_DashPlotly", "front_NextJS", ]
 envs = set()
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)

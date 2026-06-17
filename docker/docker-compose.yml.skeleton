@@ -64,14 +64,14 @@ services:
             retries: 55
     front_php_${INSTANCE_NAME}:
         container_name: learnagement_php_${INSTANCE_NAME}
-        build: ./php/
+        build: ./front_PHP/
         restart: always
         networks:
               - learnagement_front_${INSTANCE_NAME}
         ports:
             - "${FRONT_PHP_PORT}:${FRONT_PHP_DOCKER_PORT}"
         volumes:
-            - ../webApp:/var/www/html
+            - ../front_PHP:/var/www/html
             - ./log/php:/var/log/apache2
             - ../${SSL_DIR}:${DOCKER_SSL_DIR}:ro
         depends_on:
