@@ -1,6 +1,6 @@
 
 ALTER TABLE `MOB_partner_university`
-    DROP COLUMN `S8_total_places`,
+--  DROP COLUMN `S8_total_places`,
     DROP COLUMN `S8_MM`,
     DROP COLUMN `S8_MC`,
     DROP COLUMN `S8_MMT`,
@@ -10,7 +10,7 @@ ALTER TABLE `MOB_partner_university`
     DROP COLUMN `S8_IDU`,
     DROP COLUMN `S8_ESB`,
     DROP COLUMN `S8_AM`,
-    DROP COLUMN `S9_total_places`,
+--    DROP COLUMN `S9_total_places`,
     DROP COLUMN `S9_MM`,
     DROP COLUMN `S9_MC`,
     DROP COLUMN `S9_MMT`,
@@ -58,3 +58,18 @@ INSERT INTO `MOB_partner_university`
     (`name`, `code`, `latitude`, `longitude`, `address`, `country`, `languages`,`type`) 
 VALUES 
     ('Polytech Annecy-Chambery', 'MOB_STAGE', 45.919731, 6.157739, '5 chemin de Bellevue, 74940 Annecy-le-Vieux', 'France', 'francais','stage');
+
+-- -----------------------------------------------------------------------
+-- Capacités de référence par semestre (entrées de l'algorithme)
+-- et colonnes de suivi des places restantes (persistance après calcul)
+-- -----------------------------------------------------------------------
+
+-- Ajout de S8_remaining_places et S9_remaining_places
+ALTER TABLE `MOB_partner_university`
+    ADD `S8_remaining_places` INT NULL AFTER `S9_total_places`,
+    ADD `S9_remaining_places` INT NULL AFTER `S8_remaining_places`;
+
+-- Ajout de remaining_places dans MOB_partner_university_places
+-- (nombre de places par spécialité restantes après le calcul)
+ALTER TABLE `MOB_partner_university_places`
+    ADD `remaining_places` INT NULL AFTER `number_of_places`;

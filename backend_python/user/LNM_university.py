@@ -767,7 +767,7 @@ def export_admin_wishes(
     wb.save(stream)
     stream.seek(0)
     
-    filename = f"Export_Voeux_Mobilite_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    filename = f"Export_Voeux_Mobilite_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx"
     headers_dict = {
         'Content-Disposition': f'attachment; filename="{filename}"'
     }
@@ -834,7 +834,7 @@ def export_admin_assignments(
     wb.save(stream)
     stream.seek(0)
     
-    filename = f"Export_Affectations_Mobilite_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    filename = f"Export_Affectations_Mobilite_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx"
     headers_dict = {
         'Content-Disposition': f'attachment; filename="{filename}"'
     }
@@ -856,7 +856,7 @@ def get_submitted_students(
             FROM LNM_etudiant e
             JOIN LNM_promo p ON e.id_promo = p.id_promo
             JOIN LNM_filiere f ON p.id_filiere = f.id_filiere
-            WHERE p.annee = 4
+            WHERE p.annee IN (4, 5)
               AND e.mobility_completed = 0
               AND EXISTS (
                   SELECT 1 FROM MOB_wishes w 
@@ -882,7 +882,7 @@ def reset_student_wishes(
         request='''
             SELECT 1 FROM LNM_etudiant e
             JOIN LNM_promo p ON e.id_promo = p.id_promo
-            WHERE e.id_etudiant = %(id)s AND p.annee = 4 AND e.mobility_completed = 0
+            WHERE e.id_etudiant = %(id)s AND p.annee IN (4, 5) AND e.mobility_completed = 0
         ''',
         params={"id": id_etudiant},
         allowedRolesRequester=["relations_internationales"]
@@ -944,7 +944,7 @@ def export_assigned_students_status(
             SELECT a.id_etudiant, a.status, e.nom, e.prenom, e.mail, 
                    f.nom_filiere, u.name as university_name, u.country
             FROM MOB_assignment a
-            JOIN LNM_etudiant e ON a.id_etudiant = e.id_etudiant
+            JOIN LNM_etudiant e ON e.id_etudiant = a.id_etudiant
             JOIN LNM_promo p ON e.id_promo = p.id_promo
             JOIN LNM_filiere f ON p.id_filiere = f.id_filiere
             JOIN MOB_partner_university u ON a.id_partner_university = u.id_partner_university
@@ -984,8 +984,9 @@ def export_assigned_students_status(
     wb.save(stream)
     stream.seek(0)
     
+    filename = f"Export_Affectations_{status}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx"
     headers_res = {
-        'Content-Disposition': f'attachment; filename="Export_Affectations_{status}.xlsx"'
+        'Content-Disposition': f'attachment; filename="{filename}"'
     }
     return StreamingResponse(iter([stream.getvalue()]), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers=headers_res)
 
@@ -1022,7 +1023,7 @@ def get_mobility_diagnostics(
                 (SELECT MAX(w.submission_date) FROM MOB_wishes w WHERE w.id_etudiant = e.id_etudiant) as last_submission_date
             FROM LNM_etudiant e 
             JOIN LNM_promo p ON e.id_promo = p.id_promo 
-            WHERE p.annee = 4
+            WHERE p.annee IN (4, 5)
         ''',
         params=None,
         allowedRolesRequester=["relations_internationales"]
@@ -1092,7 +1093,7 @@ def export_mobility_diagnostics(
             FROM LNM_etudiant e 
             JOIN LNM_promo p ON e.id_promo = p.id_promo 
             JOIN LNM_filiere f ON p.id_filiere = f.id_filiere
-            WHERE p.annee = 4
+            WHERE p.annee IN (4, 5)
             ORDER BY e.nom ASC, e.prenom ASC
         ''',
         params=None,
@@ -1156,7 +1157,7 @@ def export_mobility_diagnostics(
     wb.save(stream)
     stream.seek(0)
     
-    filename = f"Export_{category}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    filename = f"Export_{category}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx"
     headers_dict = {
         'Content-Disposition': f'attachment; filename="{filename}"'
     }
@@ -1165,3 +1166,153 @@ def export_mobility_diagnostics(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
         headers=headers_dict
     )
+
+@router.get("/university/admin/places/export",
+            tags=["admin", "mobility"],
+            summary="Export partner university places status to Excel")
+def export_admin_places(
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    # Requête pour récupérer les universités, leurs places globales (S8/S9) et le détail par filière.
+    sql_request = SQLRequest(
+        request='''
+            SELECT 
+                u.id_partner_university,
+                u.name AS university_name,
+                u.country,
+                IFNULL(u.S8_total_places, 0) AS S8_total,
+                IFNULL(u.S9_total_places, 0) AS S9_total,
+                IFNULL(u.S8_remaining_places, IFNULL(u.S8_total_places, 0)) AS S8_restant,
+                IFNULL(u.S9_remaining_places, IFNULL(u.S9_total_places, 0)) AS S9_restant,
+                f.nom_filiere,
+                pr.annee,
+                pl.number_of_places AS filiere_total,
+                IFNULL(pl.remaining_places, pl.number_of_places) AS filiere_restant
+            FROM MOB_partner_university u
+            LEFT JOIN MOB_partner_university_places pl ON u.id_partner_university = pl.id_partner_university
+            LEFT JOIN LNM_promo pr ON pl.id_promo = pr.id_promo
+            LEFT JOIN LNM_filiere f ON pr.id_filiere = f.id_filiere
+            WHERE u.type != 'stage'
+            ORDER BY u.name ASC, f.nom_filiere ASC, pr.annee ASC
+        ''',
+        params=None,
+        allowedRolesRequester=["relations_internationales"]
+    )
+    result = db_request(current_user, sql_request)
+    
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Etat des Places"
+    
+    headers = [
+        "Université", "Pays", 
+        "S8 Total Global", "S9 Total Global", 
+        "S8 Restant Global", "S9 Restant Global",
+        "Filière", "Année (Semestre)",
+        "Places Total Filière", "Places Restant Filière"
+    ]
+    ws.append(headers)
+    
+    if result:
+        for row in result:
+            semestre_label = f"S{row.get('annee', '')*2}" if row.get('annee') else ""
+            ws.append([
+                row.get("university_name", ""),
+                row.get("country", ""),
+                row.get("S8_total", 0),
+                row.get("S9_total", 0),
+                row.get("S8_restant", 0),
+                row.get("S9_restant", 0),
+                row.get("nom_filiere", "Toutes"),
+                semestre_label,
+                row.get("filiere_total", 0),
+                row.get("filiere_restant", 0)
+            ])
+            
+    stream = io.BytesIO()
+    wb.save(stream)
+    stream.seek(0)
+    
+    filename = f"Export_Etat_Places_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx"
+    headers_dict = {
+        'Content-Disposition': f'attachment; filename="{filename}"'
+    }
+    return StreamingResponse(
+        stream, 
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+        headers=headers_dict
+    )
+
+class StudentDecisionPayload(BaseModel):
+    decision: str
+
+@router.get("/university/etudiant/{id_etudiant}/assignment",
+            tags=["etudiant", "mobility"],
+            summary="Get the assigned university for a student")
+def get_student_assignment(
+    id_etudiant: int,
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    sql_request = SQLRequest(
+        request='''
+            SELECT a.id_assignment, a.status, u.id_partner_university, u.name, u.code, u.country, u.address
+            FROM MOB_assignment a
+            JOIN MOB_partner_university u ON a.id_partner_university = u.id_partner_university
+            WHERE a.id_etudiant = %(id)s
+        ''',
+        params={"id": id_etudiant},
+        allowedRolesRequester=["etudiant"]
+    )
+    result = db_request(current_user, sql_request)
+    if result and len(result) > 0:
+        return result[0]
+    return None
+
+@router.post("/university/etudiant/{id_etudiant}/assignment/decision",
+             tags=["etudiant", "mobility"],
+             summary="Submit student decision for assignment")
+def submit_student_decision(
+    id_etudiant: int,
+    payload: StudentDecisionPayload,
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    if payload.decision not in ['accepted', 'declined']:
+        raise HTTPException(status_code=400, detail="Invalid decision. Must be 'accepted' or 'declined'.")
+
+    # Vérifier que l'affectation existe et est "pending"
+    check_request = SQLRequest(
+        request='SELECT id_assignment, status FROM MOB_assignment WHERE id_etudiant = %(id)s',
+        params={"id": id_etudiant},
+        allowedRolesRequester=["etudiant"]
+    )
+    assignment = db_request(current_user, check_request)
+    
+    if not assignment or len(assignment) == 0:
+        raise HTTPException(status_code=404, detail="Aucune affectation trouvée pour cet étudiant.")
+        
+    if assignment[0]["status"] != 'pending':
+        raise HTTPException(status_code=400, detail="La décision a déjà été prise pour cette affectation.")
+
+    # Mettre à jour le statut
+    update_request = SQLRequest(
+        request='UPDATE MOB_assignment SET status = %(status)s WHERE id_etudiant = %(id)s',
+        params={"status": payload.decision, "id": id_etudiant},
+        allowedRolesRequester=["etudiant"]
+    )
+    db_request(current_user, update_request)
+    
+    return {"message": "Décision enregistrée avec succès"}
+
+@router.post("/university/admin/mobility/assignment/close",
+             tags=["admin", "mobility"],
+             summary="Decline all pending assignments to close the acceptance phase")
+def close_assignment_phase(
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    sql_request = SQLRequest(
+        request="UPDATE MOB_assignment SET status = 'declined' WHERE status = 'pending'",
+        params=None,
+        allowedRolesRequester=["relations_internationales"]
+    )
+    db_request(current_user, sql_request)
+    return {"message": "Toutes les affectations en attente ont été refusées."}

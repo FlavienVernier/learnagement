@@ -236,7 +236,7 @@
 
     <!-- Procedure Modal -->
     <div id="procedureModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[2000] flex items-center justify-center">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-6xl p-6 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-[90vw] xl:max-w-7xl p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-start mb-6">
                 <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
                     <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -292,24 +292,56 @@
                         <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 2</span>
                         Exécution de l'algorithme
                     </h4>
-                    <div class="bg-blue-50 text-blue-800 text-xs p-3 rounded-lg border border-blue-100 mb-4 flex gap-2 items-start">
-                        <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        L'algorithme sera exécuté pour tous les étudiants de 4ème année ayant soumis leurs vœux, peu importe leur statut (Initial, Apprenti...) ou s'ils ont déjà effectué une mobilité par le passé.
-                    </div>
 
                     <div class="p-4 bg-gray-50 rounded-lg border border-gray-100 mb-4">
-                        <h5 class="text-xs font-bold text-gray-700 mb-2">Quotas de rétention par filière</h5>
-                        <p class="text-[11px] text-gray-500 mb-3">Indiquez le nombre d'étudiants à conserver en local pour chaque filière (0 par défaut).</p>
-                        <div id="filiereQuotasContainer" class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                            <span class="text-xs text-gray-400 italic">Chargement des filières...</span>
+                        <h5 class="text-xs font-bold text-gray-700 mb-2">Quotas de mobilité par filière et semestre</h5>
+                        <p class="text-[11px] text-gray-500 mb-3">Indiquez le nombre d'étudiants autorisés à partir en mobilité pour chaque filière et par semestre.</p>
+                        
+                        <div class="flex flex-wrap items-end gap-2 mb-4">
+                            <div class="flex-1 min-w-[120px]">
+                                <label class="block text-[10px] font-bold text-gray-600 mb-1">Filière</label>
+                                <select id="quotaMobilityFiliere" class="w-full text-xs border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Chargement...</option>
+                                </select>
+                            </div>
+                            <div class="w-24">
+                                <label class="block text-[10px] font-bold text-gray-600 mb-1">Semestre</label>
+                                <select id="quotaMobilitySemester" class="w-full text-xs border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="8">S8</option>
+                                    <option value="9">S9</option>
+                                </select>
+                            </div>
+                            <div class="w-24">
+                                <label class="block text-[10px] font-bold text-gray-600 mb-1">Places</label>
+                                <input type="number" id="quotaMobilityPlaces" min="0" value="0" class="w-full text-xs border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <button onclick="window.addMobilityQuota()" class="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded transition whitespace-nowrap" style="height: 34px;">
+                                Ajouter
+                            </button>
+                        </div>
+                        
+                        <div id="mobilityQuotasList" class="flex flex-col gap-2 max-h-32 overflow-y-auto">
+                            <!-- JS will populate this -->
+                            <div id="mobilityQuotasEmpty" class="text-[11px] text-gray-400 italic">Aucun quota défini. L'algorithme n'affectera personne si les quotas sont vides.</div>
                         </div>
                     </div>
                     
-                    <div class="mt-4">
+                    <div class="mt-4" id="assignmentActions">
                         <button onclick="window.runAssignmentUI()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
                             Lancer l'affectation automatique
                         </button>
+                    </div>
+
+                    <!-- Progress UI -->
+                    <div id="assignmentProgressContainer" class="hidden mt-4 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                        <div class="flex justify-between text-xs font-semibold text-gray-700 mb-2">
+                            <span id="assignmentProgressText">Démarrage...</span>
+                            <span id="assignmentProgressPercent">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div id="assignmentProgressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
                     </div>
                 </div>
                 </div>
@@ -324,6 +356,13 @@
                     </h4>
                     <p class="text-xs text-gray-500 mb-3">Modifiez manuellement le statut d'un étudiant s'il vous confirme sa décision en personne.</p>
                     
+                    <div class="mb-4 bg-red-50 p-3 rounded border border-red-200 flex justify-between items-center">
+                        <span class="text-xs text-red-800 font-semibold">Clôture globale de la phase d'acceptation :</span>
+                        <button onclick="window.closeAssignmentPhase()" class="px-3 py-1.5 bg-red-600 text-white rounded shadow text-xs font-bold hover:bg-red-700 transition">
+                            Refuser les statuts "en attente"
+                        </button>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                         <!-- Colonne de gauche : Modification -->
                         <div>
@@ -339,20 +378,20 @@
                                     <p><strong>Nom:</strong> <span id="vsNom"></span></p>
                                     <p><strong>Filière:</strong> <span id="vsFiliere"></span></p>
                                     <p class="col-span-2"><strong>Affectation:</strong> <span id="vsUniversity"></span></p>
-                                    <p class="col-span-2 flex items-center gap-2">
+                                    <p class="col-span-2 flex flex-wrap items-center gap-2">
                                         <strong>Statut:</strong> 
                                         <span id="vsStatusBadge" class="px-2 py-0.5 rounded text-xs font-bold text-white"></span>
                                     </p>
                                 </div>
                                 
-                                <div class="flex gap-2">
-                                    <button id="btnForceAccept" onclick="window.updateAssignmentStatusUI('accepted')" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700 transition">
+                                <div class="flex flex-col xl:flex-row flex-wrap gap-2">
+                                    <button id="btnForceAccept" onclick="window.updateAssignmentStatusUI('accepted')" class="flex-1 justify-center inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700 transition">
                                         Forcer l'acceptation
                                     </button>
-                                    <button id="btnForcePending" onclick="window.updateAssignmentStatusUI('pending')" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-amber-600 rounded hover:bg-amber-700 transition">
+                                    <button id="btnForcePending" onclick="window.updateAssignmentStatusUI('pending')" class="flex-1 justify-center inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-amber-600 rounded hover:bg-amber-700 transition">
                                         Remettre en attente
                                     </button>
-                                    <button id="btnForceDecline" onclick="window.updateAssignmentStatusUI('declined')" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700 transition">
+                                    <button id="btnForceDecline" onclick="window.updateAssignmentStatusUI('declined')" class="flex-1 justify-center inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700 transition">
                                         Forcer le refus
                                     </button>
                                 </div>
@@ -394,6 +433,10 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                                 Affectations (XLSX)
                             </button>
+                            <button onclick="exportPlaces()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                État des places (XLSX)
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -428,7 +471,7 @@
                     </div>
                     <div class="mt-4 flex gap-4 text-xs font-semibold text-indigo-600">
                         <a href="#" onclick="exportDiagnosticData('validated')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> Validés</a>
-                        <a href="#" onclick="exportDiagnosticData('remaining')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> À traiter</a>
+                        <a href="#" onclick="exportDiagnosticData('remaining')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> Non validés</a>
                     </div>
                 </div>
 
@@ -1385,18 +1428,142 @@ crossorigin=""/>
         }
     };
 
-    window.runAssignmentExec = async function() {
-        const filiere_limits = {};
-        document.querySelectorAll('.filiere-quota-input').forEach(input => {
-            const val = parseInt(input.value, 10);
-            if (val > 0) {
-                filiere_limits[input.getAttribute('data-filiere')] = val;
+    window.mobilityQuotas = [];
+    window.globalFilieres = [];
+
+    window.fetchGlobalFilieres = async function() {
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/filieres/", {
+                headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+            });
+            if (response.ok) {
+                window.globalFilieres = await response.json();
+                const select = document.getElementById('quotaMobilityFiliere');
+                if (select) {
+                    select.innerHTML = window.globalFilieres
+                        .sort((a,b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere)))
+                        .map(f => `<option value="${f.id_filiere}">${f.nom_filiere || f.nom_long}</option>`)
+                        .join('');
+                }
+            }
+        } catch(e) {
+            console.error("Erreur chargement filières", e);
+        }
+    };
+
+    window.addMobilityQuota = function() {
+        const id_filiere = parseInt(document.getElementById('quotaMobilityFiliere').value, 10);
+        const id_semestre = parseInt(document.getElementById('quotaMobilitySemester').value, 10);
+        const places = parseInt(document.getElementById('quotaMobilityPlaces').value, 10);
+
+        if (isNaN(id_filiere) || isNaN(id_semestre) || isNaN(places) || places < 0) {
+            alert("Veuillez remplir tous les champs correctement.");
+            return;
+        }
+
+        const exists = window.mobilityQuotas.find(q => q.id_filiere === id_filiere && q.id_semestre === id_semestre);
+        if (exists) {
+            alert("Un quota pour cette filière et ce semestre existe déjà. Veuillez le supprimer pour le modifier.");
+            return;
+        }
+
+        window.mobilityQuotas.push({ id_filiere, id_semestre, places });
+        window.renderMobilityQuotas();
+    };
+
+    window.removeMobilityQuota = function(index) {
+        window.mobilityQuotas.splice(index, 1);
+        window.renderMobilityQuotas();
+    };
+
+    window.renderMobilityQuotas = function() {
+        const container = document.getElementById('mobilityQuotasList');
+        const emptyMsg = document.getElementById('mobilityQuotasEmpty');
+        
+        // Clear old list items except empty message
+        Array.from(container.children).forEach(child => {
+            if (child.id !== 'mobilityQuotasEmpty') {
+                child.remove();
             }
         });
 
+        if (window.mobilityQuotas.length === 0) {
+            emptyMsg.classList.remove('hidden');
+        } else {
+            emptyMsg.classList.add('hidden');
+            window.mobilityQuotas.forEach((q, i) => {
+                const f = window.globalFilieres.find(f => f.id_filiere === q.id_filiere);
+                const nom = f ? (f.nom_filiere || f.nom_long) : `Filière ${q.id_filiere}`;
+                
+                const item = document.createElement('div');
+                item.className = "flex justify-between items-center bg-white p-2 border border-gray-200 rounded shadow-sm text-xs";
+                item.innerHTML = `
+                    <div class="font-semibold text-gray-700">
+                        ${nom} <span class="text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded ml-1">S${q.id_semestre}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-gray-800">${q.places} place(s)</span>
+                        <button onclick="window.removeMobilityQuota(${i})" class="text-red-500 hover:text-red-700 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+    };
+
+    let assignmentPollInterval = null;
+
+    function startAssignmentPolling() {
+        if (assignmentPollInterval) clearInterval(assignmentPollInterval);
+        
+        assignmentPollInterval = setInterval(async () => {
+            try {
+                const res = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/assignment/status", {
+                    method: 'GET',
+                    headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+                });
+                
+                if (res.ok) {
+                    const status = await res.json();
+                    
+                    document.getElementById('assignmentProgressBar').style.width = `${status.progress}%`;
+                    document.getElementById('assignmentProgressPercent').innerText = `${status.progress}%`;
+                    document.getElementById('assignmentProgressText').innerText = status.step;
+                    
+                    if (status.error) {
+                        clearInterval(assignmentPollInterval);
+                        alert("Erreur dans l'algorithme : " + status.error);
+                        resetAssignmentUI();
+                    } else if (status.progress >= 100 || !status.is_running) {
+                        clearInterval(assignmentPollInterval);
+                        setTimeout(() => {
+                            document.getElementById('procedureModal').classList.add('hidden');
+                            alert("Algorithme terminé ! (Affectations enregistrées)");
+                            resetAssignmentUI();
+                            refreshAllData();
+                        }, 500);
+                    }
+                }
+            } catch (e) {
+                console.error("Polling error", e);
+            }
+        }, 500);
+    }
+
+    function resetAssignmentUI() {
+        document.getElementById('assignmentActions').classList.remove('hidden');
+        document.getElementById('assignmentProgressContainer').classList.add('hidden');
+        document.getElementById('assignmentProgressBar').style.width = '0%';
+        document.getElementById('assignmentProgressPercent').innerText = '0%';
+        document.getElementById('assignmentProgressText').innerText = 'Démarrage...';
+    }
+
+    window.runAssignmentExec = async function() {
         const payload = {
             annee_eligible: 4, // Procédure exclusive aux 4ème année
-            filiere_limits: filiere_limits
+            mobility_quotas: window.mobilityQuotas
         };
 
         try {
@@ -1415,10 +1582,10 @@ crossorigin=""/>
                 return;
             }
 
-            const data = await response.json();
-            document.getElementById('procedureModal').classList.add('hidden');
-            alert("Algorithme lancé ! (Affectations enregistrées)");
-            refreshAllData();
+            document.getElementById('assignmentActions').classList.add('hidden');
+            document.getElementById('assignmentProgressContainer').classList.remove('hidden');
+            
+            startAssignmentPolling();
         } catch (error) {
             alert("Erreur de connexion.");
         }
@@ -1476,11 +1643,38 @@ crossorigin=""/>
         }
     };
 
+    window.exportPlaces = async function() {
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/places/export", {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
+                }
+            });
+            if (!response.ok) {
+                alert("Erreur lors de l'exportation de l'état des places");
+                return;
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `Export_Etat_Places_${new Date().toISOString().slice(0,10)}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            alert("Erreur de connexion.");
+        }
+    };
+
     // Procedure Modal & Reset Logic
     window.openProcedureModal = function() {
         document.getElementById('procedureModal').classList.remove('hidden');
         window.fetchSubmittedStudents();
         window.fetchAssignedStudents();
+        window.fetchGlobalFilieres();
     };
 
     window.submittedStudentsList = [];
@@ -1631,22 +1825,22 @@ crossorigin=""/>
             const btnDecline = document.getElementById('btnForceDecline');
             const btnPending = document.getElementById('btnForcePending');
 
-            btnAccept.classList.remove('hidden');
-            btnDecline.classList.remove('hidden');
-            btnPending.classList.remove('hidden');
+            btnAccept.style.display = '';
+            btnDecline.style.display = '';
+            btnPending.style.display = '';
 
             if (student.status === 'accepted') {
                 badge.textContent = 'Accepté';
                 badge.className = 'px-2 py-0.5 rounded text-xs font-bold text-white bg-green-500';
-                btnAccept.classList.add('hidden');
+                btnAccept.style.display = 'none';
             } else if (student.status === 'declined') {
                 badge.textContent = 'Refusé';
                 badge.className = 'px-2 py-0.5 rounded text-xs font-bold text-white bg-red-500';
-                btnDecline.classList.add('hidden');
+                btnDecline.style.display = 'none';
             } else {
                 badge.textContent = 'En attente';
                 badge.className = 'px-2 py-0.5 rounded text-xs font-bold text-white bg-amber-500';
-                btnPending.classList.add('hidden');
+                btnPending.style.display = 'none';
             }
             
             detailsDiv.classList.remove('hidden');
@@ -1730,7 +1924,32 @@ crossorigin=""/>
                 plugins: {
                     legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
                 }
-            }
+            },
+            plugins: [{
+                id: 'textInsideSlices',
+                afterDraw: function(chart) {
+                    const ctx = chart.ctx;
+                    chart.data.datasets.forEach((dataset, i) => {
+                        const meta = chart.getDatasetMeta(i);
+                        meta.data.forEach((element, index) => {
+                            const data = dataset.data[index];
+                            if (data > 0) {
+                                ctx.save();
+                                const centerPoint = element.tooltipPosition();
+                                ctx.fillStyle = '#ffffff';
+                                ctx.font = 'bold 14px Arial';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                // Slight text shadow for better readability
+                                ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                                ctx.shadowBlur = 4;
+                                ctx.fillText(data, centerPoint.x, centerPoint.y);
+                                ctx.restore();
+                            }
+                        });
+                    });
+                }
+            }]
         });
     };
 
@@ -1882,7 +2101,7 @@ crossorigin=""/>
             chartGlobal = new Chart(ctxGlobal, {
                 type: 'pie',
                 data: {
-                    labels: ['Mobilités déjà validées', 'Étudiants à traiter'],
+                    labels: ['Mobilités déjà validées', 'Mobilités non validées'],
                     datasets: [{
                         data: [data.validated_mobility, data.remaining_students],
                         backgroundColor: ['#3b82f6', '#9ca3af'], // blue, gray
@@ -1966,5 +2185,34 @@ crossorigin=""/>
             console.error("Erreur lors du chargement des diagnostiques:", error);
         }
     };
+
+    window.closeAssignmentPhase = async function() {
+        if (!confirm("Attention : Cette action va clôturer la phase d'acceptation.\nTOUTES les affectations actuellement 'en attente' seront définitivement passées à 'refusé'.\nVoulez-vous continuer ?")) {
+            return;
+        }
+        
+        try {
+            const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/admin/mobility/assignment/close";
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) throw new Error("Erreur lors de la clôture des affectations");
+            
+            alert("Opération terminée avec succès. Toutes les affectations en attente ont été refusées.");
+            
+            // Recharger les données pour rafraîchir l'interface
+            window.fetchStatsAndPopulate();
+            fetchAssignmentsForValidation();
+            
+        } catch (error) {
+            console.error(error);
+            alert("Erreur: " + error.message);
+        }
+    };
+
 </script>
 <?php $t->endSlot(); ?>
