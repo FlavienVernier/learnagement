@@ -1,4 +1,5 @@
 <?php
+    require_once __DIR__ . '/vendor/autoload.php'; // Add this line
     require __DIR__ . '/utils/template.php';
     require __DIR__ . '/utils/router.php';
     require __DIR__ . '/utils/alerts.php';
@@ -7,6 +8,8 @@
     require __DIR__ . "/utils/endpoint.php";
     require_once __DIR__ . "/config.php";
     include __DIR__ . "/utils/connectDB.php"; # must be refactored to load env here
+
+
 
     create_session();
     $r = new Router('');
@@ -151,4 +154,5 @@
         echo $t->render('dashboard/test');
     });
 
+    getLogger()->info('PHP app start');
     $t->router->run();

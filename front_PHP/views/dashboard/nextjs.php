@@ -8,7 +8,6 @@
     loadEnv(".");
 
     $type = $_SESSION['type'];
-    error_log('Your message here');
 ?>
 
 <?php

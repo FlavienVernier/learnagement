@@ -18,7 +18,21 @@ function loadEnv($path): void
        }
    }
 
+use Monolog\Logger;
+use Monolog\Level;
+use Monolog\Handler\StreamHandler;
 
+// create a log channel
+function getLogger(): \Monolog\Logger {
+    static $log = null;
+    if ($log === null) {
+        $log = new \Monolog\Logger('name');
+        $log->pushHandler(new \Monolog\Handler\StreamHandler('php://stdout', Level::Info));
+    }
+    return $log;
+}
+//$log = new Logger('name');
+//$log->pushHandler(new StreamHandler('php://stdout', Level::Info));
 
 // predefined variable 
 $sessionId = "None";

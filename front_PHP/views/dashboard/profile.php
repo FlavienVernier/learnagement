@@ -129,7 +129,7 @@
         <!-- Cards stages -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
             <?php foreach ($stages as $stage):
-                error_log($stage['date_debut'] . " " . $stage['date_fin']);
+
                 $debut = DateTime::createFromFormat('Y-m-d', $stage['date_debut']);
                 $fin   = DateTime::createFromFormat('Y-m-d', $stage['date_fin']);
                 $duree = $debut->diff($fin)->days;

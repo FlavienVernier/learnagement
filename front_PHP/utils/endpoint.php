@@ -1,4 +1,5 @@
 <?php
+require_once("./config.php");
 
 function get_python_backend_url($endpoint) {
     $base_url = getenv("BACKEND_PYTHON_DOCKER_URL");
@@ -23,7 +24,7 @@ function delete_endpoint($url, $token) {
 }
 
 function python_endpoint($method, $url, $data, $token) {
-error_log("methode: " . $method . ", url: " . $url . ", data " . $data . ", token: " . $token);
+    getLogger()->info("methode: " . $method . ", url: " . $url . ", data " . $data . ", token: " . $token);
     $headers = [
         "Authorization: Bearer $token"
     ];
@@ -52,7 +53,7 @@ error_log("methode: " . $method . ", url: " . $url . ", data " . $data . ", toke
     $response = curl_exec($ch);
 
     if ($response === false) {
-        error_log("Connection error: " . curl_error($ch));
+        getLogger()->error("Connection error: " . curl_error($ch));
         curl_close($ch);
         throw new Exception("Connection error: " . curl_error($ch));
         return [];
@@ -81,7 +82,7 @@ error_log("methode: " . $method . ", url: " . $url . ", data " . $data . ", toke
 
     $data = json_decode($response, true);
     if ($data === null) {
-        error_log("JSON parsing error");
+        getLogger()->error("JSON parsing error");
         return [];
     }
 

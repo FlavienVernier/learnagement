@@ -1,6 +1,7 @@
 {
     "require": {
-        "firebase/php-jwt": "^7.0",
-        "apereo/phpcas": "^1.6.1"
+        "firebase/php-jwt": "^v7.1.0",
+        "apereo/phpcas": "^1.6.2",
+        "monolog/monolog": "^3.10.0"
     }
 }
