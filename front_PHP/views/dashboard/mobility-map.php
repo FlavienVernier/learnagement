@@ -20,7 +20,7 @@
 
     <!-- Contrôles et panneaux superposés -->
     <div class="absolute top-[10px] left-[55px] z-[1000] flex max-w-[92vw] flex-col items-start gap-2.5">
-        <div class="flex items-center gap-2">
+        <div id="mapControls" class="flex items-center gap-2">
             <button onclick="document.getElementById('filterForm').classList.toggle('hidden')" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
                 Filtres
             </button>
@@ -174,6 +174,27 @@ crossorigin=""/>
     );
     window.MobilityMapState.universitiesById = universitiesById;
 
+    const fetchAssignment = async () => {
+        const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID + "/assignment";
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+                    "Content-Type": "application/json"
+                }
+            });
+            if (response.ok) {
+                return await response.json();
+            }
+        } catch (error) {
+            console.error(error.message);
+        }
+        return null;
+    }
+    
+    let assignment = await fetchAssignment();
+    window.MobilityMapState.assignment = assignment;
+
     async function refreshWishesFromServer() {
         const wishes = await fetchWishes();
         wishedUniversities.clear();
@@ -209,7 +230,9 @@ crossorigin=""/>
 
         wishesEmpty.classList.add('hidden');
         
-        const isSubmitted = wishes.some(w => w.submission_date !== null);
+        // OLD CODE (Buggy: ne gère pas bien undefined ou les chaînes "null"):
+        // const isSubmitted = wishes.some(w => w.submission_date !== null);
+        const isSubmitted = wishes.some(w => Boolean(w.submission_date) && w.submission_date !== 'null' && w.submission_date !== 'None');
 
         wishesList.innerHTML = wishes
             .map((wish, index) => `
@@ -288,7 +311,9 @@ crossorigin=""/>
     function popupText(university) {
         const alreadyInWishes = wishedUniversities.has(university.id_partner_university);
         const uid = String(university.id_partner_university);
-        const isSubmitted = Array.from(wishedUniversities.values()).some(w => w.submission_date !== null);
+        // OLD CODE (Buggy: ne gère pas bien undefined ou les chaînes "null"):
+        // const isSubmitted = Array.from(wishedUniversities.values()).some(w => w.submission_date !== null);
+        const isSubmitted = Array.from(wishedUniversities.values()).some(w => Boolean(w.submission_date) && w.submission_date !== 'null' && w.submission_date !== 'None');
 
         window.MobilityMapState.popupState.set(uid, {
             photos: null,
@@ -326,14 +351,29 @@ crossorigin=""/>
             ${escapeHtml(university.number_of_places)} place${university.number_of_places > 1 ? 's' : ''}<br/>
             ${university.note_min !== null ? `Note min : ${university.note_min}<br/>` : ''}
             <a href="${escapeHtml(university.website)}" target="_blank">${escapeHtml(university.website)}</a><br/>
-            <button
-                type="button"
-                onclick="window.addUniversityToWishes('${uid}')"
-                ${alreadyInWishes || wishedUniversities.size >= 5 || isSubmitted ? 'disabled' : ''}
-                class="mt-2 inline-flex items-center rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
-            >
-                ${alreadyInWishes ? 'Déjà dans les voeux' : isSubmitted ? 'Voeux déjà soumis' : wishedUniversities.size < 5 ? 'Ajouter aux voeux' : 'Maximum de voeux atteint'}
-            </button>
+            ${
+                (assignment && String(assignment.id_partner_university) === uid) ? 
+                    (assignment.status === 'pending' ? `
+                        <div class="mt-3 flex gap-2">
+                            <button onclick="window.submitDecision('declined')" class="flex-1 px-2 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-semibold rounded border border-red-200 transition">Refuser</button>
+                            <button onclick="window.submitDecision('accepted')" class="flex-1 px-2 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded shadow-sm transition">Accepter</button>
+                        </div>
+                    ` : assignment.status === 'accepted' ? `
+                        <div class="mt-3 text-xs font-semibold p-2 rounded text-center bg-green-50 text-green-700 border border-green-200">Affectation acceptée</div>
+                    ` : `
+                        <div class="mt-3 text-xs font-semibold p-2 rounded text-center bg-red-50 text-red-700 border border-red-200">Affectation refusée</div>
+                    `)
+                : `
+                    <button
+                        type="button"
+                        onclick="window.addUniversityToWishes('${uid}')"
+                        ${alreadyInWishes || wishedUniversities.size >= 5 || isSubmitted ? 'disabled' : ''}
+                        class="mt-2 inline-flex items-center rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                        ${alreadyInWishes ? 'Déjà dans les voeux' : isSubmitted ? 'Voeux déjà soumis' : wishedUniversities.size < 5 ? 'Ajouter aux voeux' : 'Maximum de voeux atteint'}
+                    </button>
+                `
+            }
         `;
     }
 
@@ -464,6 +504,45 @@ crossorigin=""/>
     window.moveWish = moveWish;
     window.submitWishes = submitWishes;
 
+    window.submitDecision = async function(decision) {
+        if (!confirm(`Êtes-vous sûr de vouloir ${decision === 'accepted' ? 'accepter' : 'refuser'} cette affectation ? Cette décision est définitive.`)) {
+            return;
+        }
+        
+        try {
+            const endpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
+                + "/university/etudiant/" + window.ENV.USER_ID
+                + "/assignment/decision";
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ decision })
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.detail || "Erreur inconnue");
+            }
+
+            // Mettre à jour l'état local
+            assignment.status = decision;
+            
+            // Re-rendre la carte et ré-ouvrir la popup pour afficher le nouveau statut
+            updateMap();
+            setTimeout(() => {
+                window.flyToUniversity(assignment.id_partner_university);
+            }, 100);
+            
+        } catch (error) {
+            console.error('Erreur lors de la décision :', error.message);
+            alert("Une erreur est survenue : " + error.message);
+        }
+    }
+
     window.flyToUniversity = function(uid) {
         const university = universitiesById.get(String(uid));
         if (!university) return;
@@ -492,6 +571,19 @@ crossorigin=""/>
     function updateMap() {
         markers.clearLayers();
         window.MobilityMapState.markerInstances = new Map();
+        
+        // Si l'étudiant a une affectation, on ne montre que cette université
+        if (assignment) {
+            const u = universitiesById.get(String(assignment.id_partner_university));
+            if (u) {
+                const marker = L.marker([u.latitude, u.longitude]).bindPopup(popupText(u));
+                marker.on('popupopen', () => void window.hydratePopupContent(u));
+                window.MobilityMapState.markerInstances.set(String(u.id_partner_university), marker);
+                markers.addLayer(marker);
+            }
+            map.addLayer(markers);
+            return;
+        }
         
         const selectedSemestre = document.getElementById('semestreSelect').value;
         const selectedNote = parseFloat(document.getElementById('noteMinRange').value);
@@ -528,5 +620,17 @@ crossorigin=""/>
     window.updateMap = updateMap; // Pour pouvoir appeler depuis le PHP
     renderWishesList();
     updateMap();
+    if (assignment) {
+        // Cacher les contrôles inutiles si affecté
+        const mapControls = document.getElementById('mapControls');
+        if(mapControls) mapControls.classList.add('hidden');
+        document.getElementById('filterForm').classList.add('hidden');
+        document.getElementById('wishesPanel').classList.add('hidden');
+        
+        // Ouvrir automatiquement la popup de la destination affectée
+        setTimeout(() => {
+            window.flyToUniversity(assignment.id_partner_university);
+        }, 500);
+    }
 </script>
 <?php $t->endSlot(); ?>

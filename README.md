@@ -62,7 +62,7 @@ Actuellement 4 instances en parallèle sont possibles.
 
 L'app s'arrête, sans perte de donnée, via la commande :  
 ```bash
-python learnagement.py -stop
+python Learnagement.py -stop
 ```
 
 ## Stop or Clean up from scratch the app
