@@ -416,9 +416,9 @@ def __validate_env__(ctx, param, value):
 def __generate_env__(env="dev"):
     if not os.path.exists(".env"):
 
-        if not os.path.exists("env_dev.env"):
+        if not os.path.exists(".env_dev.env"):
             shutil.copy("__env_default_dev.env", ".env_dev.env")
-        if not os.path.exists("env_prod.env"):
+        if not os.path.exists(".env_prod.env"):
             shutil.copy("__env_default_prod.env", ".env_prod.env")
 
         logging.warning(f"{YELLOW}env file doesn't exist, generate it with '{env}' environnement {NC}")
@@ -605,7 +605,7 @@ def start(docker_option=None, restart:bool=False, rebuild:bool=False, test:bool=
         __from_env__(env)
 
     if rebuild and not test:
-        asyncio.run(start(docker_option=["--build"] + docker_option))
+        asyncio.run(__start__(docker_option=["--build"] + docker_option))
         return
     if not test:
         asyncio.run(__start__(docker_option))

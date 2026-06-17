@@ -1,5 +1,5 @@
 <?php
-    require '../vendor/autoload.php';
+    require './vendor/autoload.php';
 
     require './utils/session.php';
     require './utils/render.php';
@@ -18,7 +18,7 @@ phpCAS::setVerbose(true);
     create_session();
 
     // Configuration phpCAS
-    phpCAS::client(CAS_VERSION_2_0, 'cas-uds.grenet.fr', 443, '/login', 'http://192.168.168.34:40080/APP_2026/learnagementCAS.php');
+    phpCAS::client(CAS_VERSION_2_0, 'cas-uds.grenet.fr', 443, '/login', 'http://192.168.168.34:40080/learnagementCAS.php');
 
     // Désactiver la validation du certificat SSL (à activer en production avec le bon certificat)
     phpCAS::setNoCasServerValidation();

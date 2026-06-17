@@ -6,8 +6,8 @@
     <title>UI Components - Test Page</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="../theme/theme.css">
-    <link rel="stylesheet" href="../theme/tailwind.extension.css">
+    <link rel="stylesheet" href="./theme/theme.css">
+    <link rel="stylesheet" href="./theme/tailwind.extension.css">
 
     <style>
         /* BASE RESET */

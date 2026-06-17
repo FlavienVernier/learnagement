@@ -57,7 +57,13 @@
                 }
             ,$path);
 
-            return $this->baseURI . $path . (!empty($query) ? '?' . http_build_query($query) : '');
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $host = $_SERVER['HTTP_HOST']; // garde le port si présent (localhost:40080)
+            $base = $scheme . '://' . $host . $this->baseURI;
+
+            return $base . $path . (!empty($query) ? '?' . http_build_query($query) : '');
+
+            //return $this->baseURI . $path . (!empty($query) ? '?' . http_build_query($query) : '');
 
         }
 

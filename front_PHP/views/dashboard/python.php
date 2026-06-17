@@ -4,8 +4,8 @@
 
 <?php $t->startSlot('content'); ?>
 <?php
-    require_once("../config.php");
-    loadEnv("..");
+    require_once("./config.php");
+    loadEnv(".");
 
     $type = $_SESSION['type'];
     error_log('Your message here');

@@ -232,7 +232,7 @@ integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
 crossorigin=""/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-<link rel="stylesheet" href="/APP_2026/theme/mobility-map.css" />
+<link rel="stylesheet" href="/theme/mobility-map.css" />
 <?php $t->endSlot(); ?>
 
 
@@ -251,14 +251,15 @@ crossorigin=""/>
 <script src="https://maps.googleapis.com/maps/api/js?key=<?= urlencode($googleMapsApiKey) ?>&libraries=places"></script>
 
 <!-- Logic map dédiée -->
-<script src="/APP_2026/theme/mobility-map-carousel.js"></script>
-<script src="/APP_2026/theme/mobility-map-streetview.js"></script>
+<script src="/theme/mobility-map-carousel.js"></script>
+<script src="/theme/mobility-map-streetview.js"></script>
 
 <!-- ToDo : Déplacer dans un fichier global ex db.js -->
+<?php require_once "./config.php"; ?>
 <script>
     window.ENV = {
-        BACKEND_URL: "http://127.0.0.1",
-        BACKEND_PORT: "44000",
+        BACKEND_URL: "<?= getenv('INSTANCE_URL') ?>",
+        BACKEND_PORT: "<?= getenv('BACKEND_PYTHON_PORT') ?>",
         USER_TOKEN: "<?= $_SESSION["jwt_token"] ?>",
         USER_ID: "<?= $_SESSION["id"] ?>"
     };
