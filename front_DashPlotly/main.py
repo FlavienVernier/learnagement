@@ -40,6 +40,8 @@ icon_map = {
     'connected': 'fa-solid fa-check',
     'disconnected': 'fa-solid fa-xmark',
     'apc20_hub': 'fa-solid fa-graduation-cap',
+    'dashboard': 'fa-solid fa-terminal',
+    'exit': 'fa-solid fa-arrow-right-from-bracket',
 }
 
 # Importer les layouts des différentes applications
@@ -156,11 +158,35 @@ def render_sidebar(section, token_arg, status):
                 label
             ], href=href, id=f"link-{key}", className='menu-item')
         )
+    navs.append(html.Hr())
+    url = os.getenv("INSTANCE_URL")
+    php_port = os.getenv("FRONT_PHP_PORT")
+    icon_class = icon_map.get("dashboard", 'fa-solid fa-circle')
+    navs.append(
+        dbc.NavLink([
+            html.I(className=icon_class, style={'marginRight': '2rem'}),
+            "PHP Dashboard"
+        ], href=f"{url}:{php_port}", id=f"link-php-dashboard", className='menu-item')
+    )
+    env = os.getenv("ENV")
+    if env == "dev":
+        port = os.getenv("FRONT_NEXTAUTH_PORT")
+        navs.append(
+            dbc.NavLink([
+                html.I(className=icon_class, style={'marginRight': '2rem'}),
+                "NextJS Dashboard"
+            ], href=f"{url}:{port}", id=f"link-php-dashboard", className='menu-item')
+        )
+    icon_class = icon_map.get("exit", 'fa-solid fa-circle')
+    navs.append(
+        dbc.NavLink([
+            html.I(className=icon_class, style={'marginRight': '2rem'}),
+            "Déconnexion"
+        ], href=f"{url}:{php_port}/logout", id=f"link-php-dashboard", className='menu-item')
+    )
 
     links.append(dbc.Nav(navs, vertical=True, pills=True))
-    links.append(html.Div([
-        html.I(className='fa-solid fa-check', style={'marginRight': '2rem'}),
-        html.P("(" + status + ")")], className='sidebar-header'))
+
     return html.Div(links, className='sidebar',style={'overflowY': 'auto', 'maxHeight': '100vh', 'paddingBottom': '50px'})
 
 app.layout = html.Div([
@@ -221,8 +247,10 @@ def render_page(url, pathname, token):
         return page_content, jwt_token, user_id, main_role, status
     except Exception as e:
         logging.exception(e)
+        instance_url = os.getenv("INSTANCE_URL")
+        front_php_port = os.getenv("FRONT_PHP_PORT")
         return html.Div(
-            [html.A(href="http://localhost:40080/APP_2026/learnagement.php?page=logout", target="_top",
+            [html.A(href=f"{instance_url}:{front_php_port}/logout", target="_top",
                     children="Session closed, connection required.")]), "-1", "none", "none", "no token"
 
 
