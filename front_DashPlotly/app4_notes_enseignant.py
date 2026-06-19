@@ -54,10 +54,11 @@ def register_callbacks(app):
     # mise à jour des promo
     @app.callback(
         Output('choix_promo_prof', 'options'),
-        Input('user_id','data')
+        Input('user_id','data'),
+        State('token', 'data'),
     )
-    def update_options_promo_prof(prof_id):
-        promo = app4_notes_tools.get_data_prof(prof_id)['promo'].drop_duplicates()
+    def update_options_promo_prof(prof_id, token):
+        promo = app4_notes_tools.get_data_prof(token, prof_id)['promo'].drop_duplicates()
 
         options_controles = [] #[{'label': 'Toutes les promos', 'value': 'all'}]
         options_controles.extend([{'label': p, 'value': p} for p in promo])
@@ -69,12 +70,13 @@ def register_callbacks(app):
         Output('choix_matiere_prof', 'options'),
         Input('choix_promo_prof', 'value'),
         State('user_id', 'data'),
+        State('token', 'data'),
         prevent_initial_call=True
     )
 
-    def update_matiere(promo_selectionnee, prof_id):
+    def update_matiere(promo_selectionnee, prof_id, token):
 
-        prof_data = app4_notes_tools.get_data_prof(prof_id)
+        prof_data = app4_notes_tools.get_data_prof(token, prof_id)
         modules = prof_data[prof_data['promo'] == promo_selectionnee]['nom'].drop_duplicates()
 
         options_controles = []  # [{'label': 'Toutes les promos', 'value': 'all'}]
@@ -95,11 +97,12 @@ def register_callbacks(app):
         Input('choix_matiere_prof', 'value'),
         Input('choix_promo_prof', 'value'),
         State('user_id', 'data'),
+        State('token', 'data'),
         prevent_initial_call=True
     )
-    def update_controles(matiere_selectionnee, promo_selectionnee, prof_id):
+    def update_controles(matiere_selectionnee, promo_selectionnee, prof_id, token):
 
-        prof_data = app4_notes_tools.get_data_prof(prof_id)
+        prof_data = app4_notes_tools.get_data_prof(token, prof_id)
 
         dates = prof_data[prof_data['promo'] == promo_selectionnee][prof_data['nom'] == matiere_selectionnee]['date'].drop_duplicates()
 
@@ -116,12 +119,13 @@ def register_callbacks(app):
         Input('choix_matiere_prof', 'value'),
         Input('choix_controle_prof', 'value'),
         State('user_id', 'data'),
+        State('token', 'data'),
         prevent_initial_call=True
     )
 
-    def update_graphique(promo_selectionnee, matiere_selectionnee, controle_selectionne, prof_id):
+    def update_graphique(promo_selectionnee, matiere_selectionnee, controle_selectionne, prof_id, token):
 
-        prof_data = app4_notes_tools.get_data_prof(prof_id)
+        prof_data = app4_notes_tools.get_data_prof(token, prof_id)
 
         # le calcul des notes de la promo est différent si on veut la moyenne de tous les contrôles ou seulement un cc
         if controle_selectionne=='moyenne':

@@ -1,4 +1,4 @@
-from dash import html, Input, Output
+from dash import html, Input, Output, State
 import dash_bootstrap_components as dbc
 import app3_absenteisme_tools
 
@@ -14,10 +14,11 @@ app3_administratif_layout = html.Div([
 def register_callbacks(app):
     @app.callback(
         Output('absences', 'children'),
-        Input('user_id', 'data')
+        Input('user_id', 'data'),
+        State('token', 'data'),
     )
-    def update_table_abs(user_id):
-        df_abs = app3_absenteisme_tools.get_absence()
+    def update_table_abs(user_id, token):
+        df_abs = app3_absenteisme_tools.get_absences(token)
         table_absence = dbc.Table.from_dataframe(
             df_abs,
             # Key styling options:

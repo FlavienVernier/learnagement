@@ -28,29 +28,36 @@ app9_layout = html.Div([
 def register_callbacks(app):
     @app.callback(
         Output('dropdown_ue', 'options'),
-        Input('user_id', 'data')
+        Input('user_id', 'data'),
+        State('token', 'data'),
     )
-    def update_ue_options(user_id):
-        ues = app9_rendu_tools.get_renduByEtudianttId(user_id)['learning_unit_name'].drop_duplicates()
+    def update_ue_options(user_id, token):
+        options = []
+        df = app9_rendu_tools.get_renduByEtudianttId(token, user_id)
+        if not df.empty:
+            df = df['learning_unit_name'].drop_duplicates()
 
-        options = [{'label': ue, 'value': ue} for ue in ues]
+            options = [{'label': ue, 'value': ue} for ue in df]
 
         return [{'label': 'Toute UE', 'value': 'Tout'}] + options
 
     @app.callback(
         Output('dropdown_module', 'options'),
         Input('dropdown_ue', 'value'),
-        Input('user_id', 'data')
+        Input('user_id', 'data'),
+        State('token', 'data'),
     )
-    def update_module_options(selected_ue, user_id):
+    def update_module_options(selected_ue, user_id, token):
+        options = []
+        df = app9_rendu_tools.get_renduByEtudianttId(token, user_id)
+        if not df.empty:
+            if(selected_ue == 'Tout'):
+                modules = app9_rendu_tools.get_renduByEtudianttId(token, user_id)['nom'].drop_duplicates()
+            else:
+                df=app9_rendu_tools.get_renduByEtudianttId(token, user_id)
+                modules = df[df['learning_unit_name'] == selected_ue]['nom'].drop_duplicates()
 
-        if(selected_ue == 'Tout'):
-            modules = app9_rendu_tools.get_renduByEtudianttId(user_id)['nom'].drop_duplicates()
-        else:
-            df=app9_rendu_tools.get_renduByEtudianttId(user_id)
-            modules = df[df['learning_unit_name'] == selected_ue]['nom'].drop_duplicates()
-
-        options = [{'label': m, 'value': m} for m in modules]
+            options = [{'label': m, 'value': m} for m in modules]
 
         return [{'label': 'Tout module', 'value': 'Tout'}] + options
 
@@ -59,10 +66,11 @@ def register_callbacks(app):
         Output('bar_chart', 'figure'),
         Input('dropdown_module', 'value'),
         Input('dropdown_ue', 'value'),
-        State('user_id', 'data')
+        State('user_id', 'data'),
+        State('token', 'data')
     )
-    def update_bar_chart(selected_module, selected_ue, user_id):
-        df = app9_rendu_tools.get_renduByEtudianttId(user_id)
+    def update_bar_chart(selected_module, selected_ue, user_id, token):
+        df = app9_rendu_tools.get_renduByEtudianttId(token, user_id)
 
         if df.empty:
             return go.Figure()

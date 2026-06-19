@@ -7,7 +7,8 @@ services:
         restart: always
         networks:
             - learnagement_back_${INSTANCE_NAME}
-            - learnagement_front_${INSTANCE_NAME}  # ToDo remove when all dependencies, except CRUD backend, will be removed
+        # ports
+            # NEVER SET PORTS FOR DB
         command: --mysql-native-password=ON
         environment:
             - MYSQL_DATABASE=${MYSQL_DB}
@@ -31,10 +32,11 @@ services:
         networks:
             - learnagement_back_${INSTANCE_NAME}
         ports:
-            - ${INSTANCE_NUMBER}8080:80
+            - ${PHPMYADMIN_PORT}:${PHPMYADMIN_DOCKER_PORT}
         environment:
             - PMA_HOST=mysql_${INSTANCE_NAME}
             - RELATIONA_DISPLAY=D
+            - APACHE_HTTP_PORT_NUMBER=${PHPMYADMIN_DOCKER_PORT}
         volumes:
             - ./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
         depends_on:
@@ -48,7 +50,7 @@ services:
             - learnagement_back_${INSTANCE_NAME}
             - learnagement_front_${INSTANCE_NAME}
         ports:
-            - ${INSTANCE_NUMBER}4000:4000
+            - ${BACKEND_PYTHON_PORT}:${BACKEND_PYTHON_DOCKER_PORT}
         volumes:
             - ../backend_python/:/app/
         depends_on:
@@ -60,41 +62,19 @@ services:
             interval: 5s
             timeout: 5s
             retries: 55
-    phpbackend_${INSTANCE_NAME}:  # ToDo remove when python backend will be operational
-        container_name: learnagement_phpbackend_${INSTANCE_NAME}
-        build: ./phpbackend/
-        restart: always
-        networks:
-              - learnagement_back_${INSTANCE_NAME}
-              - learnagement_front_${INSTANCE_NAME}
-        ports:
-            - "${INSTANCE_NUMBER}0081:80"
-        volumes:
-            - ../phpbackend:/var/www/html
-            - ./log/phpbackend:/var/log/apache2
-        depends_on:
-            mysql_${INSTANCE_NAME}:
-                condition: service_healthy
-        healthcheck:
-            test: ["CMD", "curl", "-f", "http://127.0.0.1:80/health.php"]
-            start_period: 10s
-            interval: 5s
-            timeout: 5s
-            retries: 55
-    php_${INSTANCE_NAME}:
+    front_php_${INSTANCE_NAME}:
         container_name: learnagement_php_${INSTANCE_NAME}
-        build: ./php/
+        build: ./front_PHP/
         restart: always
         networks:
               - learnagement_front_${INSTANCE_NAME}
         ports:
-            - "${INSTANCE_NUMBER}0080:80"
+            - "${FRONT_PHP_PORT}:${FRONT_PHP_DOCKER_PORT}"
         volumes:
-            - ../webApp:/var/www/html
+            - ../front_PHP:/var/www/html
             - ./log/php:/var/log/apache2
+            - ../${SSL_DIR}:${DOCKER_SSL_DIR}:ro
         depends_on:
-            phpbackend_${INSTANCE_NAME}:
-                condition: service_healthy
             backend_python_${INSTANCE_NAME}:
                 condition: service_healthy
 
@@ -105,13 +85,12 @@ services:
         networks:
               - learnagement_front_${INSTANCE_NAME}
         ports:
-            - "${INSTANCE_NUMBER}3000:3000"
+            - "${FRONT_NEXTAUTH_PORT}:${FRONT_NEXTAUTH_DOCKER_PORT}"
         volumes:
             - ../front_NextJS:/app
             - ../front_NextJS/node_modules:/app/node_modules
+            - ../${SSL_DIR}:${DOCKER_SSL_DIR}:ro
         depends_on:
-            phpbackend_${INSTANCE_NAME}:
-                condition: service_healthy
             backend_python_${INSTANCE_NAME}:
                 condition: service_healthy
     front_dashplotly_${INSTANCE_NAME}:
@@ -121,13 +100,12 @@ services:
         networks:
               - learnagement_front_${INSTANCE_NAME}
         ports:
-            - "${INSTANCE_NUMBER}8050:8050"
+            - "${FRONT_DASH_PORT}:${FRONT_DASH_DOCKER_PORT}"
         volumes:
             - ../front_DashPlotly/:/app/
             - ../front_DashPlotly/data/:/data/
+            - ../${SSL_DIR}:${DOCKER_SSL_DIR}:ro
         depends_on:
-            phpbackend_${INSTANCE_NAME}:
-                condition: service_healthy
             backend_python_${INSTANCE_NAME}:
                 condition: service_healthy
 volumes:

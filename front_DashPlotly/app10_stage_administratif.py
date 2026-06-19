@@ -10,9 +10,9 @@ from datetime import date, datetime
 
 
 
-def get_entreprises():
-    df_stages_with_supervisor = app10_stage_tools.get_stages_with_supervisorId()
-    df_stages_without_supervisor = app10_stage_tools.get_stages_without_supervisorId()
+def get_entreprises(token):
+    df_stages_with_supervisor = app10_stage_tools.get_stages_with_supervisorId(token)
+    df_stages_without_supervisor = app10_stage_tools.get_stages_without_supervisorId(token)
 
     # liste des entreprises
     entreprises = []
@@ -23,25 +23,18 @@ def get_entreprises():
     entreprises.sort()
     return entreprises
 
-def get_teachers():
-    # liste des enseignants
-    # df_enseignants = app_tools.get_list_enseignants()
-    # enseignants = []
-    # if "nom" in df_enseignants.columns.tolist() :
-    #     enseignants = df_enseignants["nom"].map(str) + " " + df_enseignants["prenom"].map(str)
-    #     enseignants = enseignants.tolist()
-    # return enseignants
-    dfi = app_tools.get_explicit_keys("LNM_enseignant")
-    intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in dfi.iterrows()]
+def get_teachers(token):
+    dfi = app_tools.get_enseignants(token)
+    intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id_enseignant']} for _, row in dfi.iterrows()]
     return intervenant_options
 
 
-def get_internship_with_supervisor():
-    df_stages_with_supervisor = app10_stage_tools.get_stages_with_supervisorId()
+def get_internship_with_supervisor(token):
+    df_stages_with_supervisor = app10_stage_tools.get_stages_with_supervisorId(token)
     return df_stages_with_supervisor
 
-def update_table_stages_with_supervisor(nom_promo):
-    df = app10_stage_tools.get_stages_with_supervisorId()
+def update_table_stages_with_supervisor(nom_promo, token):
+    df = app10_stage_tools.get_stages_with_supervisorId(token)
 
     if nom_promo and not df.empty:
         df = df[df["promo"]==nom_promo]
@@ -53,8 +46,8 @@ def update_table_stages_with_supervisor(nom_promo):
     #     bordered=True,
     #     hover=True,
     # )
-    dfi = app_tools.get_explicit_keys("LNM_enseignant")
-    intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in dfi.iterrows()]
+    dfi = app_tools.get_enseignants(token)
+    intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id_enseignant']} for _, row in dfi.iterrows()]
 
     table_stages_with_supervisor = dash_table.DataTable(
         id='table_stages_with_supervisor',
@@ -73,18 +66,20 @@ def update_table_stages_with_supervisor(nom_promo):
         },
         style_cell_conditional=[
             {'if': {'column_id': 'id_stage', },
+             'display': 'None', },
+            {'if': {'column_id': 'id_etudiant', },
              'display': 'None', }
         ],
     )
     return table_stages_with_supervisor
 
-def get_internship_without_supervisor():
-    df_stages_without_supervisor = app10_stage_tools.get_stages_without_supervisorId()
+def get_internship_without_supervisor(token):
+    df_stages_without_supervisor = app10_stage_tools.get_stages_without_supervisorId(token)
     return df_stages_without_supervisor
 
-def update_table_stages_without_supervisor(nom_promo):
+def update_table_stages_without_supervisor(nom_promo, token):
 
-    df = app10_stage_tools.get_stages_without_supervisorId()
+    df = app10_stage_tools.get_stages_without_supervisorId(token)
 
     if nom_promo and not df.empty:
         df = df[df["promo"]==nom_promo]
@@ -98,8 +93,8 @@ def update_table_stages_without_supervisor(nom_promo):
     #     bordered=True,
     #     hover=True,
     # )
-    dfi = app_tools.get_explicit_keys("LNM_enseignant")
-    intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id']} for _, row in dfi.iterrows()]
+    dfi = app_tools.get_enseignants(token)
+    intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id_enseignant']} for _, row in dfi.iterrows()]
 
     table_stages_without_supervisor = dash_table.DataTable(
         id='table_stages_without_supervisor',
@@ -118,13 +113,15 @@ def update_table_stages_without_supervisor(nom_promo):
         },
         style_cell_conditional=[
             {'if': {'column_id': 'id_stage', },
+             'display': 'None', },
+            {'if': {'column_id': 'id_etudiant', },
              'display': 'None', }
         ],
     )
     return table_stages_without_supervisor
 
-def get_students_without_internship():
-    df_students_without_stage = app10_stage_tools.get_students_without_stage()
+def get_students_without_internship(token):
+    df_students_without_stage = app10_stage_tools.get_students_without_stage(token)
     df_students_without_stage.sort_values(by=['nom'], ascending=True, inplace=True)
     # liste des étudiants sans stage
     etudiants_sans_stage = {}
@@ -135,9 +132,9 @@ def get_students_without_internship():
         etudiants_sans_stage = dict(zip(etudiants_sans_stage_label, etudiants_sans_stage_value))
     return etudiants_sans_stage
 
-def update_table_students_without_internship(nom_promo):
+def update_table_students_without_internship(nom_promo, token):
 
-    df = app10_stage_tools.get_students_without_stage()
+    df = app10_stage_tools.get_students_without_stage(token)
 
     if nom_promo and not df.empty:
         df = df[df["promo"]==nom_promo]
@@ -165,32 +162,30 @@ def update_table_students_without_internship(nom_promo):
     )
     return table_students_without_stage
 
-def update_pie_chart(nom_promo=None):
-    # Compter les étudiants avec et sans stage
-    #avec_stage_avec_tuteur = df_stages_with_supervisor().shape[0]
-    #avec_stage_sans_tuteur = df_stages_without_supervisor().shape[0]
-    #sans_stage = df_students_without_stage().shape[0]
+def update_pie_chart(token, nom_promo=None):
 
-    df_stages_with_supervisor = get_internship_with_supervisor()
-    df_stages_without_supervisor = get_internship_without_supervisor()
-    df_students_without_stage = app10_stage_tools.get_students_without_stage()
+    if token:
+        df_stages_with_supervisor = get_internship_with_supervisor(token)
+        df_stages_without_supervisor = get_internship_without_supervisor(token)
+        df_students_without_stage = app10_stage_tools.get_students_without_stage(token)
 
 
-    if nom_promo:
-        if not df_stages_with_supervisor.empty:
-            df_stages_with_supervisor = df_stages_with_supervisor[df_stages_with_supervisor["promo"]==nom_promo]
-        if not df_stages_without_supervisor.empty:
-            df_stages_without_supervisor = df_stages_without_supervisor[df_stages_without_supervisor["promo"]==nom_promo]
-        if not df_students_without_stage.empty:
-            df_students_without_stage = df_students_without_stage[df_students_without_stage["promo"]==nom_promo]
+        if nom_promo:
+            if not df_stages_with_supervisor.empty:
+                df_stages_with_supervisor = df_stages_with_supervisor[df_stages_with_supervisor["promo"]==nom_promo]
+            if not df_stages_without_supervisor.empty:
+                df_stages_without_supervisor = df_stages_without_supervisor[df_stages_without_supervisor["promo"]==nom_promo]
+            if not df_students_without_stage.empty:
+                df_students_without_stage = df_students_without_stage[df_students_without_stage["promo"]==nom_promo]
 
-    avec_stage_avec_tuteur = len(df_stages_with_supervisor)
-    avec_stage_sans_tuteur = len(df_stages_without_supervisor)
-    sans_stage = len(df_students_without_stage)
+        avec_stage_avec_tuteur = len(df_stages_with_supervisor)
+        avec_stage_sans_tuteur = len(df_stages_without_supervisor)
+        sans_stage = len(df_students_without_stage)
 
-    # Données pour le pie chart
+        fig_values = [avec_stage_avec_tuteur, avec_stage_sans_tuteur, sans_stage]
+    else:
+        fig_values = [0, 0, 1]
     fig_labels = ['Avec Stage et tuteur', 'Avec Stage, sans tuteur', 'Sans Stage']
-    fig_values = [avec_stage_avec_tuteur, avec_stage_sans_tuteur, sans_stage]
 
     # Création du pie chart
     fig = go.Figure(data=[go.Pie(labels=fig_labels, values=fig_values, hole=.3)])
@@ -219,7 +214,9 @@ app10_administratif_layout = html.Div(children=[
        id="div_pie_chart",
        style={'display': 'inline-block', 'verticalAlign': 'top',},
        children=[
-            update_pie_chart()]),
+            update_pie_chart(token=None)
+            #dcc.Graph(figure=go.Figure(data=[go.Pie(labels=["Stages"], values=[1], hole=.3)]))
+       ]),
     html.Br(),
     html.Div([
         html.H2(children='Nouveau stage'),
@@ -314,14 +311,15 @@ def register_callbacks(app):
         Output('entreprise_input', 'options'),
         Output('tuteur_input', 'options'),
         Input('user_id', 'data'),
+        State('token', 'data'),
     )
-    def update_options(user_id):
-        df = app_tools.get_list_promo()
+    def update_options(user_id, token):
+        df = app_tools.get_promos(token)
         promo_options = [{'label': row['promo'], 'value': row['promo']} for _, row in
                    df[['promo']].iterrows()]
-        etudiant_options = [{'label': k, 'value': v} for k, v in get_students_without_internship().items()]
-        entreprise_options = [{'label': v, 'value': v} for v in get_entreprises()]
-        return promo_options, etudiant_options, entreprise_options, get_teachers()
+        etudiant_options = [{'label': k, 'value': v} for k, v in get_students_without_internship(token).items()]
+        entreprise_options = [{'label': v, 'value': v} for v in get_entreprises(token)]
+        return promo_options, etudiant_options, entreprise_options, get_teachers(token)
 
     @app.callback(
         Output(component_id='div_stages_with_supervisor', component_property='children'),
@@ -329,9 +327,10 @@ def register_callbacks(app):
         Output(component_id='div_students_without_stage', component_property='children'),
         Input('user_id', 'data'),
         Input('app10_filtre_promo', 'value'),
+        State('token', 'data'),
     )
-    def init_tables(user_id, nom_promo):
-        return update_table_stages_with_supervisor(nom_promo), update_table_stages_without_supervisor(nom_promo), update_table_students_without_internship(nom_promo)
+    def init_tables(user_id, nom_promo, token):
+        return update_table_stages_with_supervisor(nom_promo, token), update_table_stages_without_supervisor(nom_promo, token), update_table_students_without_internship(nom_promo, token)
 
     # Store entreprise into dash list (not in db)
     @app.callback(
@@ -364,17 +363,18 @@ def register_callbacks(app):
         State('dates_input', 'end_date'),
         State('etudiant_input', 'value'),
         State('tuteur_input', 'value'),
+        State('token', 'data'),
         prevent_initial_call=True,
         running=[(Output("submit-button", "disabled"), True, False)]
 
     )
-    def save_stage(save_button, nom_promo, entreprise, new_entreprise, sujet, mission, ville, start_date, end_date, id_etudiant, id_enseignant):
+    def save_stage(save_button, nom_promo, entreprise, new_entreprise, sujet, mission, ville, start_date, end_date, id_etudiant, id_enseignant, token):
         if id_etudiant and (entreprise or new_entreprise) and sujet and mission and start_date and end_date:
             if not entreprise:
                 entreprise = new_entreprise
-            save_status = app10_stage_tools.add_stage(entreprise, sujet, mission, ville, start_date, end_date, id_etudiant, id_enseignant)
+            save_status = app10_stage_tools.add_stage(token, entreprise, sujet, mission, ville, start_date, end_date, id_etudiant, id_enseignant)
             print(save_status, flush=True)
-            return save_status, [update_pie_chart(nom_promo)], update_table_stages_with_supervisor(nom_promo), update_table_stages_without_supervisor(nom_promo), update_table_students_without_internship(nom_promo)
+            return save_status, [update_pie_chart(token, nom_promo)], update_table_stages_with_supervisor(nom_promo, token), update_table_stages_without_supervisor(nom_promo, token), update_table_students_without_internship(nom_promo, token)
         else:
             raise PreventUpdate
 
@@ -395,11 +395,12 @@ def register_callbacks(app):
         Input('table_stages_without_supervisor', 'data_previous'),
         State('table_stages_without_supervisor', 'data'),
         State('app10_filtre_promo', 'value'),
+        State('token', 'data'),
         prevent_initial_call=True,
     )
-    def cb_set_internship_supervisor(previous, current, nom_promo):
+    def cb_set_internship_supervisor(previous, current, nom_promo, token):
         if previous is None or current is None:
-            return [update_pie_chart(nom_promo)], update_table_stages_with_supervisor(nom_promo), update_table_stages_without_supervisor(nom_promo)
+            return [update_pie_chart(token, nom_promo)], update_table_stages_with_supervisor(nom_promo, token), update_table_stages_without_supervisor(nom_promo, token)
         elif len(previous) > len(current):  # else row updated
             to_remove = [row for row in previous if row not in current][0]
             # df = app5_module_tools.get_moduleSequencageByEnseignantId(user_id)
@@ -409,8 +410,9 @@ def register_callbacks(app):
             #                   & (df['duree_h'] == to_remove['duree_h'])
             #                   & (df['groupe_type'] == to_remove['groupe_type'])][['id_module_sequencage']].iat[0, 0]
             # print('id_toRemove', id_to_remove, flush=True)
+            id_etudiant = to_remove['id_etudiant']
             id_to_remove = to_remove['id_stage']
-            app10_stage_tools.remove_stage(id_to_remove)
+            app10_stage_tools.remove_stage(token, id_etudiant, id_to_remove )
             #return [update_pie_chart()]
             #return [update_pie_chart()], update_table_stages_with_supervisor(), update_table_stages_without_supervisor()
         else:
@@ -420,12 +422,13 @@ def register_callbacks(app):
                     row_changed = row_changed[0]
                     new_supervisor_id = row_changed['nouveau_tuteur']
                     id_stage = row_changed['id_stage']
+                    id_etudiant = row_changed['id_etudiant']
                     # id_sequence = df[(df['type'] == row_changed['type'])
                     #                    & (df['numero_ordre'] == row_changed['numero_ordre'])
                     #                    & (df['duree_h'] == row_changed['duree_h'])
                     #                    & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0]
-                    ret = app10_stage_tools.set_internship_supervisor(id_stage, new_supervisor_id)
-        return [update_pie_chart(nom_promo)], update_table_stages_with_supervisor(nom_promo), update_table_stages_without_supervisor(nom_promo)
+                    ret = app10_stage_tools.set_internship_supervisor(token, id_etudiant, id_stage, new_supervisor_id)
+        return [update_pie_chart(token, nom_promo)], update_table_stages_with_supervisor(nom_promo, token), update_table_stages_without_supervisor(nom_promo, token)
 
         # reset internship advisor
     @app.callback(
@@ -434,9 +437,10 @@ def register_callbacks(app):
         Input('table_stages_with_supervisor', 'data_previous'),
         State('table_stages_with_supervisor', 'data'),
         State('app10_filtre_promo', 'value'),
+        State('token', 'data'),
         prevent_initial_call=True,
     )
-    def cb_reset_internship_supervisor(previous, current, nom_promo):
+    def cb_reset_internship_supervisor(previous, current, nom_promo, token):
         if previous is not None and current is not None and len(previous) == len(current):
             row_changed = [row for row in current if row not in previous]
             if len(row_changed) > 0:  # else callback invoked by data deleted
@@ -444,12 +448,13 @@ def register_callbacks(app):
                 row_changed = row_changed[0]
                 new_supervisor_id = row_changed['nouveau_tuteur']
                 id_stage = row_changed['id_stage']
+                id_etudiant = row_changed['id_etudiant']
                 # id_sequence = df[(df['type'] == row_changed['type'])
                 #                    & (df['numero_ordre'] == row_changed['numero_ordre'])
                 #                    & (df['duree_h'] == row_changed['duree_h'])
                 #                    & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0]
-                ret = app10_stage_tools.set_internship_supervisor(id_stage, new_supervisor_id)
-        return update_table_stages_with_supervisor(nom_promo), update_table_stages_without_supervisor(nom_promo)
+                ret = app10_stage_tools.set_internship_supervisor(token, id_etudiant, id_stage, new_supervisor_id)
+        return update_table_stages_with_supervisor(nom_promo, token), update_table_stages_without_supervisor(nom_promo, token)
 
     # Remove stage with supervisor
     @app.callback(
@@ -457,9 +462,10 @@ def register_callbacks(app):
         Input('table_stages_with_supervisor', 'data_previous'),
         State('table_stages_with_supervisor', 'data'),
         State('app10_filtre_promo', 'value'),
+        State('token', 'data'),
         prevent_initial_call=True,
     )
-    def cb_remove_stage_with(previous, current, nom_promo):
+    def cb_remove_stage_with(previous, current, nom_promo, token):
         if previous is not None and current is not None and len(previous) > len(current):  # else row updated
             to_remove = [row for row in previous if row not in current][0]
             # df = app5_module_tools.get_moduleSequencageByEnseignantId(user_id)
@@ -469,9 +475,10 @@ def register_callbacks(app):
             #                   & (df['duree_h'] == to_remove['duree_h'])
             #                   & (df['groupe_type'] == to_remove['groupe_type'])][['id_module_sequencage']].iat[0, 0]
             # print('id_toRemove', id_to_remove, flush=True)
+            id_etudiant = to_remove['id_etudiant']
             id_to_remove = to_remove['id_stage']
-            app10_stage_tools.remove_stage(id_to_remove)
-        return [update_pie_chart(nom_promo)]
+            app10_stage_tools.remove_stage(token, id_etudiant, id_to_remove)
+        return [update_pie_chart(token, nom_promo)]
 
     # Remove stage without supervisor
     # @app.callback(

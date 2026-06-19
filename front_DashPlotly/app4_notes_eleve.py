@@ -1,5 +1,5 @@
 from dash import dcc, html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
 import app4_notes_tools
 
@@ -45,10 +45,11 @@ def register_callbacks(app):
 
     @app.callback(
         Output('choix_matiere_eleve', 'options'),
-        Input('user_id', 'data')
+        Input('user_id', 'data'),
+        State('token', 'data'),
     )
-    def update_choix_matiere_eleve(id_etudiant):
-        modules = app4_notes_tools.get_modules_byIdEtudiant(id_etudiant)
+    def update_choix_matiere_eleve(id_etudiant, token):
+        modules = app4_notes_tools.get_modules_byIdEtudiant(token, id_etudiant)
         return [{'label': row['code_module']+" "+row['nom'], 'value': row['id_module']} for i, row in modules.iterrows()]
 
     # Callback en fonction de la matière sélectionnée
@@ -56,12 +57,13 @@ def register_callbacks(app):
         Output('choix_controle_eleve', 'options'),
         #Output('choix_controle_eleve', 'value'),
         Input('choix_matiere_eleve', 'value'),
-        Input('user_id', 'data')
+        Input('user_id', 'data'),
+        State('token', 'data'),
     )
-    def update_controles(matiere_selectionnee, user_id):
+    def update_controles(matiere_selectionnee, user_id, token):
 
         #on récupère les données de la matière sélectionnée
-        data_matiere = app4_notes_tools.get_notes_eleves(user_id)
+        data_matiere = app4_notes_tools.get_notes_eleves(token, user_id)
         data_matiere = data_matiere[data_matiere['id_module'] == matiere_selectionnee]
 
 
@@ -85,31 +87,37 @@ def register_callbacks(app):
         Output('affichage_classement_eleve', 'children'),
         Input('choix_matiere_eleve', 'value'),
         Input('choix_controle_eleve', 'value'),
-        Input('user_id', 'data')
+        Input('user_id', 'data'),
+        State('token', 'data'),
     )
 
-    def update_graphique(matiere_selectionnee, controle_selectionne, user_id):
+    def update_graphique(matiere_selectionnee, controle_selectionne, user_id, token):
         # print(matiere_selectionnee, controle_selectionne)
         # le calcul des notes de la promo est différent si on veut la moyenne de tous les contrôles ou seulement un cc
         #data_matiere = app4_notes_tools.get_data_promo(matiere_selectionnee)  # mettre matiere_selectionnee au format id
 
-        data_matiere = app4_notes_tools.get_notes_eleves(user_id)
+        data_matiere = app4_notes_tools.get_notes_eleves(token, user_id)
         notes_eleve = data_matiere[data_matiere['id_module'] == matiere_selectionnee]
+
 
         # Vérifiez si la note existe
         if notes_eleve.empty:
             return go.Figure().update_layout(title="Aucune note disponible"), "Aucune note disponible"
 
         if controle_selectionne=='moyenne' :
-            notes_promo = app4_notes_tools.get_average_notes_promo(matiere_selectionnee)["evaluation"]
+            notes_promo = app4_notes_tools.get_average_notes_promo(token, matiere_selectionnee)["evaluation"]
             note_eleve = notes_eleve.loc[:, 'evaluation'].mean()
 
-        else :
+        elif controle_selectionne:
             # on récupère les données correspondant à la matière et au contrôle
-            data_matiere = app4_notes_tools.get_data_promo(matiere_selectionnee)
+            data_matiere = app4_notes_tools.get_data_promo(token, matiere_selectionnee)
             notes_promo = data_matiere[data_matiere['date'] == controle_selectionne]["evaluation"]
             note_eleve = notes_eleve[notes_eleve['date'] == controle_selectionne]
+            print(note_eleve, flush=True)
             note_eleve = note_eleve.iloc[0]['evaluation']
+
+        else :
+            return go.Figure(), "No data for selected options"
 
         # Calcul des informations
         classement, moyenne, mediane, ecart_type, X_notes, Y_notes, couleur = app4_notes_tools.calcul_informations(notes_promo, note_eleve)

@@ -1,5 +1,5 @@
 from dash import html, dcc
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import app10_stage_tools
 
@@ -18,11 +18,12 @@ def register_callbacks(app):
     @app.callback(
         Output(component_id='table_stages_etudiant', component_property='children'),
         Input(component_id='fake', component_property='value'),
-        Input('user_id', 'data')
+        Input('user_id', 'data'),
+        State('token', 'data'),
     )
-    def display_table(user_id_fake, user_id):
+    def display_table(user_id_fake, user_id, token):
         print("user-id:'",user_id,"'", flush=True)
-        df_stages = app10_stage_tools.get_stages_by_studentId(user_id)
+        df_stages = app10_stage_tools.get_stages_by_studentId(token, user_id)
         table_stages = dbc.Table.from_dataframe(
             df_stages,
             # Key styling options:

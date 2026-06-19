@@ -5,6 +5,11 @@
     return $res;
 }*/
 
+/**
+ * @deprecated
+ *
+ * @return $this
+ */
 function select_infos_module($conn, $id) {
     $sql = "SELECT * FROM `MAQUETTE_module` WHERE `id_module`=$id";
     $res = mysqli_query($conn, $sql);
@@ -49,7 +54,11 @@ function selectMAQUETTE_module($conn, $code_module) {
     return rs_to_table($res);
 }
 
-
+/**
+ * @deprecated
+ *
+ * @return $this
+ */
 function listMAQUETTE_module($conn) {
     $sql = "SELECT * FROM `MAQUETTE_module`";
     $res = mysqli_query($conn, $sql);
@@ -57,6 +66,11 @@ function listMAQUETTE_module($conn) {
     return $rs;
 }
 
+/**
+ * @deprecated
+ *
+ * @return $this
+ */
 function setMAQUETTE_moduleResponsable($conn, $id_module, $id_resp) {
     $sql = "UPDATE MAQUETTE_module
             SET id_responsable = '$id_resp'
@@ -169,7 +183,11 @@ function getMAQUETTE_moduleM2C3($conn, $id_filiere, $id_statut)
     return $rs;
 }
 
-
+/**
+ * @deprecated
+ *
+ * @return $this
+ */
 function checkMAQUETTE_moduleWithoutLearningUnit($conn)
 {
     $sql = "SELECT `code_module`, `nom`
@@ -180,6 +198,11 @@ function checkMAQUETTE_moduleWithoutLearningUnit($conn)
     return $rs;
 }
 
+/**
+ * @deprecated
+ *
+ * @return $this
+ */
 function checkMAQUETTE_moduleWithoutApprentissageCritique($conn)
 {
     $sql = "SELECT `code_module`, `nom`
@@ -190,6 +213,11 @@ function checkMAQUETTE_moduleWithoutApprentissageCritique($conn)
     return $rs;
 }
 
+/**
+ * @deprecated
+ *
+ * @return $this
+ */
 function checkMAQUETTE_moduleECTS($conn)
 {
     $sql = "SELECT 

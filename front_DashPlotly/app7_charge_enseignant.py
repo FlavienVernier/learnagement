@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.express as px
-from dash import html, dcc, Input, Output
+from dash import html, dcc, Input, Output, State
 import dash_bootstrap_components as dbc
 from datetime import date, datetime
 import app7_charge_tools
@@ -69,10 +69,11 @@ def register_callbacks(app):
     @app.callback(
         Output('graphique-charge_enseignant', 'figure'),
         Input('filtre-periode', 'value'),
-        Input('user_id', 'data')
+        Input('user_id', 'data'),
+        State('token', 'data'),
     )
-    def update_graph(filtre_periode, user_id):
-        df = app7_charge_tools.get_chargeByEnseignantId(user_id)
+    def update_graph(filtre_periode, user_id, token):
+        df = app7_charge_tools.get_chargeByEnseignantId(token, user_id)
 
 
         today = datetime.today().date()  # Date d'aujourd'hui
@@ -116,10 +117,11 @@ def register_callbacks(app):
         Output('summary_div', 'children'),
         Output('total_div', 'children'),
         Input('filtre-periode', 'value'),
-        Input('user_id', 'data')
+        Input('user_id', 'data'),
+        State('token', 'data'),
     )
-    def display_table(period, user_id):
-        df = app7_charge_tools.get_chargeByEnseignantId(user_id)
+    def display_table(period, user_id, token):
+        df = app7_charge_tools.get_chargeByEnseignantId(token, user_id)
         if period == 'all':
             df = df[['type', 'duree_h']].groupby(['type']).sum().reset_index()
         elif    period == 'semester':

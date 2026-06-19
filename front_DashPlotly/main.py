@@ -1,17 +1,29 @@
+from datetime import timedelta
+import logging
+from logging import exception
+
 from dotenv import load_dotenv
 import os
-import dash
+import jwt
 import dash_bootstrap_components as dbc
+from flask import session, jsonify
 from dash import Input, Output, dcc, html, State
-import json, base64, hmac, hashlib, time
-import traceback
-import urllib.parse
+from urllib.parse import urlparse
+from urllib.parse import parse_qs
+from auth import FlaskAuth, decode_token
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s:%(funcName)s:%(lineno)d - %(message)s')
 
 load_dotenv()
 
-app = dash.Dash(__name__, suppress_callback_exceptions=True,
-                external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME])
+
+
+# Utilisation
+app = FlaskAuth(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME])
+
 server = app.server
+server.secret_key = os.getenv('INSTANCE_SECRET')
+time_out = int(os.getenv('SESSION_TIMEOUT'))
 
 registered_callbacks = set()
 
@@ -20,16 +32,18 @@ icon_map = {
     'app3': 'fa-solid fa-user-minus',
     'app4': 'fa-solid fa-user-graduate',
     'app5': 'fa-solid fa-chalkboard-teacher',
-    'app6': 'fa-solid fa-bars-progress', 
     'app7': 'fa-solid fa-briefcase',
     'app8': 'fa-solid fa-book',
     'app9': 'fa-solid fa-tasks',
     'app10': 'fa-solid fa-percentage',
+    'apc_ens_dashboard': 'fa-solid fa-graduation-cap',
     'connected': 'fa-solid fa-check',
-    'disconnected': 'fa-solid fa-xmark'
+    'disconnected': 'fa-solid fa-xmark',
+    'apc20_hub': 'fa-solid fa-graduation-cap',
+    'dashboard': 'fa-solid fa-terminal',
+    'exit': 'fa-solid fa-arrow-right-from-bracket',
 }
 
-    
 # Importer les layouts des différentes applications
 def import_apps():
     from app2_spyder_plot_competences import app2_layout, register_callbacks as register_callbacks_app2
@@ -48,8 +62,11 @@ def import_apps():
     from app10_stage_enseignant import app10_enseignant_layout, register_callbacks as register_callbacks_app10_enseignant
     from app10_stage_etudiant import app10_etudiant_layout, register_callbacks as register_callbacks_app10_etudiant
     from app11_dag_dependance import app11_layout, register_callbacks as register_callbacks_app11
+    from app11_dag_dependance_new import app11_new_layout, register_callbacks as register_callbacks_app11_new
     from app13_mccc_administratif import app13_administratif_layout, register_callbacks as register_callbacks_app13_administratif
-    from app14_check_administratif import app14_administratif_layout, register_callbacks as register_callbacks_app14_administratif
+    from app14_check_administratif import app14_administratif_layout, register_callbacks as register_callbacks_app14_administratif    
+    from apc_dash.apc_hub import apc_hub_layout, register_apc_hub_callbacks
+
     return {
         'app2': (app2_layout, register_callbacks_app2),
         'app3_administratif': (app3_administratif_layout, register_callbacks_app3_administratif),
@@ -67,14 +84,19 @@ def import_apps():
         'app10_enseignant': (app10_enseignant_layout, register_callbacks_app10_enseignant),
         'app10_etudiant': (app10_etudiant_layout, register_callbacks_app10_etudiant),
         'app11': (app11_layout, register_callbacks_app11),
+        'app11_new': (app11_new_layout, register_callbacks_app11_new),
         'app13_administratif': (app13_administratif_layout, register_callbacks_app13_administratif),
         'app14_administratif': (app14_administratif_layout, register_callbacks_app14_administratif),
+        'apc20_hub': (apc_hub_layout, register_apc_hub_callbacks),
+
     }
 
 LOGO = "https://placehold.co/100x100"
 apps = import_apps()
 
-# MENU DE LA SIDEBAR (EDITABLE)
+environment =  SECRET_KEY = os.getenv("ENV") # prod or dev
+# Prod config
+# Default sidebar menu
 menu_items = {
     'administratif': [
         ('Absences', 'app3_administratif'),
@@ -82,30 +104,42 @@ menu_items = {
         ('MCCC', 'app13_administratif'),
         ('Check', 'app14_administratif'),
         ('Charge enseignant', 'app7_administratif'),
+        ('Approche par compétences', 'apc20_hub'),
     ],
     'enseignant': [
         ('Vue modules', 'app5_enseignant_view'),
         ('MaJ modules', 'app5_enseignant_edit'),
         ('Dépendance Séances', 'app11'),
+        ('MaJ Dépendance Séances', 'app11_new'),
         ('Absences', 'app3_enseignant'),
         ('Notes', 'app4_enseignant'),
         ('Charge de travail', 'app7_enseignant'),
         ('Tutorat stages', 'app10_enseignant'),
+        ('Approche par compétences', 'apc20_hub'),
+      
     ],
     'etudiant': [
+        ('Stages', 'app10_etudiant'),
+    ]
+}
+
+if environment == "dev":
+    menu_items['etudiant'] += [
         ('Compétences', 'app2'),
         ('Absences', 'app3_etudiant'),
         ('Notes', 'app4_etudiant'),
         ('Dépendance Séances', 'app11'),
         ('Charge de travail', 'app7_etudiant'),
         ('Avancement rendus', 'app9'),
-        ('Stages', 'app10_etudiant')
+        ('Approche par compétences', 'apc20_hub'),
     ]
-}
 
-SECRET_KEY = os.getenv("INSTANCE_SECRET").encode()
+#SECRET_KEY = os.getenv("INSTANCE_SECRET").encode()
 
 def render_sidebar(section, token_arg, status):
+    # AJOUTE CES DEUX LIGNES POUR LE DÉBOGAGE :
+    print(f"====== CRÉATION DU MENU POUR : {section} ======", flush=True)
+    print(f"====== CONTENU DU MENU : {menu_items[section]} ======", flush=True)
     links = []
     # Logo + titre
     links.append(html.Div([
@@ -124,74 +158,49 @@ def render_sidebar(section, token_arg, status):
                 label
             ], href=href, id=f"link-{key}", className='menu-item')
         )
+    navs.append(html.Hr())
+    url = os.getenv("INSTANCE_URL")
+    php_port = os.getenv("FRONT_PHP_PORT")
+    icon_class = icon_map.get("dashboard", 'fa-solid fa-circle')
+    navs.append(
+        dbc.NavLink([
+            html.I(className=icon_class, style={'marginRight': '2rem'}),
+            "PHP Dashboard"
+        ], href=f"{url}:{php_port}", id=f"link-php-dashboard", className='menu-item')
+    )
+    env = os.getenv("ENV")
+    if env == "dev":
+        port = os.getenv("FRONT_NEXTAUTH_PORT")
+        navs.append(
+            dbc.NavLink([
+                html.I(className=icon_class, style={'marginRight': '2rem'}),
+                "NextJS Dashboard"
+            ], href=f"{url}:{port}", id=f"link-php-dashboard", className='menu-item')
+        )
+    icon_class = icon_map.get("exit", 'fa-solid fa-circle')
+    navs.append(
+        dbc.NavLink([
+            html.I(className=icon_class, style={'marginRight': '2rem'}),
+            "Déconnexion"
+        ], href=f"{url}:{php_port}/logout", id=f"link-php-dashboard", className='menu-item')
+    )
 
     links.append(dbc.Nav(navs, vertical=True, pills=True))
-    links.append(html.Div([
-        html.I(className='fa-solid fa-check', style={'marginRight': '2rem'}),
-        html.P("(" + status + ")")], className='sidebar-header'))
-    return html.Div(links, className='sidebar')
+
+    return html.Div(links, className='sidebar',style={'overflowY': 'auto', 'maxHeight': '100vh', 'paddingBottom': '50px'})
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
+    dcc.Store(id='token', storage_type="memory", data='none'),
     dcc.Store(id='user_id', storage_type="memory", data='0'),
     dcc.Store(id='role', storage_type="memory", data='none'),
-    dcc.Store(id='status', storage_type="memory", data='not connected'),
+    dcc.Store(id='status', storage_type="memory", data='not connected'), #deprecated
+    # Stores des dashboards APC — toujours dans le DOM pour que leurs callbacks se déclenchent dès le token disponible
+    dcc.Store(id='apc-ens-raw-store'),
+    dcc.Location(id="url-redirect", refresh=True),
     html.Div(id='sidebar'),
     html.Div(id='page-content', className='content')
 ])
-
-'''
-@app.server.before_request
-def prout():
-    token = request.args.get('auth_token')
-    #print("t",token,  type(token))
-'''
-
-@app.callback(
-    Output('user_id', 'data'),
-    Output('role', 'data'),
-    Output('status', 'data'),
-    Input('url', 'href')
-)
-def check_auth_token(url):
-    #print(url)
-    token = urllib.parse.unquote(url.strip().split('=')[1])#.decode('utf8')
-    #print(token)
-
-    #if not session.get("token") or not token:
-    if not token:
-        #print("no token", flush=True)
-        return "-1", "none", "no token"
-    try:
-        payload_b64, signature = token.split('.')
-        payload_json = base64.b64decode(payload_b64 + '=' * (-len(payload_b64) % 4)).decode()
-        expected_sig = hmac.new(SECRET_KEY, payload_json.encode(), hashlib.sha256).hexdigest()
-
-        if not hmac.compare_digest(signature, expected_sig):
-            #print("Signature mismatch", flush=True)
-            return "-1", "none", "Signature mismatch"
-
-        payload = json.loads(payload_json)
-        if payload['expires'] < time.time():
-            #print("time out", flush=True)
-            return "-1", "none", "time out"
-            
-        #print("done", flush=True)
-        # Attach user info to the Flask global context
-        if 'id_enseignant' in payload:
-            return payload['id_enseignant'], "enseignant", "Connected"
-        elif 'id_etudiant' in payload:
-            return payload['id_etudiant'], "etudiant", "Connected"
-        elif 'id_administratif' in payload:
-            return payload['id_administratif'], "administratif", "Connected"
-        else:
-            raise Exception("Unknown user class")
-    
-    except Exception as e:
-        print(e)
-        print(traceback.format_exc())
-        return "-1", "none", "Exception"
-
 
 
 # Callback pour mettre à jour la sidebar
@@ -202,6 +211,7 @@ def check_auth_token(url):
     Input('status', 'data')
 )
 def update_sidebar(url, pathname, status):
+    logging.info("update_sidebar")
     token_arg = url.strip().split('?')[1]
     if pathname and pathname.startswith('/enseignant'):
         return render_sidebar('enseignant', token_arg, status)
@@ -216,17 +226,67 @@ def update_sidebar(url, pathname, status):
             html.P("Veuillez sélectionner une section valide dans l'URL.")
         ], className='p-3')
 
+
+
 # Callback pour rendre le bon contenu
 @app.callback(
     Output('page-content', 'children'),
+    Output('token', 'data'),
+    Output('user_id', 'data'), # ToDo must be moved to session
+    Output('role', 'data'), # ToDo must be moved to session
+    Output('status', 'data'), # ToDo must be moved to session
     Input('url', 'href'),
-    Input('url', 'pathname')
+    Input('url', 'pathname'),
+    State('token', 'data')
 )
-def render_page_content(url, pathname):
-    token_arg = url.strip().split('?')[1]
-    #print('token',token_arg)
-    if not pathname or pathname == '/':
-        return html.Div()
+
+def render_page(url, pathname, token):
+    try:
+        jwt_token, user_id, main_role, status = check_auth_token(url) # if token is none, check_auth_token will get it
+        page_content = render_page_content(url, pathname, jwt_token)
+        return page_content, jwt_token, user_id, main_role, status
+    except Exception as e:
+        logging.exception(e)
+        instance_url = os.getenv("INSTANCE_URL")
+        front_php_port = os.getenv("FRONT_PHP_PORT")
+        return html.Div(
+            [html.A(href=f"{instance_url}:{front_php_port}/logout", target="_top",
+                    children="Session closed, connection required.")]), "-1", "none", "none", "no token"
+
+
+def check_auth_token(url):
+    logging.info("check_auth_token")
+    # print(url, flush=True)
+    parsed_url = urlparse(url)
+
+    jwt_token = parse_qs(parsed_url.query)['jwt_token'][0]
+    # print(jwt_token, flush=True)
+
+    session['token'] = jwt_token
+
+    # if not session.get("token") or not token:
+    if not jwt_token:
+        logging.info("no token")
+        app.layout = html.Div([html.A(href="http://localhost:40080/APP_2026/learnagement.php?page=logout", target="_top", children="No Token, session closed, connection required.")])
+        return "-1", "none", "none", "no token"
+    #try:
+    payload = decode_token(jwt_token)
+    print(payload, flush=True)
+    # Attach user info to the Flask global context
+    if 'enseignant' in payload["roles"]:
+        return jwt_token, payload['id'], "enseignant", "Connected"
+    elif 'etudiant' in payload["roles"]:
+        return jwt_token, payload['id'], "etudiant", "Connected"
+    elif 'administratif' in payload["roles"]:
+        return jwt_token, payload['id'], "administratif", "Connected"
+    else:
+        logging.exception("Unknown user class")
+        raise Exception("Unknown user class")
+
+
+def render_page_content(url, pathname, token):
+    logging.info("render_page_content " + token)
+
     parts = pathname.strip('/').split('/')  # ['enseignant', 'app2'] ou ['etudiant','app7'] ou ['enseignant'] etc.
     if len(parts) == 1:
         # page section landing
@@ -254,4 +314,31 @@ for key, (_, register_cb) in apps.items():
         registered_callbacks.add(key)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    is_prod = os.getenv("ENV", "dev") == "prod"
+    ssl_dir = os.getenv("DOCKER_SSL_DIR")
+
+    if is_prod:
+        import gunicorn.app.base
+
+        class StandaloneApp(gunicorn.app.base.BaseApplication):
+            def __init__(self, app, options=None):
+                self.options = options or {}
+                self.application = app
+                super().__init__()
+
+            def load_config(self):
+                for key, value in self.options.items():
+                    self.cfg.set(key.lower(), value)
+
+            def load(self):
+                return self.application
+
+        options = {
+            "bind": "0.0.0.0:8050",
+            "workers": 2,
+            "certfile": os.path.join(ssl_dir, "cert.pem"),
+            "keyfile": os.path.join(ssl_dir, "key.pem"),
+        }
+        StandaloneApp(server, options).run()
+    else:
+        app.run(host='0.0.0.0', debug=True)

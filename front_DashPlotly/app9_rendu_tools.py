@@ -1,16 +1,12 @@
 from dotenv import load_dotenv
-import os
 import pandas as pd
-import requests
-import io
-import plotly.express as px
+import app_tools
 
 load_dotenv()
 
 
-def get_renduByEtudianttId(id_etudiant):
-    headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset':'UTF-8'}
-    url = os.getenv("PHP_BACKEND_DOCKER_URL") + '/list/listRenduEtudiant.php'
-    resp = requests.post(url, data={'id_etudiant': id_etudiant}, headers=headers)
-    urlData = resp.content
-    return pd.read_json(io.StringIO(urlData.decode('utf-8')))
+def get_renduByEtudianttId(token, id_etudiant):
+    df = app_tools.get_endpoint(
+        url = app_tools.get_python_backend_url(f"/etudiants/{id_etudiant}/rendus/"),
+        token=token)
+    return df
