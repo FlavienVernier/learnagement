@@ -772,6 +772,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
     window.MobilityMapState = {
         popupState,
         submittedWishesByStudent,
+        semesters: [],
     };
 
     // In a flex layout, Leaflet can initialize before final dimensions are settled.
@@ -798,9 +799,23 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
                 throw new Error(`Response status: ${response.status}`);
             }
 
-            universities = await response.json();
+            const data = await response.json();
+            if (data && data.universities && data.semesters) {
+                universities = data.universities;
+                window.MobilityMapState.semesters = data.semesters;
+            } else {
+                universities = Array.isArray(data) ? data : [];
+                window.MobilityMapState.semesters = [
+                    { id: 4, label: "S8" },
+                    { id: 5, label: "S9" }
+                ];
+            }
         } catch (error) {
             console.error(error.message);
+            window.MobilityMapState.semesters = [
+                { id: 4, label: "S8" },
+                { id: 5, label: "S9" }
+            ];
         }
 
         return universities;
@@ -839,6 +854,16 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         return Array.from(filieresById.values())
             .sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere)))
             .map((filiere) => `<option value="${escapeHtml(String(filiere.id_filiere))}">${escapeHtml(filiere.nom_filiere || filiere.nom_long || 'Filiere')}</option>`)
+            .join('');
+    }
+
+    function buildSemestreOptionsHtml() {
+        const semesters = window.MobilityMapState.semesters || [
+            { id: 4, label: "S8" },
+            { id: 5, label: "S9" }
+        ];
+        return semesters
+            .map((sem) => `<option value="${escapeHtml(String(sem.id))}">${escapeHtml(sem.label || `S${sem.id}`)}</option>`)
             .join('');
     }
 
@@ -1177,8 +1202,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
                                     ${Array.from(filieresById.values()).sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere))).map((f) => `<option value="${escapeHtml(String(f.id_filiere))}">${escapeHtml(f.nom_filiere || f.nom_long || 'Filiere')}</option>`).join('')}
                                 </select>
                                 <select id="addPlaceSemestre-${escapeHtml(key)}" class="border rounded px-2 py-1 text-xs">
-                                    <option value="4">S8</option>
-                                    <option value="5">S9</option>
+                                    ${buildSemestreOptionsHtml()}
                                 </select>
                                 <button type="button" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300" onclick="window.addUniversityPlace('${escapeHtml(key)}')">Ajouter une place</button>
                             </div>
@@ -1427,8 +1451,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             <div id="${rowId}" class="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_auto] gap-2 items-center">
                 <select class="new-uni-place-filiere border rounded px-2 py-1 text-xs">${buildFiliereOptionsHtml()}</select>
                 <select class="new-uni-place-annee border rounded px-2 py-1 text-xs">
-                    <option value="4">S8</option>
-                    <option value="5">S9</option>
+                    ${buildSemestreOptionsHtml()}
                 </select>
                 <input type="number" min="0" value="1" class="new-uni-place-count border rounded px-2 py-1 text-xs" />
                 <button type="button" class="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100" onclick="document.getElementById('${rowId}').remove()">Supprimer</button>

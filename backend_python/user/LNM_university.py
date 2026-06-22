@@ -541,7 +541,7 @@ def list_all_wishes_ri(
 def list_university_catalog_ri(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
-    request = {
+    request_catalog = {
         "request": """
                         SELECT
                             u.*,
@@ -558,7 +558,31 @@ def list_university_catalog_ri(
                     """,
         "allowedRolesRequester": ["relations_internationales"],
     }
-    return db_request(current_user, SQLRequest(**request))
+    universities = db_request(current_user, SQLRequest(**request_catalog))
+
+    request_semesters = {
+        "request": """
+                        SELECT DISTINCT
+                            annee AS id,
+                            CASE WHEN annee = 4 THEN 'S8' ELSE 'S9' END AS label
+                        FROM LNM_promo
+                        WHERE annee IN (4, 5)
+                        ORDER BY annee ASC
+                    """,
+        "allowedRolesRequester": ["relations_internationales"],
+    }
+    semesters = db_request(current_user, SQLRequest(**request_semesters))
+
+    if not semesters:
+        semesters = [
+            {"id": 4, "label": "S8"},
+            {"id": 5, "label": "S9"}
+        ]
+
+    return {
+        "universities": universities if universities else [],
+        "semesters": semesters
+    }
 
 
 @router.post("/university/admin",
