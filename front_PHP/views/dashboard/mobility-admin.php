@@ -76,35 +76,6 @@
             </article>
         </div>
 
-        <div class="rounded-2xl border mb-6">
-            <div class="p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                <div class="relative w-full lg:w-96">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                    <input id="wishesSearch" type="search" placeholder="Rechercher un etudiant, email ou universite..."
-                        class="border text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" />
-                </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <label for="dossierStatusFilter"
-                        class="text-xs font-semibold uppercase tracking-wide text-gray-500">Filtre dossier</label>
-                    <select id="dossierStatusFilter" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                        <option value="tous">Tous</option>
-                        <option value="complet">Complet</option>
-                        <option value="incomplet">Incomplet</option>
-                        <option value="recent">Recent (7 jours)</option>
-                    </select>
-                    <button id="resetDashboardFilters" type="button"
-                        class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
-                        Reinitialiser
-                    </button>
-                    <span id="wishesResultsCount" class="text-sm">0 resultat</span>
-                </div>
-            </div>
-        </div>
         <div class="mb-4 flex flex-wrap gap-4">
             <button onclick="window.openProcedureModal()"
                 class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 hover:shadow transition">
@@ -126,29 +97,13 @@
                 </svg>
                 Diagnostique & Statistiques
             </button>
-        </div>
-
-        <!-- Modal replaced the inline panel. The button is kept. -->
-
-        <div class="rounded-2xl border overflow-hidden mb-8">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left">
-                    <thead class="text-xs uppercase border-b bg-primary text-on-primary">
-                        <tr>
-                            <th class="px-6 py-4 font-semibold">Etudiant</th>
-                            <th class="px-6 py-4 font-semibold">Date soumission</th>
-                            <th class="px-6 py-4 font-semibold">Statut</th>
-                            <th class="px-6 py-4 font-semibold">Nombre de voeux</th>
-                            <th class="px-6 py-4 font-semibold text-right">Details</th>
-                        </tr>
-                    </thead>
-                    <tbody id="wishesTableBody" class="divide-y divide-gray-500">
-                        <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-500">Chargement des dossiers...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <button onclick="window.toggleWishesModal()"
+                class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition">
+                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                Liste des Vœux Étudiants
+            </button>
         </div>
     </div>
 
@@ -241,15 +196,31 @@
                 </select>
             </div>
 
-            <div class="rounded border bg-white p-3">
-                <div class="mb-2 flex items-center justify-between">
-                    <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-600">Places par filière /
-                        semestre</h4>
-                    <button id="addNewUniPlaceRowBtn" type="button"
-                        class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300">Ajouter une
-                        ligne</button>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <div class="rounded border bg-white p-3">
+                    <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-2">Semestre 8 (S8)</h4>
+                    <div class="mb-3">
+                        <label class="text-[10px] uppercase font-semibold text-gray-500 mb-1 block">Places globales S8</label>
+                        <input id="newUniS8Total" type="number" min="0" value="0" class="border rounded px-3 py-1.5 text-sm w-full" />
+                    </div>
+                    <div class="mb-2 flex items-center justify-between">
+                        <span class="text-[10px] uppercase font-semibold text-gray-500">Places par filière (S8)</span>
+                        <button type="button" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300" onclick="window.addNewUniversityPlaceRow(4, 'newUniPlacesRowsS8')">Ajouter une ligne</button>
+                    </div>
+                    <div id="newUniPlacesRowsS8" class="space-y-2"></div>
                 </div>
-                <div id="newUniPlacesRows" class="space-y-2"></div>
+                <div class="rounded border bg-white p-3">
+                    <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-2">Semestre 9 (S9)</h4>
+                    <div class="mb-3">
+                        <label class="text-[10px] uppercase font-semibold text-gray-500 mb-1 block">Places globales S9</label>
+                        <input id="newUniS9Total" type="number" min="0" value="0" class="border rounded px-3 py-1.5 text-sm w-full" />
+                    </div>
+                    <div class="mb-2 flex items-center justify-between">
+                        <span class="text-[10px] uppercase font-semibold text-gray-500">Places par filière (S9)</span>
+                        <button type="button" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300" onclick="window.addNewUniversityPlaceRow(5, 'newUniPlacesRowsS9')">Ajouter une ligne</button>
+                    </div>
+                    <div id="newUniPlacesRowsS9" class="space-y-2"></div>
+                </div>
             </div>
 
             <div class="mt-3 flex items-center justify-end gap-2">
@@ -597,6 +568,94 @@
     </div>
 
     <!-- Diagnostics Modal -->
+    <div id="wishesModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[2000] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-[95vw] p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-6">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                    Liste des Vœux Étudiants
+                </h3>
+                <button onclick="window.toggleWishesModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="rounded-2xl border mb-6">
+                <div class="p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                    <div class="relative w-full lg:w-96">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input id="wishesSearch" type="search" placeholder="Rechercher un étudiant, email ou université..."
+                            class="border text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" />
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <label for="wishesFiliereFilter"
+                            class="text-xs font-semibold uppercase tracking-wide text-gray-500">Filière</label>
+                        <select id="wishesFiliereFilter" class="border border-gray-300 rounded-lg px-3 py-2 text-sm min-w-[150px]">
+                            <option value="toutes">Toutes</option>
+                        </select>
+                        <div class="h-6 w-px bg-gray-300 mx-1 hidden sm:block"></div>
+                        <label for="dossierStatusFilter"
+                            class="text-xs font-semibold uppercase tracking-wide text-blue-600 bg-blue-50 px-2 py-1 rounded">Phase 1: Soumission</label>
+                        <select id="dossierStatusFilter" class="border border-blue-300 bg-blue-50/30 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 min-w-[150px]">
+                            <option value="tous">Tous</option>
+                            <option value="complet">Complet</option>
+                            <option value="incomplet">Incomplet</option>
+                            <option value="retardataire">Retardataire</option>
+                        </select>
+                        <div class="h-6 w-px bg-gray-300 mx-1 hidden sm:block"></div>
+                        <label for="assignmentStatusFilter"
+                            class="text-xs font-semibold uppercase tracking-wide text-purple-600 bg-purple-50 px-2 py-1 rounded">Phase 3: Acceptation</label>
+                        <select id="assignmentStatusFilter" class="border border-purple-300 bg-purple-50/30 rounded-lg px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500 min-w-[150px]">
+                            <option value="tous">Tous</option>
+                            <option value="accepted">Accepté</option>
+                            <option value="declined">Refusé</option>
+                            <option value="pending">En attente</option>
+                            <option value="none">Non affecté</option>
+                        </select>
+                        <button id="resetDashboardFilters" type="button"
+                            class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
+                            Réinitialiser
+                        </button>
+                        <span id="wishesResultsCount" class="text-sm">0 résultat</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rounded-2xl border overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs uppercase border-b bg-primary text-on-primary">
+                            <tr>
+                                <th class="px-6 py-4 font-semibold">Étudiant</th>
+                                <th class="px-6 py-4 font-semibold">N° Étudiant</th>
+                                <th class="px-6 py-4 font-semibold">Filière</th>
+                                <th class="px-6 py-4 font-semibold">Date soumission</th>
+                                <th class="px-6 py-4 font-semibold">Statut de soumission</th>
+                                <th class="px-6 py-4 font-semibold">Nombre de vœux</th>
+                                <th class="px-6 py-4 font-semibold">Acceptation</th>
+                                <th class="px-6 py-4 font-semibold text-right">Détails</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wishesTableBody" class="divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="6" class="px-6 py-12 text-center text-gray-500">Chargement des dossiers...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="diagnosticsModal"
         class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[2000] flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-5xl p-6 max-h-[95vh] overflow-y-auto">
@@ -764,11 +823,12 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 <?php $t->startSlot('script.bottom'); ?>
 <script type="module" defer>
     const map = L.map('map').setView([48.85, 2.35], 4);
-    const submittedWishesByStudent = new Map();
     const expandedStudentRows = new Set();
     const expandedUniversityRows = new Set();
     const popupState = new Map();
     const wishesCountByUniversityId = new Map();
+    const submittedWishesByStudent = new Map();
+    const wishesFilieresSet = new Set();
     window.MobilityMapState = {
         popupState,
         submittedWishesByStudent,
@@ -939,18 +999,37 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
                         nom: wish.etudiant_nom,
                         prenom: wish.etudiant_prenom,
                         mail: wish.etudiant_mail,
-                        submission_date: wish.submission_date
+                        submission_date: wish.submission_date,
+                        assignment_status: wish.assignment_status,
+                        id_assignment: wish.id_assignment,
+                        filiere_nom: wish.filiere_nom
                     },
                     wishes: []
                 });
+                if (wish.filiere_nom) {
+                    wishesFilieresSet.add(wish.filiere_nom);
+                } else {
+                    wishesFilieresSet.add('Non renseignée');
+                }
             }
-            submittedWishesByStudent.get(wish.id_etudiant).wishes.push(wish);
+            if (wish.id_wish) {
+                submittedWishesByStudent.get(wish.id_etudiant).wishes.push(wish);
+            }
 
             const catalogUniversity = universitiesById.get(String(wish.id_partner_university));
-            if (catalogUniversity) {
+            if (catalogUniversity && wish.id_wish) {
                 catalogUniversity.wishCount = wishesCountByUniversityId.get(String(wish.id_partner_university)) || 0;
             }
         });
+
+        const filiereFilter = document.getElementById('wishesFiliereFilter');
+        if (filiereFilter) {
+            const currentVal = filiereFilter.value;
+            filiereFilter.innerHTML = '<option value="toutes">Toutes</option>' + Array.from(wishesFilieresSet).sort().map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('');
+            if (Array.from(wishesFilieresSet).includes(currentVal)) {
+                filiereFilter.value = currentVal;
+            }
+        }
     }
     async function refreshAllData() {
         const catalogRows = await fetchUniversityCatalog();
@@ -982,11 +1061,15 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         return Array.from(submittedWishesByStudent.values()).map((entry) => {
             const wishes = [...entry.wishes].sort((a, b) => (a.priority || 99) - (b.priority || 99));
             const submissionDate = entry.student.submission_date ? new Date(entry.student.submission_date) : null;
-            const isRecent = submissionDate ? (Date.now() - submissionDate.getTime()) <= (7 * 24 * 60 * 60 * 1000) : false;
             // OLD CODE (Buggy: considérait parfois undefined ou "null" comme true)
             // const isSubmitted = Boolean(entry.student.submission_date);
             const isSubmitted = Boolean(entry.student.submission_date) && entry.student.submission_date !== 'null' && entry.student.submission_date !== 'None';
-            const status = isSubmitted && wishes.length >= 5 ? 'complet' : 'incomplet';
+            let status = 'incomplet';
+            if (isSubmitted && wishes.length >= 1) {
+                status = 'complet';
+            } else if (wishes.length === 0) {
+                status = 'retardataire';
+            }
 
             return {
                 studentId: entry.student.id_etudiant,
@@ -998,7 +1081,9 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
                 wishesCount: wishes.length,
                 status,
                 isSubmitted,
-                isRecent,
+                assignmentStatus: entry.student.assignment_status,
+                assignmentId: entry.student.id_assignment,
+                filiere: entry.student.filiere_nom || 'Non renseignée'
             };
         });
     }
@@ -1007,7 +1092,17 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         if (status === 'complet') {
             return { label: 'Complet', className: 'bg-green-100 text-green-700' };
         }
+        if (status === 'retardataire') {
+            return { label: 'Retardataire', className: 'bg-red-100 text-red-700' };
+        }
         return { label: 'Incomplet', className: 'bg-yellow-100 text-yellow-700' };
+    }
+
+    function assignmentBadge(status) {
+        if (status === 'accepted') return { label: 'Accepté', className: 'bg-green-100 text-green-700' };
+        if (status === 'declined') return { label: 'Refusé', className: 'bg-red-100 text-red-700' };
+        if (status === 'pending') return { label: 'En attente', className: 'bg-yellow-100 text-yellow-700' };
+        return { label: 'Non affecté', className: 'bg-gray-100 text-gray-500' };
     }
 
     window.toggleWishDetails = function (studentId) {
@@ -1024,14 +1119,24 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         const body = document.getElementById('wishesTableBody');
         const query = (document.getElementById('wishesSearch').value || '').trim().toLowerCase();
         const statusFilter = document.getElementById('dossierStatusFilter').value;
+        const assignmentStatusFilter = document.getElementById('assignmentStatusFilter') ? document.getElementById('assignmentStatusFilter').value : 'tous';
+        const filiereFilter = document.getElementById('wishesFiliereFilter') ? document.getElementById('wishesFiliereFilter').value : 'toutes';
 
         let rows = getDashboardRows();
 
-        if (statusFilter !== 'tous') {
+        if (filiereFilter !== 'toutes') {
+            rows = rows.filter(row => row.filiere === filiereFilter);
+        }
+
+        if (assignmentStatusFilter !== 'tous') {
             rows = rows.filter((row) => {
-                if (statusFilter === 'recent') return row.isRecent;
-                return row.status === statusFilter;
+                const as = row.assignmentStatus || 'none';
+                return as === assignmentStatusFilter;
             });
+        }
+
+        if (statusFilter !== 'tous') {
+            rows = rows.filter(row => row.status === statusFilter);
         }
 
         if (query) {
@@ -1050,23 +1155,20 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             });
         }
 
-        rows.sort((a, b) => {
-            if (!a.submissionDate && !b.submissionDate) return 0;
-            if (!a.submissionDate) return 1;
-            if (!b.submissionDate) return -1;
-            return b.submissionDate - a.submissionDate;
-        });
+        // Le tri personnalisé par date de soumission a été supprimé à la demande de l'utilisateur.
+        // L'ordre d'affichage correspondra désormais strictement à l'ordre renvoyé par la base de données (alphabétique).
 
         const countText = rows.length + ' resultat' + (rows.length > 1 ? 's' : '');
         document.getElementById('wishesResultsCount').innerText = countText;
 
         if (rows.length === 0) {
-            body.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-gray-500">Aucun dossier ne correspond aux filtres.</td></tr>';
+            body.innerHTML = '<tr><td colspan="8" class="px-6 py-12 text-center text-gray-500">Aucun dossier ne correspond aux filtres.</td></tr>';
             return;
         }
 
         const html = rows.map((row) => {
             const badge = statusBadge(row.status);
+            const assignBadge = assignmentBadge(row.assignmentStatus);
             const studentRowKey = String(row.studentId || '');
             const isExpanded = expandedStudentRows.has(studentRowKey);
             const firstWish = row.wishes[0] || null;
@@ -1107,11 +1209,29 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
                             </div>
                         </div>
                     </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-700">${escapeHtml(row.studentId || '-')}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-700 font-medium">${escapeHtml(row.filiere || '-')}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-gray-600">${escapeHtml(row.submissionDateText)}</td>
                     <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${badge.className}">${badge.label}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${badge.className}">${badge.label}</span>
+                            ${row.isSubmitted ? `<button type="button" class="inline-flex items-center justify-center px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border border-red-200 rounded text-xs font-semibold transition shadow-sm" onclick="window.resetStudentWishes('${escapeHtml(row.studentId)}')" title="Annuler la soumission">Annuler</button>` : ''}
+                        </div>
                     </td>
                     <td class="px-6 py-4 text-gray-900 font-semibold">${row.wishesCount}/5</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${assignBadge.className}">${assignBadge.label}</span>
+                            ${row.assignmentId ? `
+                                <select class="text-xs border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 bg-gray-50 py-1" onchange="if(this.value) window.updateAssignmentStatusExec('${escapeHtml(row.assignmentId)}', this.value); this.value=''">
+                                    <option value="" disabled selected>Modifier</option>
+                                    <option value="accepted">Accepter</option>
+                                    <option value="declined">Refuser</option>
+                                    <option value="pending">En attente</option>
+                                </select>
+                            ` : ''}
+                        </div>
+                    </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center justify-end gap-2">
                             <button type="button" class="inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 transition" onclick="window.toggleWishDetails('${escapeHtml(studentRowKey)}')" aria-label="Afficher les voeux">
@@ -1122,7 +1242,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
                 </tr>
                 ${isExpanded ? `
                 <tr class="bg-gray-50">
-                    <td colspan="5" class="px-6 py-4">
+                    <td colspan="8" class="px-6 py-4">
                         <div class="space-y-2">
                             ${wishRows || '<div class="text-sm text-gray-500">Aucun voeu enregistre.</div>'}
                         </div>
@@ -1162,16 +1282,23 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             const key = String(u.rowKey);
             const isExpanded = expandedUniversityRows.has(key);
             const wishesCount = wishesCountByUniversityId.get(String(u.id_partner_university || '')) || 0;
-            const filiereRows = (u.filieres || []).map((f, index) => {
+            const s8Filieres = (u.filieres || []).filter(f => Number(f.annee) === 4);
+            const s9Filieres = (u.filieres || []).filter(f => Number(f.annee) === 5);
+
+            const renderFiliereRow = (f) => {
+                const index = u.filieres.indexOf(f);
                 const filiereText = f.nom_filiere || f.nom_long || `Filiere ${f.id_filiere}`;
                 return `
-                    <div class="grid grid-cols-1 lg:grid-cols-[2fr_1fr_auto] gap-2 items-center rounded border border-gray-200 bg-white p-2">
-                        <div class="text-xs text-gray-700">${escapeHtml(filiereText)} - ${escapeHtml(getSemesterLabel(f.annee))}</div>
+                    <div class="grid grid-cols-[2fr_1fr_auto] gap-2 items-center rounded border border-gray-200 bg-white p-2">
+                        <div class="text-xs text-gray-700">${escapeHtml(filiereText)}</div>
                         <input type="number" min="0" value="${escapeHtml(String(f.number_of_places ?? 0))}" class="border rounded px-2 py-1 text-xs" onchange="window.updateUniversityPlace('${escapeHtml(key)}', ${index}, this.value)" />
                         <button type="button" class="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100" onclick="window.removeUniversityPlace('${escapeHtml(key)}', ${index})">Supprimer</button>
                     </div>
                 `;
-            }).join('');
+            };
+
+            const filiereRowsS8 = s8Filieres.map(renderFiliereRow).join('');
+            const filiereRowsS9 = s9Filieres.map(renderFiliereRow).join('');
 
             return `
                 <tr class="hover:bg-gray-100 transition">
@@ -1197,18 +1324,40 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
                                 <input type="text" value="${escapeHtml(u.code || '')}" placeholder="Code" class="border rounded px-2 py-1 text-xs" onchange="window.updateUniversityMeta('${escapeHtml(key)}', 'code', this.value)" />
                             </div>
 
-                            <div class="flex flex-wrap items-center gap-2">
-                                <select id="addPlaceFiliere-${escapeHtml(key)}" class="border rounded px-2 py-1 text-xs">
-                                    ${Array.from(filieresById.values()).sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere))).map((f) => `<option value="${escapeHtml(String(f.id_filiere))}">${escapeHtml(f.nom_filiere || f.nom_long || 'Filiere')}</option>`).join('')}
-                                </select>
-                                <select id="addPlaceSemestre-${escapeHtml(key)}" class="border rounded px-2 py-1 text-xs">
-                                    ${buildSemestreOptionsHtml()}
-                                </select>
-                                <button type="button" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300" onclick="window.addUniversityPlace('${escapeHtml(key)}')">Ajouter une place</button>
-                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-3">
+                                <div class="rounded border bg-white p-3">
+                                    <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-2">Semestre 8 (S8)</h4>
+                                    <div class="mb-3">
+                                        <label class="text-[10px] uppercase font-semibold text-gray-500 mb-1 block">Places globales S8</label>
+                                        <input type="number" value="${escapeHtml(String(u.S8_total_places || 0))}" min="0" class="border rounded px-2 py-1 text-xs w-full" onchange="window.updateUniversityMeta('${escapeHtml(key)}', 'S8_total_places', Number(this.value))" />
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                                        <select id="addPlaceFiliereS8-${escapeHtml(key)}" class="border rounded px-2 py-1 text-xs flex-1">
+                                            ${Array.from(filieresById.values()).sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere))).map((f) => `<option value="${escapeHtml(String(f.id_filiere))}">${escapeHtml(f.nom_filiere || f.nom_long || 'Filiere')}</option>`).join('')}
+                                        </select>
+                                        <button type="button" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300" onclick="window.addUniversityPlace('${escapeHtml(key)}', 4)">Ajouter</button>
+                                    </div>
+                                    <div class="space-y-2">
+                                        ${filiereRowsS8 || '<div class="text-xs text-gray-500">Aucune place configuree.</div>'}
+                                    </div>
+                                </div>
 
-                            <div class="space-y-2">
-                                ${filiereRows || '<div class="text-xs text-gray-500">Aucune place configuree.</div>'}
+                                <div class="rounded border bg-white p-3">
+                                    <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-2">Semestre 9 (S9)</h4>
+                                    <div class="mb-3">
+                                        <label class="text-[10px] uppercase font-semibold text-gray-500 mb-1 block">Places globales S9</label>
+                                        <input type="number" value="${escapeHtml(String(u.S9_total_places || 0))}" min="0" class="border rounded px-2 py-1 text-xs w-full" onchange="window.updateUniversityMeta('${escapeHtml(key)}', 'S9_total_places', Number(this.value))" />
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                                        <select id="addPlaceFiliereS9-${escapeHtml(key)}" class="border rounded px-2 py-1 text-xs flex-1">
+                                            ${Array.from(filieresById.values()).sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere))).map((f) => `<option value="${escapeHtml(String(f.id_filiere))}">${escapeHtml(f.nom_filiere || f.nom_long || 'Filiere')}</option>`).join('')}
+                                        </select>
+                                        <button type="button" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300" onclick="window.addUniversityPlace('${escapeHtml(key)}', 5)">Ajouter</button>
+                                    </div>
+                                    <div class="space-y-2">
+                                        ${filiereRowsS9 || '<div class="text-xs text-gray-500">Aucune place configuree.</div>'}
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="flex items-center justify-end gap-2">
@@ -1273,16 +1422,21 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         updateMap();
     };
 
-    window.addUniversityPlace = function (rowKey) {
+    window.addUniversityPlace = function (rowKey, annee) {
         const university = getEditableUniversityByKey(rowKey);
         if (!university) return;
-        const filiereSelectEl = document.getElementById(`addPlaceFiliere-${rowKey}`);
-        const semestreSelectEl = document.getElementById(`addPlaceSemestre-${rowKey}`);
-        if (!filiereSelectEl || !semestreSelectEl) return;
+        const filiereSelectEl = document.getElementById(`addPlaceFiliereS${annee === 4 ? '8' : '9'}-${rowKey}`);
+        if (!filiereSelectEl) return;
 
         const filiereId = String(filiereSelectEl.value);
+
+        const alreadyExists = university.filieres.some(f => String(f.id_filiere) === filiereId && Number(f.annee) === Number(annee));
+        if (alreadyExists) {
+            window.alert(`Cette filière a déjà été ajoutée pour le semestre S${annee === 4 ? '8' : '9'}.`);
+            return;
+        }
+
         const filiereMeta = filieresById.get(filiereId);
-        const annee = Number.parseInt(semestreSelectEl.value, 10);
 
         university.filieres.push({
             id_filiere: Number.parseInt(filiereId, 10),
@@ -1319,6 +1473,8 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
                 ? null
                 : Number(university.note_min),
             type: university.type || 'ERASMUS',
+            S8_total_places: Number(university.S8_total_places || 0),
+            S9_total_places: Number(university.S9_total_places || 0),
             places: (university.filieres || []).map((f) => ({
                 id_filiere: Number(f.id_filiere),
                 annee: Number(f.annee),
@@ -1440,35 +1596,35 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         document.getElementById('newUniLongitude').value = '2.35';
         document.getElementById('newUniNoteMin').value = '';
         document.getElementById('newUniType').value = 'ERASMUS';
-        const placesRows = document.getElementById('newUniPlacesRows');
-        placesRows.innerHTML = '';
-        window.addNewUniversityPlaceRow();
+        document.getElementById('newUniS8Total').value = '0';
+        document.getElementById('newUniS9Total').value = '0';
+        document.getElementById('newUniPlacesRowsS8').innerHTML = '';
+        document.getElementById('newUniPlacesRowsS9').innerHTML = '';
+        window.addNewUniversityPlaceRow(4, 'newUniPlacesRowsS8');
+        window.addNewUniversityPlaceRow(5, 'newUniPlacesRowsS9');
     }
 
-    window.addNewUniversityPlaceRow = function () {
+    window.addNewUniversityPlaceRow = function (annee, containerId) {
         const rowId = `new-place-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
         const rowHtml = `
-            <div id="${rowId}" class="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_auto] gap-2 items-center">
+            <div id="${rowId}" class="grid grid-cols-[2fr_1fr_auto] gap-2 items-center" data-annee="${annee}">
                 <select class="new-uni-place-filiere border rounded px-2 py-1 text-xs">${buildFiliereOptionsHtml()}</select>
-                <select class="new-uni-place-annee border rounded px-2 py-1 text-xs">
-                    ${buildSemestreOptionsHtml()}
-                </select>
                 <input type="number" min="0" value="1" class="new-uni-place-count border rounded px-2 py-1 text-xs" />
                 <button type="button" class="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100" onclick="document.getElementById('${rowId}').remove()">Supprimer</button>
             </div>
         `;
-        document.getElementById('newUniPlacesRows').insertAdjacentHTML('beforeend', rowHtml);
+        document.getElementById(containerId).insertAdjacentHTML('beforeend', rowHtml);
     };
 
     function collectNewUniversityPlaces() {
-        const placeRows = Array.from(document.querySelectorAll('#newUniPlacesRows > div'));
+        const placeRows = Array.from(document.querySelectorAll('#newUniPlacesRowsS8 > div, #newUniPlacesRowsS9 > div'));
         return placeRows.map((row) => {
             const filiere = row.querySelector('.new-uni-place-filiere');
-            const annee = row.querySelector('.new-uni-place-annee');
             const count = row.querySelector('.new-uni-place-count');
+            const annee = row.getAttribute('data-annee');
             return {
                 id_filiere: Number(filiere?.value || 0),
-                annee: Number(annee?.value || 4),
+                annee: Number(annee || 4),
                 number_of_places: Math.max(0, Number.parseInt(count?.value || '0', 10) || 0),
             };
         });
@@ -1486,12 +1642,24 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             longitude: Number(document.getElementById('newUniLongitude').value || 0),
             note_min: document.getElementById('newUniNoteMin').value === '' ? null : Number(document.getElementById('newUniNoteMin').value),
             type: document.getElementById('newUniType').value || 'ERASMUS',
+            S8_total_places: Number(document.getElementById('newUniS8Total').value || 0),
+            S9_total_places: Number(document.getElementById('newUniS9Total').value || 0),
             places: collectNewUniversityPlaces(),
         };
 
         if (!payload.name || !payload.country) {
             window.alert('Nom et pays sont obligatoires.');
             return;
+        }
+
+        const seen = new Set();
+        for (const p of payload.places) {
+            const key = `${p.id_filiere}-${p.annee}`;
+            if (seen.has(key)) {
+                window.alert(`Erreur : Une filière a été ajoutée plusieurs fois pour le semestre S${p.annee === 4 ? '8' : '9'}. Veuillez retirer les doublons.`);
+                return;
+            }
+            seen.add(key);
         }
 
         const response = await fetch((window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + '/university/admin', {
@@ -1594,6 +1762,10 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
     document.getElementById('wishesSearch').addEventListener('input', renderDashboardTable);
     document.getElementById('dossierStatusFilter').addEventListener('change', renderDashboardTable);
+    const assignmentStatusFilterElem = document.getElementById('assignmentStatusFilter');
+    if (assignmentStatusFilterElem) assignmentStatusFilterElem.addEventListener('change', renderDashboardTable);
+    const wishesFiliereFilter = document.getElementById('wishesFiliereFilter');
+    if (wishesFiliereFilter) wishesFiliereFilter.addEventListener('change', renderDashboardTable);
     document.getElementById('filiereSelect').addEventListener('change', updateMap);
     document.getElementById('universityAdminSearch').addEventListener('input', renderUniversitiesAdminTable);
     document.getElementById('addUniversityRowBtn').addEventListener('click', () => {
@@ -1603,11 +1775,13 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
     document.getElementById('cancelAddUniversityBtn').addEventListener('click', () => {
         document.getElementById('addUniversityPanel').classList.add('hidden');
     });
-    document.getElementById('addNewUniPlaceRowBtn').addEventListener('click', window.addNewUniversityPlaceRow);
+
     document.getElementById('saveNewUniversityBtn').addEventListener('click', window.saveNewUniversity);
     document.getElementById('resetDashboardFilters').addEventListener('click', () => {
         document.getElementById('wishesSearch').value = '';
         document.getElementById('dossierStatusFilter').value = 'tous';
+        if (document.getElementById('assignmentStatusFilter')) document.getElementById('assignmentStatusFilter').value = 'tous';
+        if (document.getElementById('wishesFiliereFilter')) document.getElementById('wishesFiliereFilter').value = 'toutes';
         document.getElementById('filiereSelect').value = 'toutes';
         document.getElementById('semestreSelect').value = 'Tous';
         document.getElementById('noteMinRange').value = 20;
@@ -1616,8 +1790,8 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         updateMap();
     });
 
-    resetAddUniversityForm();
     await refreshAllData();
+    resetAddUniversityForm();
 
     window.forceSubmitWishesExec = async function () {
         if (!confirm("Êtes-vous sûr de vouloir forcer la clôture de tous les dossiers de vœux incomplets ?\n\nTous les étudiants ayant fait au moins 1 choix verront leur dossier verrouillé et soumis.")) return;
@@ -1976,9 +2150,12 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         }
     };
 
-    window.resetStudentWishes = async function () {
-        const select = document.getElementById('resetStudentSelect');
-        const id = select.value;
+    window.resetStudentWishes = async function (idParam) {
+        let id = typeof idParam === 'string' || typeof idParam === 'number' ? idParam : null;
+        if (!id) {
+            const select = document.getElementById('resetStudentSelect');
+            if (select) id = select.value;
+        }
         if (!id) return;
 
         if (!confirm("Êtes-vous sûr de vouloir annuler la soumission de cet étudiant ? Il repassera en statut 'En cours'.")) {
@@ -2080,6 +2257,11 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
     };
 
     window.updateAssignmentStatusExec = async function (id_assignment, new_status) {
+        let actionStr = new_status === 'accepted' ? 'accepter' : (new_status === 'declined' ? 'refuser' : 'mettre en attente');
+        if (!confirm(`Êtes-vous sûr de vouloir ${actionStr} cette affectation ?`)) {
+            return;
+        }
+
         try {
             const payload = {
                 id_assignment: parseInt(id_assignment, 10),
@@ -2300,6 +2482,11 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
     let chartGlobal = null;
     let chartWishes = null;
     let chartDist = null;
+
+    window.toggleWishesModal = function () {
+        const modal = document.getElementById('wishesModal');
+        modal.classList.toggle('hidden');
+    };
 
     window.toggleDiagnostics = function () {
         const modal = document.getElementById('diagnosticsModal');

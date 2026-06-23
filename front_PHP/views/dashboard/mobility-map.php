@@ -282,7 +282,7 @@ crossorigin=""/>
                 type="button"
                 onclick="window.submitWishes()"
                 class="mt-3 w-full rounded bg-primary px-3 py-2 text-sm font-semibold text-white cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-400"
-                ${wishes.length < 5 || isSubmitted ? 'disabled' : ''}
+                ${wishes.length < 1 || isSubmitted ? 'disabled' : ''}
             >
                 ${isSubmitted ? 'Voeux soumis' : 'Soumettre mes voeux'}
             </button>

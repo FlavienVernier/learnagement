@@ -33,6 +33,8 @@ class UniversityAdminPayload(BaseModel):
     languages: Optional[str] = None
     note_min: Optional[float] = None
     type: Optional[str] = "ERASMUS"
+    S8_total_places: int = 0
+    S9_total_places: int = 0
     places: List[UniversityPlacePayload] = []
 
 
@@ -144,10 +146,9 @@ def list_universities_etudiant(
                         FROM MOB_partner_university_places pl
                         JOIN MOB_partner_university u ON u.id_partner_university = pl.id_partner_university 
                         JOIN LNM_promo pr ON pr.id_promo = pl.id_promo
-                        WHERE id_filiere = (
-                            SELECT e_pr.id_filiere
+                        WHERE pr.id_promo = (
+                            SELECT e.id_promo
                             FROM LNM_etudiant e 
-                            JOIN LNM_promo e_pr ON e_pr.id_promo = e.id_promo 
                             WHERE e.id_etudiant = %(id_etudiant)s
                         )
                         UNION
@@ -465,8 +466,8 @@ def submit_university_wishes(
     if is_submitted > 0:
         raise HTTPException(status_code=400, detail="Vos voeux ont déjà été soumis.")
 
-    if wishes_count < 5:
-        raise HTTPException(status_code=400, detail="Vous devez avoir au moins 5 voeux pour les soumettre.")
+    if wishes_count < 1:
+        raise HTTPException(status_code=400, detail="Vous devez avoir au moins 1 voeu pour soumettre votre dossier.")
 
     # Update the submission date for all submitted wishes
     update_request = {
@@ -518,15 +519,23 @@ def list_all_wishes_ri(
                             e.nom AS etudiant_nom,
                             e.prenom AS etudiant_prenom,
                             e.mail AS etudiant_mail,
+                            w.id_wish,
                             w.priority,
                             w.submission_date,
                             u.id_partner_university,
                             u.name AS university_name,
                             u.country AS university_country,
-                            u.code AS university_code
-                        FROM MOB_wishes w
-                        JOIN LNM_etudiant e ON e.id_etudiant = w.id_etudiant
-                        JOIN MOB_partner_university u ON u.id_partner_university = w.id_partner_university
+                            u.code AS university_code,
+                            a.id_assignment,
+                            a.status AS assignment_status,
+                            f.nom_filiere AS filiere_nom
+                        FROM LNM_etudiant e
+                        JOIN LNM_promo p ON e.id_promo = p.id_promo
+                        LEFT JOIN LNM_filiere f ON p.id_filiere = f.id_filiere
+                        LEFT JOIN MOB_wishes w ON e.id_etudiant = w.id_etudiant
+                        LEFT JOIN MOB_partner_university u ON u.id_partner_university = w.id_partner_university
+                        LEFT JOIN MOB_assignment a ON a.id_etudiant = e.id_etudiant
+                        WHERE p.annee IN (4, 5) AND e.mobility_completed != 1
                         ORDER BY e.nom ASC, e.prenom ASC, w.priority ASC
                     """,
         "allowedRolesRequester": ["relations_internationales"],
@@ -550,10 +559,10 @@ def list_university_catalog_ri(
                             pr.id_filiere,
                             f.nom_filiere,
                             f.nom_long
-                        FROM MOB_partner_university_places pl
-                        JOIN MOB_partner_university u ON u.id_partner_university = pl.id_partner_university
-                        JOIN LNM_promo pr ON pr.id_promo = pl.id_promo
-                        JOIN LNM_filiere f ON f.id_filiere = pr.id_filiere
+                        FROM MOB_partner_university u
+                        LEFT JOIN MOB_partner_university_places pl ON u.id_partner_university = pl.id_partner_university
+                        LEFT JOIN LNM_promo pr ON pr.id_promo = pl.id_promo
+                        LEFT JOIN LNM_filiere f ON f.id_filiere = pr.id_filiere
                         ORDER BY u.name ASC, f.nom_filiere ASC, pr.annee ASC
                     """,
         "allowedRolesRequester": ["relations_internationales"],
@@ -604,10 +613,11 @@ def create_university_ri(
         "request": """
                         INSERT INTO MOB_partner_university (
                             name, code, country, address, latitude, longitude, website, 
-                            languages, note_min, type
+                            languages, note_min, type, S8_total_places, S9_total_places
                         ) VALUES (
                             %(name)s, %(code)s, %(country)s, %(address)s, %(latitude)s, 
-                            %(longitude)s, %(website)s, %(languages)s, %(note_min)s, %(type)s
+                            %(longitude)s, %(website)s, %(languages)s, %(note_min)s, %(type)s,
+                            %(S8_total_places)s, %(S9_total_places)s
                         )
                     """,
         "params": {
@@ -621,6 +631,8 @@ def create_university_ri(
             "languages": payload.languages,
             "note_min": payload.note_min,
             "type": payload.type,
+            "S8_total_places": payload.S8_total_places,
+            "S9_total_places": payload.S9_total_places,
         },
         "allowedRolesRequester": ["relations_internationales"],
     }
@@ -702,7 +714,9 @@ def update_university_ri(
                             website = %(website)s,
                             languages = %(languages)s,
                             note_min = %(note_min)s,
-                            type = %(type)s
+                            type = %(type)s,
+                            S8_total_places = %(S8_total_places)s,
+                            S9_total_places = %(S9_total_places)s
                         WHERE id_partner_university = %(id_partner_university)s
                     """,
         "params": {
@@ -717,6 +731,8 @@ def update_university_ri(
             "languages": payload.languages,
             "note_min": payload.note_min,
             "type": payload.type,
+            "S8_total_places": payload.S8_total_places,
+            "S9_total_places": payload.S9_total_places,
         },
         "allowedRolesRequester": ["relations_internationales"],
     }
@@ -817,17 +833,45 @@ def export_admin_assignments(
                 p.annee AS Annee,
                 s.nom_statut AS Statut,
                 IFNULL(e.mobility_note, 'N/A') AS Note,
-                u.name AS Universite_Affectee,
-                u.country AS Pays,
-                sem.semestre AS Semestre_Affecte,
-                a.status AS Statut_Affectation
-            FROM MOB_assignment a
-            JOIN LNM_etudiant e ON e.id_etudiant = a.id_etudiant
+                CASE
+                    WHEN e.mobility_note IS NULL THEN 'N/A'
+                    WHEN stats.std_note > 0 THEN ROUND((e.mobility_note - stats.mean_note) / stats.std_note, 2)
+                    ELSE 0.0
+                END AS Moyenne_Centree_Reduite,
+                CASE 
+                    WHEN u.name IS NOT NULL THEN u.name
+                    WHEN (SELECT COUNT(*) FROM MOB_wishes w WHERE w.id_etudiant = e.id_etudiant) = 0 THEN 'Aucun vœu'
+                    ELSE 'Non affecté'
+                END AS Universite_Affectee,
+                IFNULL((
+                    SELECT mw.priority 
+                    FROM MOB_wishes mw 
+                    WHERE mw.id_etudiant = e.id_etudiant 
+                      AND mw.id_partner_university = a.id_partner_university 
+                    LIMIT 1
+                ), 'N/A') AS Ordre_Voeu,
+                IFNULL(u.country, 'N/A') AS Pays,
+                IFNULL(sem.semestre, 'N/A') AS Semestre_Affecte,
+                CASE 
+                    WHEN a.status IS NOT NULL THEN a.status
+                    WHEN (SELECT COUNT(*) FROM MOB_wishes w WHERE w.id_etudiant = e.id_etudiant) = 0 THEN 'Retardataire'
+                    ELSE 'Non affecté'
+                END AS Statut_Affectation
+            FROM LNM_etudiant e
             JOIN LNM_promo p ON p.id_promo = e.id_promo
             JOIN LNM_filiere f ON f.id_filiere = p.id_filiere
             JOIN LNM_statut s ON s.id_statut = p.id_statut
-            JOIN MOB_partner_university u ON u.id_partner_university = a.id_partner_university
-            JOIN LNM_semestre sem ON sem.id_semestre = a.id_semestre
+            LEFT JOIN (
+                SELECT p2.id_filiere, AVG(e2.mobility_note) AS mean_note, STDDEV(e2.mobility_note) AS std_note
+                FROM LNM_etudiant e2
+                JOIN LNM_promo p2 ON e2.id_promo = p2.id_promo
+                WHERE p2.annee IN (4, 5) AND e2.mobility_note IS NOT NULL
+                GROUP BY p2.id_filiere
+            ) stats ON stats.id_filiere = p.id_filiere
+            LEFT JOIN MOB_assignment a ON a.id_etudiant = e.id_etudiant
+            LEFT JOIN MOB_partner_university u ON u.id_partner_university = a.id_partner_university
+            LEFT JOIN LNM_semestre sem ON sem.id_semestre = a.id_semestre
+            WHERE p.annee IN (4, 5)
             ORDER BY e.nom ASC, e.prenom ASC
         ''',
         params=None,

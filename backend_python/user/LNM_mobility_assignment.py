@@ -35,13 +35,13 @@ def get_eligible_students(current_user: User) -> List[dict]:
     Retourne une liste de dictionnaires avec id_etudiant, mobility_note, id_promo, id_filiere et submission_date.
     """
     query = """
-        SELECT e.id_etudiant, e.mobility_note, e.id_promo, p.id_filiere, MAX(w.submission_date) as submission_date
+        SELECT e.id_etudiant, e.mobility_note, e.id_promo, p.id_filiere, p.annee, MAX(w.submission_date) as submission_date
         FROM LNM_etudiant e
         JOIN LNM_promo p ON e.id_promo = p.id_promo
         JOIN MOB_wishes w ON e.id_etudiant = w.id_etudiant
         WHERE p.annee IN (4, 5)
           AND w.submission_date IS NOT NULL
-        GROUP BY e.id_etudiant, e.mobility_note, e.id_promo, p.id_filiere
+        GROUP BY e.id_etudiant, e.mobility_note, e.id_promo, p.id_filiere, p.annee
     """
     request = {
         "request": query,
@@ -303,6 +303,7 @@ def run_round_robin_assignment(
                 "id_etudiant":           id_etudiant,
                 "id_partner_university": id_university,
                 "id_semestre":           id_semestre,
+                "status":                "accepted" if is_stage else "pending"
             })
 
             # Décrémentation des stocks (sauf stage)
@@ -316,6 +317,9 @@ def run_round_robin_assignment(
 
         if not assigned:
             logger.debug("Étudiant %s — aucun vœu accepté, non inséré dans MOB_assignment.", id_etudiant)
+            # SUPPRESSION À LA DEMANDE DE L'UTILISATEUR :
+            # Il n'y a plus d'affectation par défaut au stage pour les étudiants non affectés
+            # (ni pour les retardataires, ni pour ceux dont les vœux ont tous été refusés).
 
     # --- Construction de l'état final des places restantes (pour persistance) ---
     final_places = {
@@ -343,10 +347,12 @@ def save_assignments(assignments: List[dict], final_places: dict, current_user: 
         values_clause = []
         params = {}
         for i, assign in enumerate(assignments):
-            values_clause.append(f"(%(e{i})s, %(u{i})s, %(s{i})s, 'pending')")
+            status = assign.get("status", "pending")
+            values_clause.append(f"(%(e{i})s, %(u{i})s, %(s{i})s, %(st{i})s)")
             params[f"e{i}"] = assign["id_etudiant"]
             params[f"u{i}"] = assign["id_partner_university"]
             params[f"s{i}"] = assign["id_semestre"]
+            params[f"st{i}"] = status
 
         query = f"""
             INSERT INTO MOB_assignment (id_etudiant, id_partner_university, id_semestre, status)
