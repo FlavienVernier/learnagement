@@ -20,12 +20,13 @@ if [ -f .env ]; then
     INSTANCE_NAME=$(grep -E '^INSTANCE_NAME=' .env | cut -d '=' -f2 | tr -d '\r')
 fi
 
-if [ "$INSTANCE_NAME" = "prod" ]; then
+if [ "$ENV" = "prod" ]; then
     echo "Production détectée — activation du vhost SSL..."
+    a2enmod ssl
     a2ensite ssl.conf
 else
     echo "Environnement non-prod ($INSTANCE_NAME) — SSL vhost ignoré."
 fi
 
-echo "🌐 Starting Apache..."
+echo "Starting Apache..."
 exec apache2-foreground

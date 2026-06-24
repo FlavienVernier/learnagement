@@ -51,6 +51,8 @@ services:
             - learnagement_front_${INSTANCE_NAME}
         ports:
             - ${BACKEND_PYTHON_PORT}:${BACKEND_PYTHON_DOCKER_PORT}
+        environment:
+            - ENV=${ENV}
         volumes:
             - ../backend_python/:/app/
         depends_on:
@@ -70,6 +72,8 @@ services:
               - learnagement_front_${INSTANCE_NAME}
         ports:
             - "${FRONT_PHP_PORT}:${FRONT_PHP_DOCKER_PORT}"
+        environment:
+            - ENV=${ENV}
         volumes:
             - ../front_PHP:/var/www/html
             - ./log/php:/var/log/apache2
@@ -86,6 +90,8 @@ services:
               - learnagement_front_${INSTANCE_NAME}
         ports:
             - "${FRONT_NEXTAUTH_PORT}:${FRONT_NEXTAUTH_DOCKER_PORT}"
+        environment:
+            - ENV=${ENV}
         volumes:
             - ../front_NextJS:/app
             - ../front_NextJS/node_modules:/app/node_modules
@@ -101,6 +107,8 @@ services:
               - learnagement_front_${INSTANCE_NAME}
         ports:
             - "${FRONT_DASH_PORT}:${FRONT_DASH_DOCKER_PORT}"
+        environment:
+            - ENV=${ENV}
         volumes:
             - ../front_DashPlotly/:/app/
             - ../front_DashPlotly/data/:/data/

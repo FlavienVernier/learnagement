@@ -14,6 +14,8 @@ Python 3.
 
 ## Installation et lancement
 
+### Dev Mode
+
 Initialisation de l'environnement à ne faire qu'une seule fois
 ```bash
 python3 -m venv venv
@@ -37,6 +39,16 @@ For any help
 ```bash
 python Learnagement.py --help
 ```
+
+### Prod Mode
+
+```bash
+mkdir certs
+cd certs
+openssl req -new -newkey rsa:4096 -nodes -keyout snakeoil.key -out snakeoil.csr
+openssl x509 -req -sha256 -days 365 -in snakeoil.csr -signkey snakeoil.key -out key.pem
+```
+
 
 ## Utilisation
 

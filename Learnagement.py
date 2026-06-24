@@ -20,6 +20,7 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes
 from pathlib import Path
 
+from sqlalchemy import true
 
 # Couleurs pour les messages (non directement nécessaires dans Python mais émulation via ANSI codes)
 RED = "\033[0;31m"
@@ -32,7 +33,7 @@ YELLOW='\033[0;33m'
 NC = "\033[0m"  # No color
 
 containers = ["docker", "backend_python", "front_PHP", "front_DashPlotly", "front_NextJS", ]
-envs = set()
+envs = {"dev", "prod"}
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
@@ -198,7 +199,9 @@ def __generate_base_env():
     default_env_vars["INSTANCE_SECRET"] = str(__generate_secret__().hex())
     protocol = "http"
     default_env_vars["FRONT_PHP_PROTOCOL"] = protocol
-    default_env_vars["INSTANCE_URL"] = protocol + "://" + socket.gethostname()
+
+    default_env_vars["INSTANCE_PROTOCOL"] = protocol
+    default_env_vars["INSTANCE_URL"] = socket.gethostname()
 
     # MySQL
     default_env_vars["MYSQL_SERVER"] = f"learnagement_mysql_{instance_name}"
@@ -321,7 +324,7 @@ def __docker_configuration__():
     if not os.path.exists("docker-compose.yml"):
         shutil.copy("docker-compose.yml.skeleton", "docker-compose.yml")
         __searchReplaceInFile__("docker-compose.yml", "${INSTANCE_NAME}", os.environ["INSTANCE_NAME"])
-        #__searchReplaceInFile__("docker-compose.yml", "${INSTANCE_NUMBER}", str(os.environ["INSTANCE_NUMBER"]))
+        __searchReplaceInFile__("docker-compose.yml", "${ENV}", str(os.environ["ENV"]))
         __searchReplaceInFile__("docker-compose.yml", "${PHPMYADMIN_PORT}", str(os.environ["PHPMYADMIN_PORT"]))
         __searchReplaceInFile__("docker-compose.yml", "${PHPMYADMIN_DOCKER_PORT}", str(os.environ["PHPMYADMIN_DOCKER_PORT"]))
         __searchReplaceInFile__("docker-compose.yml", "${BACKEND_PYTHON_PORT}", str(os.environ["BACKEND_PYTHON_PORT"]))
@@ -456,10 +459,10 @@ def __from_env__(env=None):
 
         env_vars = __load_env_file(".env")
         if env == "prod":
-            env_vars = __set_env(env_vars, "env_prod.env")
+            env_vars = __set_env(env_vars, ".env_prod.env")
 
         else:
-            env_vars = __set_env(env_vars, "env_dev.env")
+            env_vars = __set_env(env_vars, ".env_dev.env")
 
         save_env_file(env_vars, ".env")
 
@@ -502,6 +505,8 @@ def __from_scratch__():
             logging.exception(e)
         try:
             os.remove(".env")
+            os.remove(".env_dev.env")
+            os.remove(".env_prod.env")
         except FileNotFoundError as e:
             logging.exception(e)
 
@@ -603,6 +608,7 @@ def start(docker_option=None, restart:bool=False, rebuild:bool=False, test:bool=
 
     if env:
         __from_env__(env)
+        rebuild = True
 
     if rebuild and not test:
         asyncio.run(__start__(docker_option=["--build"] + docker_option))

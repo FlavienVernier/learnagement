@@ -13,9 +13,11 @@
         ]],
         ["type" => "split"],
         ["type" => "item", "label" => "Dashboard Dash-Plotly", "url" => $t->router->href('dashboard-python'), "icon" => $t->asset('icons/console.svg')],
-        ["type" => "item", "label" => "Dashboard NextJS", "url" => $t->router->href('dashboard-nextjs'), "icon" => $t->asset('icons/console.svg')],
         ["type" => "item", "label" => "Déconnexion", "url" => $t->router->href('logout'), "icon" => $t->asset('icons/out-door.svg')],
         ];
+    if (getenv("ENV") == "prod"){
+        $urls += [["type" => "item", "label" => "Dashboard NextJS", "url" => $t->router->href('dashboard-nextjs'), "icon" => $t->asset('icons/console.svg')]];
+    }
         
     if ($user && $user['type'] === 'etudiant') {
         $urls[1]['items'][] = ["type" => "item", "label" => "Profil", "url" => $t->router->href('dashboard-profile'), "icon" => $t->asset('icons/user-circle.svg')];
