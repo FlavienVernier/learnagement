@@ -35,13 +35,14 @@ def get_eligible_students(current_user: User) -> List[dict]:
     Retourne une liste de dictionnaires avec id_etudiant, mobility_note, id_promo, id_filiere et submission_date.
     """
     query = """
-        SELECT e.id_etudiant, e.mobility_note, e.id_promo, p.id_filiere, p.annee, MAX(w.submission_date) as submission_date
+        SELECT e.id_etudiant, e.mobility_z_score as z_score, e.id_promo, p.id_filiere, p.annee, MAX(w.submission_date) as submission_date
         FROM LNM_etudiant e
         JOIN LNM_promo p ON e.id_promo = p.id_promo
         JOIN MOB_wishes w ON e.id_etudiant = w.id_etudiant
-        WHERE p.annee IN (4, 5)
+        WHERE p.annee = 4
           AND w.submission_date IS NOT NULL
-        GROUP BY e.id_etudiant, e.mobility_note, e.id_promo, p.id_filiere, p.annee
+          AND e.mobility_z_score IS NOT NULL
+        GROUP BY e.id_etudiant, e.mobility_z_score, e.id_promo, p.id_filiere, p.annee
     """
     request = {
         "request": query,
@@ -52,45 +53,14 @@ def get_eligible_students(current_user: User) -> List[dict]:
     result = db_request(current_user, sql_request)
     return result if result else []
 
-def calculate_z_scores(students: List[dict]) -> List[dict]:
+def sort_students_by_z_score(students: List[dict]) -> List[dict]:
     """
-    Étape 2: Calculer la moyenne centrée réduite (Z-score) par filière.
-    Trie les étudiants par Z-score décroissant (et date de soumission des vœux en cas d'égalité).
+    Étape 2: Trier les étudiants par Z-score (lu en BDD) décroissant 
+    (et date de soumission des vœux en cas d'égalité).
     """
-    import math
-    from collections import defaultdict
-
-    # Regrouper les notes par filière
-    filiere_notes = defaultdict(list)
-    for s in students:
-        filiere_notes[s["id_filiere"]].append(float(s["mobility_note"]))
-            
-    # Calculer la moyenne et l'écart-type par filière
-    filiere_stats = {}
-    for filiere, notes in filiere_notes.items():
-        n = len(notes)
-        if n == 0:
-            mean, std = 0.0, 0.0
-        else:
-            mean = sum(notes) / n
-            variance = sum((x - mean) ** 2 for x in notes) / n
-            std = math.sqrt(variance)
-        filiere_stats[filiere] = {"mean": mean, "std": std}
-        
-    # Calculer le z-score pour chaque étudiant
-    for s in students:
-        note = float(s["mobility_note"])
-        stats = filiere_stats[s["id_filiere"]]
-        if stats["std"] > 0:
-            s["z_score"] = (note - stats["mean"]) / stats["std"]
-        else:
-            s["z_score"] = 0.0
-                
-    # Trier par z_score (décroissant), puis par submission_date (croissant)
-    # L'utilisation du tuple (-z_score, date) permet ce double tri
     sorted_students = sorted(
         students,
-        key=lambda x: (-x["z_score"], x["submission_date"])
+        key=lambda x: (-float(x["z_score"] or 0), x["submission_date"])
     )
     return sorted_students
 
@@ -134,7 +104,6 @@ def get_available_places(current_user: User) -> dict:
     query_places = """
         SELECT id_partner_university, id_promo, number_of_places
         FROM MOB_partner_university_places
-        WHERE number_of_places > 0
     """
     sql_places = SQLRequest(request=query_places, params={}, allowedRolesRequester=["relations_internationales"])
     places_rows = db_request(current_user, sql_places) or []
@@ -342,7 +311,15 @@ def save_assignments(assignments: List[dict], final_places: dict, current_user: 
       - S8_remaining_places / S9_remaining_places dans MOB_partner_university
       - remaining_places dans MOB_partner_university_places
     """
-    # --- 6a. Insérer les affectations dans MOB_assignment ---
+    # --- 6a. Supprimer les affectations précédentes non validées pour éviter les fantômes ---
+    delete_pending = SQLRequest(
+        request="DELETE FROM MOB_assignment WHERE status = 'pending'",
+        params={},
+        allowedRolesRequester=["relations_internationales"]
+    )
+    db_request(current_user, delete_pending)
+
+    # --- 6b. Insérer les nouvelles affectations dans MOB_assignment ---
     if assignments:
         values_clause = []
         params = {}
@@ -424,8 +401,8 @@ def execute_assignment_task(payload: AssignmentRunPayload, current_user: User):
         
         time.sleep(0.5)
         assignment_progress["progress"] = 30
-        assignment_progress["step"] = "Étape 2 : Calcul des scores Z..."
-        sorted_students = calculate_z_scores(students)
+        assignment_progress["step"] = "Étape 2 : Tri des étudiants..."
+        sorted_students = sort_students_by_z_score(students)
         
         time.sleep(0.5)
         assignment_progress["progress"] = 50

@@ -286,43 +286,32 @@
                 <!-- COLONNE 1 -->
                 <div class="space-y-6 lg:border-r lg:border-gray-200 lg:pr-8">
 
-                    <!-- ETAPE 1 -->
-                    <div>
+                    <!-- ETAPE 1 (Fusion de 0 et 1) -->
+                    <div class="mb-8">
                         <h4
                             class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2 flex items-center gap-2">
                             <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 1</span>
-                            Gestion des soumissions
+                            Gestion de la Campagne et des Soumissions
                         </h4>
-
-                        <!-- Annulation individuelle -->
                         <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
-                            <h5 class="text-xs font-bold text-gray-700 mb-2">Annulation de soumission individuelle</h5>
-                            <p class="text-[11px] text-gray-500 mb-3">Redonner la main à un étudiant pour modifier ses
-                                choix avant la clôture finale.</p>
-                            <select id="resetStudentSelect" onchange="window.onResetStudentChange()"
-                                class="w-full text-sm border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 mb-3">
-                                <option value="">Sélectionnez un étudiant...</option>
-                            </select>
-                            <div id="resetStudentDetails"
-                                class="hidden bg-white p-3 rounded border text-xs text-gray-600 mb-3">
-                                <p><strong>Nom complet:</strong> <span id="rsName"></span></p>
-                                <p><strong>Email:</strong> <span id="rsEmail"></span></p>
-                                <p><strong>Filière:</strong> <span id="rsFiliere"></span></p>
+                            <p class="text-xs font-bold text-gray-800 mb-3">Saisissez l'ID des étudiants doublants et leur Moyenne Centrée Réduite manuellement avant de lancer la campagne.</p>
+                            <div class="flex gap-2 mb-3">
+                                <input type="number" id="doublantEtudiantId" placeholder="ID Étudiant" class="w-1/2 text-sm border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                <input type="number" step="0.01" id="doublantZScore" placeholder="Moyenne C. Réduite" class="w-1/2 text-sm border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             </div>
-                            <button id="btnResetWishes" onclick="window.resetStudentWishes()"
-                                class="hidden inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                </svg>
-                                Annuler la soumission
+                            <button type="button" onclick="window.addDoublantToList()" class="mb-3 w-full inline-flex justify-center items-center gap-2 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 transition">Ajouter à la liste</button>
+                            <div class="flex justify-between items-center mb-2 mt-4 hidden" id="doublantsHeader">
+                                <h5 class="text-xs font-bold text-gray-700">Liste des doublants ajoutés</h5>
+                                <span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full" id="doublantsCount">0 étudiant</span>
+                            </div>
+                            <ul id="doublantsList" class="text-xs text-gray-600 mb-4 space-y-2"></ul>
+
+
+                            <button id="btnLaunchCampaign" onclick="window.launchCampaign()" class="w-full inline-flex justify-center items-center gap-2 px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700 transition">
+                                Ouvrir la campagne & Calculer les scores
                             </button>
                         </div>
 
-                        <h5 class="text-xs font-bold text-gray-700 mb-2">Clôture globale</h5>
-                        <p class="text-xs text-gray-500 mb-3">Verrouille tous les dossiers pour figer les données et
-                            force la soumission des vœux incomplets.</p>
                         <button onclick="window.forceSubmitWishesUI()"
                             class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -344,9 +333,7 @@
                         </h4>
 
                         <div class="p-4 bg-gray-50 rounded-lg border border-gray-100 mb-4">
-                            <h5 class="text-xs font-bold text-gray-700 mb-2">Quotas de mobilité par filière et semestre
-                            </h5>
-                            <p class="text-[11px] text-gray-500 mb-3">Indiquez le nombre d'étudiants autorisés à partir
+                            <p class="text-xs font-bold text-gray-800 mb-3">Indiquez le nombre d'étudiants autorisés à partir
                                 en mobilité pour chaque filière et par semestre.</p>
 
                             <div class="flex flex-wrap items-end gap-2 mb-4">
@@ -2093,17 +2080,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             if (response.ok) {
                 window.submittedStudentsList = await response.json();
 
-                // Populate Reset Student Dropdown
-                const select = document.getElementById('resetStudentSelect');
-                select.innerHTML = '<option value="">Sélectionnez un étudiant...</option>';
-                window.submittedStudentsList.forEach(student => {
-                    const opt = document.createElement('option');
-                    opt.value = student.id_etudiant;
-                    opt.textContent = `${student.id_etudiant} - ${student.nom} ${student.prenom}`;
-                    select.appendChild(opt);
-                });
-                document.getElementById('resetStudentDetails').classList.add('hidden');
-                document.getElementById('btnResetWishes').classList.add('hidden');
+
 
                 // Populate Filiere Quotas
                 const filieres = [...new Set(window.submittedStudentsList.map(s => s.nom_filiere))].filter(Boolean).sort();
@@ -2128,34 +2105,139 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         }
     };
 
-    window.onResetStudentChange = function () {
-        const select = document.getElementById('resetStudentSelect');
-        const id = select.value;
-        const detailsDiv = document.getElementById('resetStudentDetails');
-        const btn = document.getElementById('btnResetWishes');
 
-        if (!id) {
-            detailsDiv.classList.add('hidden');
-            btn.classList.add('hidden');
+    window.doublantsArray = [];
+
+    window.addDoublantToList = async function () {
+        const idInput = document.getElementById('doublantEtudiantId');
+        const scoreInput = document.getElementById('doublantZScore');
+        const id = parseInt(idInput.value);
+        const score = parseFloat(scoreInput.value);
+
+        if (!id || isNaN(score)) {
+            alert('Veuillez renseigner un ID et un score valide.');
             return;
         }
 
-        const student = window.submittedStudentsList.find(s => s.id_etudiant == id);
-        if (student) {
-            document.getElementById('rsName').textContent = `${student.nom} ${student.prenom}`;
-            document.getElementById('rsEmail').textContent = student.mail;
-            document.getElementById('rsFiliere').textContent = student.nom_filiere;
-            detailsDiv.classList.remove('hidden');
-            btn.classList.remove('hidden');
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/campaign/doublant/" + id, {
+                headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+            });
+            
+            if (!response.ok) {
+                const err = await response.json();
+                alert("Erreur: " + (err.detail || "Étudiant non valide."));
+                return;
+            }
+            
+            const student = await response.json();
+
+            const existingIdx = window.doublantsArray.findIndex(d => d.id_etudiant === id);
+            if (existingIdx !== -1) {
+                window.doublantsArray[existingIdx].z_score = score;
+            } else {
+                window.doublantsArray.push({ 
+                    id_etudiant: id, 
+                    z_score: score,
+                    nom: student.nom,
+                    prenom: student.prenom,
+                    filiere: student.nom_filiere
+                });
+            }
+
+            idInput.value = '';
+            scoreInput.value = '';
+            window.renderDoublantsList();
+        } catch (error) {
+            console.error("Erreur vérification doublant", error);
+            alert("Erreur lors de la vérification de l'étudiant.");
         }
+    };
+
+    window.removeDoublant = function (id) {
+        window.doublantsArray = window.doublantsArray.filter(d => d.id_etudiant !== id);
+        window.renderDoublantsList();
+    };
+
+    window.renderDoublantsList = function () {
+        const ul = document.getElementById('doublantsList');
+        const header = document.getElementById('doublantsHeader');
+        const countSpan = document.getElementById('doublantsCount');
+
+        if (window.doublantsArray.length > 0) {
+            header.classList.remove('hidden');
+            countSpan.textContent = window.doublantsArray.length + (window.doublantsArray.length > 1 ? ' étudiants' : ' étudiant');
+        } else {
+            header.classList.add('hidden');
+        }
+
+        ul.innerHTML = window.doublantsArray.map(d => `
+            <li class="flex items-center justify-between gap-3 bg-white p-3 rounded-lg border border-gray-200 shadow-sm transition-all hover:shadow-md">
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm font-bold text-gray-800 truncate">${d.nom} ${d.prenom}</div>
+                    <div class="text-[11px] text-gray-500 mt-1 flex items-center gap-2">
+                        <span class="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 font-medium">ID: ${d.id_etudiant}</span>
+                        <span class="truncate">${d.filiere}</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <div class="text-[9px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">Moyenne C. Réduite</div>
+                        <div class="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded">${d.z_score}</div>
+                    </div>
+                    <button type="button" onclick="window.removeDoublant(${d.id_etudiant})" class="flex-shrink-0 w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1" title="Retirer cet étudiant">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </li>
+        `).join('');
+    };
+
+    window.launchCampaignExec = async function () {
+        try {
+            const btn = document.getElementById('btnLaunchCampaign');
+            btn.disabled = true;
+            btn.textContent = "Calcul en cours...";
+
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/campaign/launch", {
+                method: 'POST',
+                headers: { 
+                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ doublants: window.doublantsArray })
+            });
+
+            if (response.ok) {
+                alert("Campagne lancée et scores calculés avec succès !");
+                window.doublantsArray = [];
+                window.renderDoublantsList();
+                if (typeof refreshAllData === 'function') {
+                    refreshAllData();
+                }
+            } else {
+                const err = await response.json();
+                alert("Erreur: " + (err.detail || "Impossible de lancer la campagne"));
+            }
+        } catch (e) {
+            console.error("Erreur lancement campagne", e);
+            alert("Erreur lors du lancement de la campagne.");
+        } finally {
+            const btn = document.getElementById('btnLaunchCampaign');
+            btn.disabled = false;
+            btn.textContent = "Ouvrir la campagne & Calculer les scores";
+        }
+    };
+
+    window.launchCampaign = function () {
+        window.requireConfirmation(
+            "Êtes-vous sûr de vouloir lancer la campagne ? Cela calculera les Moyennes Centrées Réduites de tous les étudiants de 4ème/5ème année et écrasera les affectations/vœux des doublants ajoutés.",
+            window.launchCampaignExec
+        );
     };
 
     window.resetStudentWishes = async function (idParam) {
         let id = typeof idParam === 'string' || typeof idParam === 'number' ? idParam : null;
-        if (!id) {
-            const select = document.getElementById('resetStudentSelect');
-            if (select) id = select.value;
-        }
         if (!id) return;
 
         if (!confirm("Êtes-vous sûr de vouloir annuler la soumission de cet étudiant ? Il repassera en statut 'En cours'.")) {
@@ -2623,8 +2705,9 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
                     alert("Opération terminée avec succès. Toutes les affectations en attente ont été refusées.");
 
                     // Recharger les données pour rafraîchir l'interface
-                    window.fetchStatsAndPopulate();
-                    fetchAssignmentsForValidation();
+                    if (typeof refreshAllData === 'function') {
+                        refreshAllData();
+                    }
 
                 } catch (error) {
                     console.error(error);

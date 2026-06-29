@@ -133,6 +133,23 @@ crossorigin=""/>
                     "Content-Type": "application/json"
                 }
             });
+            if (response.status === 403) {
+                const mapEl = document.getElementById('map');
+                const mapControls = document.getElementById('mapControls');
+                if (mapControls) mapControls.classList.add('hidden');
+                mapEl.innerHTML = `
+                    <div class="flex items-center justify-center h-full bg-gray-50 z-[9999] relative">
+                        <div class="bg-white p-8 rounded-xl shadow-lg max-w-md text-center border border-gray-200">
+                            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-800 mb-2">Campagne Fermée</h2>
+                            <p class="text-gray-600">La campagne de mobilité n'est pas encore ouverte. Veuillez patienter jusqu'à l'annonce officielle.</p>
+                        </div>
+                    </div>
+                `;
+                return null; // Return null to indicate closed
+            }
             if (!response.ok) {
                 throw new Error(`Response status: ${response.status}`);
             }
@@ -168,6 +185,10 @@ crossorigin=""/>
     }
 
     const universities = await fetchUniversities();
+    if (!universities) {
+        // Campagne non ouverte, on arrête l'exécution du script de la carte
+        throw new Error("Campagne non ouverte, arrêt de l'initialisation de la carte.");
+    }
     const universitiesById = new Map(
         universities.map((u) => [String(u.id_partner_university), u])
     );
@@ -365,7 +386,7 @@ crossorigin=""/>
                 : `
                     <button
                         type="button"
-                        onclick="window.addUniversityToWishes('${uid}')"
+                        onclick="window.addUniversityToWishes('${uid}', ${university.id_semestre})"
                         ${alreadyInWishes || wishedUniversities.size >= 5 || isSubmitted ? 'disabled' : ''}
                         class="mt-2 inline-flex items-center rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                     >
@@ -376,7 +397,7 @@ crossorigin=""/>
         `;
     }
 
-    async function addUniversityToWishes(universityId) {
+    async function addUniversityToWishes(universityId, id_semestre) {
         const university = universitiesById.get(String(universityId));
         if (!university) {
             console.error('Universite introuvable pour id:', universityId);
@@ -397,7 +418,8 @@ crossorigin=""/>
                 headers: {
                     'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({ id_semestre: id_semestre })
             });
 
             if (!response.ok && response.status !== 409) {

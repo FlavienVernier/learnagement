@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 from fastapi.responses import StreamingResponse
 import io
 import openpyxl
@@ -36,7 +36,12 @@ class UniversityAdminPayload(BaseModel):
     S8_total_places: int = 0
     S9_total_places: int = 0
     places: List[UniversityPlacePayload] = []
+class DoublantScore(BaseModel):
+    id_etudiant: int
+    z_score: float
 
+class CampaignLaunchRequestPayload(BaseModel):
+    doublants: List[DoublantScore] = []
 
 def _resolve_promo_id(
     current_user: User,
@@ -140,25 +145,34 @@ def list_universities_etudiant(
     id_etudiant: int,
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
+    # Check if campaign is open
+    check_campaign = SQLRequest(
+        request="SELECT mobility_z_score FROM LNM_etudiant WHERE id_etudiant = %(id)s",
+        params={"id": id_etudiant},
+        allowedRolesRequester=["etudiant"]
+    )
+    student_data = db_request(current_user, check_campaign)
+    if not student_data or student_data[0].get("mobility_z_score") is None:
+        raise HTTPException(status_code=403, detail="La campagne de mobilité n'est pas encore ouverte.")
+
     request = {
         "request" : """
-                        SELECT u.*, pl.number_of_places, pr.annee
+                        SELECT u.*, pl.number_of_places, pr.annee, CASE WHEN pr.annee = 4 THEN 8 ELSE 9 END as id_semestre
                         FROM MOB_partner_university_places pl
                         JOIN MOB_partner_university u ON u.id_partner_university = pl.id_partner_university 
                         JOIN LNM_promo pr ON pr.id_promo = pl.id_promo
-                        WHERE pr.id_promo = (
-                            SELECT e.id_promo
+                        WHERE pr.id_filiere = (
+                            SELECT p.id_filiere
                             FROM LNM_etudiant e 
+                            JOIN LNM_promo p ON e.id_promo = p.id_promo
                             WHERE e.id_etudiant = %(id_etudiant)s
                         )
                         UNION
-                        SELECT u.*, 999 as number_of_places, 4 as annee
+                        SELECT u.*, 999 as number_of_places,
+                               (SELECT p.annee FROM LNM_etudiant e JOIN LNM_promo p ON e.id_promo = p.id_promo WHERE e.id_etudiant = %(id_etudiant)s) as annee,
+                               CASE WHEN (SELECT p.annee FROM LNM_etudiant e JOIN LNM_promo p ON e.id_promo = p.id_promo WHERE e.id_etudiant = %(id_etudiant)s) = 4 THEN 8 ELSE 9 END as id_semestre
                         FROM MOB_partner_university u
                         WHERE u.type = 'stage'
-                        UNION
-                        SELECT u.*, 999 as number_of_places, 5 as annee
-                        FROM MOB_partner_university u
-                        WHERE u.type = 'stage';
                     """,
         "params": {
             "id_etudiant": id_etudiant
@@ -203,6 +217,7 @@ def add_university_to_wishes(
     id_etudiant: int,
     id_partner_university: int,
     current_user: Annotated[User, Depends(get_current_active_user)],
+    payload: dict = Body(default={})
 ):
     if current_user.id != id_etudiant:
         raise HTTPException(status_code=403, detail="Unauthorized access")
@@ -240,7 +255,9 @@ def add_university_to_wishes(
 
     next_priority = max_priority + 1
 
-    # ToDo manage semester !!! default stub set as 8
+    # Le frontend envoie directement l'id_semestre correspondant au choix
+    id_semestre = payload.get("id_semestre", 8) if payload else 8
+
     request = {
         "request": """
                         INSERT INTO MOB_wishes (id_etudiant, id_partner_university, priority, id_semestre)
@@ -250,7 +267,7 @@ def add_university_to_wishes(
             "id_etudiant": id_etudiant,
             "id_partner_university": id_partner_university,
             "priority": next_priority,
-            "id_semestre": 8,
+            "id_semestre": id_semestre,
         },
         "allowedRolesRequester": ["etudiant"],
     }
@@ -970,6 +987,7 @@ def reset_student_wishes(
     db_request(current_user, sql_request)
     return {"message": "La soumission a été annulée avec succès."}
 
+
 class UpdateAssignmentStatusPayload(BaseModel):
     id_assignment: int
     new_status: str
@@ -1091,7 +1109,7 @@ def get_mobility_diagnostics(
                 (SELECT MAX(w.submission_date) FROM MOB_wishes w WHERE w.id_etudiant = e.id_etudiant) as last_submission_date
             FROM LNM_etudiant e 
             JOIN LNM_promo p ON e.id_promo = p.id_promo 
-            WHERE p.annee IN (4, 5)
+            WHERE p.annee = 4
         ''',
         params=None,
         allowedRolesRequester=["relations_internationales"]
@@ -1161,7 +1179,7 @@ def export_mobility_diagnostics(
             FROM LNM_etudiant e 
             JOIN LNM_promo p ON e.id_promo = p.id_promo 
             JOIN LNM_filiere f ON p.id_filiere = f.id_filiere
-            WHERE p.annee IN (4, 5)
+            WHERE p.annee = 4
             ORDER BY e.nom ASC, e.prenom ASC
         ''',
         params=None,
@@ -1421,6 +1439,9 @@ def submit_student_decision(
     payload: StudentDecisionPayload,
     current_user: Annotated[User, Depends(get_current_active_user)]
 ):
+    if current_user.id != id_etudiant:
+        raise HTTPException(status_code=403, detail="Unauthorized access")
+
     if payload.decision not in ['accepted', 'declined']:
         raise HTTPException(status_code=400, detail="Invalid decision. Must be 'accepted' or 'declined'.")
 
@@ -1461,3 +1482,110 @@ def close_assignment_phase(
     )
     db_request(current_user, sql_request)
     return {"message": "Toutes les affectations en attente ont été refusées."}
+
+@router.post("/university/admin/campaign/launch",
+             tags=["admin", "mobility"],
+             summary="Lancer la campagne et calculer les Z-scores")
+def launch_mobility_campaign(
+    payload: CampaignLaunchRequestPayload,
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    # 1. Update doublants
+    doublant_ids = []
+    if payload.doublants:
+        for d in payload.doublants:
+            doublant_ids.append(d.id_etudiant)
+            # Supprimer affectations / voeux existants pour le doublant
+            db_request(current_user, SQLRequest(
+                request="DELETE FROM MOB_assignment WHERE id_etudiant = %(id)s",
+                params={"id": d.id_etudiant},
+                allowedRolesRequester=["relations_internationales"]
+            ))
+            db_request(current_user, SQLRequest(
+                request="DELETE FROM MOB_wishes WHERE id_etudiant = %(id)s",
+                params={"id": d.id_etudiant},
+                allowedRolesRequester=["relations_internationales"]
+            ))
+            # Maj du score
+            db_request(current_user, SQLRequest(
+                request="UPDATE LNM_etudiant SET mobility_z_score = %(z)s WHERE id_etudiant = %(id)s",
+                params={"z": d.z_score, "id": d.id_etudiant},
+                allowedRolesRequester=["relations_internationales"]
+            ))
+
+    # 2. Calculer stats par filière pour les autres
+    # On prend tous les étudiants de 4ème et 5ème année ayant une note
+    doublant_filter = ""
+    if doublant_ids:
+        doublant_filter = f"AND e.id_etudiant NOT IN ({','.join(map(str, doublant_ids))})"
+
+    stats_query = f"""
+        SELECT p.id_filiere, AVG(e.mobility_note) as mean_note, STDDEV(e.mobility_note) as std_note
+        FROM LNM_etudiant e
+        JOIN LNM_promo p ON e.id_promo = p.id_promo
+        WHERE p.annee = 4 AND e.mobility_note IS NOT NULL {doublant_filter}
+        GROUP BY p.id_filiere
+    """
+    stats_req = db_request(current_user, SQLRequest(request=stats_query, params=None, allowedRolesRequester=["relations_internationales"]))
+    
+    stats_map = {}
+    if stats_req and isinstance(stats_req, list):
+        for row in stats_req:
+            stats_map[row['id_filiere']] = row
+
+    # 3. Récupérer et mettre à jour les autres étudiants
+    students_query = f"""
+        SELECT e.id_etudiant, e.mobility_note, p.id_filiere
+        FROM LNM_etudiant e
+        JOIN LNM_promo p ON e.id_promo = p.id_promo
+        WHERE p.annee = 4 {doublant_filter}
+    """
+    students_req = db_request(current_user, SQLRequest(request=students_query, params=None, allowedRolesRequester=["relations_internationales"]))
+    
+    if students_req and isinstance(students_req, list):
+        for student in students_req:
+            note = student.get('mobility_note')
+            f_id = student.get('id_filiere')
+            z_score = 0.0
+            if note is not None and f_id in stats_map:
+                f_stats = stats_map[f_id]
+                std = float(f_stats.get('std_note') or 0.0)
+                mean = float(f_stats.get('mean_note') or 0.0)
+                if std > 0:
+                    z_score = round((float(note) - mean) / std, 4)
+            
+            # Update
+            db_request(current_user, SQLRequest(
+                request="UPDATE LNM_etudiant SET mobility_z_score = %(z)s WHERE id_etudiant = %(id)s",
+                params={"z": z_score, "id": student['id_etudiant']},
+                allowedRolesRequester=["relations_internationales"]
+            ))
+
+    return {"message": "Campagne lancée et scores calculés avec succès."}
+
+@router.get("/university/admin/campaign/doublant/{id_etudiant:int}",
+             tags=["admin", "mobility"],
+             summary="Vérifier un étudiant doublant avant l'ajout")
+def verify_doublant(
+    id_etudiant: int,
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    query = """
+        SELECT e.id_etudiant, e.nom, e.prenom, f.nom_filiere, p.annee
+        FROM LNM_etudiant e
+        JOIN LNM_promo p ON e.id_promo = p.id_promo
+        JOIN LNM_filiere f ON p.id_filiere = f.id_filiere
+        WHERE e.id_etudiant = %(id)s
+    """
+    req = SQLRequest(request=query, params={"id": id_etudiant}, allowedRolesRequester=["relations_internationales"])
+    result = db_request(current_user, req)
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="Étudiant introuvable.")
+    
+    student = result[0]
+    # L'utilisateur a demandé "si il est du 4 eme anne". On vérifie l'année.
+    if student["annee"] != 4:
+        raise HTTPException(status_code=400, detail=f"L'étudiant est en année {student['annee']} (doit être en 4ème année).")
+        
+    return student

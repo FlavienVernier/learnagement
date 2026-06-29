@@ -25,7 +25,8 @@ ALTER TABLE `MOB_partner_university`
 
 ALTER TABLE `LNM_etudiant`
     ADD `mobility_completed` BOOLEAN NOT NULL DEFAULT FALSE AFTER `id_origine`,
-    add `mobility_note` INT NULL AFTER `mobility_completed`;
+    ADD `mobility_note` INT NULL AFTER `mobility_completed`,
+    ADD `mobility_z_score` FLOAT NULL DEFAULT NULL AFTER `mobility_note`;
 
 ALTER TABLE `MOB_wishes`
     ADD `id_semestre` TINYINT NOT NULL AFTER `id_partner_university`,
