@@ -21,12 +21,20 @@
     <!-- Contrôles et panneaux superposés -->
     <div class="absolute top-[10px] left-[55px] z-[1000] flex max-w-[92vw] flex-col items-start gap-2.5">
         <div id="mapControls" class="flex items-center gap-2">
-            <button onclick="document.getElementById('filterForm').classList.toggle('hidden')" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
+            <button onclick="document.getElementById('filterForm').classList.toggle('hidden')"
+                class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
                 Filtres
             </button>
-            <button onclick="document.getElementById('wishesPanel').classList.toggle('hidden')" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
+            <button id="wishesBtn" onclick="document.getElementById('wishesPanel').classList.toggle('hidden')"
+                class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
                 Voeux
             </button>
+            <div id="campaignOpenBadge" class="hidden bg-blue-50 text-blue-800 font-semibold py-2 px-4 border border-blue-200 rounded shadow text-sm flex items-center gap-2 pointer-events-none">
+                <span class="text-blue-500">ℹ️</span> Campagne en cours
+            </div>
+            <div id="wishesSubmittedBadge" class="hidden bg-green-50 text-green-800 font-semibold py-2 px-4 border border-green-200 rounded shadow text-sm flex items-center gap-2 pointer-events-none">
+                <span class="text-green-500">✅</span> Vœux soumis
+            </div>
         </div>
 
         <form id="filterForm" onsubmit="return false;" class="hidden bg-white p-4 rounded-lg shadow-lg border border-gray-200">
@@ -54,9 +62,24 @@
                 <h2 class="text-sm font-semibold text-gray-800">Mes voeux</h2>
                 <span id="wishesCount" class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">0/5</span>
             </div>
+            <div id="campaignClosedNotice" class="hidden mb-3 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <p class="text-xs font-bold text-amber-800">Inscriptions non disponibles.</p>
+                <p class="text-xs text-amber-700 mt-0.5">La campagne n'est pas encore lancée. Revenez après l'annonce
+                    officielle pour soumettre vos vœux.</p>
+            </div>
             <p id="wishesEmpty" class="text-sm text-gray-500">Aucun voeu pour le moment.</p>
             <ul id="wishesList" class="space-y-2"></ul>
         </aside>
+    </div>
+    <!-- Bannière campagne non ouverte -->
+    <div id="campaignClosedBanner" class="hidden absolute top-3 left-1/2 -translate-x-1/2 z-[1100] w-max max-w-[90vw] pointer-events-none">
+        <div class="bg-white border border-amber-300 rounded-xl shadow-lg px-5 py-3 flex items-center gap-3">
+            <span class="text-amber-500 text-xl">⏳</span>
+            <div>
+                <p class="text-sm font-bold text-gray-800">La procédure de mobilité n'a pas encore commencé.</p>
+                <p class="text-xs text-gray-500 mt-0.5">Vous pouvez explorer les universités. L'inscription aux vœux sera disponible après le lancement officiel de la campagne.</p>
+            </div>
+        </div>
     </div>
 </section>
 <?php $t->endSlot(); ?>
@@ -133,23 +156,6 @@ crossorigin=""/>
                     "Content-Type": "application/json"
                 }
             });
-            if (response.status === 403) {
-                const mapEl = document.getElementById('map');
-                const mapControls = document.getElementById('mapControls');
-                if (mapControls) mapControls.classList.add('hidden');
-                mapEl.innerHTML = `
-                    <div class="flex items-center justify-center h-full bg-gray-50 z-[9999] relative">
-                        <div class="bg-white p-8 rounded-xl shadow-lg max-w-md text-center border border-gray-200">
-                            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                            </div>
-                            <h2 class="text-2xl font-bold text-gray-800 mb-2">Campagne Fermée</h2>
-                            <p class="text-gray-600">La campagne de mobilité n'est pas encore ouverte. Veuillez patienter jusqu'à l'annonce officielle.</p>
-                        </div>
-                    </div>
-                `;
-                return null; // Return null to indicate closed
-            }
             if (!response.ok) {
                 throw new Error(`Response status: ${response.status}`);
             }
@@ -184,11 +190,42 @@ crossorigin=""/>
         return wishes;
     }
 
-    const universities = await fetchUniversities();
-    if (!universities) {
-        // Campagne non ouverte, on arrête l'exécution du script de la carte
-        throw new Error("Campagne non ouverte, arrêt de l'initialisation de la carte.");
+    // Vérifier le statut de la campagne avant tout
+    const campaignStatusUrl = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID + "/campaign-status";
+    let campaignOpen = false;
+    try {
+        const statusRes = await fetch(campaignStatusUrl, {
+            headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+        });
+        if (statusRes.ok) {
+            const statusData = await statusRes.json();
+            campaignOpen = statusData.is_open === true;
+        }
+    } catch (e) {
+        console.error("Impossible de récupérer le statut de la campagne", e);
     }
+    window.MobilityMapState.campaignOpen = campaignOpen;
+
+    // Afficher la bannière et le message dans le panel vœux si campagne fermée
+    if (!campaignOpen) {
+        const banner = document.getElementById('campaignClosedBanner');
+        const notice = document.getElementById('campaignClosedNotice');
+        const wishesEmpty = document.getElementById('wishesEmpty');
+        const wishesList = document.getElementById('wishesList');
+        const wishesCount = document.getElementById('wishesCount');
+        const wishesBtn = document.getElementById('wishesBtn');
+        const wishesPanel = document.getElementById('wishesPanel');
+        
+        if (banner) banner.classList.remove('hidden');
+        if (notice) notice.classList.remove('hidden');
+        if (wishesEmpty) wishesEmpty.classList.add('hidden');
+        if (wishesList) wishesList.classList.add('hidden');
+        if (wishesCount) wishesCount.classList.add('hidden');
+        if (wishesBtn) wishesBtn.classList.add('hidden');
+        if (wishesPanel) wishesPanel.classList.add('hidden');
+    }
+
+    const universities = await fetchUniversities();
     const universitiesById = new Map(
         universities.map((u) => [String(u.id_partner_university), u])
     );
@@ -244,7 +281,9 @@ crossorigin=""/>
 
         if (wishes.length === 0) {
             wishesList.innerHTML = '';
-            wishesEmpty.classList.remove('hidden');
+            if (window.MobilityMapState.campaignOpen !== false) {
+                wishesEmpty.classList.remove('hidden');
+            }
             return;
         }
 
@@ -253,6 +292,19 @@ crossorigin=""/>
         // OLD CODE (Buggy: ne gère pas bien undefined ou les chaînes "null"):
         // const isSubmitted = wishes.some(w => w.submission_date !== null);
         const isSubmitted = wishes.some(w => Boolean(w.submission_date) && w.submission_date !== 'null' && w.submission_date !== 'None');
+
+        const campaignOpenBadge = document.getElementById('campaignOpenBadge');
+        const wishesSubmittedBadge = document.getElementById('wishesSubmittedBadge');
+
+        if (window.MobilityMapState.campaignOpen !== false) {
+            if (isSubmitted) {
+                if (campaignOpenBadge) campaignOpenBadge.classList.add('hidden');
+                if (wishesSubmittedBadge) wishesSubmittedBadge.classList.remove('hidden');
+            } else {
+                if (campaignOpenBadge) campaignOpenBadge.classList.remove('hidden');
+                if (wishesSubmittedBadge) wishesSubmittedBadge.classList.add('hidden');
+            }
+        }
 
         wishesList.innerHTML = wishes
             .map((wish, index) => `
@@ -383,7 +435,11 @@ crossorigin=""/>
                     ` : `
                         <div class="mt-3 text-xs font-semibold p-2 rounded text-center bg-red-50 text-red-700 border border-red-200">Affectation refusée</div>
                     `)
-                : `
+                : window.MobilityMapState.campaignOpen === false ? `
+                    <div class="mt-2 inline-flex items-center gap-1.5 rounded bg-gray-100 border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-500 cursor-not-allowed">
+                        <span>⏳</span> Disponible après le lancement de la campagne
+                    </div>
+                ` : `
                     <button
                         type="button"
                         onclick="window.addUniversityToWishes('${uid}', ${university.id_semestre})"

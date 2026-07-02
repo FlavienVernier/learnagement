@@ -145,15 +145,6 @@ def list_universities_etudiant(
     id_etudiant: int,
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
-    # Check if campaign is open
-    check_campaign = SQLRequest(
-        request="SELECT mobility_z_score FROM LNM_etudiant WHERE id_etudiant = %(id)s",
-        params={"id": id_etudiant},
-        allowedRolesRequester=["etudiant"]
-    )
-    student_data = db_request(current_user, check_campaign)
-    if not student_data or student_data[0].get("mobility_z_score") is None:
-        raise HTTPException(status_code=403, detail="La campagne de mobilité n'est pas encore ouverte.")
 
     request = {
         "request" : """
@@ -180,6 +171,25 @@ def list_universities_etudiant(
         "allowedRolesRequester" : ["etudiant"],
     }
     return db_request(current_user, SQLRequest(**request))
+
+
+@router.get("/university/etudiant/{id_etudiant:int}/campaign-status",
+            tags=["mobility"],
+            summary="Statut de la campagne pour l'étudiant",
+            description="Indique si la campagne de mobilité est ouverte pour cet étudiant")
+def get_campaign_status(
+    id_etudiant: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    req = SQLRequest(
+        request="SELECT mobility_z_score FROM LNM_etudiant WHERE id_etudiant = %(id)s",
+        params={"id": id_etudiant},
+        allowedRolesRequester=["etudiant"]
+    )
+    result = db_request(current_user, req)
+    is_open = bool(result and result[0].get("mobility_z_score") is not None)
+    return {"is_open": is_open}
+
 
 
 @router.get("/university/etudiant/{id_etudiant:int}/wishes",
@@ -221,6 +231,16 @@ def add_university_to_wishes(
 ):
     if current_user.id != id_etudiant:
         raise HTTPException(status_code=403, detail="Unauthorized access")
+
+    # Sécurité : bloquer l'ajout de vœux si la campagne n'est pas encore ouverte
+    campaign_check = SQLRequest(
+        request="SELECT mobility_z_score FROM LNM_etudiant WHERE id_etudiant = %(id)s",
+        params={"id": id_etudiant},
+        allowedRolesRequester=["etudiant"]
+    )
+    student_data = db_request(current_user, campaign_check)
+    if not student_data or student_data[0].get("mobility_z_score") is None:
+        raise HTTPException(status_code=403, detail="La campagne de mobilité n'est pas encore ouverte. Vous ne pouvez pas ajouter de vœux.")
 
     check_request = {
         "request": """
