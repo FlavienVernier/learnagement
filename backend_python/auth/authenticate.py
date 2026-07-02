@@ -2,15 +2,16 @@ import os
 import dotenv
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordRequestForm
 
 from dependencies import logger, get_user, Token
 import auth.authenticate_lnm as authenticate_lnm
+import auth.authenticate_cas as authenticate_cas
 #import auth.authenticate_ldap
 #import auth.authenticate_proxy_cas
 
-from typing import Annotated
+from typing import Annotated, Optional
 
 dotenv.load_dotenv(".env")
 
@@ -30,7 +31,18 @@ async def login_for_access_token(
     return await authenticate_lnm.login_for_access_token(form_data)
 
 
-
+@router.post("/token-cas/",
+    tags=["Auth"],
+    summary="CAS login or provision",
+    description="Internal endpoint — login or create user from CAS, returns JWT token")
+async def cas_login(
+    #data: authenticate_cas.CasUserProvision,
+    data,
+    x_cas_token: Annotated[str | None , Header()] = None
+) -> Token:
+    logger.info(f"CAS login {data}")
+    authenticate_cas.verify_cas_service_token(x_cas_token)
+    return await authenticate_cas.login_or_provision_from_cas(data)
 
 @router.post("/logout",
     tags=["Auth"],

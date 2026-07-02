@@ -40,14 +40,27 @@ For any help
 python Learnagement.py --help
 ```
 
-### Prod Mode
+### Production Mode
 
+Generate self certificate:
 ```bash
 mkdir certs
 cd certs
-openssl req -new -newkey rsa:4096 -nodes -keyout snakeoil.key -out snakeoil.csr
-openssl x509 -req -sha256 -days 365 -in snakeoil.csr -signkey snakeoil.key -out key.pem
+openssl req \                                                  
+  -x509 \
+  -newkey rsa:4096 \
+  -nodes \
+  -keyout key.pem \
+  -out cert.pem \
+  -days 365
+cd -
 ```
+
+Run with prod environnement (secure):
+```bash
+python Learnagement.py start --env
+```
+Note, containers will rebuild.
 
 
 ## Utilisation

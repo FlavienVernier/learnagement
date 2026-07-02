@@ -31,6 +31,11 @@ function getLogger(): \Monolog\Logger {
     }
     return $log;
 }
+
+function get_cas_service_token(): string {
+    return getenv("CAS_SERVICE_TOKEN") ?? '';
+}
+
 //$log = new Logger('name');
 //$log->pushHandler(new StreamHandler('php://stdout', Level::Info));
 

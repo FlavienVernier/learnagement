@@ -7,6 +7,24 @@
 
     <!-- Carte formulaire -->
     <div class="rounded-2xl shadow-lg p-8 w-[75%]">
+        <hr>
+        <label for="email" class="block mb-2 text-sm font-medium text-gray-700 text-center">
+            <i> Login USMB</i>
+        </label>
+        <!-- Bouton de connexion CAS -->
+        <div class="flex items-center justify-center mt-4">
+            <a href="https://cas-uds.grenet.fr/login?service=<?= urlencode("https://learnagement.local.univ-savoie.fr/") ?>"
+               class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-semibold rounded-xl text-sm px-5 py-3 text-center transition-colors duration-200">
+                Se connecter / avec CAS - USMB
+            </a>
+        </div>
+        <div>
+            <br>
+            <hr>
+            <label for="email" class="block mb-2 text-sm font-medium text-gray-700 text-center">
+               <i> ou en local</i>
+            </label>
+        </div>
       <form action="<?= $t->router->href('login-post') ?>" method="POST" class="space-y-5">
 
         <!-- Email -->
@@ -74,11 +92,11 @@
 
         <!-- Bouton de connexion -->
         <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-semibold rounded-xl text-sm px-5 py-3 text-center transition-colors duration-200">
-          Se connecter
+          Se connecter / avec un compte local
         </button>
 
       </form>
     </div>
 
-  </div>
+
 <?php $t->endSlot(); ?>

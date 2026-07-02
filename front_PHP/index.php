@@ -6,6 +6,7 @@
     require __DIR__ . '/utils/auth.php';
     require __DIR__ . '/utils/session.php';
     require __DIR__ . "/utils/endpoint.php";
+    require_once __DIR__ . "/utils/cas.php";
     require_once __DIR__ . "/config.php";
     include __DIR__ . "/utils/connectDB.php"; # must be refactored to load env here
 
@@ -29,6 +30,40 @@
 
     // Define routes
     $t->router->get('/', 'home', function () use ($t, $user) {
+
+        // Retour depuis le CAS avec un ticket
+        if (isset($_GET['ticket'])) {
+            require_once __DIR__ . "/utils/cas.php";
+
+            $serviceUrl = "https://learnagement.local.univ-savoie.fr/";
+            $casData = validateCasTicket($_GET['ticket'], $serviceUrl);
+
+            getLogger()->info('CAS data: ' . json_encode($casData));
+
+            if ($casData === null) {
+                getLogger()->warning('CAS ticket invalide', ['ticket' => $_GET['ticket']]);
+                $t->router->redirect('login');
+            }
+
+
+
+            $result = casLogin($casData, getenv("CAS_SERVICE_TOKEN"));
+            if ($result && isset($result['access_token'])) {
+                // Le backend a géré seul le lookup/provisionnement
+                login(
+                    id: $result['id'],
+                    email: $result['email'],
+                    type: $result['type'],
+                    jwt: $result['access_token']
+                );
+                $_SESSION['auth_method'] = 'cas';
+                $t->router->redirect('dashboard');
+            }
+
+            $t->router->redirect('login');
+        }
+        // else direct user connexion or no user connected
+
         if ($user)
             $t->router->redirect('dashboard');
         echo $t->render('base/home'); // Make a home page
@@ -50,7 +85,17 @@
 
     $t->router->get('/logout', 'logout', function () use ($t, $user) {
         requireAuth($user, $t->router);
+
+        $wasCas = ($_SESSION['auth_method'] ?? '') === 'cas';
         logout();
+
+        if ($wasCas) {
+            $casLogoutUrl = "https://cas-uds.grenet.fr/cas/logout"
+                . "?service=" . urlencode("https://learnagement.local.univ-savoie.fr/login");
+            header("Location: " . $casLogoutUrl);
+            exit;
+        }
+
         $t->router->redirect('login');
     });
 

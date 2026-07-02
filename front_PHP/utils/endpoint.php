@@ -90,6 +90,38 @@ function python_endpoint($method, $url, $data, $token) {
 }
 
 
+function cas_endpoint($method, $url, $data = null) {
+    $casToken = getenv("CAS_SERVICE_TOKEN");
+    $headers = [
+        "X-Cas-Token: $casToken",
+        "Content-Type: application/json",
+    ];
+
+    if ($method === "GET" && $data) {
+        $url .= "?" . http_build_query($data);
+    }
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+    if ($method === "POST" && $data) {
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    }
+
+    $response = curl_exec($ch);
+    $status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    unset($ch);
+
+    if ($status === 404) return null;      // user inexistant → à provisionner
+    if ($status >= 400) return null;
+
+    return json_decode($response, true);
+}
+
+
 function get_enseignants($token) {
     $url = get_python_backend_url("enseignants/");
     return get_endpoint($url, $token);
