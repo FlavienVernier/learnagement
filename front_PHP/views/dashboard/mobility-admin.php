@@ -286,40 +286,40 @@
                 <!-- COLONNE 1 -->
                 <div class="space-y-6 lg:border-r lg:border-gray-200 lg:pr-8">
 
-                    <!-- ETAPE 1 (Fusion de 0 et 1) -->
+                    <!-- ETAPE 1 (Refonte) -->
                     <div class="mb-8">
                         <h4
                             class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2 flex items-center gap-2">
                             <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 1</span>
-                            Gestion de la Campagne et des Soumissions
+                            Préparation et Lancement de la Campagne
                         </h4>
-                        <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
-                            <p class="text-xs font-bold text-gray-800 mb-3">Saisissez l'ID des étudiants doublants et leur Moyenne Centrée Réduite manuellement avant de lancer la campagne.</p>
-                            <div class="flex gap-2 mb-3">
-                                <input type="number" id="doublantEtudiantId" placeholder="ID Étudiant" class="w-1/2 text-sm border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                <input type="number" step="0.01" id="doublantZScore" placeholder="Moyenne C. Réduite" class="w-1/2 text-sm border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-                            <button type="button" onclick="window.addDoublantToList()" class="mb-3 w-full inline-flex justify-center items-center gap-2 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 transition">Ajouter à la liste</button>
-                            <div class="flex justify-between items-center mb-2 mt-4 hidden" id="doublantsHeader">
-                                <h5 class="text-xs font-bold text-gray-700">Liste des doublants ajoutés</h5>
-                                <span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full" id="doublantsCount">0 étudiant</span>
-                            </div>
-                            <ul id="doublantsList" class="text-xs text-gray-600 mb-4 space-y-2"></ul>
+                        
+                        <div class="grid grid-cols-1 gap-3">
+                            <!-- Bouton 1 -->
+                            <button onclick="document.getElementById('quotasModal').classList.remove('hidden')" class="w-full flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 hover:border-indigo-300 transition text-left group">
+                                <div>
+                                    <h5 class="font-bold text-gray-800 group-hover:text-indigo-700 transition">Gestion des Quotas</h5>
+                                    <p class="text-xs text-gray-500 mt-1">Définir le nombre de places pour chaque filière avant le lancement.</p>
+                                </div>
+                                <svg class="w-6 h-6 text-gray-400 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
 
+                            <!-- Bouton 2 -->
+                            <button onclick="document.getElementById('campaignModal').classList.remove('hidden')" class="w-full flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 hover:border-green-300 transition text-left group">
+                                <div>
+                                    <h5 class="font-bold text-gray-800 group-hover:text-green-700 transition">Lancement de la campagne & Redoublants</h5>
+                                    <p class="text-xs text-gray-500 mt-1">Gérer les étudiants doublants et ouvrir la campagne de mobilité.</p>
+                                </div>
+                                <svg class="w-6 h-6 text-gray-400 group-hover:text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
 
-                            <button id="btnLaunchCampaign" onclick="window.launchCampaign()" class="w-full inline-flex justify-center items-center gap-2 px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700 transition">
-                                Ouvrir la campagne & Calculer les scores
+                            <!-- Bouton 3 -->
+                            <button onclick="window.forceSubmitWishesUI()"
+                                class="w-full mt-2 px-4 py-3 bg-red-600 text-white rounded-lg shadow-sm text-sm font-bold hover:bg-red-700 transition flex justify-center items-center gap-2">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                Clôturer l'étape 1 (Fermer les soumissions)
                             </button>
                         </div>
-
-                        <button onclick="window.forceSubmitWishesUI()"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            Clôturer les soumissions
-                        </button>
                     </div>
 
                     <hr class="border-gray-200">
@@ -333,71 +333,26 @@
                         </h4>
 
                         <div class="p-4 bg-gray-50 rounded-lg border border-gray-100 mb-4">
-                            <p class="text-xs font-bold text-gray-800 mb-3">Indiquez le nombre d'étudiants autorisés à partir
-                                en mobilité pour chaque filière et par semestre.</p>
+                            <p class="text-xs font-bold text-gray-800 mb-3">L'algorithme utilisera les quotas définis à l'Étape 1 pour répartir les étudiants de 4ème année sur les semestres S8 ou S9 des universités partenaires.</p>
 
-                            <div class="flex flex-wrap items-end gap-2 mb-4">
-                                <div class="flex-1 min-w-[120px]">
-                                    <label class="block text-[10px] font-bold text-gray-600 mb-1">Filière</label>
-                                    <select id="quotaMobilityFiliere"
-                                        class="w-full text-xs border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="">Chargement...</option>
-                                    </select>
+                            <div class="mt-4 flex flex-col gap-4">
+                                <div id="assignmentActions">
+                                    <button onclick="window.runAssignmentUI()"
+                                        class="w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                                        Lancer l'affectation automatique
+                                    </button>
                                 </div>
-                                <div class="w-24">
-                                    <label class="block text-[10px] font-bold text-gray-600 mb-1">Semestre</label>
-                                    <select id="quotaMobilitySemester"
-                                        class="w-full text-xs border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="8">S8</option>
-                                        <option value="9">S9</option>
-                                    </select>
+                                
+                                <div id="assignmentProgressContainer" class="hidden w-full p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                    <div class="flex justify-between text-xs font-semibold text-gray-700 mb-2">
+                                        <span id="assignmentProgressText">Démarrage...</span>
+                                        <span id="assignmentProgressPercent">0%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                        <div id="assignmentProgressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                    </div>
                                 </div>
-                                <div class="w-24">
-                                    <label class="block text-[10px] font-bold text-gray-600 mb-1">Places</label>
-                                    <input type="number" id="quotaMobilityPlaces" min="0" value="0"
-                                        class="w-full text-xs border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-                                <button onclick="window.addMobilityQuota()"
-                                    class="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded transition whitespace-nowrap"
-                                    style="height: 34px;">
-                                    Ajouter
-                                </button>
-                            </div>
-
-                            <div id="mobilityQuotasList" class="flex flex-col gap-2 h-18 overflow-y-auto">
-                                <!-- JS will populate this -->
-                                <div id="mobilityQuotasEmpty" class="text-[11px] text-gray-400 italic">Aucun quota
-                                    défini. L'algorithme n'affectera personne si les quotas sont vides.</div>
-                            </div>
-                        </div>
-
-                        <div class="mt-4 flex items-center gap-4" id="assignmentActions">
-                            <button onclick="window.runAssignmentUI()"
-                                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                                </svg>
-                                Lancer l'affectation automatique
-                            </button>
-                            <div id="quotaCounter"
-                                class="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full border border-gray-200 shadow-sm transition-colors duration-300">
-                                0 / 0 quotas configurés
-                            </div>
-                        </div>
-
-                        <!-- Progress UI -->
-                        <div id="assignmentProgressContainer"
-                            class="hidden mt-4 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-                            <div class="flex justify-between text-xs font-semibold text-gray-700 mb-2">
-                                <span id="assignmentProgressText">Démarrage...</span>
-                                <span id="assignmentProgressPercent">0%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div id="assignmentProgressBar"
-                                    class="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
-                                    style="width: 0%"></div>
                             </div>
                         </div>
                     </div>
@@ -639,6 +594,85 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="quotasModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[2000] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-6">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    Gestion des Quotas de Mobilité
+                </h3>
+                <button onclick="document.getElementById('quotasModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-sm text-gray-600 mb-4">Définissez le nombre d'étudiants autorisés à partir pour chaque filière et semestre.</p>
+                
+                <div class="overflow-x-auto border border-gray-200 rounded-lg shadow-sm mb-6">
+                    <table class="w-full text-sm text-left text-gray-700">
+                        <thead class="text-xs uppercase bg-gray-50 text-gray-600 border-b border-gray-200">
+                            <tr>
+                                <th class="px-4 py-3 font-bold w-1/2">Filière</th>
+                                <th class="px-4 py-3 font-bold text-center">Places S8</th>
+                                <th class="px-4 py-3 font-bold text-center">Places S9</th>
+                            </tr>
+                        </thead>
+                        <tbody id="quotasGridBody" class="divide-y divide-gray-100">
+                            <tr>
+                                <td colspan="3" class="px-4 py-8 text-center text-gray-400 italic">Chargement des filières...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                    <button onclick="document.getElementById('quotasModal').classList.add('hidden')" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg shadow-sm hover:bg-gray-50 transition">
+                        Retour au Centre de Contrôle
+                    </button>
+                    <button onclick="window.saveMobilityQuotas()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Enregistrer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="campaignModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[2000] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-6">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    Lancement de la campagne & Redoublants
+                </h3>
+                <button onclick="document.getElementById('campaignModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-sm font-bold text-gray-800 mb-3">Saisissez l'ID des étudiants doublants et leur Moyenne Centrée Réduite manuellement avant de lancer la campagne.</p>
+                <div class="flex gap-2 mb-3">
+                    <input type="number" id="doublantEtudiantId" placeholder="ID Étudiant" class="w-1/2 text-sm border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <input type="number" step="0.01" id="doublantZScore" placeholder="Moyenne C. Réduite" class="w-1/2 text-sm border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <button type="button" onclick="window.addDoublantToList()" class="mb-3 w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition">Ajouter à la liste</button>
+                
+                <div class="flex justify-between items-center mb-2 mt-4 hidden" id="doublantsHeader">
+                    <h5 class="text-sm font-bold text-gray-700">Liste des doublants ajoutés</h5>
+                    <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded-full" id="doublantsCount">0 étudiant</span>
+                </div>
+                <ul id="doublantsList" class="text-sm text-gray-600 mb-6 space-y-2 max-h-40 overflow-y-auto"></ul>
+
+                <hr class="border-gray-200 mb-6">
+                
+                <button id="btnLaunchCampaign" onclick="window.launchCampaign()" class="w-full inline-flex justify-center items-center gap-2 px-4 py-3 text-sm font-semibold text-white bg-green-600 rounded-lg shadow hover:bg-green-700 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Ouvrir la campagne & Calculer les scores
+                </button>
             </div>
         </div>
     </div>
@@ -1808,6 +1842,64 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
     window.mobilityQuotas = [];
     window.globalFilieres = [];
 
+    window.fetchMobilityQuotas = async function () {
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility-quotas?annee_scolaire=2025-2026", {
+                headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+            });
+            if (response.ok) {
+                window.mobilityQuotas = await response.json();
+                window.renderMobilityQuotas();
+            }
+        } catch (e) {
+            console.error("Erreur chargement quotas", e);
+        }
+    };
+
+    window.saveMobilityQuotas = async function () {
+        const newQuotas = [];
+        const inputsS8 = document.querySelectorAll('.quota-input-s8');
+        const inputsS9 = document.querySelectorAll('.quota-input-s9');
+        
+        inputsS8.forEach(input => {
+            const places = parseInt(input.value, 10);
+            if (!isNaN(places) && places > 0) {
+                newQuotas.push({ id_filiere: parseInt(input.dataset.filiere, 10), id_semestre: 8, places });
+            }
+        });
+        
+        inputsS9.forEach(input => {
+            const places = parseInt(input.value, 10);
+            if (!isNaN(places) && places > 0) {
+                newQuotas.push({ id_filiere: parseInt(input.dataset.filiere, 10), id_semestre: 9, places });
+            }
+        });
+
+        window.mobilityQuotas = newQuotas;
+
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility-quotas", {
+                method: 'POST',
+                headers: { 
+                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ annee_scolaire: "2025-2026", quotas: window.mobilityQuotas })
+            });
+            if (response.ok) {
+                alert("Quotas sauvegardés avec succès !");
+                document.getElementById('quotasModal').classList.add('hidden');
+            } else {
+                alert("Erreur lors de la sauvegarde des quotas.");
+            }
+        } catch (e) {
+            console.error("Erreur sauvegarde quotas", e);
+        }
+    };
+
+    window.mobilityQuotas = [];
+    window.globalFilieres = [];
+
     window.fetchGlobalFilieres = async function () {
         try {
             const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/filieres/", {
@@ -1815,96 +1907,51 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             });
             if (response.ok) {
                 window.globalFilieres = await response.json();
-                const select = document.getElementById('quotaMobilityFiliere');
-                if (select) {
-                    select.innerHTML = window.globalFilieres
-                        .sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere)))
-                        .map(f => `<option value="${f.id_filiere}">${f.nom_filiere || f.nom_long}</option>`)
-                        .join('');
-                }
+                // Removed dropdown populate logic, render will handle the grid
             }
         } catch (e) {
             console.error("Erreur chargement filières", e);
         }
     };
 
-    window.addMobilityQuota = function () {
-        const id_filiere = parseInt(document.getElementById('quotaMobilityFiliere').value, 10);
-        const id_semestre = parseInt(document.getElementById('quotaMobilitySemester').value, 10);
-        const places = parseInt(document.getElementById('quotaMobilityPlaces').value, 10);
-
-        if (isNaN(id_filiere) || isNaN(id_semestre) || isNaN(places) || places < 0) {
-            alert("Veuillez remplir tous les champs correctement.");
-            return;
-        }
-
-        const exists = window.mobilityQuotas.find(q => q.id_filiere === id_filiere && q.id_semestre === id_semestre);
-        if (exists) {
-            alert("Un quota pour cette filière et ce semestre existe déjà. Veuillez le supprimer pour le modifier.");
-            return;
-        }
-
-        window.mobilityQuotas.push({ id_filiere, id_semestre, places });
-        window.renderMobilityQuotas();
-    };
-
-    window.removeMobilityQuota = function (index) {
-        window.mobilityQuotas.splice(index, 1);
-        window.renderMobilityQuotas();
-    };
-
     window.renderMobilityQuotas = function () {
-        const container = document.getElementById('mobilityQuotasList');
-        const emptyMsg = document.getElementById('mobilityQuotasEmpty');
+        const tbody = document.getElementById('quotasGridBody');
+        if (!tbody || !window.globalFilieres) return;
 
-        // Clear old list items except empty message
-        Array.from(container.children).forEach(child => {
-            if (child.id !== 'mobilityQuotasEmpty') {
-                child.remove();
-            }
+        if (window.globalFilieres.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-8 text-center text-gray-400 italic">Aucune filière trouvée.</td></tr>`;
+            return;
+        }
+
+        const sortedFilieres = [...window.globalFilieres].sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere)));
+        
+        let html = '';
+        sortedFilieres.forEach(f => {
+            const nom = f.nom_filiere || f.nom_long || `Filière ${f.id_filiere}`;
+            
+            // Find existing quotas for this filiere
+            const qS8 = window.mobilityQuotas.find(q => q.id_filiere === f.id_filiere && q.id_semestre === 8);
+            const qS9 = window.mobilityQuotas.find(q => q.id_filiere === f.id_filiere && q.id_semestre === 9);
+            
+            const placesS8 = qS8 ? qS8.places : 0;
+            const placesS9 = qS9 ? qS9.places : 0;
+
+            html += `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-4 py-3 font-semibold text-gray-800">${nom}</td>
+                    <td class="px-4 py-3 text-center">
+                        <input type="number" min="0" class="quota-input-s8 w-20 text-center text-sm border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500" data-filiere="${f.id_filiere}" value="${placesS8}">
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <input type="number" min="0" class="quota-input-s9 w-20 text-center text-sm border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500" data-filiere="${f.id_filiere}" value="${placesS9}">
+                    </td>
+                </tr>
+            `;
         });
-
-        if (window.mobilityQuotas.length === 0) {
-            emptyMsg.classList.remove('hidden');
-        } else {
-            emptyMsg.classList.add('hidden');
-            window.mobilityQuotas.forEach((q, i) => {
-                const f = window.globalFilieres.find(f => f.id_filiere === q.id_filiere);
-                const nom = f ? (f.nom_filiere || f.nom_long) : `Filière ${q.id_filiere}`;
-
-                const item = document.createElement('div');
-                item.className = "flex justify-between items-center bg-white p-2 border border-gray-200 rounded shadow-sm text-xs";
-                item.innerHTML = `
-                    <div class="font-semibold text-gray-700">
-                        ${nom} <span class="text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded ml-1">S${q.id_semestre}</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span class="font-bold text-gray-800">${q.places} place(s)</span>
-                        <button onclick="window.removeMobilityQuota(${i})" class="text-red-500 hover:text-red-700 transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        </button>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        // Update quota counter
-        const counterEl = document.getElementById('quotaCounter');
-        if (counterEl && window.globalFilieres) {
-            const totalPossible = window.globalFilieres.length * 2; // 2 semesters per filière
-            const filled = window.mobilityQuotas.length;
-            counterEl.textContent = `${filled} / ${totalPossible} quotas configurés`;
-
-            if (filled === totalPossible && totalPossible > 0) {
-                counterEl.classList.remove('text-gray-600', 'bg-gray-100', 'border-gray-200');
-                counterEl.classList.add('text-emerald-700', 'bg-emerald-100', 'border-emerald-300');
-            } else {
-                counterEl.classList.add('text-gray-600', 'bg-gray-100', 'border-gray-200');
-                counterEl.classList.remove('text-emerald-700', 'bg-emerald-100', 'border-emerald-300');
-            }
-        }
+        
+        tbody.innerHTML = html;
     };
+
 
     let assignmentPollInterval = null;
 
@@ -2062,12 +2109,11 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         }
     };
 
-    // Procedure Modal & Reset Logic
     window.openProcedureModal = function () {
         document.getElementById('procedureModal').classList.remove('hidden');
         window.fetchSubmittedStudents();
         window.fetchAssignedStudents();
-        window.fetchGlobalFilieres();
+        window.fetchGlobalFilieres().then(() => window.fetchMobilityQuotas());
     };
 
     window.submittedStudentsList = [];
@@ -2685,6 +2731,14 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         } catch (error) {
             console.error("Erreur lors du chargement des diagnostiques:", error);
         }
+    };
+
+    window.saveQuotas = async function() {
+        // Implementation logic for saving quotas
+    };
+
+    window.loadQuotas = async function() {
+        // Implementation logic for loading quotas
     };
 
     window.closeAssignmentPhase = function () {

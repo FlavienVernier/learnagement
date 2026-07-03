@@ -18,6 +18,21 @@
         </div>
     </div>
 
+    <!-- Quota Display (Bottom Left) -->
+    <div id="studentQuotaContainer" class="hidden absolute bottom-6 left-4 z-[1000] bg-white/95 border border-indigo-100 rounded-lg shadow-lg p-4 backdrop-blur-sm pointer-events-none">
+        <p class="text-[10px] uppercase font-bold text-indigo-700 tracking-wide mb-1">Quota - <span id="quotaFiliereName">...</span></p>
+        <div class="flex gap-4">
+            <div class="flex items-center gap-1">
+                <span class="text-xs font-semibold text-indigo-600">S8:</span>
+                <span class="text-sm font-bold text-indigo-900" id="quotaS8Count">-</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <span class="text-xs font-semibold text-indigo-600">S9:</span>
+                <span class="text-sm font-bold text-indigo-900" id="quotaS9Count">-</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Contrôles et panneaux superposés -->
     <div class="absolute top-[10px] left-[55px] z-[1000] flex max-w-[92vw] flex-col items-start gap-2.5">
         <div id="mapControls" class="flex items-center gap-2">
@@ -207,7 +222,10 @@ crossorigin=""/>
     window.MobilityMapState.campaignOpen = campaignOpen;
 
     // Afficher la bannière et le message dans le panel vœux si campagne fermée
-    if (!campaignOpen) {
+    if (campaignOpen) {
+        const badge = document.getElementById('campaignOpenBadge');
+        if (badge) badge.classList.remove('hidden');
+    } else {
         const banner = document.getElementById('campaignClosedBanner');
         const notice = document.getElementById('campaignClosedNotice');
         const wishesEmpty = document.getElementById('wishesEmpty');
@@ -694,8 +712,36 @@ crossorigin=""/>
         map.addLayer(markers);
     }
 
+    const fetchStudentQuota = async () => {
+        const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID + "/quota?annee_scolaire=2025-2026";
+        try {
+            const response = await fetch(url, { headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` } });
+            if (response.ok) {
+                const data = await response.json();
+                if (data) {
+                    const container = document.getElementById('studentQuotaContainer');
+                    if (container) container.classList.remove('hidden');
+                    
+                    const filiereNameEl = document.getElementById('quotaFiliereName');
+                    if (filiereNameEl) filiereNameEl.innerText = data.filiere || 'Filière';
+                    
+                    const s8El = document.getElementById('quotaS8Count');
+                    if (s8El) s8El.innerText = data.S8 ?? 0;
+                    
+                    const s9El = document.getElementById('quotaS9Count');
+                    if (s9El) s9El.innerText = data.S9 ?? 0;
+                }
+            }
+        } catch (e) {
+            console.error("Erreur quota", e);
+        }
+    };
+
     window.updateMap = updateMap; // Pour pouvoir appeler depuis le PHP
     renderWishesList();
+    if (campaignOpen && !assignment) {
+        fetchStudentQuota();
+    }
     updateMap();
     if (assignment) {
         // Cacher les contrôles inutiles si affecté

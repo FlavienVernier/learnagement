@@ -27,11 +27,12 @@ class MobilityQuota(BaseModel):
 
 class AssignmentRunPayload(BaseModel):
     annee_eligible: int = 4
+    annee_scolaire: str = "2025-2026"
     mobility_quotas: List[MobilityQuota] = []
 
 def get_eligible_students(current_user: User) -> List[dict]:
     """
-    Étape 1: Récupérer les étudiants éligibles (4ème et 5ème année).
+    Étape 1: Récupérer les étudiants éligibles (4ème année uniquement).
     Retourne une liste de dictionnaires avec id_etudiant, mobility_note, id_promo, id_filiere et submission_date.
     """
     query = """
@@ -52,6 +53,33 @@ def get_eligible_students(current_user: User) -> List[dict]:
     sql_request = SQLRequest(**request)
     result = db_request(current_user, sql_request)
     return result if result else []
+
+def get_mobility_quotas_from_db(annee_scolaire: str, current_user: User) -> List[MobilityQuota]:
+    """
+    Récupère les quotas depuis la base de données pour une année scolaire donnée.
+    """
+    query = """
+        SELECT id_filiere, id_semestre, places
+        FROM MOB_filiere_quotas
+        WHERE annee_scolaire = %(annee_scolaire)s
+    """
+    request = {
+        "request": query,
+        "params": {"annee_scolaire": annee_scolaire},
+        "allowedRolesRequester": ["relations_internationales"]
+    }
+    sql_request = SQLRequest(**request)
+    result = db_request(current_user, sql_request)
+    
+    quotas = []
+    if result:
+        for row in result:
+            quotas.append(MobilityQuota(
+                id_filiere=row["id_filiere"],
+                id_semestre=row["id_semestre"],
+                places=row["places"]
+            ))
+    return quotas
 
 def sort_students_by_z_score(students: List[dict]) -> List[dict]:
     """
@@ -413,7 +441,13 @@ def execute_assignment_task(payload: AssignmentRunPayload, current_user: User):
         time.sleep(0.5)
         assignment_progress["progress"] = 70
         assignment_progress["step"] = "Étape 4 : Exécution de l'algorithme Round-Robin..."
-        result = run_round_robin_assignment(sorted_students, wishes, places, payload.mobility_quotas)
+        
+        # Récupération des quotas persistés depuis la base de données
+        quotas_from_db = get_mobility_quotas_from_db(payload.annee_scolaire, current_user)
+        # S'ils sont vides, on utilise ceux du payload en fallback
+        active_quotas = quotas_from_db if quotas_from_db else payload.mobility_quotas
+        
+        result = run_round_robin_assignment(sorted_students, wishes, places, active_quotas)
         assignments = result["assignments"]
         final_places = result["final_places"]
         
@@ -449,4 +483,92 @@ def run_mobility_assignment(
         
     background_tasks.add_task(execute_assignment_task, payload, current_user)
     return {"message": "Algorithme d'affectation démarré en arrière-plan."}
+
+class MobilityQuotasUpdatePayload(BaseModel):
+    annee_scolaire: str
+    quotas: List[MobilityQuota]
+
+@router.get("/university/admin/mobility-quotas",
+            tags=["admin", "mobility"],
+            summary="Get mobility quotas",
+            description="Récupérer les quotas de mobilité par filière")
+def get_mobility_quotas(
+    annee_scolaire: str,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    query = """
+        SELECT id_filiere, id_semestre, places
+        FROM MOB_filiere_quotas
+        WHERE annee_scolaire = %(annee_scolaire)s
+    """
+    sql_request = SQLRequest(request=query, params={"annee_scolaire": annee_scolaire}, allowedRolesRequester=["relations_internationales"])
+    return db_request(current_user, sql_request)
+
+@router.post("/university/admin/mobility-quotas",
+            tags=["admin", "mobility"],
+            summary="Save mobility quotas",
+            description="Sauvegarder les quotas de mobilité par filière")
+def save_mobility_quotas(
+    payload: MobilityQuotasUpdatePayload,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    # D'abord, supprimer les anciens quotas pour cette année
+    delete_query = """
+        DELETE FROM MOB_filiere_quotas 
+        WHERE annee_scolaire = %(annee_scolaire)s
+    """
+    sql_request = SQLRequest(request=delete_query, params={"annee_scolaire": payload.annee_scolaire}, allowedRolesRequester=["relations_internationales"])
+    db_request(current_user, sql_request)
+    
+    # Ensuite, insérer les nouveaux quotas
+    insert_query = """
+        INSERT INTO MOB_filiere_quotas (id_filiere, annee_scolaire, id_semestre, places)
+        VALUES (%(id_filiere)s, %(annee_scolaire)s, %(id_semestre)s, %(places)s)
+    """
+    for quota in payload.quotas:
+        params = {
+            "id_filiere": quota.id_filiere,
+            "annee_scolaire": payload.annee_scolaire,
+            "id_semestre": quota.id_semestre,
+            "places": quota.places
+        }
+        sql_request = SQLRequest(request=insert_query, params=params, allowedRolesRequester=["relations_internationales"])
+        db_request(current_user, sql_request)
+        
+    return {"message": "Quotas sauvegardés avec succès."}
+
+@router.get("/university/etudiant/{id_etudiant}/quota",
+            tags=["etudiant", "mobility"],
+            summary="Get student mobility quota",
+            description="Récupérer les quotas disponibles pour la filière d'un étudiant")
+def get_student_quota(
+    id_etudiant: int,
+    annee_scolaire: str,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    # Récupérer la filière de l'étudiant
+    # Note : allowedRolesRequester contient "connected_user" pour permettre à l'étudiant de l'appeler.
+    query = """
+        SELECT q.id_semestre, q.places, f.nom_filiere
+        FROM MOB_filiere_quotas q
+        JOIN LNM_promo p ON p.id_filiere = q.id_filiere
+        JOIN LNM_etudiant e ON e.id_promo = p.id_promo
+        JOIN LNM_filiere f ON f.id_filiere = q.id_filiere
+        WHERE e.id_etudiant = %(id_etudiant)s
+          AND q.annee_scolaire = %(annee_scolaire)s
+    """
+    sql_request = SQLRequest(request=query, params={"id_etudiant": id_etudiant, "annee_scolaire": annee_scolaire}, allowedRolesRequester=["connected_user"])
+    result = db_request(current_user, sql_request)
+    
+    if not result:
+        return {"S8": 0, "S9": 0, "filiere": "Inconnue"}
+        
+    quotas_dict = {"S8": 0, "S9": 0, "filiere": result[0]["nom_filiere"]}
+    for row in result:
+        if row["id_semestre"] == 8:
+            quotas_dict["S8"] = row["places"]
+        elif row["id_semestre"] == 9:
+            quotas_dict["S9"] = row["places"]
+            
+    return quotas_dict
 

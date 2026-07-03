@@ -74,3 +74,17 @@ ALTER TABLE `MOB_partner_university`
 -- (nombre de places par spécialité restantes après le calcul)
 ALTER TABLE `MOB_partner_university_places`
     ADD `remaining_places` INT NULL AFTER `number_of_places`;
+
+-- -----------------------------------------------------------------------
+-- Quotas de départ par filière et par année scolaire
+-- -----------------------------------------------------------------------
+CREATE TABLE `MOB_filiere_quotas` (
+    `id_quota` INT NOT NULL AUTO_INCREMENT,
+    `id_filiere` INT NOT NULL,
+    `annee_scolaire` VARCHAR(20) NOT NULL,
+    `id_semestre` INT NOT NULL,
+    `places` INT NOT NULL,
+    PRIMARY KEY (`id_quota`),
+    CONSTRAINT `fk_mob_filiere_quotas_filiere` FOREIGN KEY (`id_filiere`) REFERENCES `LNM_filiere` (`id_filiere`),
+    UNIQUE KEY `uq_filiere_annee_semestre` (`id_filiere`, `annee_scolaire`, `id_semestre`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

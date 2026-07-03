@@ -870,11 +870,7 @@ def export_admin_assignments(
                 p.annee AS Annee,
                 s.nom_statut AS Statut,
                 IFNULL(e.mobility_note, 'N/A') AS Note,
-                CASE
-                    WHEN e.mobility_note IS NULL THEN 'N/A'
-                    WHEN stats.std_note > 0 THEN ROUND((e.mobility_note - stats.mean_note) / stats.std_note, 2)
-                    ELSE 0.0
-                END AS Moyenne_Centree_Reduite,
+                IFNULL(e.mobility_z_score, 'N/A') AS Moyenne_Centree_Reduite,
                 CASE 
                     WHEN u.name IS NOT NULL THEN u.name
                     WHEN (SELECT COUNT(*) FROM MOB_wishes w WHERE w.id_etudiant = e.id_etudiant) = 0 THEN 'Aucun vœu'
@@ -898,13 +894,7 @@ def export_admin_assignments(
             JOIN LNM_promo p ON p.id_promo = e.id_promo
             JOIN LNM_filiere f ON f.id_filiere = p.id_filiere
             JOIN LNM_statut s ON s.id_statut = p.id_statut
-            LEFT JOIN (
-                SELECT p2.id_filiere, AVG(e2.mobility_note) AS mean_note, STDDEV(e2.mobility_note) AS std_note
-                FROM LNM_etudiant e2
-                JOIN LNM_promo p2 ON e2.id_promo = p2.id_promo
-                WHERE p2.annee IN (4, 5) AND e2.mobility_note IS NOT NULL
-                GROUP BY p2.id_filiere
-            ) stats ON stats.id_filiere = p.id_filiere
+
             LEFT JOIN MOB_assignment a ON a.id_etudiant = e.id_etudiant
             LEFT JOIN MOB_partner_university u ON u.id_partner_university = a.id_partner_university
             LEFT JOIN LNM_semestre sem ON sem.id_semestre = a.id_semestre
@@ -1534,7 +1524,7 @@ def launch_mobility_campaign(
             ))
 
     # 2. Calculer stats par filière pour les autres
-    # On prend tous les étudiants de 4ème et 5ème année ayant une note
+    # On prend tous les étudiants de 4ème année ayant une note
     doublant_filter = ""
     if doublant_ids:
         doublant_filter = f"AND e.id_etudiant NOT IN ({','.join(map(str, doublant_ids))})"
