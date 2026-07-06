@@ -572,7 +572,7 @@ def list_all_wishes_ri(
                         LEFT JOIN MOB_wishes w ON e.id_etudiant = w.id_etudiant
                         LEFT JOIN MOB_partner_university u ON u.id_partner_university = w.id_partner_university
                         LEFT JOIN MOB_assignment a ON a.id_etudiant = e.id_etudiant
-                        WHERE p.annee IN (4, 5) AND e.mobility_completed != 1
+                        WHERE p.annee = 4 AND e.mobility_completed != 1
                         ORDER BY e.nom ASC, e.prenom ASC, w.priority ASC
                     """,
         "allowedRolesRequester": ["relations_internationales"],
@@ -798,7 +798,6 @@ def export_admin_wishes(
                 e.prenom AS Prenom,
                 e.mail AS Email,
                 f.nom_filiere AS Filiere,
-                p.annee AS Annee,
                 s.nom_statut AS Statut,
                 IFNULL(e.mobility_note, 'N/A') AS Note,
                 w.priority AS Priorite,
@@ -825,7 +824,7 @@ def export_admin_wishes(
     ws.title = "Voeux Etudiants"
     
     headers = [
-        "Nom", "Prénom", "Email", "Filière", "Année", "Statut", 
+        "Nom", "Prénom", "Email", "Filière", "Statut", 
         "Note de Mobilité", "Priorité", "Université Partenaire", 
         "Pays", "Semestre Demandé", "Date de Soumission"
     ]
@@ -834,7 +833,7 @@ def export_admin_wishes(
     for row in result:
         ws.append([
             row.get("Nom", ""), row.get("Prenom", ""), row.get("Email", ""),
-            row.get("Filiere", ""), row.get("Annee", ""), row.get("Statut", ""),
+            row.get("Filiere", ""), row.get("Statut", ""),
             row.get("Note", ""), row.get("Priorite", ""), row.get("Universite_Partenaire", ""),
             row.get("Pays", ""), row.get("Semestre_Demande", ""),
             str(row.get("Date_Soumission", "")) if row.get("Date_Soumission") else "Non Soumis"
@@ -867,7 +866,6 @@ def export_admin_assignments(
                 e.prenom AS Prenom,
                 e.mail AS Email,
                 f.nom_filiere AS Filiere,
-                p.annee AS Annee,
                 s.nom_statut AS Statut,
                 IFNULL(e.mobility_note, 'N/A') AS Note,
                 IFNULL(e.mobility_z_score, 'N/A') AS Moyenne_Centree_Reduite,
@@ -898,7 +896,7 @@ def export_admin_assignments(
             LEFT JOIN MOB_assignment a ON a.id_etudiant = e.id_etudiant
             LEFT JOIN MOB_partner_university u ON u.id_partner_university = a.id_partner_university
             LEFT JOIN LNM_semestre sem ON sem.id_semestre = a.id_semestre
-            WHERE p.annee IN (4, 5)
+            WHERE p.annee = 4
             ORDER BY e.nom ASC, e.prenom ASC
         ''',
         params=None,
@@ -911,8 +909,8 @@ def export_admin_assignments(
     ws.title = "Affectations Etudiants"
     
     headers = [
-        "Nom", "Prénom", "Email", "Filière", "Année", "Statut", 
-        "Note de Mobilité", "Université Affectée", "Pays", 
+        "Nom", "Prénom", "Email", "Filière", "Statut", 
+        "Note de Mobilité", "Moyenne Centrée Réduite", "Université Affectée", "Pays", 
         "Semestre Affecté", "Statut de l'affectation"
     ]
     ws.append(headers)
@@ -920,8 +918,8 @@ def export_admin_assignments(
     for row in result:
         ws.append([
             row.get("Nom", ""), row.get("Prenom", ""), row.get("Email", ""),
-            row.get("Filiere", ""), row.get("Annee", ""), row.get("Statut", ""),
-            row.get("Note", ""), row.get("Universite_Affectee", ""),
+            row.get("Filiere", ""), row.get("Statut", ""),
+            row.get("Note", ""), row.get("Moyenne_Centree_Reduite", ""), row.get("Universite_Affectee", ""),
             row.get("Pays", ""), row.get("Semestre_Affecte", ""), row.get("Statut_Affectation", "")
         ])
         
@@ -951,7 +949,7 @@ def get_submitted_students(
             FROM LNM_etudiant e
             JOIN LNM_promo p ON e.id_promo = p.id_promo
             JOIN LNM_filiere f ON p.id_filiere = f.id_filiere
-            WHERE p.annee IN (4, 5)
+            WHERE p.annee = 4
               AND e.mobility_completed = 0
               AND EXISTS (
                   SELECT 1 FROM MOB_wishes w 
@@ -977,7 +975,7 @@ def reset_student_wishes(
         request='''
             SELECT 1 FROM LNM_etudiant e
             JOIN LNM_promo p ON e.id_promo = p.id_promo
-            WHERE e.id_etudiant = %(id)s AND p.annee IN (4, 5) AND e.mobility_completed = 0
+            WHERE e.id_etudiant = %(id)s AND p.annee = 4 AND e.mobility_completed = 0
         ''',
         params={"id": id_etudiant},
         allowedRolesRequester=["relations_internationales"]
@@ -1037,7 +1035,7 @@ def export_assigned_students_status(
         
     sql_request = SQLRequest(
         request='''
-            SELECT a.id_etudiant, a.status, e.nom, e.prenom, e.mail, 
+            SELECT a.id_etudiant, a.status, e.nom, e.prenom, e.mail, e.mobility_z_score,
                    f.nom_filiere, u.name as university_name, u.country
             FROM MOB_assignment a
             JOIN LNM_etudiant e ON e.id_etudiant = a.id_etudiant
@@ -1060,7 +1058,7 @@ def export_assigned_students_status(
     ws = wb.active
     ws.title = f"Affectations {status.capitalize()}"
     
-    headers = ["ID Etudiant", "Nom", "Prénom", "Email", "Filière", "Université Attribuée", "Pays", "Statut"]
+    headers = ["ID Etudiant", "Nom", "Prénom", "Email", "Filière", "Moyenne Centrée Réduite", "Université Attribuée", "Pays", "Statut"]
     ws.append(headers)
     
     if result:
@@ -1071,6 +1069,7 @@ def export_assigned_students_status(
                 row.get("prenom", ""),
                 row.get("mail", ""),
                 row.get("nom_filiere", ""),
+                row.get("mobility_z_score", ""),
                 row.get("university_name", ""),
                 row.get("country", ""),
                 row.get("status", "")

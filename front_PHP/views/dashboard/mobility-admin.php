@@ -372,54 +372,8 @@
 
 
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                            <!-- Colonne de gauche : Modification -->
-                            <div>
-                                <div class="mb-4">
-                                    <label for="validationStudentSelect"
-                                        class="block text-xs font-semibold text-gray-700 mb-1">Sélectionnez un étudiant
-                                        affecté :</label>
-                                    <select id="validationStudentSelect" onchange="window.onValidationStudentChange()"
-                                        class="w-full text-sm border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="">Chargement...</option>
-                                    </select>
-                                </div>
-
-                                <div id="validationStudentDetails"
-                                    class="hidden bg-gray-50 p-3 rounded border border-gray-200 mb-3 text-sm">
-                                    <div class="grid grid-cols-2 gap-2 mb-3">
-                                        <p><strong>Nom:</strong> <span id="vsNom"></span></p>
-                                        <p><strong>Filière:</strong> <span id="vsFiliere"></span></p>
-                                        <p class="col-span-2"><strong>Affectation:</strong> <span
-                                                id="vsUniversity"></span></p>
-                                        <p class="col-span-2 flex flex-wrap items-center gap-2">
-                                            <strong>Statut:</strong>
-                                            <span id="vsStatusBadge"
-                                                class="px-2 py-0.5 rounded text-xs font-bold text-white"></span>
-                                        </p>
-                                    </div>
-
-                                    <div class="flex flex-col xl:flex-row flex-wrap gap-2">
-                                        <button id="btnForceAccept"
-                                            onclick="window.updateAssignmentStatusUI('accepted')"
-                                            class="flex-1 justify-center inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700 transition">
-                                            Forcer l'acceptation
-                                        </button>
-                                        <button id="btnForcePending"
-                                            onclick="window.updateAssignmentStatusUI('pending')"
-                                            class="flex-1 justify-center inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-amber-600 rounded hover:bg-amber-700 transition">
-                                            Remettre en attente
-                                        </button>
-                                        <button id="btnForceDecline"
-                                            onclick="window.updateAssignmentStatusUI('declined')"
-                                            class="flex-1 justify-center inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700 transition">
-                                            Forcer le refus
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Colonne de droite : Graphe et Export -->
+                        <div class="mb-4">
+                            <!-- Graphe et Export -->
                             <div
                                 class="bg-gray-50 border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center">
                                 <h4 class="font-bold text-gray-700 mb-2 text-center text-sm">Statut des Affectations
@@ -589,7 +543,7 @@
                         </thead>
                         <tbody id="wishesTableBody" class="divide-y divide-gray-200">
                             <tr>
-                                <td colspan="6" class="px-6 py-12 text-center text-gray-500">Chargement des dossiers...</td>
+                                <td colspan="8" class="px-6 py-12 text-center text-gray-500">Chargement des dossiers...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -643,7 +597,7 @@
     </div>
     
     <div id="campaignModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[2000] flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl p-6 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-7xl p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-start mb-6">
                 <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
                     Lancement de la campagne & Redoublants
@@ -663,16 +617,31 @@
                 
                 <div class="flex justify-between items-center mb-2 mt-4 hidden" id="doublantsHeader">
                     <h5 class="text-sm font-bold text-gray-700">Liste des doublants ajoutés</h5>
-                    <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded-full" id="doublantsCount">0 étudiant</span>
+                    <div class="flex items-center gap-2">
+                        <div id="doublantsFiliereCounters" class="flex flex-wrap gap-2 justify-end"></div>
+                        <span class="bg-gray-100 text-gray-800 text-xs font-bold px-2.5 py-1 rounded shadow-sm border border-gray-200" id="doublantsCount">0 total</span>
+                    </div>
                 </div>
-                <ul id="doublantsList" class="text-sm text-gray-600 mb-6 space-y-2 max-h-40 overflow-y-auto"></ul>
+                <ul id="doublantsList" class="text-sm text-gray-600 mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-[32rem] overflow-y-auto p-1"></ul>
 
                 <hr class="border-gray-200 mb-6">
                 
-                <button id="btnLaunchCampaign" onclick="window.launchCampaign()" class="w-full inline-flex justify-center items-center gap-2 px-4 py-3 text-sm font-semibold text-white bg-green-600 rounded-lg shadow hover:bg-green-700 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Ouvrir la campagne & Calculer les scores
-                </button>
+                <div id="campaignLaunchControls">
+                    <button id="btnLaunchCampaign" onclick="window.launchCampaign()" class="w-full inline-flex justify-center items-center gap-2 px-4 py-3 text-sm font-semibold text-white bg-green-600 rounded-lg shadow hover:bg-green-700 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Ouvrir la campagne & Calculer les scores
+                    </button>
+                </div>
+                
+                <div id="campaignProgressContainer" class="hidden w-full mt-4 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <div class="flex justify-between text-xs font-semibold text-gray-700 mb-2">
+                        <span id="campaignProgressText">Lancement en cours...</span>
+                        <span id="campaignProgressPercent">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="campaignProgressBar" class="bg-green-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -2209,41 +2178,102 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         const ul = document.getElementById('doublantsList');
         const header = document.getElementById('doublantsHeader');
         const countSpan = document.getElementById('doublantsCount');
+        const filiereCounters = document.getElementById('doublantsFiliereCounters');
 
         if (window.doublantsArray.length > 0) {
             header.classList.remove('hidden');
-            countSpan.textContent = window.doublantsArray.length + (window.doublantsArray.length > 1 ? ' étudiants' : ' étudiant');
+            countSpan.textContent = window.doublantsArray.length + (window.doublantsArray.length > 1 ? ' Total' : ' Total');
+            
+            // Calculer les compteurs par filière
+            const filieresCount = {};
+            window.doublantsArray.forEach(d => {
+                filieresCount[d.filiere] = (filieresCount[d.filiere] || 0) + 1;
+            });
+            
+            const colors = [
+                {bg: 'bg-indigo-50', text: 'text-indigo-800', border: 'border-indigo-200', badge: 'bg-indigo-100 text-indigo-800 border-indigo-200'},
+                {bg: 'bg-emerald-50', text: 'text-emerald-800', border: 'border-emerald-200', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200'},
+                {bg: 'bg-amber-50', text: 'text-amber-800', border: 'border-amber-200', badge: 'bg-amber-100 text-amber-800 border-amber-200'},
+                {bg: 'bg-rose-50', text: 'text-rose-800', border: 'border-rose-200', badge: 'bg-rose-100 text-rose-800 border-rose-200'},
+                {bg: 'bg-fuchsia-50', text: 'text-fuchsia-800', border: 'border-fuchsia-200', badge: 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200'},
+                {bg: 'bg-cyan-50', text: 'text-cyan-800', border: 'border-cyan-200', badge: 'bg-cyan-100 text-cyan-800 border-cyan-200'}
+            ];
+            
+            const filiereColorsMap = {};
+            let colorIndex = 0;
+            const getFiliereColor = (filiereName) => {
+                if (!filiereName) return colors[0];
+                if (!filiereColorsMap[filiereName]) {
+                    filiereColorsMap[filiereName] = colors[colorIndex % colors.length];
+                    colorIndex++;
+                }
+                return filiereColorsMap[filiereName];
+            };
+
+            // Afficher les petits compteurs
+            filiereCounters.innerHTML = Object.entries(filieresCount).map(([filiere, count]) => {
+                const c = getFiliereColor(filiere);
+                return `<span class="${c.badge} text-xs font-bold px-2.5 py-1 rounded shadow-sm border">${filiere || 'N/A'}: ${count}</span>`;
+            }).join('');
+
+            ul.innerHTML = window.doublantsArray.map(d => {
+                const c = getFiliereColor(d.filiere);
+                return `
+                <li class="flex items-center justify-between gap-2 p-2.5 rounded-lg border ${c.bg} ${c.border} shadow-sm transition-all hover:shadow-md">
+                    <div class="flex-1 min-w-0">
+                        <div class="text-xs font-bold text-gray-800 truncate" title="${d.nom} ${d.prenom}">${d.nom} ${d.prenom}</div>
+                        <div class="text-[10px] text-gray-600 mt-0.5 flex items-center gap-1.5">
+                            <span class="bg-white px-1 py-0.5 rounded font-medium border border-gray-200">ID: ${d.id_etudiant}</span>
+                            <span class="truncate font-bold text-xs ${c.text}">${d.filiere}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="text-right">
+                            <div class="text-[8px] uppercase font-bold text-gray-400 tracking-wider mb-0.5" title="Moyenne Centrée Réduite">MCR</div>
+                            <div class="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded">${parseFloat(d.z_score).toFixed(2)}</div>
+                        </div>
+                        <button type="button" onclick="window.removeDoublant(${d.id_etudiant})" class="flex-shrink-0 w-6 h-6 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1" title="Retirer cet étudiant">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                </li>`;
+            }).join('');
+
         } else {
             header.classList.add('hidden');
+            ul.innerHTML = '';
         }
-
-        ul.innerHTML = window.doublantsArray.map(d => `
-            <li class="flex items-center justify-between gap-3 bg-white p-3 rounded-lg border border-gray-200 shadow-sm transition-all hover:shadow-md">
-                <div class="flex-1 min-w-0">
-                    <div class="text-sm font-bold text-gray-800 truncate">${d.nom} ${d.prenom}</div>
-                    <div class="text-[11px] text-gray-500 mt-1 flex items-center gap-2">
-                        <span class="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 font-medium">ID: ${d.id_etudiant}</span>
-                        <span class="truncate">${d.filiere}</span>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="text-right">
-                        <div class="text-[9px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">Moyenne C. Réduite</div>
-                        <div class="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded">${d.z_score}</div>
-                    </div>
-                    <button type="button" onclick="window.removeDoublant(${d.id_etudiant})" class="flex-shrink-0 w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1" title="Retirer cet étudiant">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-            </li>
-        `).join('');
     };
 
     window.launchCampaignExec = async function () {
         try {
-            const btn = document.getElementById('btnLaunchCampaign');
-            btn.disabled = true;
-            btn.textContent = "Calcul en cours...";
+            document.getElementById('campaignLaunchControls').classList.add('hidden');
+            const progressContainer = document.getElementById('campaignProgressContainer');
+            const progressBar = document.getElementById('campaignProgressBar');
+            const progressPercent = document.getElementById('campaignProgressPercent');
+            const progressText = document.getElementById('campaignProgressText');
+            
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '0%';
+            progressPercent.textContent = '0%';
+            progressText.textContent = "Nettoyage et initialisation...";
+            
+            // Simuler l'avancement pendant le fetch (qui est synchrone et peut prendre quelques secondes)
+            let currentProgress = 0;
+            const simulateProgress = setInterval(() => {
+                if (currentProgress < 90) {
+                    currentProgress += Math.random() * 15;
+                    if (currentProgress > 90) currentProgress = 90;
+                    progressBar.style.width = currentProgress + '%';
+                    progressPercent.textContent = Math.floor(currentProgress) + '%';
+                    
+                    if (currentProgress > 30 && currentProgress < 60) {
+                        progressText.textContent = "Calcul des Z-scores en cours...";
+                    } else if (currentProgress >= 60) {
+                        progressText.textContent = "Sauvegarde des données...";
+                    }
+                }
+            }, 500);
 
             const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/campaign/launch", {
                 method: 'POST',
@@ -2253,25 +2283,34 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
                 },
                 body: JSON.stringify({ doublants: window.doublantsArray })
             });
+            
+            clearInterval(simulateProgress);
+            progressBar.style.width = '100%';
+            progressPercent.textContent = '100%';
+            progressText.textContent = "Campagne lancée avec succès !";
 
             if (response.ok) {
-                alert("Campagne lancée et scores calculés avec succès !");
-                window.doublantsArray = [];
-                window.renderDoublantsList();
-                if (typeof refreshAllData === 'function') {
-                    refreshAllData();
-                }
+                setTimeout(() => {
+                    alert("Campagne lancée et scores calculés avec succès !");
+                    window.doublantsArray = [];
+                    window.renderDoublantsList();
+                    progressContainer.classList.add('hidden');
+                    document.getElementById('campaignLaunchControls').classList.remove('hidden');
+                    if (typeof refreshAllData === 'function') {
+                        refreshAllData();
+                    }
+                }, 500);
             } else {
                 const err = await response.json();
                 alert("Erreur: " + (err.detail || "Impossible de lancer la campagne"));
+                progressContainer.classList.add('hidden');
+                document.getElementById('campaignLaunchControls').classList.remove('hidden');
             }
         } catch (e) {
             console.error("Erreur lancement campagne", e);
             alert("Erreur lors du lancement de la campagne.");
-        } finally {
-            const btn = document.getElementById('btnLaunchCampaign');
-            btn.disabled = false;
-            btn.textContent = "Ouvrir la campagne & Calculer les scores";
+            document.getElementById('campaignProgressContainer').classList.add('hidden');
+            document.getElementById('campaignLaunchControls').classList.remove('hidden');
         }
     };
 
@@ -2321,15 +2360,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             if (response.ok) {
                 window.assignedStudentsList = await response.json();
 
-                const select = document.getElementById('validationStudentSelect');
-                select.innerHTML = '<option value="">Sélectionnez un étudiant...</option>';
-                window.assignedStudentsList.forEach(student => {
-                    const opt = document.createElement('option');
-                    opt.value = student.id_assignment; // On se base sur id_assignment
-                    opt.textContent = `${student.id_etudiant} - ${student.nom} ${student.prenom}`;
-                    select.appendChild(opt);
-                });
-                document.getElementById('validationStudentDetails').classList.add('hidden');
+
 
                 if (typeof Chart !== 'undefined') {
                     window.renderEtape3Chart();
@@ -2337,50 +2368,6 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             }
         } catch (error) {
             console.error("Erreur chargement des affectations", error);
-        }
-    };
-
-    window.onValidationStudentChange = function () {
-        const select = document.getElementById('validationStudentSelect');
-        const id_assignment = select.value;
-        const detailsDiv = document.getElementById('validationStudentDetails');
-
-        if (!id_assignment) {
-            detailsDiv.classList.add('hidden');
-            return;
-        }
-
-        const student = window.assignedStudentsList.find(s => s.id_assignment == id_assignment);
-        if (student) {
-            document.getElementById('vsNom').textContent = `${student.nom} ${student.prenom}`;
-            document.getElementById('vsFiliere').textContent = student.nom_filiere;
-            document.getElementById('vsUniversity').textContent = student.university_name;
-
-            const badge = document.getElementById('vsStatusBadge');
-
-            const btnAccept = document.getElementById('btnForceAccept');
-            const btnDecline = document.getElementById('btnForceDecline');
-            const btnPending = document.getElementById('btnForcePending');
-
-            btnAccept.style.display = '';
-            btnDecline.style.display = '';
-            btnPending.style.display = '';
-
-            if (student.status === 'accepted') {
-                badge.textContent = 'Accepté';
-                badge.className = 'px-2 py-0.5 rounded text-xs font-bold text-white bg-green-500';
-                btnAccept.style.display = 'none';
-            } else if (student.status === 'declined') {
-                badge.textContent = 'Refusé';
-                badge.className = 'px-2 py-0.5 rounded text-xs font-bold text-white bg-red-500';
-                btnDecline.style.display = 'none';
-            } else {
-                badge.textContent = 'En attente';
-                badge.className = 'px-2 py-0.5 rounded text-xs font-bold text-white bg-amber-500';
-                btnPending.style.display = 'none';
-            }
-
-            detailsDiv.classList.remove('hidden');
         }
     };
 
@@ -2405,10 +2392,9 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             });
 
             if (response.ok) {
-                alert("Statut mis à jour avec succès.");
-                window.fetchAssignedStudents();
+                window.fetchAssignedStudents(); // Met à jour le graphe
                 if (typeof refreshAllData === 'function') {
-                    refreshAllData();
+                    refreshAllData(); // Met à jour la liste des étudiants
                 }
             } else {
                 alert("Erreur lors de la mise à jour.");
@@ -2416,21 +2402,6 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         } catch (error) {
             alert("Erreur de connexion.");
         }
-    };
-
-    window.updateAssignmentStatusUI = function (new_status) {
-        const id_assignment = document.getElementById('validationStudentSelect').value;
-        if (!id_assignment) return;
-
-        let actionStr = "";
-        if (new_status === 'accepted') actionStr = "l'acceptation";
-        else if (new_status === 'declined') actionStr = "le refus";
-        else actionStr = "la remise en attente";
-
-        window.requireConfirmation(
-            `Vous êtes sur le point de forcer ${actionStr} de cette affectation.`,
-            () => window.updateAssignmentStatusExec(id_assignment, new_status)
-        );
     };
 
     window.chartEtape3 = null;
