@@ -45,14 +45,7 @@ CREATE TABLE `MOB_assignment` (
     CONSTRAINT `FK_assignment_semestre` FOREIGN KEY (`id_semestre`) REFERENCES `LNM_semestre` (`id_semestre`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- ALTER TABLE `MOB_partner_university`
---    ADD `important` TEXT NULL,
---    ADD `commentaire` TEXT NULL,
---    ADD `criteres_academiques` TEXT NULL,
---    ADD `integration_et_vie_sociale` TEXT NULL,
---    ADD `logement_et_vie_quotidienne` TEXT NULL,
---    ADD `organisation_et_demarches` TEXT NULL,
---    ADD `experience_globale` TEXT NULL;
+
 
 -- Ajout du faux choix pour les stages
 INSERT INTO `MOB_partner_university` 
@@ -60,24 +53,14 @@ INSERT INTO `MOB_partner_university`
 VALUES 
     ('Polytech Annecy-Chambery', 'MOB_STAGE', 45.919731, 6.157739, '5 chemin de Bellevue, 74940 Annecy-le-Vieux', 'France', 'francais','stage');
 
--- -----------------------------------------------------------------------
--- Capacités de référence par semestre (entrées de l'algorithme)
--- et colonnes de suivi des places restantes (persistance après calcul)
--- -----------------------------------------------------------------------
-
--- Ajout de S8_remaining_places et S9_remaining_places
 ALTER TABLE `MOB_partner_university`
     ADD `S8_remaining_places` INT NULL AFTER `S9_total_places`,
     ADD `S9_remaining_places` INT NULL AFTER `S8_remaining_places`;
 
--- Ajout de remaining_places dans MOB_partner_university_places
--- (nombre de places par spécialité restantes après le calcul)
+
 ALTER TABLE `MOB_partner_university_places`
     ADD `remaining_places` INT NULL AFTER `number_of_places`;
 
--- -----------------------------------------------------------------------
--- Quotas de départ par filière et par année scolaire
--- -----------------------------------------------------------------------
 CREATE TABLE `MOB_filiere_quotas` (
     `id_quota` INT NOT NULL AUTO_INCREMENT,
     `id_filiere` INT NOT NULL,

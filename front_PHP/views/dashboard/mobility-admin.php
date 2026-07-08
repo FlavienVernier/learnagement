@@ -1495,6 +1495,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             return;
         }
         await refreshAllData();
+        window.alert('Université mise à jour avec succès !');
     };
 
     function refreshKpis() {
@@ -1669,6 +1670,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
         document.getElementById('addUniversityPanel').classList.add('hidden');
         await refreshAllData();
+        window.alert('Université créée avec succès !');
         resetAddUniversityForm();
     };
 

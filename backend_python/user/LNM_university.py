@@ -1277,12 +1277,12 @@ def export_admin_places(
                 u.country,
                 IFNULL(u.S8_total_places, 0) AS S8_total,
                 IFNULL(u.S9_total_places, 0) AS S9_total,
-                IFNULL(u.S8_remaining_places, IFNULL(u.S8_total_places, 0)) AS S8_restant,
-                IFNULL(u.S9_remaining_places, IFNULL(u.S9_total_places, 0)) AS S9_restant,
+                IFNULL(u.S8_total_places, 0) AS S8_restant,
+                IFNULL(u.S9_total_places, 0) AS S9_restant,
                 f.nom_filiere,
                 pr.annee,
                 pl.number_of_places AS filiere_total,
-                IFNULL(pl.remaining_places, pl.number_of_places) AS filiere_restant
+                pl.number_of_places AS filiere_restant
             FROM MOB_partner_university u
             LEFT JOIN MOB_partner_university_places pl ON u.id_partner_university = pl.id_partner_university
             LEFT JOIN LNM_promo pr ON pl.id_promo = pr.id_promo
