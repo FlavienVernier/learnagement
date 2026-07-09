@@ -255,6 +255,10 @@ async def get_current_active_user(
     #    raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
+
+#######################
+# Permissions
+
 def has_role(role_required: str):
     async def check_role(
         current_user: Annotated[User, Depends(get_current_user)],
@@ -266,6 +270,37 @@ def has_role(role_required: str):
     return check_role
 
 
+def has_responsabilite(user, type_objet: str, scope: dict) -> bool:
+    """
+    scope = dict de dimensions requises, ex: {"filiere": "IDU", "niveau": "FI4"}
+
+    Logique de subsomption :
+      - type_objet 'all' couvre tout
+      - une dimension absente en BD = wildcard (couvre toutes les valeurs)
+      - une dimension présente en BD doit matcher exactement le scope demandé
+      - une responsabilité avec MOINS de dimensions que le scope est plus large → couvre
+    """
+    for responsability in user.responsabilites:
+
+        # type_objet doit matcher ou être 'all'
+        if responsability["type_objet"] not in (type_objet, "all"):
+            continue
+
+        # Chaque dimension définie en BD doit être satisfaite par le scope
+        # (les dimensions absentes en BD sont des wildcards)
+        match = all(
+            scope.get(dim) == val
+            for dim, val in responsability["dimensions"].items()
+        )
+
+        if match:
+            return True
+
+    return False
+
+
+##############################
+# Request API
 
 def db_request(requester: User, request: SQLRequest):
     if not "anonymous" in request.allowedRolesRequester:
@@ -309,6 +344,9 @@ def db_request(requester: User, request: SQLRequest):
             connection.close()
     #return json.dumps([dict(ix) for ix in rows]) # return string
     return [dict(ix) for ix in rows] # return list that will be converted to json
+
+
+###################################
 
 def main():
     return True
