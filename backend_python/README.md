@@ -68,3 +68,82 @@ requests = {
         ),
     },
 }
+
+
+
+
+# Architecture du projet
+
+```
+project/
+│
+├── app/                          # package principal
+│   ├── __init__.py
+│   ├── main.py                   # création de l'app FastAPI, inclusion des routers
+│   │
+│   ├── core/                     # configuration transversale
+│   │   ├── __init__.py
+│   │   ├── config.py             # settings (pydantic BaseSettings, .env)
+│   │   ├── security.py           # JWT, hashing, tokens
+│   │   └── logging.py            # configuration du logger
+│   │
+│   ├── db/                       # couche base de données
+│   │   ├── __init__.py
+│   │   ├── connection.py         # pool de connexions
+│   │   └── migrations/           # alembic ou scripts SQL
+│   │
+│   ├── models/                   # modèles de données
+│   │   ├── __init__.py
+│   │   ├── user.py               # UserInDB, User, UserCreate...
+│   │   └── ...
+│   │
+│   ├── schemas/                  # modèles Pydantic entrée/sortie API
+│   │   ├── __init__.py
+│   │   ├── user.py               # UserResponse, UserCreate...
+│   │   └── ...
+│   │
+│   ├── repositories/             # accès aux données (requêtes SQL/ORM)
+│   │   ├── __init__.py
+│   │   ├── user.py               # get_user_by_id, create_user...
+│   │   └── ...
+│   │
+│   ├── services/                 # logique métier
+│   │   ├── __init__.py
+│   │   ├── auth.py               # login, logout, token
+│   │   └── ...
+│   │
+│   ├── api/                      # endpoints FastAPI
+│   │   ├── __init__.py
+│   │   ├── dependencies.py       # Depends() partagés (get_current_user...)
+│   │   └── v1/                   # versioning
+│   │       ├── __init__.py
+│   │       ├── router.py         # agrège tous les routers v1
+│   │       ├── auth.py
+│   │       ├── users.py
+│   │       └── ...
+│   │
+│   └── access_control/           # module de contrôle d'accès
+│       ├── __init__.py
+│       ├── types.py
+│       ├── responsabilites.py
+│       ├── rules.py
+│       └── checker.py
+│
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py               # fixtures partagées (user mock, db test...)
+│   ├── test_access_control/
+│   │   └── test_rules.py
+│   ├── test_api/
+│   │   └── test_auth.py
+│   └── test_services/
+│       └── test_auth.py
+│
+├── .env
+├── .env.example
+├── pytest.ini
+├── requirements.txt
+├── requirements-dev.txt
+├── Dockerfile
+└── docker-compose.yml
+```

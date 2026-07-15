@@ -1,7 +1,7 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
-from typing import Annotated, Any, Dict, List, Optional
+from typing import Annotated, Any, Dict, List
 import time
 
 assignment_progress = {
@@ -11,7 +11,9 @@ assignment_progress = {
     "error": None
 }
 
-from dependencies import db_request, get_current_active_user, User, SQLRequest
+from api.dependencies import db_request, get_current_active_user
+from models.request import SQLRequest
+from models.user import User
 
 logger = logging.getLogger(__name__)
 

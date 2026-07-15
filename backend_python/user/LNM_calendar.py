@@ -1,8 +1,10 @@
 import logging
-from typing import Annotated, List
+from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from dependencies import SQLRequest, db_request, get_current_active_user, User
+from api.dependencies import db_request, get_current_active_user
+from models.request import SQLRequest
+from models.user import User
 
 router = APIRouter()
 

@@ -1,13 +1,11 @@
-import os
-import dotenv
 import logging
-import json
 import inspect
 
 from fastapi import APIRouter, Depends
 from typing import Annotated
-from dependencies import db_request, get_current_active_user, User, SQLRequest
-
+from api.dependencies import db_request, get_current_active_user
+from models.request import SQLRequest
+from models.user import User
 
 logger = logging.getLogger(__name__)
 

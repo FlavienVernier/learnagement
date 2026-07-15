@@ -3,84 +3,16 @@ import inspect
 
 from fastapi import APIRouter, Depends
 from typing import Annotated
-from pydantic import BaseModel
 
-from dependencies import db_request, get_current_active_user, User, SQLRequest
+from api.dependencies import db_request, get_current_active_user
+from models.request import SQLRequest
+from models.user import User
+from repositories.LNM_filiere_requests import requests
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-requests = {
-    "get_filieres" : {
-        "request" : """
-                        SELECT LNM_filiere.*, ExplicitSecondaryKs_LNM_filiere.ExplicitSecondaryK
-                        FROM LNM_filiere
-                        JOIN ExplicitSecondaryKs_LNM_filiere ON ExplicitSecondaryKs_LNM_filiere.id_filiere = LNM_filiere.id_filiere
-                    """,
-        "allowedRolesRequester" : ["connected_user"],
-    },
-    "get_statuts" : {
-        "request" : """
-                        SELECT LNM_statut.*, ExplicitSecondaryKs_LNM_statut.ExplicitSecondaryK
-                        FROM LNM_statut
-                        JOIN ExplicitSecondaryKs_LNM_statut ON ExplicitSecondaryKs_LNM_statut.id_statut = LNM_statut.id_statut
-                    """,
-        "allowedRolesRequester" : ["connected_user"],
-    },
-    "get_groupe_types" : {
-        "request" : """
-                        SELECT LNM_groupe_type.*, ExplicitSecondaryKs_LNM_groupe_type.ExplicitSecondaryK
-                        FROM LNM_groupe_type
-                        JOIN ExplicitSecondaryKs_LNM_groupe_type ON ExplicitSecondaryKs_LNM_groupe_type.id_groupe_type = LNM_groupe_type.id_groupe_type;
-                    """,
-        "allowedRolesRequester" : ["connected_user"],
-    },
-    "get_seance_types" : {
-        "request" : """
-                        SELECT LNM_seance_type.*, ExplicitSecondaryKs_LNM_seance_type.ExplicitSecondaryK
-                        FROM LNM_seance_type
-                        JOIN ExplicitSecondaryKs_LNM_seance_type ON ExplicitSecondaryKs_LNM_seance_type.id_seance_type = LNM_seance_type.id_seance_type;
-                    """,
-        "allowedRolesRequester" : ["connected_user"],
-    },
-    "get_dags" : {
-        "request" : """
-                        SELECT 
-                            LNM_filiere.nom_filiere, 
-                            LNM_filiere.nom_long, 
-                            LNM_promo.annee, 
-                            LNM_statut.nom_statut, 
-                            MAQUETTE_learning_unit.learning_unit_code, 
-                            MAQUETTE_learning_unit.learning_unit_name, 
-                            MAQUETTE_module.code_module, 
-                            MAQUETTE_module.nom, 
-                            APC_apprentissage_critique.libelle_apprentissage, 
-                            APC_niveau.niveau, APC_niveau.libelle_niveau, 
-                            APC_competence.code_competence, 
-                            APC_competence.libelle_competence
-                        FROM LNM_filiere
-                                 JOIN LNM_promo ON LNM_promo.id_filiere = LNM_filiere.id_filiere
-                                 JOIN LNM_statut ON LNM_statut.id_statut = LNM_promo.id_statut
-                                 JOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_promo = LNM_promo.id_promo
-                                 JOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_learning_unit = MAQUETTE_learning_unit.id_learning_unit
-                                 JOIN MAQUETTE_module ON MAQUETTE_module.id_module = MAQUETTE_module_as_learning_unit.id_module
-                                 JOIN APC_apprentissage_critique_as_module ON APC_apprentissage_critique_as_module.id_module = MAQUETTE_module.id_module
-                                 JOIN APC_apprentissage_critique ON APC_apprentissage_critique.id_apprentissage_critique = APC_apprentissage_critique_as_module.id_apprentissage_critique
-                                 JOIN APC_niveau ON APC_niveau.id_niveau = APC_apprentissage_critique.id_niveau
-                                 JOIN APC_competence ON APC_competence.id_competence = APC_niveau.id_competence
-                    """,
-        "allowedRolesRequester" : ["anonymous"],
-    },
-    "get_promos" : {
-        "request" : """
-                        SELECT LNM_promo.`id_promo`, ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK AS promo
-                        FROM `LNM_promo`
-                        JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_promo.id_promo;
-                    """,
-        "allowedRolesRequester" : ["connected_user"],
-    },
-}
 
 @router.get("/filieres/",
             tags=["filiere"],
@@ -131,6 +63,36 @@ def dags(
 ):
     request = requests["get_" + inspect.currentframe().f_code.co_name]
     return db_request(None, SQLRequest(**request))
+
+
+@router.get("/filieres/stages",
+            tags=["filiere", "internship"],
+            summary="Filiere",
+            description="Return the list of filieres")
+def stages(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = requests["get_" + inspect.currentframe().f_code.co_name]
+
+    # Résolution de id_filiere :
+    # 1. Si l'user a une responsabilité stage avec une dimension filiere → on l'utilise
+    # 2. Sinon on utilise "id_filiere"
+    stage_resp = next(
+        (r for r in current_user.responsibilities if r["type_objet"] in ("stage", "all") and "filiere" in r["dimensions"]),
+        None
+    )
+    id_filiere = stage_resp["dimensions"]["filiere"] \
+                    if stage_resp \
+                    else "id_filiere"
+
+    request["params"] = request["params"](id_filiere) \
+                            if callable(request["params"]) \
+                            else request["params"]
+    request["allowedRolesRequester"] = request["allowedRolesRequester"](id_filiere) \
+                                        if callable(request["allowedRolesRequester"]) \
+                                        else request["allowedRolesRequester"]
+    print(request, flush=True)
+    return db_request(current_user, SQLRequest(**request))
 
 @router.get("/promos/",
             tags=["filiere"],

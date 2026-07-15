@@ -16,22 +16,12 @@ def _responsabilite_covers(stored: dict, required: Responsabilite) -> bool:
         for dim, val in stored["dimensions"].items()
     )
 
-
-def has_one_responsabilite(user, required: Responsabilite) -> bool:
-    """
-    L'utilisateur doit avoir AU MOINS UNE responsabilité couvrant 'required'.
-    """
-    return any(
-        _responsabilite_covers(r, required)
-        for r in user.responsabilites
-    )
-
 def has_any_of_responsabilites(user, required_list: list[Responsabilite]) -> bool:
     """
     L'utilisateur doit couvrir AU MOINS UNE des responsabilités de la liste.
     """
     return any(
-        has_one_responsabilite(user, required)
+        any(_responsabilite_covers(stored, required) for stored in user.responsabilites)
         for required in required_list
     )
 
@@ -40,7 +30,7 @@ def has_all_responsabilites(user, required_list: list[Responsabilite]) -> bool:
     L'utilisateur doit avoir UNE responsabilité couvrant CHACUNE des entrées.
     """
     return all(
-        has_one_responsabilite(user, required)
+        has_any_of_responsabilites(user, [required])
         for required in required_list
     )
 
@@ -57,9 +47,8 @@ def has_hierarchy_responsabilites(user, ordered_list: list[Responsabilite]) -> b
         return False
 
     for i, required in enumerate(ordered_list):
-        if not has_one_responsabilite(user, required):
-            # On s'arrête : le préfixe jusqu'à i-1 était valide
-            return i > 0  # True si au moins R1 était satisfait
+        if not has_any_of_responsabilites(user, [required]):
+            return i > 0
 
     return True  # toute la hiérarchie est satisfaite
 

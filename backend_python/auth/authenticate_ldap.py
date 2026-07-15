@@ -5,7 +5,8 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from dependencies import logger, get_user, Token
+from api.dependencies import logger, get_user
+from models.token import Token
 from auth.authenticate_tools import create_access_token
 
 dotenv.load_dotenv(".env")

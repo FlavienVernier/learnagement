@@ -1,12 +1,14 @@
 import os
 import mysql.connector
 
-from fastapi import APIRouter, Depends, HTTPException, status, Header
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import HTTPException, status, Header
 from typing import Annotated, Optional
 from pydantic import BaseModel
 
-from dependencies import logger, db_connexion, get_user, Token
+from api.dependencies import logger, get_user
+from db.connection import db_connexion
+from models.token import Token
+
 
 # --- Schéma pour le provisionnement CAS ---
 class CasUserProvision(BaseModel):

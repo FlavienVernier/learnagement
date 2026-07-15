@@ -1,13 +1,13 @@
 from access_control.types import AccessRule
 from access_control.responsabilites import (
-    has_one_responsabilite,
+    has_any_of_responsabilites,
     has_all_responsabilites,
     has_hierarchy_responsabilites,
     parse_responsabilite,
 )
 
 
-def evaluate_rule(rule: AccessRule, user, params: dict) -> bool:
+def evaluate_rule(rule: AccessRule, user, params: dict | None) -> bool:
     """
     Point d'entrée principal. Évalue si user satisfait la règle d'accès.
     Résout d'abord les lambdas, puis dispatche selon le type de règle.
@@ -63,7 +63,7 @@ def _evaluate_dict(rule: dict, user, params: dict) -> bool:
 
     Clés supportées :
       "roles"     → list[str]  : au moins un rôle
-      "one"       → list[dict] : au moins une responsabilité
+      "any"       → list[dict] : au moins une des responsabilités
       "all"       → list[dict] : toutes les responsabilités
       "hierarchy" → list[dict] : préfixe valide de la hiérarchie
     """
@@ -72,9 +72,9 @@ def _evaluate_dict(rule: dict, user, params: dict) -> bool:
 
     evaluators = {
         "roles":     lambda v: _evaluate_role_list(v, user),
-        "one":       lambda v: has_one_responsabilite(
+        "any":       lambda v: has_any_of_responsabilites(
                                    user,
-                                   parse_responsabilite(v)
+                                   [parse_responsabilite(r) for r in v]
                                ),
         "all":       lambda v: has_all_responsabilites(
                                    user,

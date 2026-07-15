@@ -5,14 +5,13 @@ from unittest.mock import MagicMock
 from access_control.types import Responsabilite
 from access_control.responsabilites import (
     _responsabilite_covers,
-    has_one_responsabilite,
     has_all_responsabilites,
     has_hierarchy_responsabilites,
-    parse_responsabilite,
     has_any_of_responsabilites,
 )
 from access_control.rules import evaluate_rule
 from access_control.checker import check_access
+from models.request import SQLRequest
 from fastapi import HTTPException
 
 
@@ -40,7 +39,7 @@ def make_required(type_objet: str, **dims) -> Responsabilite:
 # _responsabilite_covers
 # ─────────────────────────────────────────────
 
-class TestResponsabilitéCovers:
+class TestResponsibilityCovers:
 
     def test_wildcard_vide_ne_couvre_pas(self):
         """
@@ -116,46 +115,50 @@ class TestResponsabilitéCovers:
 
 
 # ─────────────────────────────────────────────
-# has_one_responsabilite
+# has_any_of_responsabilites
 # ─────────────────────────────────────────────
 
-class TestHasOneResponsabilite:
+class TestHasAnyOfResponsabilite:
 
     def test_user_sans_responsabilite(self):
         user = make_user(responsabilites=[])
-        required = make_required("stage", filiere="IDU")
+        required = [
+            make_required("stage", filiere="IDU")
+        ]
 
-        assert has_one_responsabilite(user, required) is False
+        assert has_any_of_responsabilites(user, required) is False
 
     def test_user_avec_responsabilite_couvrant(self):
         user = make_user(responsabilites=[
             make_stored("stage", {"filiere": "IDU"})
         ])
-        required = make_required("stage", filiere="IDU", niveau="FI4")
+        required = [
+            make_required("stage", filiere="IDU", niveau="FI4")
+        ]
 
-        assert has_one_responsabilite(user, required) is True
+        assert has_any_of_responsabilites(user, required) is True
 
     def test_user_avec_plusieurs_dont_une_couvre(self):
         user = make_user(responsabilites=[
             make_stored("stage", {"filiere": "SEA"}),
             make_stored("stage", {"filiere": "IDU"}),
         ])
-        required = make_required("stage", filiere="IDU", niveau="FI4")
+        required = [
+            make_required("stage", filiere="IDU", niveau="FI4")
+        ]
 
-        assert has_one_responsabilite(user, required) is True
+        assert has_any_of_responsabilites(user, required) is True
 
     def test_user_avec_responsabilites_aucune_ne_couvre(self):
         user = make_user(responsabilites=[
             make_stored("stage", {"filiere": "SEA"}),
             make_stored("semestre", {"filiere": "IDU", "semestre": "S8"}),
         ])
-        required = make_required("stage", filiere="IDU")
-        
-        assert has_one_responsabilite(user, required) is False
+        required = [
+            make_required("stage", filiere="IDU")
+        ]
 
-# ─────────────────────────────────────────────
-# has_any_of_responsabilites
-# ─────────────────────────────────────────────
+        assert has_any_of_responsabilites(user, required) is False
 
     def test_user_couvre_au_moins_une_parmi_plusieurs_required(self):
         user = make_user(responsabilites=[
@@ -283,18 +286,18 @@ class TestEvaluateRule:
         user = make_user(type_role="administratif")
         assert evaluate_rule({"roles": ["administratif"]}, user, {}) is True
 
-    def test_dict_one_satisfait(self):
+    def test_dict_any_satisfait(self):
         user = make_user(responsabilites=[
             make_stored("stage", {"filiere": "IDU"})
         ])
-        rule = {"one": {"type_objet": "stage", "filiere": "IDU"}}
+        rule = {"any": [{"type_objet": "stage", "filiere": "IDU"}]}
         assert evaluate_rule(rule, user, {}) is True
 
-    def test_dict_one_non_satisfait(self):
+    def test_dict_any_non_satisfait(self):
         user = make_user(responsabilites=[
             make_stored("stage", {"filiere": "SEA"})
         ])
-        rule = {"one": {"type_objet": "stage", "filiere": "IDU"}}
+        rule = {"any": [{"type_objet": "stage", "filiere": "IDU"}]}
         assert evaluate_rule(rule, user, {}) is False
 
     def test_dict_all_satisfait(self):
@@ -315,7 +318,7 @@ class TestEvaluateRule:
         ])
         rule = {
             "roles": ["administratif"],
-            "one":   {"type_objet": "stage", "filiere": "IDU"},
+            "any":   [{"type_objet": "stage", "filiere": "IDU"}],
         }
         assert evaluate_rule(rule, user, {}) is True
 
@@ -349,36 +352,24 @@ class TestCheckAccess:
     def setup_method(self):
         self.requests = {
             "get_public": {
-                "requete": "SELECT 1",
-                "params": [],
+                "request": "SELECT 1",
+                "params": {},
                 "allowedRolesRequester": "anonymous",
             },
             "get_admin_only": {
-                "requete": "SELECT 1",
-                "params": [],
+                "request": "SELECT 1",
+                "params": {},
                 "allowedRolesRequester": ["administratif"],
-            },
-            "sans_regle": {
-                "requete": "SELECT 1",
-                "params": [],
             },
         }
 
     def test_acces_autorise(self):
-        check_access("get_public", {}, None, self.requests)  # ne lève pas
+        request = SQLRequest.model_validate(self.requests["get_public"])
+        check_access(request, None)  # ne lève pas d'exception
 
     def test_acces_refuse_leve_403(self):
+        request = SQLRequest.model_validate(self.requests["get_admin_only"])
         user = make_user(type_role="etudiant")
         with pytest.raises(HTTPException) as exc:
-            check_access("get_admin_only", {}, user, self.requests)
+            check_access(request, user)
         assert exc.value.status_code == 403
-
-    def test_requete_inconnue_leve_404(self):
-        with pytest.raises(HTTPException) as exc:
-            check_access("inexistant", {}, None, self.requests)
-        assert exc.value.status_code == 404
-
-    def test_regle_manquante_leve_500(self):
-        with pytest.raises(HTTPException) as exc:
-            check_access("sans_regle", {}, None, self.requests)
-        assert exc.value.status_code == 500

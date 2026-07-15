@@ -1,10 +1,12 @@
-import os
 import dotenv
-import logging
-import json
 
-import sqlalchemy
 import mysql.connector
+from db.connection import db_connexion
+from models.request import SQLRequest
+from models.token import TokenData
+from models.user import User, UserInDB
+from core.security import SECRET_KEY, ALGORITHM, oauth2_scheme
+from core.logging import logger
 
 from typing import Annotated
 
@@ -12,44 +14,12 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 
 from fastapi import Header, HTTPException, Depends, status
-from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s:%(funcName)s:%(lineno)d - %(message)s')
+from access_control.checker import check_access
 
-logger = logging.getLogger(__name__)
 
-dotenv.load_dotenv(".env")
 
-SECRET_KEY = os.getenv("INSTANCE_SECRET")
-ALGORITHM = "HS256"
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-class TokenData(BaseModel):
-    mail: str | None = None
-
-class User(BaseModel):
-    id: int
-    prenom: str
-    nom: str
-    mail: str | None = None
-    ExplicitSecondaryK: str
-    main_role: str
-    roles: list = []
-    password2update: bool = False
-
-class UserInDB(User):
-    password: str
-
-class SQLRequest(BaseModel):
-    request: str
-    params: dict | None = None
-    allowedRolesRequester: list[str]
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+dotenv.load_dotenv("../.env")
 
 async def get_token_header(x_token: Annotated[str, Header()]):
     if x_token != "fake-super-secret-token":
@@ -60,18 +30,6 @@ async def get_query_token(token: str):
     if token != "jessica":
         raise HTTPException(status_code=400, detail="No Jessica token provided")
 
-def db_connexion():
-    try:
-        db_info={
-            "host": os.getenv("MYSQL_SERVER"),
-            "user": os.getenv("MYSQL_USER_LOGIN"),
-            "port": int(os.getenv("MYSQL_PORT")),
-            "password": os.getenv("MYSQL_USER_PASSWORD"),
-            "database": os.getenv("MYSQL_DB"),}
-        return db_info
-    except Exception as e:
-        logger.exception(e)
-        raise e
 
 def get_administratif(user_login: str, method: str = "byMail"):
     if method == "byMail":
@@ -144,12 +102,30 @@ def get_enseignant(user_login: str, method: str = "byMail"):
         cursor.execute(
             f"""SELECT LNM_role.role 
                         FROM LNM_enseignant 
-                        JOIN LNM_enseignant_as_role on LNM_enseignant_as_role.id_enseignant = LNM_enseignant.id_enseignant
+                        JOIN LNM_enseignant_as_role ON LNM_enseignant_as_role.id_enseignant = LNM_enseignant.id_enseignant
                         JOIN LNM_role on LNM_role.id_role = LNM_enseignant_as_role.id_role
                         WHERE {login_field} = %s""",
             (user_login,))
         roles = cursor.fetchall()
         user_dict["roles"] += [item for t in roles for item in t]
+
+        connection = mysql.connector.connect(**db_connexion())
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute(
+            f"""
+                SELECT 
+                    LNM_enseignant_responsabilites.id_enseignant_responsabilites,
+                    LNM_enseignant_responsabilites.type_objet,
+                    LNM_enseignant_responsabilite_dimensions.dimension,
+                    LNM_enseignant_responsabilite_dimensions.valeur
+                FROM LNM_enseignant_responsabilites
+                JOIN LNM_enseignant ON LNM_enseignant.id_enseignant = LNM_enseignant_responsabilites.id_enseignant
+                LEFT JOIN LNM_enseignant_responsabilite_dimensions ON LNM_enseignant_responsabilite_dimensions.id_enseignant_responsabilites = LNM_enseignant_responsabilites.id_enseignant_responsabilites
+                WHERE {login_field} = %s""",
+            (user_login,))
+        responsibilities = cursor.fetchall()
+        user_dict["responsibilities"] = load_enseignant_responsibilities(responsibilities)
+
         return UserInDB(**user_dict)
     return None
 
@@ -197,6 +173,28 @@ def get_user(user_login: str, method: str = "byMail"):
         logger.error(f"Logging error with login: {user_login}, with method: {method}")
 
     return user
+
+
+
+def load_enseignant_responsibilities(rows: list[dict]) -> list[dict]:
+    """
+    Transforme les lignes SQL à plat en liste de responsabilités avec
+    leurs dimensions sous forme de dict.
+    """
+    print(rows)
+
+    resp_map = {}
+    for row in rows:
+        rid = row["id_enseignant_responsabilites"]
+        if rid not in resp_map:
+            resp_map[rid] = {
+                "type_objet": row["type_objet"],
+                "dimensions": {}   # { "filiere": "IDU", "niveau": "FI4", ... }
+            }
+        if row["dimension"]:  # LEFT JOIN → peut être NULL si aucune dimension
+            resp_map[rid]["dimensions"][row["dimension"]] = row["valeur"]
+
+    return list(resp_map.values())
 
 # ToDo Utiliser get_user_cached dans get_current_user en interface entre get_current_user et get_user pour avoir un cache Redis et limiter les requesters SQL relative à l'utilisateur
 # import redis
@@ -303,11 +301,11 @@ def has_responsabilite(user, type_objet: str, scope: dict) -> bool:
 # Request API
 
 def db_request(requester: User, request: SQLRequest):
-    if not "anonymous" in request.allowedRolesRequester:
-        # check if there is no intersection between requester roles and request allowed roles
-        if not bool(set(requester.roles) & set(request.allowedRolesRequester)):
-            logger.error(f"User {requester.id} hasn't role {request.allowedRolesRequester}")
-            raise HTTPException(status_code=403, detail="Unauthorized access")
+    # vérification via le système de règles
+    check_access(
+        request=request,
+        user=requester,
+    )
 
     if requester:
         logger.info(f"User {requester.id} has role {requester.roles} requests {request}")

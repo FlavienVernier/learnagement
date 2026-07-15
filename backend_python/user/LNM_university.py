@@ -6,10 +6,12 @@ import io
 import openpyxl
 from datetime import datetime
 from typing import Annotated
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 from pydantic import BaseModel, Field
 
-from dependencies import db_request, get_current_active_user, User, SQLRequest
+from api.dependencies import db_request, get_current_active_user
+from models.request import SQLRequest
+from models.user import User
 
 logger = logging.getLogger(__name__)
 
