@@ -274,7 +274,7 @@ crossorigin=""/>
         const wishes = await fetchWishes();
         wishedUniversities.clear();
         wishes.forEach((wish) => {
-            wishedUniversities.set(wish.id_partner_university, wish);
+            wishedUniversities.set(`${wish.id_partner_university}-${wish.id_semestre}`, wish);
         });
     }
     await refreshWishesFromServer();
@@ -331,35 +331,35 @@ crossorigin=""/>
                     <span class="font-semibold text-lg text-gray-800">${index + 1}</span>
                     <div class="flex items-center justify-between gap-2 w-full">
                         <div class="cursor-pointer flex-1 hover:text-primary transition-colors" onclick="window.flyToUniversity('${wish.id_partner_university}')" title="Voir sur la carte">
-                            <p class="text-sm text-gray-800"><strong class="font-semibold">${escapeHtml(wish.name)}</strong> (${escapeHtml(wish.code)})</p>
+                            <p class="text-sm text-gray-800"><strong class="font-semibold">[S${escapeHtml(wish.id_semestre)}] ${escapeHtml(wish.name)}</strong> (${escapeHtml(wish.code)})</p>
                             <p class="text-xs text-gray-600">${escapeHtml(wish.country)}</p>
                         </div>
                         <div class="flex items-center gap-1 ${isSubmitted ? 'hidden' : ''}">
                             <button
                                 type="button"
-                                onclick="window.moveWish(${wish.id_partner_university}, 'up')"
+                                onclick="window.moveWish(${wish.id_partner_university}, ${wish.id_semestre}, 'up')"
                                 ${(index === 0) ? 'disabled' : ''}
-                                class="h-7 w-7 text-base font-semibold text-gray-700 opacity-55 transition-opacity hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-20"
-                                title="Monter"
+                                class="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:hover:bg-transparent transition"
+                                title="Monter le voeu"
                             >
-                                ↑
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
                             </button>
                             <button
                                 type="button"
-                                onclick="window.moveWish(${wish.id_partner_university}, 'down')"
+                                onclick="window.moveWish(${wish.id_partner_university}, ${wish.id_semestre}, 'down')"
                                 ${(index === wishes.length - 1) ? 'disabled' : ''}
-                                class="h-7 w-7 text-base font-semibold text-gray-700 opacity-55 transition-opacity hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-20"
-                                title="Descendre"
+                                class="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:hover:bg-transparent transition"
+                                title="Descendre le voeu"
                             >
-                                ↓
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
                             </button>
                             <button
                                 type="button"
-                                onclick="window.deleteWish(${wish.id_partner_university})"
-                                class="h-7 w-7 text-base font-semibold text-gray-700 opacity-55 transition duration-150 hover:text-red-600 hover:opacity-100"
-                                title="Supprimer"
+                                onclick="window.deleteWish(${wish.id_partner_university}, ${wish.id_semestre})"
+                                class="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition ml-1"
+                                title="Supprimer le voeu"
                             >
-                                ×
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
                     </div>
@@ -399,7 +399,8 @@ crossorigin=""/>
     }
 
     function popupText(university) {
-        const alreadyInWishes = wishedUniversities.has(university.id_partner_university);
+        const id_semestre = university.annee === 4 ? 8 : 9;
+        const alreadyInWishes = wishedUniversities.has(`${university.id_partner_university}-${id_semestre}`);
         const uid = String(university.id_partner_university);
         // OLD CODE (Buggy: ne gère pas bien undefined ou les chaînes "null"):
         // const isSubmitted = Array.from(wishedUniversities.values()).some(w => w.submission_date !== null);
@@ -460,7 +461,7 @@ crossorigin=""/>
                 ` : `
                     <button
                         type="button"
-                        onclick="window.addUniversityToWishes('${uid}', ${university.id_semestre})"
+                        onclick="window.addUniversityToWishes('${uid}', ${university.annee === 4 ? 8 : 9})"
                         ${alreadyInWishes || wishedUniversities.size >= 5 || isSubmitted ? 'disabled' : ''}
                         class="mt-2 inline-flex items-center rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                     >
@@ -478,7 +479,7 @@ crossorigin=""/>
             return;
         }
 
-        if (wishedUniversities.has(university.id_partner_university)) {
+        if (wishedUniversities.has(`${university.id_partner_university}-${id_semestre}`)) {
             return;
         }
 
@@ -509,11 +510,12 @@ crossorigin=""/>
         }
     }
 
-    async function deleteWish(idPartnerUniversity) {
+    async function deleteWish(idPartnerUniversity, idSemestre) {
         try {
             const deleteEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
                 + "/university/etudiant/" + window.ENV.USER_ID
-                + "/wish/" + idPartnerUniversity;
+                + "/wish/" + idPartnerUniversity
+                + "/semestre/" + idSemestre;
 
             const response = await fetch(deleteEndpoint, {
                 method: 'DELETE',
@@ -535,11 +537,12 @@ crossorigin=""/>
         }
     }
 
-    async function moveWish(idPartnerUniversity, direction) {
+    async function moveWish(idPartnerUniversity, idSemestre, direction) {
         try {
             const moveEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
                 + "/university/etudiant/" + window.ENV.USER_ID
                 + "/wish/" + idPartnerUniversity
+                + "/semestre/" + idSemestre
                 + "/move/" + direction;
 
             const response = await fetch(moveEndpoint, {

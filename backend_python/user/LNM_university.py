@@ -205,7 +205,7 @@ def list_university_wishes_etudiant(
 
     request = {
         "request": """
-                        SELECT w.priority, w.submission_date, u.*
+                        SELECT w.priority, w.submission_date, w.id_semestre, u.*
                         FROM MOB_wishes w
                         JOIN MOB_partner_university u ON u.id_partner_university = w.id_partner_university
                         WHERE w.id_etudiant = %(id_etudiant)s
@@ -232,6 +232,9 @@ def add_university_to_wishes(
     if current_user.id != id_etudiant:
         raise HTTPException(status_code=403, detail="Unauthorized access")
 
+    # Le frontend envoie directement l'id_semestre correspondant au choix
+    id_semestre = payload.get("id_semestre", 8) if payload else 8
+
     # Sécurité : bloquer l'ajout de vœux si la campagne n'est pas encore ouverte
     campaign_check = SQLRequest(
         request="SELECT mobility_z_score FROM LNM_etudiant WHERE id_etudiant = %(id)s",
@@ -247,7 +250,7 @@ def add_university_to_wishes(
                         SELECT
                             COUNT(*) AS wishes_count,
                             COALESCE(MAX(priority), 0) AS max_priority,
-                            COALESCE(SUM(CASE WHEN id_partner_university = %(id_partner_university)s THEN 1 ELSE 0 END), 0) AS already_exists,
+                            COALESCE(SUM(CASE WHEN id_partner_university = %(id_partner_university)s AND id_semestre = %(id_semestre)s THEN 1 ELSE 0 END), 0) AS already_exists,
                             MAX(CASE WHEN submission_date IS NOT NULL THEN 1 ELSE 0 END) AS is_submitted
                         FROM MOB_wishes
                         WHERE id_etudiant = %(id_etudiant)s
@@ -255,6 +258,7 @@ def add_university_to_wishes(
         "params": {
             "id_etudiant": id_etudiant,
             "id_partner_university": id_partner_university,
+            "id_semestre": id_semestre,
         },
         "allowedRolesRequester": ["etudiant"],
     }
@@ -271,12 +275,9 @@ def add_university_to_wishes(
         raise HTTPException(status_code=400, detail="Vous ne pouvez pas ajouter plus de 5 voeux.")
 
     if already_exists > 0:
-        raise HTTPException(status_code=400, detail="Cette universite est deja dans vos voeux.")
+        raise HTTPException(status_code=400, detail="Cette universite est deja dans vos voeux pour ce semestre.")
 
     next_priority = max_priority + 1
-
-    # Le frontend envoie directement l'id_semestre correspondant au choix
-    id_semestre = payload.get("id_semestre", 8) if payload else 8
 
     request = {
         "request": """
@@ -294,13 +295,14 @@ def add_university_to_wishes(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.delete("/university/etudiant/{id_etudiant:int}/wish/{id_partner_university:int}",
+@router.delete("/university/etudiant/{id_etudiant:int}/wish/{id_partner_university:int}/semestre/{id_semestre:int}",
             tags=["mobility"],
             summary="Delete university from wishes",
             description="Delete a partner university from the student's mobility wishes")
 def delete_university_from_wishes(
     id_etudiant: int,
     id_partner_university: int,
+    id_semestre: int,
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     if current_user.id != id_etudiant:
@@ -312,10 +314,12 @@ def delete_university_from_wishes(
                         FROM MOB_wishes
                         WHERE id_etudiant = %(id_etudiant)s
                           AND id_partner_university = %(id_partner_university)s
+                          AND id_semestre = %(id_semestre)s
                     """,
         "params": {
             "id_etudiant": id_etudiant,
             "id_partner_university": id_partner_university,
+            "id_semestre": id_semestre,
         },
         "allowedRolesRequester": ["etudiant"],
     }
@@ -333,10 +337,12 @@ def delete_university_from_wishes(
                         DELETE FROM MOB_wishes
                         WHERE id_etudiant = %(id_etudiant)s
                           AND id_partner_university = %(id_partner_university)s
+                          AND id_semestre = %(id_semestre)s
                     """,
         "params": {
             "id_etudiant": id_etudiant,
             "id_partner_university": id_partner_university,
+            "id_semestre": id_semestre,
         },
         "allowedRolesRequester": ["etudiant"],
     }
@@ -360,13 +366,14 @@ def delete_university_from_wishes(
     return {"message": "Voeu supprime."}
 
 
-@router.post("/university/etudiant/{id_etudiant:int}/wish/{id_partner_university:int}/move/{direction}",
+@router.post("/university/etudiant/{id_etudiant:int}/wish/{id_partner_university:int}/semestre/{id_semestre:int}/move/{direction}",
             tags=["mobility"],
             summary="Move university wish",
             description="Move a wish up or down in the student's priority list")
 def move_university_wish(
     id_etudiant: int,
     id_partner_university: int,
+    id_semestre: int,
     direction: str,
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
@@ -382,10 +389,12 @@ def move_university_wish(
                         FROM MOB_wishes
                         WHERE id_etudiant = %(id_etudiant)s
                           AND id_partner_university = %(id_partner_university)s
+                          AND id_semestre = %(id_semestre)s
                     """,
         "params": {
             "id_etudiant": id_etudiant,
             "id_partner_university": id_partner_university,
+            "id_semestre": id_semestre,
         },
         "allowedRolesRequester": ["etudiant"],
     }
@@ -401,7 +410,7 @@ def move_university_wish(
 
     target_request = {
         "request": """
-                        SELECT id_partner_university
+                        SELECT id_partner_university, id_semestre
                         FROM MOB_wishes
                         WHERE id_etudiant = %(id_etudiant)s
                           AND priority = %(target_priority)s
@@ -417,6 +426,7 @@ def move_university_wish(
         raise HTTPException(status_code=400, detail="Impossible de deplacer ce voeu plus loin.")
 
     target_id_partner_university = int(target_rows[0]["id_partner_university"])
+    target_id_semestre = int(target_rows[0]["id_semestre"])
 
     # Step 1: move current wish to a temporary priority to avoid unique collisions.
     temp_request = {
@@ -425,10 +435,12 @@ def move_university_wish(
                         SET priority = 0
                         WHERE id_etudiant = %(id_etudiant)s
                           AND id_partner_university = %(current_id_partner_university)s
+                          AND id_semestre = %(id_semestre)s
                     """,
         "params": {
             "id_etudiant": id_etudiant,
             "current_id_partner_university": id_partner_university,
+            "id_semestre": id_semestre,
         },
         "allowedRolesRequester": ["etudiant"],
     }
@@ -441,10 +453,12 @@ def move_university_wish(
                         SET priority = %(current_priority)s
                         WHERE id_etudiant = %(id_etudiant)s
                           AND id_partner_university = %(target_id_partner_university)s
+                          AND id_semestre = %(target_id_semestre)s
                     """,
         "params": {
             "id_etudiant": id_etudiant,
             "target_id_partner_university": target_id_partner_university,
+            "target_id_semestre": target_id_semestre,
             "current_priority": current_priority,
         },
         "allowedRolesRequester": ["etudiant"],
@@ -458,11 +472,13 @@ def move_university_wish(
                         SET priority = %(target_priority)s
                         WHERE id_etudiant = %(id_etudiant)s
                           AND id_partner_university = %(current_id_partner_university)s
+                          AND id_semestre = %(id_semestre)s
                           AND priority = 0
                     """,
         "params": {
             "id_etudiant": id_etudiant,
             "current_id_partner_university": id_partner_university,
+            "id_semestre": id_semestre,
             "target_priority": target_priority,
         },
         "allowedRolesRequester": ["etudiant"],
@@ -557,6 +573,7 @@ def list_all_wishes_ri(
                             e.prenom AS etudiant_prenom,
                             e.mail AS etudiant_mail,
                             w.id_wish,
+                            w.id_semestre,
                             w.priority,
                             w.submission_date,
                             u.id_partner_university,

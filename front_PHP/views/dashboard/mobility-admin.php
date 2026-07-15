@@ -1174,11 +1174,12 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
                 const wishName = uni ? uni.name : (wish.university_name || `Universite ${wishId}`);
                 const wishCountry = uni ? uni.country : (wish.university_country || '');
                 const wishCode = uni ? uni.code : (wish.university_code || '');
+                const semesterPrefix = wish.id_semestre ? `[S${wish.id_semestre}] ` : '';
 
                 return `
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-gray-200 bg-white p-3">
                         <div class="min-w-0">
-                            <div class="text-sm font-semibold text-gray-900">#${index + 1} - ${escapeHtml(wishName)}</div>
+                            <div class="text-sm font-semibold text-gray-900">#${index + 1} - ${semesterPrefix}${escapeHtml(wishName)}</div>
                             <div class="text-xs text-gray-500">${escapeHtml(wishCountry)} - ${escapeHtml(wishCode || '')}</div>
                         </div>
                         <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 transition shrink-0" onclick="window.scrollToUniversityOnMap('${escapeHtml(wishId)}')">Voir sur la carte</button>
