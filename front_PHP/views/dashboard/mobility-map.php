@@ -18,15 +18,38 @@
         </div>
     </div>
 
+    <!-- Quota Display (Bottom Left) -->
+    <div id="studentQuotaContainer" class="hidden absolute bottom-6 left-4 z-[1000] bg-white/95 border border-indigo-100 rounded-lg shadow-lg p-4 backdrop-blur-sm pointer-events-none">
+        <p class="text-[10px] uppercase font-bold text-indigo-700 tracking-wide mb-1">Quota - <span id="quotaFiliereName">...</span></p>
+        <div class="flex gap-4">
+            <div class="flex items-center gap-1">
+                <span class="text-xs font-semibold text-indigo-600">S8:</span>
+                <span class="text-sm font-bold text-indigo-900" id="quotaS8Count">-</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <span class="text-xs font-semibold text-indigo-600">S9:</span>
+                <span class="text-sm font-bold text-indigo-900" id="quotaS9Count">-</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Contrôles et panneaux superposés -->
     <div class="absolute top-[10px] left-[55px] z-[1000] flex max-w-[92vw] flex-col items-start gap-2.5">
         <div id="mapControls" class="flex items-center gap-2">
-            <button onclick="document.getElementById('filterForm').classList.toggle('hidden')" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
+            <button onclick="document.getElementById('filterForm').classList.toggle('hidden')"
+                class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
                 Filtres
             </button>
-            <button onclick="document.getElementById('wishesPanel').classList.toggle('hidden')" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
+            <button id="wishesBtn" onclick="document.getElementById('wishesPanel').classList.toggle('hidden')"
+                class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
                 Voeux
             </button>
+            <div id="campaignOpenBadge" class="hidden bg-blue-50 text-blue-800 font-semibold py-2 px-4 border border-blue-200 rounded shadow text-sm flex items-center gap-2 pointer-events-none">
+                <span class="text-blue-500">ℹ️</span> Campagne en cours
+            </div>
+            <div id="wishesSubmittedBadge" class="hidden bg-green-50 text-green-800 font-semibold py-2 px-4 border border-green-200 rounded shadow text-sm flex items-center gap-2 pointer-events-none">
+                <span class="text-green-500">✅</span> Vœux soumis
+            </div>
         </div>
 
         <form id="filterForm" onsubmit="return false;" class="hidden bg-white p-4 rounded-lg shadow-lg border border-gray-200">
@@ -54,9 +77,24 @@
                 <h2 class="text-sm font-semibold text-gray-800">Mes voeux</h2>
                 <span id="wishesCount" class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">0/5</span>
             </div>
+            <div id="campaignClosedNotice" class="hidden mb-3 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <p class="text-xs font-bold text-amber-800">Inscriptions non disponibles.</p>
+                <p class="text-xs text-amber-700 mt-0.5">La campagne n'est pas encore lancée. Revenez après l'annonce
+                    officielle pour soumettre vos vœux.</p>
+            </div>
             <p id="wishesEmpty" class="text-sm text-gray-500">Aucun voeu pour le moment.</p>
             <ul id="wishesList" class="space-y-2"></ul>
         </aside>
+    </div>
+    <!-- Bannière campagne non ouverte -->
+    <div id="campaignClosedBanner" class="hidden absolute top-3 left-1/2 -translate-x-1/2 z-[1100] w-max max-w-[90vw] pointer-events-none">
+        <div class="bg-white border border-amber-300 rounded-xl shadow-lg px-5 py-3 flex items-center gap-3">
+            <span class="text-amber-500 text-xl">⏳</span>
+            <div>
+                <p class="text-sm font-bold text-gray-800">La procédure de mobilité n'a pas encore commencé.</p>
+                <p class="text-xs text-gray-500 mt-0.5">Vous pouvez explorer les universités. L'inscription aux vœux sera disponible après le lancement officiel de la campagne.</p>
+            </div>
+        </div>
     </div>
 </section>
 <?php $t->endSlot(); ?>
@@ -167,6 +205,44 @@ crossorigin=""/>
         return wishes;
     }
 
+    // Vérifier le statut de la campagne avant tout
+    const campaignStatusUrl = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID + "/campaign-status";
+    let campaignOpen = false;
+    try {
+        const statusRes = await fetch(campaignStatusUrl, {
+            headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+        });
+        if (statusRes.ok) {
+            const statusData = await statusRes.json();
+            campaignOpen = statusData.is_open === true;
+        }
+    } catch (e) {
+        console.error("Impossible de récupérer le statut de la campagne", e);
+    }
+    window.MobilityMapState.campaignOpen = campaignOpen;
+
+    // Afficher la bannière et le message dans le panel vœux si campagne fermée
+    if (campaignOpen) {
+        const badge = document.getElementById('campaignOpenBadge');
+        if (badge) badge.classList.remove('hidden');
+    } else {
+        const banner = document.getElementById('campaignClosedBanner');
+        const notice = document.getElementById('campaignClosedNotice');
+        const wishesEmpty = document.getElementById('wishesEmpty');
+        const wishesList = document.getElementById('wishesList');
+        const wishesCount = document.getElementById('wishesCount');
+        const wishesBtn = document.getElementById('wishesBtn');
+        const wishesPanel = document.getElementById('wishesPanel');
+        
+        if (banner) banner.classList.remove('hidden');
+        if (notice) notice.classList.remove('hidden');
+        if (wishesEmpty) wishesEmpty.classList.add('hidden');
+        if (wishesList) wishesList.classList.add('hidden');
+        if (wishesCount) wishesCount.classList.add('hidden');
+        if (wishesBtn) wishesBtn.classList.add('hidden');
+        if (wishesPanel) wishesPanel.classList.add('hidden');
+    }
+
     const universities = await fetchUniversities();
     const universitiesById = new Map(
         universities.map((u) => [String(u.id_partner_university), u])
@@ -198,7 +274,7 @@ crossorigin=""/>
         const wishes = await fetchWishes();
         wishedUniversities.clear();
         wishes.forEach((wish) => {
-            wishedUniversities.set(wish.id_partner_university, wish);
+            wishedUniversities.set(`${wish.id_partner_university}-${wish.id_semestre}`, wish);
         });
     }
     await refreshWishesFromServer();
@@ -223,7 +299,9 @@ crossorigin=""/>
 
         if (wishes.length === 0) {
             wishesList.innerHTML = '';
-            wishesEmpty.classList.remove('hidden');
+            if (window.MobilityMapState.campaignOpen !== false) {
+                wishesEmpty.classList.remove('hidden');
+            }
             return;
         }
 
@@ -233,6 +311,19 @@ crossorigin=""/>
         // const isSubmitted = wishes.some(w => w.submission_date !== null);
         const isSubmitted = wishes.some(w => Boolean(w.submission_date) && w.submission_date !== 'null' && w.submission_date !== 'None');
 
+        const campaignOpenBadge = document.getElementById('campaignOpenBadge');
+        const wishesSubmittedBadge = document.getElementById('wishesSubmittedBadge');
+
+        if (window.MobilityMapState.campaignOpen !== false) {
+            if (isSubmitted) {
+                if (campaignOpenBadge) campaignOpenBadge.classList.add('hidden');
+                if (wishesSubmittedBadge) wishesSubmittedBadge.classList.remove('hidden');
+            } else {
+                if (campaignOpenBadge) campaignOpenBadge.classList.remove('hidden');
+                if (wishesSubmittedBadge) wishesSubmittedBadge.classList.add('hidden');
+            }
+        }
+
         wishesList.innerHTML = wishes
             .map((wish, index) => `
             <li class="rounded border border-gray-200 bg-gray-50 p-2">
@@ -240,35 +331,35 @@ crossorigin=""/>
                     <span class="font-semibold text-lg text-gray-800">${index + 1}</span>
                     <div class="flex items-center justify-between gap-2 w-full">
                         <div class="cursor-pointer flex-1 hover:text-primary transition-colors" onclick="window.flyToUniversity('${wish.id_partner_university}')" title="Voir sur la carte">
-                            <p class="text-sm text-gray-800"><strong class="font-semibold">${escapeHtml(wish.name)}</strong> (${escapeHtml(wish.code)})</p>
+                            <p class="text-sm text-gray-800"><strong class="font-semibold">[S${escapeHtml(wish.id_semestre)}] ${escapeHtml(wish.name)}</strong> (${escapeHtml(wish.code)})</p>
                             <p class="text-xs text-gray-600">${escapeHtml(wish.country)}</p>
                         </div>
                         <div class="flex items-center gap-1 ${isSubmitted ? 'hidden' : ''}">
                             <button
                                 type="button"
-                                onclick="window.moveWish(${wish.id_partner_university}, 'up')"
+                                onclick="window.moveWish(${wish.id_partner_university}, ${wish.id_semestre}, 'up')"
                                 ${(index === 0) ? 'disabled' : ''}
-                                class="h-7 w-7 text-base font-semibold text-gray-700 opacity-55 transition-opacity hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-20"
-                                title="Monter"
+                                class="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:hover:bg-transparent transition"
+                                title="Monter le voeu"
                             >
-                                ↑
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
                             </button>
                             <button
                                 type="button"
-                                onclick="window.moveWish(${wish.id_partner_university}, 'down')"
+                                onclick="window.moveWish(${wish.id_partner_university}, ${wish.id_semestre}, 'down')"
                                 ${(index === wishes.length - 1) ? 'disabled' : ''}
-                                class="h-7 w-7 text-base font-semibold text-gray-700 opacity-55 transition-opacity hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-20"
-                                title="Descendre"
+                                class="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:hover:bg-transparent transition"
+                                title="Descendre le voeu"
                             >
-                                ↓
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
                             </button>
                             <button
                                 type="button"
-                                onclick="window.deleteWish(${wish.id_partner_university})"
-                                class="h-7 w-7 text-base font-semibold text-gray-700 opacity-55 transition duration-150 hover:text-red-600 hover:opacity-100"
-                                title="Supprimer"
+                                onclick="window.deleteWish(${wish.id_partner_university}, ${wish.id_semestre})"
+                                class="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition ml-1"
+                                title="Supprimer le voeu"
                             >
-                                ×
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
                     </div>
@@ -282,7 +373,7 @@ crossorigin=""/>
                 type="button"
                 onclick="window.submitWishes()"
                 class="mt-3 w-full rounded bg-primary px-3 py-2 text-sm font-semibold text-white cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-400"
-                ${wishes.length < 5 || isSubmitted ? 'disabled' : ''}
+                ${wishes.length < 1 || isSubmitted ? 'disabled' : ''}
             >
                 ${isSubmitted ? 'Voeux soumis' : 'Soumettre mes voeux'}
             </button>
@@ -308,7 +399,8 @@ crossorigin=""/>
     }
 
     function popupText(university) {
-        const alreadyInWishes = wishedUniversities.has(university.id_partner_university);
+        const id_semestre = university.annee === 4 ? 8 : 9;
+        const alreadyInWishes = wishedUniversities.has(`${university.id_partner_university}-${id_semestre}`);
         const uid = String(university.id_partner_university);
         // OLD CODE (Buggy: ne gère pas bien undefined ou les chaînes "null"):
         // const isSubmitted = Array.from(wishedUniversities.values()).some(w => w.submission_date !== null);
@@ -362,10 +454,14 @@ crossorigin=""/>
                     ` : `
                         <div class="mt-3 text-xs font-semibold p-2 rounded text-center bg-red-50 text-red-700 border border-red-200">Affectation refusée</div>
                     `)
-                : `
+                : window.MobilityMapState.campaignOpen === false ? `
+                    <div class="mt-2 inline-flex items-center gap-1.5 rounded bg-gray-100 border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-500 cursor-not-allowed">
+                        <span>⏳</span> Disponible après le lancement de la campagne
+                    </div>
+                ` : `
                     <button
                         type="button"
-                        onclick="window.addUniversityToWishes('${uid}')"
+                        onclick="window.addUniversityToWishes('${uid}', ${university.annee === 4 ? 8 : 9})"
                         ${alreadyInWishes || wishedUniversities.size >= 5 || isSubmitted ? 'disabled' : ''}
                         class="mt-2 inline-flex items-center rounded bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                     >
@@ -376,14 +472,14 @@ crossorigin=""/>
         `;
     }
 
-    async function addUniversityToWishes(universityId) {
+    async function addUniversityToWishes(universityId, id_semestre) {
         const university = universitiesById.get(String(universityId));
         if (!university) {
             console.error('Universite introuvable pour id:', universityId);
             return;
         }
 
-        if (wishedUniversities.has(university.id_partner_university)) {
+        if (wishedUniversities.has(`${university.id_partner_university}-${id_semestre}`)) {
             return;
         }
 
@@ -397,7 +493,8 @@ crossorigin=""/>
                 headers: {
                     'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({ id_semestre: id_semestre })
             });
 
             if (!response.ok && response.status !== 409) {
@@ -413,11 +510,12 @@ crossorigin=""/>
         }
     }
 
-    async function deleteWish(idPartnerUniversity) {
+    async function deleteWish(idPartnerUniversity, idSemestre) {
         try {
             const deleteEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
                 + "/university/etudiant/" + window.ENV.USER_ID
-                + "/wish/" + idPartnerUniversity;
+                + "/wish/" + idPartnerUniversity
+                + "/semestre/" + idSemestre;
 
             const response = await fetch(deleteEndpoint, {
                 method: 'DELETE',
@@ -439,11 +537,12 @@ crossorigin=""/>
         }
     }
 
-    async function moveWish(idPartnerUniversity, direction) {
+    async function moveWish(idPartnerUniversity, idSemestre, direction) {
         try {
             const moveEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
                 + "/university/etudiant/" + window.ENV.USER_ID
                 + "/wish/" + idPartnerUniversity
+                + "/semestre/" + idSemestre
                 + "/move/" + direction;
 
             const response = await fetch(moveEndpoint, {
@@ -616,8 +715,36 @@ crossorigin=""/>
         map.addLayer(markers);
     }
 
+    const fetchStudentQuota = async () => {
+        const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID + "/quota?annee_scolaire=2025-2026";
+        try {
+            const response = await fetch(url, { headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` } });
+            if (response.ok) {
+                const data = await response.json();
+                if (data) {
+                    const container = document.getElementById('studentQuotaContainer');
+                    if (container) container.classList.remove('hidden');
+                    
+                    const filiereNameEl = document.getElementById('quotaFiliereName');
+                    if (filiereNameEl) filiereNameEl.innerText = data.filiere || 'Filière';
+                    
+                    const s8El = document.getElementById('quotaS8Count');
+                    if (s8El) s8El.innerText = data.S8 ?? 0;
+                    
+                    const s9El = document.getElementById('quotaS9Count');
+                    if (s9El) s9El.innerText = data.S9 ?? 0;
+                }
+            }
+        } catch (e) {
+            console.error("Erreur quota", e);
+        }
+    };
+
     window.updateMap = updateMap; // Pour pouvoir appeler depuis le PHP
     renderWishesList();
+    if (campaignOpen && !assignment) {
+        fetchStudentQuota();
+    }
     updateMap();
     if (assignment) {
         // Cacher les contrôles inutiles si affecté

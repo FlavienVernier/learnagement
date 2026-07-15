@@ -11,44 +11,64 @@
         </div>
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <article class="block rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:shadow-md transition">
+            <article
+                class="block rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:shadow-md transition">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-sm font-medium text-gray-600">Dossiers soumis</span>
                     <span class="bg-blue-100 p-2 rounded-lg">
-                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
                     </span>
                 </div>
                 <div id="kpiStudents" class="text-4xl font-extrabold text-gray-900">0</div>
                 <div class="mt-1 text-xs">Étudiants ayant validé leurs voeux</div>
             </article>
 
-            <article class="block rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:shadow-md transition">
+            <article
+                class="block rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:shadow-md transition">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-sm font-medium text-gray-600">Dossiers incomplets</span>
                     <span class="bg-indigo-100 p-2 rounded-lg">
-                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
                     </span>
                 </div>
                 <div id="kpiIncomplete" class="text-4xl font-extrabold text-indigo-600">0</div>
                 <div class="mt-1 text-xs">Dossiers non encore soumis</div>
             </article>
 
-            <article class="block rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:shadow-md transition">
+            <article
+                class="block rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:shadow-md transition">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-sm font-medium text-gray-600">Universites ciblées</span>
                     <span class="bg-green-100 p-2 rounded-lg">
-                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5l9-3 9 3-9 3-9-3zm0 7l9 3 9-3m-18 7l9 3 9-3"/></svg>
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 5l9-3 9 3-9 3-9-3zm0 7l9 3 9-3m-18 7l9 3 9-3" />
+                        </svg>
                     </span>
                 </div>
                 <div id="kpiUniversities" class="text-4xl font-extrabold text-green-600">0</div>
                 <div class="mt-1 text-xs">Destinations distinctes demandées</div>
             </article>
 
-            <article class="block rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:shadow-md transition">
+            <article
+                class="block rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:shadow-md transition">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-sm font-medium text-gray-600">Dépots récents</span>
                     <span class="bg-yellow-100 p-2 rounded-lg">
-                        <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                     </span>
                 </div>
                 <div id="kpiRecent" class="text-4xl font-extrabold text-yellow-600">0</div>
@@ -56,63 +76,34 @@
             </article>
         </div>
 
-        <div class="rounded-2xl border mb-6">
-            <div class="p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                <div class="relative w-full lg:w-96">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    </div>
-                    <input id="wishesSearch" type="search"
-                        placeholder="Rechercher un etudiant, email ou universite..."
-                        class="border text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5"/>
-                </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <label for="dossierStatusFilter" class="text-xs font-semibold uppercase tracking-wide text-gray-500">Filtre dossier</label>
-                    <select id="dossierStatusFilter" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                        <option value="tous">Tous</option>
-                        <option value="complet">Complet</option>
-                        <option value="incomplet">Incomplet</option>
-                        <option value="recent">Recent (7 jours)</option>
-                    </select>
-                    <button id="resetDashboardFilters" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
-                        Reinitialiser
-                    </button>
-                    <span id="wishesResultsCount" class="text-sm">0 resultat</span>
-                </div>
-            </div>
-        </div>
         <div class="mb-4 flex flex-wrap gap-4">
-            <button onclick="window.openProcedureModal()" class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 hover:shadow transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <button onclick="window.openProcedureModal()"
+                class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 hover:shadow transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
                 Centre de Contrôle : Procédure
             </button>
-            <button onclick="window.toggleDiagnostics()" class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition">
-                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+            <button onclick="window.toggleDiagnostics()"
+                class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition">
+                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                </svg>
                 Diagnostique & Statistiques
             </button>
-        </div>
-
-        <!-- Modal replaced the inline panel. The button is kept. -->
-
-        <div class="rounded-2xl border overflow-hidden mb-8">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left">
-                    <thead class="text-xs uppercase border-b bg-primary text-on-primary">
-                        <tr>
-                            <th class="px-6 py-4 font-semibold">Etudiant</th>
-                            <th class="px-6 py-4 font-semibold">Date soumission</th>
-                            <th class="px-6 py-4 font-semibold">Statut</th>
-                            <th class="px-6 py-4 font-semibold">Nombre de voeux</th>
-                            <th class="px-6 py-4 font-semibold text-right">Details</th>
-                        </tr>
-                    </thead>
-                    <tbody id="wishesTableBody" class="divide-y divide-gray-500">
-                        <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-500">Chargement des dossiers...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <button onclick="window.toggleWishesModal()"
+                class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition">
+                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                Liste des Vœux Étudiants
+            </button>
         </div>
     </div>
 
@@ -121,16 +112,19 @@
 
         <div class="absolute top-[10px] left-[55px] z-[1000] flex max-w-[92vw] flex-col items-start gap-2.5">
             <div class="flex items-center gap-2">
-                <button onclick="document.getElementById('filterForm').classList.toggle('hidden')" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
+                <button onclick="document.getElementById('filterForm').classList.toggle('hidden')"
+                    class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
                     Filtres carte
                 </button>
             </div>
 
-            <form id="filterForm" onsubmit="return false;" class="hidden bg-white p-4 rounded-lg shadow-lg border border-gray-200">
+            <form id="filterForm" onsubmit="return false;"
+                class="hidden bg-white p-4 rounded-lg shadow-lg border border-gray-200">
                 <div class="flex flex-wrap justify-center items-center gap-4">
                     <div class="flex flex-col">
                         <label for="semestreSelect" class="text-xs font-semibold text-gray-600 mb-1">Semestre</label>
-                        <select name="semestre" id="semestreSelect" onchange="updateMap()" class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary min-w-24">
+                        <select name="semestre" id="semestreSelect" onchange="updateMap()"
+                            class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary min-w-24">
                             <option value="Tous">Tous</option>
                             <option value="S8">S8</option>
                             <option value="S9">S9</option>
@@ -138,7 +132,8 @@
                     </div>
                     <div class="flex flex-col">
                         <label for="filiereSelect" class="text-xs font-semibold text-gray-600 mb-1">Filiere</label>
-                        <select name="filiere" id="filiereSelect" onchange="updateMap()" class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary min-w-48">
+                        <select name="filiere" id="filiereSelect" onchange="updateMap()"
+                            class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary min-w-48">
                             <option value="toutes">Toutes</option>
                         </select>
                     </div>
@@ -147,7 +142,9 @@
                             <label for="noteMinRange" class="text-xs font-semibold text-gray-600">Note minimale</label>
                             <span id="noteMinValue" class="text-xs font-bold text-gray-700">20</span>
                         </div>
-                        <input type="range" name="notemin" id="noteMinRange" min="0" max="20" value="20" class="w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary" oninput="document.getElementById('noteMinValue').innerText = this.value; updateMap()">
+                        <input type="range" name="notemin" id="noteMinRange" min="0" max="20" value="20"
+                            class="w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                            oninput="document.getElementById('noteMinValue').innerText = this.value; updateMap()">
                     </div>
                 </div>
             </form>
@@ -172,19 +169,26 @@
         <div id="addUniversityPanel" class="hidden p-4 border-b bg-gray-50">
             <div class="mb-3 flex items-center justify-between">
                 <h3 class="text-sm font-semibold text-gray-800">Nouvelle université partenaire</h3>
-                <button id="cancelAddUniversityBtn" type="button" class="text-xs px-3 py-1.5 rounded bg-gray-200 text-gray-700 hover:bg-gray-300">Annuler</button>
+                <button id="cancelAddUniversityBtn" type="button"
+                    class="text-xs px-3 py-1.5 rounded bg-gray-200 text-gray-700 hover:bg-gray-300">Annuler</button>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-3">
-                <input id="newUniName" type="text" placeholder="Nom de l'université *" class="border rounded px-3 py-2 text-sm" />
+                <input id="newUniName" type="text" placeholder="Nom de l'université *"
+                    class="border rounded px-3 py-2 text-sm" />
                 <input id="newUniCountry" type="text" placeholder="Pays *" class="border rounded px-3 py-2 text-sm" />
                 <input id="newUniCode" type="text" placeholder="Code" class="border rounded px-3 py-2 text-sm" />
-                <input id="newUniAddress" type="text" placeholder="Adresse" class="border rounded px-3 py-2 text-sm lg:col-span-2" />
+                <input id="newUniAddress" type="text" placeholder="Adresse"
+                    class="border rounded px-3 py-2 text-sm lg:col-span-2" />
                 <input id="newUniWebsite" type="url" placeholder="Site web" class="border rounded px-3 py-2 text-sm" />
-                <input id="newUniLanguages" type="text" placeholder="Langues (ex: Anglais, Espagnol)" class="border rounded px-3 py-2 text-sm lg:col-span-2" />
+                <input id="newUniLanguages" type="text" placeholder="Langues (ex: Anglais, Espagnol)"
+                    class="border rounded px-3 py-2 text-sm lg:col-span-2" />
                 <div class="grid grid-cols-3 gap-2 lg:col-span-1">
-                    <input id="newUniLatitude" type="number" step="0.000001" placeholder="Latitude" class="border rounded px-3 py-2 text-sm" />
-                    <input id="newUniLongitude" type="number" step="0.000001" placeholder="Longitude" class="border rounded px-3 py-2 text-sm" />
-                    <input id="newUniNoteMin" type="number" step="0.01" min="0" max="20" placeholder="Note min" class="border rounded px-3 py-2 text-sm" />
+                    <input id="newUniLatitude" type="number" step="0.000001" placeholder="Latitude"
+                        class="border rounded px-3 py-2 text-sm" />
+                    <input id="newUniLongitude" type="number" step="0.000001" placeholder="Longitude"
+                        class="border rounded px-3 py-2 text-sm" />
+                    <input id="newUniNoteMin" type="number" step="0.01" min="0" max="20" placeholder="Note min"
+                        class="border rounded px-3 py-2 text-sm" />
                 </div>
                 <select id="newUniType" class="border rounded px-3 py-2 text-sm">
                     <option value="ERASMUS">ERASMUS</option>
@@ -192,16 +196,37 @@
                 </select>
             </div>
 
-            <div class="rounded border bg-white p-3">
-                <div class="mb-2 flex items-center justify-between">
-                    <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-600">Places par filière / semestre</h4>
-                    <button id="addNewUniPlaceRowBtn" type="button" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300">Ajouter une ligne</button>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <div class="rounded border bg-white p-3">
+                    <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-2">Semestre 8 (S8)</h4>
+                    <div class="mb-3">
+                        <label class="text-[10px] uppercase font-semibold text-gray-500 mb-1 block">Places globales S8</label>
+                        <input id="newUniS8Total" type="number" min="0" value="0" class="border rounded px-3 py-1.5 text-sm w-full" />
+                    </div>
+                    <div class="mb-2 flex items-center justify-between">
+                        <span class="text-[10px] uppercase font-semibold text-gray-500">Places par filière (S8)</span>
+                        <button type="button" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300" onclick="window.addNewUniversityPlaceRow(4, 'newUniPlacesRowsS8')">Ajouter une ligne</button>
+                    </div>
+                    <div id="newUniPlacesRowsS8" class="space-y-2"></div>
                 </div>
-                <div id="newUniPlacesRows" class="space-y-2"></div>
+                <div class="rounded border bg-white p-3">
+                    <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-2">Semestre 9 (S9)</h4>
+                    <div class="mb-3">
+                        <label class="text-[10px] uppercase font-semibold text-gray-500 mb-1 block">Places globales S9</label>
+                        <input id="newUniS9Total" type="number" min="0" value="0" class="border rounded px-3 py-1.5 text-sm w-full" />
+                    </div>
+                    <div class="mb-2 flex items-center justify-between">
+                        <span class="text-[10px] uppercase font-semibold text-gray-500">Places par filière (S9)</span>
+                        <button type="button" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300" onclick="window.addNewUniversityPlaceRow(5, 'newUniPlacesRowsS9')">Ajouter une ligne</button>
+                    </div>
+                    <div id="newUniPlacesRowsS9" class="space-y-2"></div>
+                </div>
             </div>
 
             <div class="mt-3 flex items-center justify-end gap-2">
-                <button id="saveNewUniversityBtn" type="button" class="text-xs px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700">Créer l'université</button>
+                <button id="saveNewUniversityBtn" type="button"
+                    class="text-xs px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700">Créer
+                    l'université</button>
             </div>
         </div>
         <div class="overflow-x-auto">
@@ -235,232 +260,414 @@
     </div>
 
     <!-- Procedure Modal -->
-    <div id="procedureModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[2000] flex items-center justify-center">
+    <div id="procedureModal"
+        class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[2000] flex items-center justify-center">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-[90vw] xl:max-w-7xl p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-start mb-6">
                 <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
                     Centre de Contrôle : Mobilité
                 </h3>
-                <button onclick="document.getElementById('procedureModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <button onclick="document.getElementById('procedureModal').classList.add('hidden')"
+                    class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
                 </button>
             </div>
-            
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-0">
                 <!-- COLONNE 1 -->
                 <div class="space-y-6 lg:border-r lg:border-gray-200 lg:pr-8">
 
-                <!-- ETAPE 1 -->
-                <div>
-                    <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2 flex items-center gap-2">
-                        <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 1</span>
-                        Gestion des soumissions
-                    </h4>
-
-                    <!-- Annulation individuelle -->
-                    <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
-                        <h5 class="text-xs font-bold text-gray-700 mb-2">Annulation de soumission individuelle</h5>
-                        <p class="text-[11px] text-gray-500 mb-3">Redonner la main à un étudiant pour modifier ses choix avant la clôture finale.</p>
-                        <select id="resetStudentSelect" onchange="window.onResetStudentChange()" class="w-full text-sm border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 mb-3">
-                            <option value="">Sélectionnez un étudiant...</option>
-                        </select>
-                        <div id="resetStudentDetails" class="hidden bg-white p-3 rounded border text-xs text-gray-600 mb-3">
-                            <p><strong>Nom complet:</strong> <span id="rsName"></span></p>
-                            <p><strong>Email:</strong> <span id="rsEmail"></span></p>
-                            <p><strong>Filière:</strong> <span id="rsFiliere"></span></p>
-                        </div>
-                        <button id="btnResetWishes" onclick="window.resetStudentWishes()" class="hidden inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                            Annuler la soumission
-                        </button>
-                    </div>
-
-                    <h5 class="text-xs font-bold text-gray-700 mb-2">Clôture globale</h5>
-                    <p class="text-xs text-gray-500 mb-3">Verrouille tous les dossiers pour figer les données et force la soumission des vœux incomplets.</p>
-                    <button onclick="window.forceSubmitWishesUI()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        Clôturer les soumissions
-                    </button>
-                </div>
-                
-                <hr class="border-gray-200">
-
-                <!-- ETAPE 2 -->
-                <div>
-                    <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2 flex items-center gap-2">
-                        <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 2</span>
-                        Exécution de l'algorithme
-                    </h4>
-
-                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-100 mb-4">
-                        <h5 class="text-xs font-bold text-gray-700 mb-2">Quotas de mobilité par filière et semestre</h5>
-                        <p class="text-[11px] text-gray-500 mb-3">Indiquez le nombre d'étudiants autorisés à partir en mobilité pour chaque filière et par semestre.</p>
+                    <!-- ETAPE 1 (Refonte) -->
+                    <div class="mb-8">
+                        <h4
+                            class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2 flex items-center gap-2">
+                            <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 1</span>
+                            Préparation et Lancement de la Campagne
+                        </h4>
                         
-                        <div class="flex flex-wrap items-end gap-2 mb-4">
-                            <div class="flex-1 min-w-[120px]">
-                                <label class="block text-[10px] font-bold text-gray-600 mb-1">Filière</label>
-                                <select id="quotaMobilityFiliere" class="w-full text-xs border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="">Chargement...</option>
-                                </select>
-                            </div>
-                            <div class="w-24">
-                                <label class="block text-[10px] font-bold text-gray-600 mb-1">Semestre</label>
-                                <select id="quotaMobilitySemester" class="w-full text-xs border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="8">S8</option>
-                                    <option value="9">S9</option>
-                                </select>
-                            </div>
-                            <div class="w-24">
-                                <label class="block text-[10px] font-bold text-gray-600 mb-1">Places</label>
-                                <input type="number" id="quotaMobilityPlaces" min="0" value="0" class="w-full text-xs border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-                            <button onclick="window.addMobilityQuota()" class="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded transition whitespace-nowrap" style="height: 34px;">
-                                Ajouter
+                        <div class="grid grid-cols-1 gap-3">
+                            <!-- Bouton 1 -->
+                            <button onclick="document.getElementById('quotasModal').classList.remove('hidden')" class="w-full flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 hover:border-indigo-300 transition text-left group">
+                                <div>
+                                    <h5 class="font-bold text-gray-800 group-hover:text-indigo-700 transition">Gestion des Quotas</h5>
+                                    <p class="text-xs text-gray-500 mt-1">Définir le nombre de places pour chaque filière avant le lancement.</p>
+                                </div>
+                                <svg class="w-6 h-6 text-gray-400 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
+
+                            <!-- Bouton 2 -->
+                            <button onclick="document.getElementById('campaignModal').classList.remove('hidden')" class="w-full flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 hover:border-green-300 transition text-left group">
+                                <div>
+                                    <h5 class="font-bold text-gray-800 group-hover:text-green-700 transition">Lancement de la campagne & Redoublants</h5>
+                                    <p class="text-xs text-gray-500 mt-1">Gérer les étudiants doublants et ouvrir la campagne de mobilité.</p>
+                                </div>
+                                <svg class="w-6 h-6 text-gray-400 group-hover:text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
+
+                            <!-- Bouton 3 -->
+                            <button onclick="window.forceSubmitWishesUI()"
+                                class="w-full mt-2 px-4 py-3 bg-red-600 text-white rounded-lg shadow-sm text-sm font-bold hover:bg-red-700 transition flex justify-center items-center gap-2">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                Clôturer l'étape 1 (Fermer les soumissions)
                             </button>
                         </div>
-                        
-                        <div id="mobilityQuotasList" class="flex flex-col gap-2 max-h-32 overflow-y-auto">
-                            <!-- JS will populate this -->
-                            <div id="mobilityQuotasEmpty" class="text-[11px] text-gray-400 italic">Aucun quota défini. L'algorithme n'affectera personne si les quotas sont vides.</div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4" id="assignmentActions">
-                        <button onclick="window.runAssignmentUI()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
-                            Lancer l'affectation automatique
-                        </button>
                     </div>
 
-                    <!-- Progress UI -->
-                    <div id="assignmentProgressContainer" class="hidden mt-4 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-                        <div class="flex justify-between text-xs font-semibold text-gray-700 mb-2">
-                            <span id="assignmentProgressText">Démarrage...</span>
-                            <span id="assignmentProgressPercent">0%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div id="assignmentProgressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    <hr class="border-gray-200">
+
+                    <!-- ETAPE 2 -->
+                    <div>
+                        <h4
+                            class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2 flex items-center gap-2">
+                            <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 2</span>
+                            Exécution de l'algorithme
+                        </h4>
+
+                        <div class="p-4 bg-gray-50 rounded-lg border border-gray-100 mb-4">
+                            <p class="text-xs font-bold text-gray-800 mb-3">L'algorithme utilisera les quotas définis à l'Étape 1 pour répartir les étudiants de 4ème année sur les semestres S8 ou S9 des universités partenaires.</p>
+
+                            <div class="mt-4 flex flex-col gap-4">
+                                <div id="assignmentActions">
+                                    <button onclick="window.runAssignmentUI()"
+                                        class="w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                                        Lancer l'affectation automatique
+                                    </button>
+                                </div>
+                                
+                                <div id="assignmentProgressContainer" class="hidden w-full p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                    <div class="flex justify-between text-xs font-semibold text-gray-700 mb-2">
+                                        <span id="assignmentProgressText">Démarrage...</span>
+                                        <span id="assignmentProgressPercent">0%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                        <div id="assignmentProgressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
                 </div>
 
                 <!-- COLONNE 2 -->
                 <div class="space-y-6 lg:pl-8">
                     <!-- ETAPE 3 -->
-                <div>
-                    <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2 flex items-center gap-2">
-                        <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 3</span>
-                        Validation manuelle des affectations
-                    </h4>
-                    <p class="text-xs text-gray-500 mb-3">Modifiez manuellement le statut d'un étudiant s'il vous confirme sa décision en personne.</p>
-                    
-                    <div class="mb-4 bg-red-50 p-3 rounded border border-red-200 flex justify-between items-center">
-                        <span class="text-xs text-red-800 font-semibold">Clôture globale de la phase d'acceptation :</span>
-                        <button onclick="window.closeAssignmentPhase()" class="px-3 py-1.5 bg-red-600 text-white rounded shadow text-xs font-bold hover:bg-red-700 transition">
-                            Refuser les statuts "en attente"
-                        </button>
-                    </div>
+                    <div>
+                        <h4
+                            class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2 flex items-center gap-2">
+                            <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 3</span>
+                            Validation manuelle des affectations
+                        </h4>
+                        <p class="text-xs text-gray-500 mb-3">Modifiez manuellement le statut d'un étudiant s'il vous
+                            confirme sa décision en personne.</p>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                        <!-- Colonne de gauche : Modification -->
-                        <div>
-                            <div class="mb-4">
-                                <label for="validationStudentSelect" class="block text-xs font-semibold text-gray-700 mb-1">Sélectionnez un étudiant affecté :</label>
-                                <select id="validationStudentSelect" onchange="window.onValidationStudentChange()" class="w-full text-sm border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="">Chargement...</option>
-                                </select>
-                            </div>
 
-                            <div id="validationStudentDetails" class="hidden bg-gray-50 p-3 rounded border border-gray-200 mb-3 text-sm">
-                                <div class="grid grid-cols-2 gap-2 mb-3">
-                                    <p><strong>Nom:</strong> <span id="vsNom"></span></p>
-                                    <p><strong>Filière:</strong> <span id="vsFiliere"></span></p>
-                                    <p class="col-span-2"><strong>Affectation:</strong> <span id="vsUniversity"></span></p>
-                                    <p class="col-span-2 flex flex-wrap items-center gap-2">
-                                        <strong>Statut:</strong> 
-                                        <span id="vsStatusBadge" class="px-2 py-0.5 rounded text-xs font-bold text-white"></span>
-                                    </p>
+
+                        <div class="mb-4">
+                            <!-- Graphe et Export -->
+                            <div
+                                class="bg-gray-50 border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center">
+                                <h4 class="font-bold text-gray-700 mb-2 text-center text-sm">Statut des Affectations
+                                </h4>
+                                <div class="w-full relative h-40 flex justify-center">
+                                    <canvas id="chartEtape3Status"></canvas>
                                 </div>
-                                
-                                <div class="flex flex-col xl:flex-row flex-wrap gap-2">
-                                    <button id="btnForceAccept" onclick="window.updateAssignmentStatusUI('accepted')" class="flex-1 justify-center inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700 transition">
-                                        Forcer l'acceptation
-                                    </button>
-                                    <button id="btnForcePending" onclick="window.updateAssignmentStatusUI('pending')" class="flex-1 justify-center inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-amber-600 rounded hover:bg-amber-700 transition">
-                                        Remettre en attente
-                                    </button>
-                                    <button id="btnForceDecline" onclick="window.updateAssignmentStatusUI('declined')" class="flex-1 justify-center inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700 transition">
-                                        Forcer le refus
-                                    </button>
+                                <div
+                                    class="mt-4 flex gap-3 text-[11px] font-semibold text-indigo-600 flex-wrap justify-center">
+                                    <a href="#" onclick="exportAssignedData('accepted')"
+                                        class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4" />
+                                        </svg> Acceptés</a>
+                                    <a href="#" onclick="exportAssignedData('pending')"
+                                        class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4" />
+                                        </svg> En attente</a>
+                                    <a href="#" onclick="exportAssignedData('declined')"
+                                        class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4" />
+                                        </svg> Refusés</a>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Colonne de droite : Graphe et Export -->
-                        <div class="bg-gray-50 border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center">
-                            <h4 class="font-bold text-gray-700 mb-2 text-center text-sm">Statut des Affectations</h4>
-                            <div class="w-full relative h-40 flex justify-center">
-                                <canvas id="chartEtape3Status"></canvas>
-                            </div>
-                            <div class="mt-4 flex gap-3 text-[11px] font-semibold text-indigo-600 flex-wrap justify-center">
-                                <a href="#" onclick="exportAssignedData('accepted')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> Acceptés</a>
-                                <a href="#" onclick="exportAssignedData('pending')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> En attente</a>
-                                <a href="#" onclick="exportAssignedData('declined')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> Refusés</a>
-                            </div>
+                        <!-- Bouton Cloture Phase d'acceptation deplace a la fin de l'etape 3 -->
+                        <div class="mt-4 flex justify-center">
+                            <button onclick="window.closeAssignmentPhase()"
+                                class="px-4 py-2 bg-red-600 text-white rounded-lg shadow-sm text-sm font-bold hover:bg-red-700 transition">
+                                Clôture de la phase d'acceptation
+                            </button>
                         </div>
                     </div>
-                </div>
 
-                <hr class="border-gray-200">
+                    <hr class="border-gray-200">
 
 
 
                     <!-- ETAPE 4 -->
                     <div>
-                        <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2 flex items-center gap-2">
+                        <h4
+                            class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2 flex items-center gap-2">
                             <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Étape 4</span>
                             Exportation des Résultats
                         </h4>
-                        <p class="text-xs text-gray-500 mb-3">Téléchargez les listes finales pour communication aux universités partenaires.</p>
+                        <p class="text-xs text-gray-500 mb-3">Téléchargez les listes finales pour communication aux
+                            universités partenaires.</p>
                         <div class="flex gap-3">
-                            <button onclick="exportWishes()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            <button onclick="exportWishes()"
+                                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
                                 Vœux (XLSX)
                             </button>
-                            <button onclick="exportAssignments()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            <button onclick="exportAssignments()"
+                                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
                                 Affectations (XLSX)
                             </button>
-                            <button onclick="exportPlaces()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            <button onclick="exportPlaces()"
+                                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
                                 État des places (XLSX)
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="mt-8 flex justify-end">
-                <button onclick="document.getElementById('procedureModal').classList.add('hidden')" class="px-5 py-2 text-sm font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition">Fermer le centre</button>
-            </div>
+
         </div>
     </div>
 
     <!-- Diagnostics Modal -->
-    <div id="diagnosticsModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[2000] flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-5xl p-6 max-h-[95vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-6">
+    <div id="wishesModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[2000] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-[95vw] p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-6">
                 <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
-                    Diagnostique & Statistiques (Telling Story)
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                    Liste des Vœux Étudiants
                 </h3>
-                <button onclick="document.getElementById('diagnosticsModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                <button onclick="window.toggleWishesModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
                 </button>
             </div>
             
+            <div class="rounded-2xl border mb-6">
+                <div class="p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                    <div class="relative w-full lg:w-96">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input id="wishesSearch" type="search" placeholder="Rechercher un étudiant, email ou université..."
+                            class="border text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" />
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <label for="wishesFiliereFilter"
+                            class="text-xs font-semibold uppercase tracking-wide text-gray-500">Filière</label>
+                        <select id="wishesFiliereFilter" class="border border-gray-300 rounded-lg px-3 py-2 text-sm min-w-[150px]">
+                            <option value="toutes">Toutes</option>
+                        </select>
+                        <div class="h-6 w-px bg-gray-300 mx-1 hidden sm:block"></div>
+                        <label for="dossierStatusFilter"
+                            class="text-xs font-semibold uppercase tracking-wide text-blue-600 bg-blue-50 px-2 py-1 rounded">Phase 1: Soumission</label>
+                        <select id="dossierStatusFilter" class="border border-blue-300 bg-blue-50/30 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 min-w-[150px]">
+                            <option value="tous">Tous</option>
+                            <option value="complet">Complet</option>
+                            <option value="incomplet">Incomplet</option>
+                            <option value="retardataire">Retardataire</option>
+                        </select>
+                        <div class="h-6 w-px bg-gray-300 mx-1 hidden sm:block"></div>
+                        <label for="assignmentStatusFilter"
+                            class="text-xs font-semibold uppercase tracking-wide text-purple-600 bg-purple-50 px-2 py-1 rounded">Phase 3: Acceptation</label>
+                        <select id="assignmentStatusFilter" class="border border-purple-300 bg-purple-50/30 rounded-lg px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500 min-w-[150px]">
+                            <option value="tous">Tous</option>
+                            <option value="accepted">Accepté</option>
+                            <option value="declined">Refusé</option>
+                            <option value="pending">En attente</option>
+                            <option value="none">Non affecté</option>
+                        </select>
+                        <button id="resetDashboardFilters" type="button"
+                            class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
+                            Réinitialiser
+                        </button>
+                        <span id="wishesResultsCount" class="text-sm">0 résultat</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rounded-2xl border overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs uppercase border-b bg-primary text-on-primary">
+                            <tr>
+                                <th class="px-6 py-4 font-semibold">Étudiant</th>
+                                <th class="px-6 py-4 font-semibold">N° Étudiant</th>
+                                <th class="px-6 py-4 font-semibold">Filière</th>
+                                <th class="px-6 py-4 font-semibold">Date soumission</th>
+                                <th class="px-6 py-4 font-semibold">Statut de soumission</th>
+                                <th class="px-6 py-4 font-semibold">Nombre de vœux</th>
+                                <th class="px-6 py-4 font-semibold">Acceptation</th>
+                                <th class="px-6 py-4 font-semibold text-right">Détails</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wishesTableBody" class="divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="8" class="px-6 py-12 text-center text-gray-500">Chargement des dossiers...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="quotasModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[2000] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-6">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    Gestion des Quotas de Mobilité
+                </h3>
+                <button onclick="document.getElementById('quotasModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-sm text-gray-600 mb-4">Définissez le nombre d'étudiants autorisés à partir pour chaque filière et semestre.</p>
+                
+                <div class="overflow-x-auto border border-gray-200 rounded-lg shadow-sm mb-6">
+                    <table class="w-full text-sm text-left text-gray-700">
+                        <thead class="text-xs uppercase bg-gray-50 text-gray-600 border-b border-gray-200">
+                            <tr>
+                                <th class="px-4 py-3 font-bold w-1/2">Filière</th>
+                                <th class="px-4 py-3 font-bold text-center">Places S8</th>
+                                <th class="px-4 py-3 font-bold text-center">Places S9</th>
+                            </tr>
+                        </thead>
+                        <tbody id="quotasGridBody" class="divide-y divide-gray-100">
+                            <tr>
+                                <td colspan="3" class="px-4 py-8 text-center text-gray-400 italic">Chargement des filières...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                    <button onclick="document.getElementById('quotasModal').classList.add('hidden')" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg shadow-sm hover:bg-gray-50 transition">
+                        Retour au Centre de Contrôle
+                    </button>
+                    <button onclick="window.saveMobilityQuotas()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Enregistrer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="campaignModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[2000] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-7xl p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-6">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    Lancement de la campagne & Redoublants
+                </h3>
+                <button onclick="document.getElementById('campaignModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-sm font-bold text-gray-800 mb-3">Saisissez l'ID des étudiants doublants et leur Moyenne Centrée Réduite manuellement avant de lancer la campagne.</p>
+                <div class="flex gap-2 mb-3">
+                    <input type="number" id="doublantEtudiantId" placeholder="ID Étudiant" class="w-1/2 text-sm border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <input type="number" step="0.01" id="doublantZScore" placeholder="Moyenne C. Réduite" class="w-1/2 text-sm border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <button type="button" onclick="window.addDoublantToList()" class="mb-3 w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition">Ajouter à la liste</button>
+                
+                <div class="flex justify-between items-center mb-2 mt-4 hidden" id="doublantsHeader">
+                    <h5 class="text-sm font-bold text-gray-700">Liste des doublants ajoutés</h5>
+                    <div class="flex items-center gap-2">
+                        <div id="doublantsFiliereCounters" class="flex flex-wrap gap-2 justify-end"></div>
+                        <span class="bg-gray-100 text-gray-800 text-xs font-bold px-2.5 py-1 rounded shadow-sm border border-gray-200" id="doublantsCount">0 total</span>
+                    </div>
+                </div>
+                <ul id="doublantsList" class="text-sm text-gray-600 mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-[32rem] overflow-y-auto p-1"></ul>
+
+                <hr class="border-gray-200 mb-6">
+                
+                <div id="campaignLaunchControls">
+                    <button id="btnLaunchCampaign" onclick="window.launchCampaign()" class="w-full inline-flex justify-center items-center gap-2 px-4 py-3 text-sm font-semibold text-white bg-green-600 rounded-lg shadow hover:bg-green-700 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Ouvrir la campagne & Calculer les scores
+                    </button>
+                </div>
+                
+                <div id="campaignProgressContainer" class="hidden w-full mt-4 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <div class="flex justify-between text-xs font-semibold text-gray-700 mb-2">
+                        <span id="campaignProgressText">Lancement en cours...</span>
+                        <span id="campaignProgressPercent">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="campaignProgressBar" class="bg-green-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="diagnosticsModal"
+        class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-[2000] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-5xl p-6 max-h-[95vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                    </svg>
+                    Diagnostique & Statistiques (Telling Story)
+                </h3>
+                <button onclick="document.getElementById('diagnosticsModal').classList.add('hidden')"
+                    class="text-gray-400 hover:text-gray-600 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Graphe 1 -->
                 <div class="bg-gray-50 border rounded-xl p-4 shadow-sm flex flex-col items-center">
@@ -470,22 +677,49 @@
                         <canvas id="chartGlobalStatus"></canvas>
                     </div>
                     <div class="mt-4 flex gap-4 text-xs font-semibold text-indigo-600">
-                        <a href="#" onclick="exportDiagnosticData('validated')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> Validés</a>
-                        <a href="#" onclick="exportDiagnosticData('remaining')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> Non validés</a>
+                        <a href="#" onclick="exportDiagnosticData('validated')"
+                            class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4" />
+                            </svg> Validés</a>
+                        <a href="#" onclick="exportDiagnosticData('remaining')"
+                            class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4" />
+                            </svg> Non validés</a>
                     </div>
                 </div>
 
                 <!-- Graphe 2 -->
                 <div class="bg-gray-50 border rounded-xl p-4 shadow-sm flex flex-col items-center">
-                    <h4 class="font-bold text-gray-700 mb-2 text-center text-sm">2. Avancement des étudiants à traiter</h4>
-                    <p class="text-xs text-gray-500 mb-4 text-center">Ceux qui n'ont pas encore validé leur mobilité.</p>
+                    <h4 class="font-bold text-gray-700 mb-2 text-center text-sm">2. Avancement des étudiants à traiter
+                    </h4>
+                    <p class="text-xs text-gray-500 mb-4 text-center">Ceux qui n'ont pas encore validé leur mobilité.
+                    </p>
                     <div class="w-full relative h-48 flex justify-center">
                         <canvas id="chartWishesStatus"></canvas>
                     </div>
                     <div class="mt-4 flex gap-3 text-[11px] font-semibold text-indigo-600 flex-wrap justify-center">
-                        <a href="#" onclick="exportDiagnosticData('submitted')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> Soumis</a>
-                        <a href="#" onclick="exportDiagnosticData('in_progress')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> En cours</a>
-                        <a href="#" onclick="exportDiagnosticData('retardataires')" class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4"/></svg> Retardataires</a>
+                        <a href="#" onclick="exportDiagnosticData('submitted')"
+                            class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4" />
+                            </svg> Soumis</a>
+                        <a href="#" onclick="exportDiagnosticData('in_progress')"
+                            class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4" />
+                            </svg> En cours</a>
+                        <a href="#" onclick="exportDiagnosticData('retardataires')"
+                            class="hover:underline flex items-center gap-1"><svg class="w-3 h-3" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4" />
+                            </svg> Retardataires</a>
                     </div>
                 </div>
 
@@ -498,26 +732,34 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="mt-8 flex justify-end">
-                <button onclick="document.getElementById('diagnosticsModal').classList.add('hidden')" class="px-5 py-2 text-sm font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition">Fermer</button>
+                <button onclick="document.getElementById('diagnosticsModal').classList.add('hidden')"
+                    class="px-5 py-2 text-sm font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition">Fermer</button>
             </div>
         </div>
     </div>
     <!-- Confirmation Code Modal -->
-    <div id="confirmActionModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-[3000] flex items-center justify-center p-4">
+    <div id="confirmActionModal"
+        class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-[3000] flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 text-center">
             <h3 class="text-lg font-bold text-red-600 mb-2">Action Critique</h3>
             <p class="text-sm text-gray-600 mb-4" id="confirmActionDescription"></p>
-            
-            <div class="bg-gray-100 p-3 rounded mb-4 font-mono text-xl tracking-[0.2em] font-bold text-gray-800 select-none" id="confirmActionCodeDisplay"></div>
-            
+
+            <div class="bg-gray-100 p-3 rounded mb-4 font-mono text-xl tracking-[0.2em] font-bold text-gray-800 select-none"
+                id="confirmActionCodeDisplay"></div>
+
             <p class="text-xs text-gray-500 mb-2">Veuillez recopier le code ci-dessus pour confirmer :</p>
-            <input type="text" id="confirmActionCodeInput" class="w-full text-center text-lg font-mono border-gray-300 rounded focus:ring-red-500 focus:border-red-500 mb-4 uppercase" placeholder="Entrez le code" autocomplete="off">
-            
+            <input type="text" id="confirmActionCodeInput"
+                class="w-full text-center text-lg font-mono border-gray-300 rounded focus:ring-red-500 focus:border-red-500 mb-4 uppercase"
+                placeholder="Entrez le code" autocomplete="off">
+
             <div class="flex gap-3 justify-center">
-                <button onclick="document.getElementById('confirmActionModal').classList.add('hidden')" class="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-200 hover:bg-gray-300 rounded transition">Annuler</button>
-                <button id="confirmActionButton" class="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded transition opacity-50 cursor-not-allowed" disabled>Confirmer</button>
+                <button onclick="document.getElementById('confirmActionModal').classList.add('hidden')"
+                    class="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-200 hover:bg-gray-300 rounded transition">Annuler</button>
+                <button id="confirmActionButton"
+                    class="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded transition opacity-50 cursor-not-allowed"
+                    disabled>Confirmer</button>
             </div>
         </div>
     </div>
@@ -528,8 +770,7 @@
 <?php $t->startSlot('stylesheet'); ?>
 <!-- Import Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-crossorigin=""/>
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 <link rel="stylesheet" href="/theme/mobility-map.css" />
@@ -538,13 +779,12 @@ crossorigin=""/>
 
 <?php $t->startSlot('script.top'); ?>
 <?php
-    $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY'] ?? '');
+$googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY'] ?? '');
 ?>
 <!-- Import Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin="">
-</script>
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="">
+    </script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <!-- Google Maps API pour Street View interactif -->
@@ -573,14 +813,16 @@ crossorigin=""/>
 <?php $t->startSlot('script.bottom'); ?>
 <script type="module" defer>
     const map = L.map('map').setView([48.85, 2.35], 4);
-    const submittedWishesByStudent = new Map();
     const expandedStudentRows = new Set();
     const expandedUniversityRows = new Set();
     const popupState = new Map();
     const wishesCountByUniversityId = new Map();
+    const submittedWishesByStudent = new Map();
+    const wishesFilieresSet = new Set();
     window.MobilityMapState = {
         popupState,
         submittedWishesByStudent,
+        semesters: [],
     };
 
     // In a flex layout, Leaflet can initialize before final dimensions are settled.
@@ -607,9 +849,23 @@ crossorigin=""/>
                 throw new Error(`Response status: ${response.status}`);
             }
 
-            universities = await response.json();
+            const data = await response.json();
+            if (data && data.universities && data.semesters) {
+                universities = data.universities;
+                window.MobilityMapState.semesters = data.semesters;
+            } else {
+                universities = Array.isArray(data) ? data : [];
+                window.MobilityMapState.semesters = [
+                    { id: 4, label: "S8" },
+                    { id: 5, label: "S9" }
+                ];
+            }
         } catch (error) {
             console.error(error.message);
+            window.MobilityMapState.semesters = [
+                { id: 4, label: "S8" },
+                { id: 5, label: "S9" }
+            ];
         }
 
         return universities;
@@ -648,6 +904,16 @@ crossorigin=""/>
         return Array.from(filieresById.values())
             .sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere)))
             .map((filiere) => `<option value="${escapeHtml(String(filiere.id_filiere))}">${escapeHtml(filiere.nom_filiere || filiere.nom_long || 'Filiere')}</option>`)
+            .join('');
+    }
+
+    function buildSemestreOptionsHtml() {
+        const semesters = window.MobilityMapState.semesters || [
+            { id: 4, label: "S8" },
+            { id: 5, label: "S9" }
+        ];
+        return semesters
+            .map((sem) => `<option value="${escapeHtml(String(sem.id))}">${escapeHtml(sem.label || `S${sem.id}`)}</option>`)
             .join('');
     }
 
@@ -718,23 +984,42 @@ crossorigin=""/>
 
             if (!submittedWishesByStudent.has(wish.id_etudiant)) {
                 submittedWishesByStudent.set(wish.id_etudiant, {
-                    student: { 
-                        id_etudiant: wish.id_etudiant, 
-                        nom: wish.etudiant_nom, 
-                        prenom: wish.etudiant_prenom, 
+                    student: {
+                        id_etudiant: wish.id_etudiant,
+                        nom: wish.etudiant_nom,
+                        prenom: wish.etudiant_prenom,
                         mail: wish.etudiant_mail,
-                        submission_date: wish.submission_date
+                        submission_date: wish.submission_date,
+                        assignment_status: wish.assignment_status,
+                        id_assignment: wish.id_assignment,
+                        filiere_nom: wish.filiere_nom
                     },
                     wishes: []
                 });
+                if (wish.filiere_nom) {
+                    wishesFilieresSet.add(wish.filiere_nom);
+                } else {
+                    wishesFilieresSet.add('Non renseignée');
+                }
             }
-            submittedWishesByStudent.get(wish.id_etudiant).wishes.push(wish);
+            if (wish.id_wish) {
+                submittedWishesByStudent.get(wish.id_etudiant).wishes.push(wish);
+            }
 
             const catalogUniversity = universitiesById.get(String(wish.id_partner_university));
-            if (catalogUniversity) {
+            if (catalogUniversity && wish.id_wish) {
                 catalogUniversity.wishCount = wishesCountByUniversityId.get(String(wish.id_partner_university)) || 0;
             }
         });
+
+        const filiereFilter = document.getElementById('wishesFiliereFilter');
+        if (filiereFilter) {
+            const currentVal = filiereFilter.value;
+            filiereFilter.innerHTML = '<option value="toutes">Toutes</option>' + Array.from(wishesFilieresSet).sort().map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('');
+            if (Array.from(wishesFilieresSet).includes(currentVal)) {
+                filiereFilter.value = currentVal;
+            }
+        }
     }
     async function refreshAllData() {
         const catalogRows = await fetchUniversityCatalog();
@@ -766,11 +1051,15 @@ crossorigin=""/>
         return Array.from(submittedWishesByStudent.values()).map((entry) => {
             const wishes = [...entry.wishes].sort((a, b) => (a.priority || 99) - (b.priority || 99));
             const submissionDate = entry.student.submission_date ? new Date(entry.student.submission_date) : null;
-            const isRecent = submissionDate ? (Date.now() - submissionDate.getTime()) <= (7 * 24 * 60 * 60 * 1000) : false;
             // OLD CODE (Buggy: considérait parfois undefined ou "null" comme true)
             // const isSubmitted = Boolean(entry.student.submission_date);
             const isSubmitted = Boolean(entry.student.submission_date) && entry.student.submission_date !== 'null' && entry.student.submission_date !== 'None';
-            const status = isSubmitted && wishes.length >= 5 ? 'complet' : 'incomplet';
+            let status = 'incomplet';
+            if (isSubmitted && wishes.length >= 1) {
+                status = 'complet';
+            } else if (wishes.length === 0) {
+                status = 'retardataire';
+            }
 
             return {
                 studentId: entry.student.id_etudiant,
@@ -782,7 +1071,9 @@ crossorigin=""/>
                 wishesCount: wishes.length,
                 status,
                 isSubmitted,
-                isRecent,
+                assignmentStatus: entry.student.assignment_status,
+                assignmentId: entry.student.id_assignment,
+                filiere: entry.student.filiere_nom || 'Non renseignée'
             };
         });
     }
@@ -791,10 +1082,20 @@ crossorigin=""/>
         if (status === 'complet') {
             return { label: 'Complet', className: 'bg-green-100 text-green-700' };
         }
+        if (status === 'retardataire') {
+            return { label: 'Retardataire', className: 'bg-red-100 text-red-700' };
+        }
         return { label: 'Incomplet', className: 'bg-yellow-100 text-yellow-700' };
     }
 
-    window.toggleWishDetails = function(studentId) {
+    function assignmentBadge(status) {
+        if (status === 'accepted') return { label: 'Accepté', className: 'bg-green-100 text-green-700' };
+        if (status === 'declined') return { label: 'Refusé', className: 'bg-red-100 text-red-700' };
+        if (status === 'pending') return { label: 'En attente', className: 'bg-yellow-100 text-yellow-700' };
+        return { label: 'Non affecté', className: 'bg-gray-100 text-gray-500' };
+    }
+
+    window.toggleWishDetails = function (studentId) {
         const key = String(studentId);
         if (expandedStudentRows.has(key)) {
             expandedStudentRows.delete(key);
@@ -808,14 +1109,24 @@ crossorigin=""/>
         const body = document.getElementById('wishesTableBody');
         const query = (document.getElementById('wishesSearch').value || '').trim().toLowerCase();
         const statusFilter = document.getElementById('dossierStatusFilter').value;
+        const assignmentStatusFilter = document.getElementById('assignmentStatusFilter') ? document.getElementById('assignmentStatusFilter').value : 'tous';
+        const filiereFilter = document.getElementById('wishesFiliereFilter') ? document.getElementById('wishesFiliereFilter').value : 'toutes';
 
         let rows = getDashboardRows();
 
-        if (statusFilter !== 'tous') {
+        if (filiereFilter !== 'toutes') {
+            rows = rows.filter(row => row.filiere === filiereFilter);
+        }
+
+        if (assignmentStatusFilter !== 'tous') {
             rows = rows.filter((row) => {
-                if (statusFilter === 'recent') return row.isRecent;
-                return row.status === statusFilter;
+                const as = row.assignmentStatus || 'none';
+                return as === assignmentStatusFilter;
             });
+        }
+
+        if (statusFilter !== 'tous') {
+            rows = rows.filter(row => row.status === statusFilter);
         }
 
         if (query) {
@@ -834,23 +1145,20 @@ crossorigin=""/>
             });
         }
 
-        rows.sort((a, b) => {
-            if (!a.submissionDate && !b.submissionDate) return 0;
-            if (!a.submissionDate) return 1;
-            if (!b.submissionDate) return -1;
-            return b.submissionDate - a.submissionDate;
-        });
+        // Le tri personnalisé par date de soumission a été supprimé à la demande de l'utilisateur.
+        // L'ordre d'affichage correspondra désormais strictement à l'ordre renvoyé par la base de données (alphabétique).
 
         const countText = rows.length + ' resultat' + (rows.length > 1 ? 's' : '');
         document.getElementById('wishesResultsCount').innerText = countText;
 
         if (rows.length === 0) {
-            body.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-gray-500">Aucun dossier ne correspond aux filtres.</td></tr>';
+            body.innerHTML = '<tr><td colspan="8" class="px-6 py-12 text-center text-gray-500">Aucun dossier ne correspond aux filtres.</td></tr>';
             return;
         }
 
         const html = rows.map((row) => {
             const badge = statusBadge(row.status);
+            const assignBadge = assignmentBadge(row.assignmentStatus);
             const studentRowKey = String(row.studentId || '');
             const isExpanded = expandedStudentRows.has(studentRowKey);
             const firstWish = row.wishes[0] || null;
@@ -866,11 +1174,12 @@ crossorigin=""/>
                 const wishName = uni ? uni.name : (wish.university_name || `Universite ${wishId}`);
                 const wishCountry = uni ? uni.country : (wish.university_country || '');
                 const wishCode = uni ? uni.code : (wish.university_code || '');
+                const semesterPrefix = wish.id_semestre ? `[S${wish.id_semestre}] ` : '';
 
                 return `
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-gray-200 bg-white p-3">
                         <div class="min-w-0">
-                            <div class="text-sm font-semibold text-gray-900">#${index + 1} - ${escapeHtml(wishName)}</div>
+                            <div class="text-sm font-semibold text-gray-900">#${index + 1} - ${semesterPrefix}${escapeHtml(wishName)}</div>
                             <div class="text-xs text-gray-500">${escapeHtml(wishCountry)} - ${escapeHtml(wishCode || '')}</div>
                         </div>
                         <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 transition shrink-0" onclick="window.scrollToUniversityOnMap('${escapeHtml(wishId)}')">Voir sur la carte</button>
@@ -891,11 +1200,29 @@ crossorigin=""/>
                             </div>
                         </div>
                     </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-700">${escapeHtml(row.studentId || '-')}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-700 font-medium">${escapeHtml(row.filiere || '-')}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-gray-600">${escapeHtml(row.submissionDateText)}</td>
                     <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${badge.className}">${badge.label}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${badge.className}">${badge.label}</span>
+                            ${row.isSubmitted ? `<button type="button" class="inline-flex items-center justify-center px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border border-red-200 rounded text-xs font-semibold transition shadow-sm" onclick="window.resetStudentWishes('${escapeHtml(row.studentId)}')" title="Annuler la soumission">Annuler</button>` : ''}
+                        </div>
                     </td>
                     <td class="px-6 py-4 text-gray-900 font-semibold">${row.wishesCount}/5</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${assignBadge.className}">${assignBadge.label}</span>
+                            ${row.assignmentId ? `
+                                <select class="text-xs border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 bg-gray-50 py-1" onchange="if(this.value) window.updateAssignmentStatusExec('${escapeHtml(row.assignmentId)}', this.value); this.value=''">
+                                    <option value="" disabled selected>Modifier</option>
+                                    <option value="accepted">Accepter</option>
+                                    <option value="declined">Refuser</option>
+                                    <option value="pending">En attente</option>
+                                </select>
+                            ` : ''}
+                        </div>
+                    </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center justify-end gap-2">
                             <button type="button" class="inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 transition" onclick="window.toggleWishDetails('${escapeHtml(studentRowKey)}')" aria-label="Afficher les voeux">
@@ -906,7 +1233,7 @@ crossorigin=""/>
                 </tr>
                 ${isExpanded ? `
                 <tr class="bg-gray-50">
-                    <td colspan="5" class="px-6 py-4">
+                    <td colspan="8" class="px-6 py-4">
                         <div class="space-y-2">
                             ${wishRows || '<div class="text-sm text-gray-500">Aucun voeu enregistre.</div>'}
                         </div>
@@ -946,16 +1273,23 @@ crossorigin=""/>
             const key = String(u.rowKey);
             const isExpanded = expandedUniversityRows.has(key);
             const wishesCount = wishesCountByUniversityId.get(String(u.id_partner_university || '')) || 0;
-            const filiereRows = (u.filieres || []).map((f, index) => {
+            const s8Filieres = (u.filieres || []).filter(f => Number(f.annee) === 4);
+            const s9Filieres = (u.filieres || []).filter(f => Number(f.annee) === 5);
+
+            const renderFiliereRow = (f) => {
+                const index = u.filieres.indexOf(f);
                 const filiereText = f.nom_filiere || f.nom_long || `Filiere ${f.id_filiere}`;
                 return `
-                    <div class="grid grid-cols-1 lg:grid-cols-[2fr_1fr_auto] gap-2 items-center rounded border border-gray-200 bg-white p-2">
-                        <div class="text-xs text-gray-700">${escapeHtml(filiereText)} - ${escapeHtml(getSemesterLabel(f.annee))}</div>
+                    <div class="grid grid-cols-[2fr_1fr_auto] gap-2 items-center rounded border border-gray-200 bg-white p-2">
+                        <div class="text-xs text-gray-700">${escapeHtml(filiereText)}</div>
                         <input type="number" min="0" value="${escapeHtml(String(f.number_of_places ?? 0))}" class="border rounded px-2 py-1 text-xs" onchange="window.updateUniversityPlace('${escapeHtml(key)}', ${index}, this.value)" />
                         <button type="button" class="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100" onclick="window.removeUniversityPlace('${escapeHtml(key)}', ${index})">Supprimer</button>
                     </div>
                 `;
-            }).join('');
+            };
+
+            const filiereRowsS8 = s8Filieres.map(renderFiliereRow).join('');
+            const filiereRowsS9 = s9Filieres.map(renderFiliereRow).join('');
 
             return `
                 <tr class="hover:bg-gray-100 transition">
@@ -981,19 +1315,40 @@ crossorigin=""/>
                                 <input type="text" value="${escapeHtml(u.code || '')}" placeholder="Code" class="border rounded px-2 py-1 text-xs" onchange="window.updateUniversityMeta('${escapeHtml(key)}', 'code', this.value)" />
                             </div>
 
-                            <div class="flex flex-wrap items-center gap-2">
-                                <select id="addPlaceFiliere-${escapeHtml(key)}" class="border rounded px-2 py-1 text-xs">
-                                    ${Array.from(filieresById.values()).sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere))).map((f) => `<option value="${escapeHtml(String(f.id_filiere))}">${escapeHtml(f.nom_filiere || f.nom_long || 'Filiere')}</option>`).join('')}
-                                </select>
-                                <select id="addPlaceSemestre-${escapeHtml(key)}" class="border rounded px-2 py-1 text-xs">
-                                    <option value="4">S8</option>
-                                    <option value="5">S9</option>
-                                </select>
-                                <button type="button" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300" onclick="window.addUniversityPlace('${escapeHtml(key)}')">Ajouter une place</button>
-                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-3">
+                                <div class="rounded border bg-white p-3">
+                                    <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-2">Semestre 8 (S8)</h4>
+                                    <div class="mb-3">
+                                        <label class="text-[10px] uppercase font-semibold text-gray-500 mb-1 block">Places globales S8</label>
+                                        <input type="number" value="${escapeHtml(String(u.S8_total_places || 0))}" min="0" class="border rounded px-2 py-1 text-xs w-full" onchange="window.updateUniversityMeta('${escapeHtml(key)}', 'S8_total_places', Number(this.value))" />
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                                        <select id="addPlaceFiliereS8-${escapeHtml(key)}" class="border rounded px-2 py-1 text-xs flex-1">
+                                            ${Array.from(filieresById.values()).sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere))).map((f) => `<option value="${escapeHtml(String(f.id_filiere))}">${escapeHtml(f.nom_filiere || f.nom_long || 'Filiere')}</option>`).join('')}
+                                        </select>
+                                        <button type="button" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300" onclick="window.addUniversityPlace('${escapeHtml(key)}', 4)">Ajouter</button>
+                                    </div>
+                                    <div class="space-y-2">
+                                        ${filiereRowsS8 || '<div class="text-xs text-gray-500">Aucune place configuree.</div>'}
+                                    </div>
+                                </div>
 
-                            <div class="space-y-2">
-                                ${filiereRows || '<div class="text-xs text-gray-500">Aucune place configuree.</div>'}
+                                <div class="rounded border bg-white p-3">
+                                    <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-600 mb-2">Semestre 9 (S9)</h4>
+                                    <div class="mb-3">
+                                        <label class="text-[10px] uppercase font-semibold text-gray-500 mb-1 block">Places globales S9</label>
+                                        <input type="number" value="${escapeHtml(String(u.S9_total_places || 0))}" min="0" class="border rounded px-2 py-1 text-xs w-full" onchange="window.updateUniversityMeta('${escapeHtml(key)}', 'S9_total_places', Number(this.value))" />
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                                        <select id="addPlaceFiliereS9-${escapeHtml(key)}" class="border rounded px-2 py-1 text-xs flex-1">
+                                            ${Array.from(filieresById.values()).sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere))).map((f) => `<option value="${escapeHtml(String(f.id_filiere))}">${escapeHtml(f.nom_filiere || f.nom_long || 'Filiere')}</option>`).join('')}
+                                        </select>
+                                        <button type="button" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300" onclick="window.addUniversityPlace('${escapeHtml(key)}', 5)">Ajouter</button>
+                                    </div>
+                                    <div class="space-y-2">
+                                        ${filiereRowsS9 || '<div class="text-xs text-gray-500">Aucune place configuree.</div>'}
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="flex items-center justify-end gap-2">
@@ -1020,7 +1375,7 @@ crossorigin=""/>
         }
     }
 
-    window.toggleUniversityPlacesEditor = function(rowKey) {
+    window.toggleUniversityPlacesEditor = function (rowKey) {
         const key = String(rowKey);
         if (expandedUniversityRows.has(key)) {
             expandedUniversityRows.delete(key);
@@ -1030,13 +1385,13 @@ crossorigin=""/>
         renderUniversitiesAdminTable();
     };
 
-    window.updateUniversityMeta = function(rowKey, field, value) {
+    window.updateUniversityMeta = function (rowKey, field, value) {
         const university = getEditableUniversityByKey(rowKey);
         if (!university) return;
         university[field] = value;
     };
 
-    window.updateUniversityPlace = function(rowKey, placeIndex, value) {
+    window.updateUniversityPlace = function (rowKey, placeIndex, value) {
         const university = getEditableUniversityByKey(rowKey);
         if (!university || !university.filieres[placeIndex]) return;
         const parsed = Number.parseInt(value, 10);
@@ -1049,7 +1404,7 @@ crossorigin=""/>
         updateMap();
     };
 
-    window.removeUniversityPlace = function(rowKey, placeIndex) {
+    window.removeUniversityPlace = function (rowKey, placeIndex) {
         const university = getEditableUniversityByKey(rowKey);
         if (!university) return;
         university.filieres.splice(placeIndex, 1);
@@ -1058,16 +1413,21 @@ crossorigin=""/>
         updateMap();
     };
 
-    window.addUniversityPlace = function(rowKey) {
+    window.addUniversityPlace = function (rowKey, annee) {
         const university = getEditableUniversityByKey(rowKey);
         if (!university) return;
-        const filiereSelectEl = document.getElementById(`addPlaceFiliere-${rowKey}`);
-        const semestreSelectEl = document.getElementById(`addPlaceSemestre-${rowKey}`);
-        if (!filiereSelectEl || !semestreSelectEl) return;
+        const filiereSelectEl = document.getElementById(`addPlaceFiliereS${annee === 4 ? '8' : '9'}-${rowKey}`);
+        if (!filiereSelectEl) return;
 
         const filiereId = String(filiereSelectEl.value);
+
+        const alreadyExists = university.filieres.some(f => String(f.id_filiere) === filiereId && Number(f.annee) === Number(annee));
+        if (alreadyExists) {
+            window.alert(`Cette filière a déjà été ajoutée pour le semestre S${annee === 4 ? '8' : '9'}.`);
+            return;
+        }
+
         const filiereMeta = filieresById.get(filiereId);
-        const annee = Number.parseInt(semestreSelectEl.value, 10);
 
         university.filieres.push({
             id_filiere: Number.parseInt(filiereId, 10),
@@ -1087,7 +1447,7 @@ crossorigin=""/>
         updateMap();
     };
 
-    window.saveUniversityDraft = async function(rowKey) {
+    window.saveUniversityDraft = async function (rowKey) {
         const university = getEditableUniversityByKey(rowKey);
         if (!university) return;
 
@@ -1104,6 +1464,8 @@ crossorigin=""/>
                 ? null
                 : Number(university.note_min),
             type: university.type || 'ERASMUS',
+            S8_total_places: Number(university.S8_total_places || 0),
+            S9_total_places: Number(university.S9_total_places || 0),
             places: (university.filieres || []).map((f) => ({
                 id_filiere: Number(f.id_filiere),
                 annee: Number(f.annee),
@@ -1134,6 +1496,7 @@ crossorigin=""/>
             return;
         }
         await refreshAllData();
+        window.alert('Université mise à jour avec succès !');
     };
 
     function refreshKpis() {
@@ -1163,7 +1526,7 @@ crossorigin=""/>
             'Italien': '🇮🇹',
             'Japonais': '🇯🇵'
         };
-        
+
         return languagesString.split(',').map(l => {
             const lang = l.trim();
             return flags[lang] ? `<span title="${escapeHtml(lang)}" class="text-base cursor-help">${flags[lang]}</span>` : escapeHtml(lang);
@@ -1171,14 +1534,14 @@ crossorigin=""/>
     }
 
     function popupText(university) {
-                const uid = String(university.id_partner_university);
-        
+        const uid = String(university.id_partner_university);
+
         window.MobilityMapState.popupState.set(uid, {
             photos: null,
             photoIndex: 0,
             streetView: null
         });
-        
+
         return `
             <div class="popup-tabs">
                 <button id="tab-photos-${uid}" type="button" class="popup-tab" onclick="window.switchPopupTab('${uid}', 'photos')">Photos</button>
@@ -1225,42 +1588,41 @@ crossorigin=""/>
         document.getElementById('newUniLongitude').value = '2.35';
         document.getElementById('newUniNoteMin').value = '';
         document.getElementById('newUniType').value = 'ERASMUS';
-        const placesRows = document.getElementById('newUniPlacesRows');
-        placesRows.innerHTML = '';
-        window.addNewUniversityPlaceRow();
+        document.getElementById('newUniS8Total').value = '0';
+        document.getElementById('newUniS9Total').value = '0';
+        document.getElementById('newUniPlacesRowsS8').innerHTML = '';
+        document.getElementById('newUniPlacesRowsS9').innerHTML = '';
+        window.addNewUniversityPlaceRow(4, 'newUniPlacesRowsS8');
+        window.addNewUniversityPlaceRow(5, 'newUniPlacesRowsS9');
     }
 
-    window.addNewUniversityPlaceRow = function() {
+    window.addNewUniversityPlaceRow = function (annee, containerId) {
         const rowId = `new-place-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
         const rowHtml = `
-            <div id="${rowId}" class="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_auto] gap-2 items-center">
+            <div id="${rowId}" class="grid grid-cols-[2fr_1fr_auto] gap-2 items-center" data-annee="${annee}">
                 <select class="new-uni-place-filiere border rounded px-2 py-1 text-xs">${buildFiliereOptionsHtml()}</select>
-                <select class="new-uni-place-annee border rounded px-2 py-1 text-xs">
-                    <option value="4">S8</option>
-                    <option value="5">S9</option>
-                </select>
                 <input type="number" min="0" value="1" class="new-uni-place-count border rounded px-2 py-1 text-xs" />
                 <button type="button" class="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100" onclick="document.getElementById('${rowId}').remove()">Supprimer</button>
             </div>
         `;
-        document.getElementById('newUniPlacesRows').insertAdjacentHTML('beforeend', rowHtml);
+        document.getElementById(containerId).insertAdjacentHTML('beforeend', rowHtml);
     };
 
     function collectNewUniversityPlaces() {
-        const placeRows = Array.from(document.querySelectorAll('#newUniPlacesRows > div'));
+        const placeRows = Array.from(document.querySelectorAll('#newUniPlacesRowsS8 > div, #newUniPlacesRowsS9 > div'));
         return placeRows.map((row) => {
             const filiere = row.querySelector('.new-uni-place-filiere');
-            const annee = row.querySelector('.new-uni-place-annee');
             const count = row.querySelector('.new-uni-place-count');
+            const annee = row.getAttribute('data-annee');
             return {
                 id_filiere: Number(filiere?.value || 0),
-                annee: Number(annee?.value || 4),
+                annee: Number(annee || 4),
                 number_of_places: Math.max(0, Number.parseInt(count?.value || '0', 10) || 0),
             };
         });
     }
 
-    window.saveNewUniversity = async function() {
+    window.saveNewUniversity = async function () {
         const payload = {
             name: document.getElementById('newUniName').value.trim(),
             country: document.getElementById('newUniCountry').value.trim(),
@@ -1272,12 +1634,24 @@ crossorigin=""/>
             longitude: Number(document.getElementById('newUniLongitude').value || 0),
             note_min: document.getElementById('newUniNoteMin').value === '' ? null : Number(document.getElementById('newUniNoteMin').value),
             type: document.getElementById('newUniType').value || 'ERASMUS',
+            S8_total_places: Number(document.getElementById('newUniS8Total').value || 0),
+            S9_total_places: Number(document.getElementById('newUniS9Total').value || 0),
             places: collectNewUniversityPlaces(),
         };
 
         if (!payload.name || !payload.country) {
             window.alert('Nom et pays sont obligatoires.');
             return;
+        }
+
+        const seen = new Set();
+        for (const p of payload.places) {
+            const key = `${p.id_filiere}-${p.annee}`;
+            if (seen.has(key)) {
+                window.alert(`Erreur : Une filière a été ajoutée plusieurs fois pour le semestre S${p.annee === 4 ? '8' : '9'}. Veuillez retirer les doublons.`);
+                return;
+            }
+            seen.add(key);
         }
 
         const response = await fetch((window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + '/university/admin', {
@@ -1297,12 +1671,13 @@ crossorigin=""/>
 
         document.getElementById('addUniversityPanel').classList.add('hidden');
         await refreshAllData();
+        window.alert('Université créée avec succès !');
         resetAddUniversityForm();
     };
 
-    
 
-    window.flyToUniversity = function(uid) {
+
+    window.flyToUniversity = function (uid) {
         const university = universitiesById.get(String(uid));
         if (!university) return;
 
@@ -1319,7 +1694,7 @@ crossorigin=""/>
             range.value = 20;
             document.getElementById('noteMinValue').innerText = 20;
             updateMap();
-            
+
             // On retente la navigation et l'ouverture lorsque la carte est à jour
             setTimeout(() => {
                 window.flyToUniversity(uid);
@@ -1327,7 +1702,7 @@ crossorigin=""/>
         }
     };
 
-    window.scrollToUniversityOnMap = function(uid) {
+    window.scrollToUniversityOnMap = function (uid) {
         const mapSection = document.getElementById('mapSection');
         mapSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         window.setTimeout(() => {
@@ -1338,7 +1713,7 @@ crossorigin=""/>
     function updateMap() {
         markers.clearLayers();
         window.MobilityMapState.markerInstances = new Map();
-        
+
         const selectedSemestre = document.getElementById('semestreSelect').value;
         const selectedFiliere = document.getElementById('filiereSelect').value;
         const selectedNote = parseFloat(document.getElementById('noteMinRange').value);
@@ -1380,6 +1755,10 @@ crossorigin=""/>
 
     document.getElementById('wishesSearch').addEventListener('input', renderDashboardTable);
     document.getElementById('dossierStatusFilter').addEventListener('change', renderDashboardTable);
+    const assignmentStatusFilterElem = document.getElementById('assignmentStatusFilter');
+    if (assignmentStatusFilterElem) assignmentStatusFilterElem.addEventListener('change', renderDashboardTable);
+    const wishesFiliereFilter = document.getElementById('wishesFiliereFilter');
+    if (wishesFiliereFilter) wishesFiliereFilter.addEventListener('change', renderDashboardTable);
     document.getElementById('filiereSelect').addEventListener('change', updateMap);
     document.getElementById('universityAdminSearch').addEventListener('input', renderUniversitiesAdminTable);
     document.getElementById('addUniversityRowBtn').addEventListener('click', () => {
@@ -1389,11 +1768,13 @@ crossorigin=""/>
     document.getElementById('cancelAddUniversityBtn').addEventListener('click', () => {
         document.getElementById('addUniversityPanel').classList.add('hidden');
     });
-    document.getElementById('addNewUniPlaceRowBtn').addEventListener('click', window.addNewUniversityPlaceRow);
+
     document.getElementById('saveNewUniversityBtn').addEventListener('click', window.saveNewUniversity);
     document.getElementById('resetDashboardFilters').addEventListener('click', () => {
         document.getElementById('wishesSearch').value = '';
         document.getElementById('dossierStatusFilter').value = 'tous';
+        if (document.getElementById('assignmentStatusFilter')) document.getElementById('assignmentStatusFilter').value = 'tous';
+        if (document.getElementById('wishesFiliereFilter')) document.getElementById('wishesFiliereFilter').value = 'toutes';
         document.getElementById('filiereSelect').value = 'toutes';
         document.getElementById('semestreSelect').value = 'Tous';
         document.getElementById('noteMinRange').value = 20;
@@ -1402,10 +1783,10 @@ crossorigin=""/>
         updateMap();
     });
 
-    resetAddUniversityForm();
     await refreshAllData();
+    resetAddUniversityForm();
 
-    window.forceSubmitWishesExec = async function() {
+    window.forceSubmitWishesExec = async function () {
         if (!confirm("Êtes-vous sûr de vouloir forcer la clôture de tous les dossiers de vœux incomplets ?\n\nTous les étudiants ayant fait au moins 1 choix verront leur dossier verrouillé et soumis.")) return;
 
         try {
@@ -1433,107 +1814,136 @@ crossorigin=""/>
     window.mobilityQuotas = [];
     window.globalFilieres = [];
 
-    window.fetchGlobalFilieres = async function() {
+    window.fetchMobilityQuotas = async function () {
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility-quotas?annee_scolaire=2025-2026", {
+                headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+            });
+            if (response.ok) {
+                window.mobilityQuotas = await response.json();
+                window.renderMobilityQuotas();
+            }
+        } catch (e) {
+            console.error("Erreur chargement quotas", e);
+        }
+    };
+
+    window.saveMobilityQuotas = async function () {
+        const newQuotas = [];
+        const inputsS8 = document.querySelectorAll('.quota-input-s8');
+        const inputsS9 = document.querySelectorAll('.quota-input-s9');
+        
+        inputsS8.forEach(input => {
+            const places = parseInt(input.value, 10);
+            if (!isNaN(places) && places > 0) {
+                newQuotas.push({ id_filiere: parseInt(input.dataset.filiere, 10), id_semestre: 8, places });
+            }
+        });
+        
+        inputsS9.forEach(input => {
+            const places = parseInt(input.value, 10);
+            if (!isNaN(places) && places > 0) {
+                newQuotas.push({ id_filiere: parseInt(input.dataset.filiere, 10), id_semestre: 9, places });
+            }
+        });
+
+        window.mobilityQuotas = newQuotas;
+
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility-quotas", {
+                method: 'POST',
+                headers: { 
+                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ annee_scolaire: "2025-2026", quotas: window.mobilityQuotas })
+            });
+            if (response.ok) {
+                alert("Quotas sauvegardés avec succès !");
+                document.getElementById('quotasModal').classList.add('hidden');
+            } else {
+                alert("Erreur lors de la sauvegarde des quotas.");
+            }
+        } catch (e) {
+            console.error("Erreur sauvegarde quotas", e);
+        }
+    };
+
+    window.mobilityQuotas = [];
+    window.globalFilieres = [];
+
+    window.fetchGlobalFilieres = async function () {
         try {
             const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/filieres/", {
                 headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
             });
             if (response.ok) {
                 window.globalFilieres = await response.json();
-                const select = document.getElementById('quotaMobilityFiliere');
-                if (select) {
-                    select.innerHTML = window.globalFilieres
-                        .sort((a,b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere)))
-                        .map(f => `<option value="${f.id_filiere}">${f.nom_filiere || f.nom_long}</option>`)
-                        .join('');
-                }
+                // Removed dropdown populate logic, render will handle the grid
             }
-        } catch(e) {
+        } catch (e) {
             console.error("Erreur chargement filières", e);
         }
     };
 
-    window.addMobilityQuota = function() {
-        const id_filiere = parseInt(document.getElementById('quotaMobilityFiliere').value, 10);
-        const id_semestre = parseInt(document.getElementById('quotaMobilitySemester').value, 10);
-        const places = parseInt(document.getElementById('quotaMobilityPlaces').value, 10);
+    window.renderMobilityQuotas = function () {
+        const tbody = document.getElementById('quotasGridBody');
+        if (!tbody || !window.globalFilieres) return;
 
-        if (isNaN(id_filiere) || isNaN(id_semestre) || isNaN(places) || places < 0) {
-            alert("Veuillez remplir tous les champs correctement.");
+        if (window.globalFilieres.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-8 text-center text-gray-400 italic">Aucune filière trouvée.</td></tr>`;
             return;
         }
 
-        const exists = window.mobilityQuotas.find(q => q.id_filiere === id_filiere && q.id_semestre === id_semestre);
-        if (exists) {
-            alert("Un quota pour cette filière et ce semestre existe déjà. Veuillez le supprimer pour le modifier.");
-            return;
-        }
-
-        window.mobilityQuotas.push({ id_filiere, id_semestre, places });
-        window.renderMobilityQuotas();
-    };
-
-    window.removeMobilityQuota = function(index) {
-        window.mobilityQuotas.splice(index, 1);
-        window.renderMobilityQuotas();
-    };
-
-    window.renderMobilityQuotas = function() {
-        const container = document.getElementById('mobilityQuotasList');
-        const emptyMsg = document.getElementById('mobilityQuotasEmpty');
+        const sortedFilieres = [...window.globalFilieres].sort((a, b) => String(a.nom_filiere).localeCompare(String(b.nom_filiere)));
         
-        // Clear old list items except empty message
-        Array.from(container.children).forEach(child => {
-            if (child.id !== 'mobilityQuotasEmpty') {
-                child.remove();
-            }
-        });
+        let html = '';
+        sortedFilieres.forEach(f => {
+            const nom = f.nom_filiere || f.nom_long || `Filière ${f.id_filiere}`;
+            
+            // Find existing quotas for this filiere
+            const qS8 = window.mobilityQuotas.find(q => q.id_filiere === f.id_filiere && q.id_semestre === 8);
+            const qS9 = window.mobilityQuotas.find(q => q.id_filiere === f.id_filiere && q.id_semestre === 9);
+            
+            const placesS8 = qS8 ? qS8.places : 0;
+            const placesS9 = qS9 ? qS9.places : 0;
 
-        if (window.mobilityQuotas.length === 0) {
-            emptyMsg.classList.remove('hidden');
-        } else {
-            emptyMsg.classList.add('hidden');
-            window.mobilityQuotas.forEach((q, i) => {
-                const f = window.globalFilieres.find(f => f.id_filiere === q.id_filiere);
-                const nom = f ? (f.nom_filiere || f.nom_long) : `Filière ${q.id_filiere}`;
-                
-                const item = document.createElement('div');
-                item.className = "flex justify-between items-center bg-white p-2 border border-gray-200 rounded shadow-sm text-xs";
-                item.innerHTML = `
-                    <div class="font-semibold text-gray-700">
-                        ${nom} <span class="text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded ml-1">S${q.id_semestre}</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span class="font-bold text-gray-800">${q.places} place(s)</span>
-                        <button onclick="window.removeMobilityQuota(${i})" class="text-red-500 hover:text-red-700 transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        </button>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-        }
+            html += `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-4 py-3 font-semibold text-gray-800">${nom}</td>
+                    <td class="px-4 py-3 text-center">
+                        <input type="number" min="0" class="quota-input-s8 w-20 text-center text-sm border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500" data-filiere="${f.id_filiere}" value="${placesS8}">
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <input type="number" min="0" class="quota-input-s9 w-20 text-center text-sm border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500" data-filiere="${f.id_filiere}" value="${placesS9}">
+                    </td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = html;
     };
+
 
     let assignmentPollInterval = null;
 
     function startAssignmentPolling() {
         if (assignmentPollInterval) clearInterval(assignmentPollInterval);
-        
+
         assignmentPollInterval = setInterval(async () => {
             try {
                 const res = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/assignment/status", {
                     method: 'GET',
                     headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
                 });
-                
+
                 if (res.ok) {
                     const status = await res.json();
-                    
+
                     document.getElementById('assignmentProgressBar').style.width = `${status.progress}%`;
                     document.getElementById('assignmentProgressPercent').innerText = `${status.progress}%`;
                     document.getElementById('assignmentProgressText').innerText = status.step;
-                    
+
                     if (status.error) {
                         clearInterval(assignmentPollInterval);
                         alert("Erreur dans l'algorithme : " + status.error);
@@ -1562,7 +1972,7 @@ crossorigin=""/>
         document.getElementById('assignmentProgressText').innerText = 'Démarrage...';
     }
 
-    window.runAssignmentExec = async function() {
+    window.runAssignmentExec = async function () {
         const payload = {
             annee_eligible: 4, // Procédure exclusive aux 4ème année
             mobility_quotas: window.mobilityQuotas
@@ -1586,14 +1996,14 @@ crossorigin=""/>
 
             document.getElementById('assignmentActions').classList.add('hidden');
             document.getElementById('assignmentProgressContainer').classList.remove('hidden');
-            
+
             startAssignmentPolling();
         } catch (error) {
             alert("Erreur de connexion.");
         }
     };
 
-    window.exportWishes = async function() {
+    window.exportWishes = async function () {
         try {
             const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/wishes/export", {
                 method: 'GET',
@@ -1610,7 +2020,7 @@ crossorigin=""/>
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
-            a.download = `Export_Voeux_Mobilite_${new Date().toISOString().slice(0,10)}.xlsx`;
+            a.download = `Export_Voeux_Mobilite_${new Date().toISOString().slice(0, 10)}.xlsx`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -1619,7 +2029,7 @@ crossorigin=""/>
         }
     };
 
-    window.exportAssignments = async function() {
+    window.exportAssignments = async function () {
         try {
             const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/assignments/export", {
                 method: 'GET',
@@ -1636,7 +2046,7 @@ crossorigin=""/>
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
-            a.download = `Export_Affectations_Mobilite_${new Date().toISOString().slice(0,10)}.xlsx`;
+            a.download = `Export_Affectations_Mobilite_${new Date().toISOString().slice(0, 10)}.xlsx`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -1645,7 +2055,7 @@ crossorigin=""/>
         }
     };
 
-    window.exportPlaces = async function() {
+    window.exportPlaces = async function () {
         try {
             const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/places/export", {
                 method: 'GET',
@@ -1662,7 +2072,7 @@ crossorigin=""/>
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
-            a.download = `Export_Etat_Places_${new Date().toISOString().slice(0,10)}.xlsx`;
+            a.download = `Export_Etat_Places_${new Date().toISOString().slice(0, 10)}.xlsx`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -1671,35 +2081,24 @@ crossorigin=""/>
         }
     };
 
-    // Procedure Modal & Reset Logic
-    window.openProcedureModal = function() {
+    window.openProcedureModal = function () {
         document.getElementById('procedureModal').classList.remove('hidden');
         window.fetchSubmittedStudents();
         window.fetchAssignedStudents();
-        window.fetchGlobalFilieres();
+        window.fetchGlobalFilieres().then(() => window.fetchMobilityQuotas());
     };
 
     window.submittedStudentsList = [];
 
-    window.fetchSubmittedStudents = async function() {
+    window.fetchSubmittedStudents = async function () {
         try {
             const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/submitted-students", {
                 headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
             });
             if (response.ok) {
                 window.submittedStudentsList = await response.json();
-                
-                // Populate Reset Student Dropdown
-                const select = document.getElementById('resetStudentSelect');
-                select.innerHTML = '<option value="">Sélectionnez un étudiant...</option>';
-                window.submittedStudentsList.forEach(student => {
-                    const opt = document.createElement('option');
-                    opt.value = student.id_etudiant;
-                    opt.textContent = `${student.id_etudiant} - ${student.nom} ${student.prenom}`;
-                    select.appendChild(opt);
-                });
-                document.getElementById('resetStudentDetails').classList.add('hidden');
-                document.getElementById('btnResetWishes').classList.add('hidden');
+
+
 
                 // Populate Filiere Quotas
                 const filieres = [...new Set(window.submittedStudentsList.map(s => s.nom_filiere))].filter(Boolean).sort();
@@ -1724,31 +2123,209 @@ crossorigin=""/>
         }
     };
 
-    window.onResetStudentChange = function() {
-        const select = document.getElementById('resetStudentSelect');
-        const id = select.value;
-        const detailsDiv = document.getElementById('resetStudentDetails');
-        const btn = document.getElementById('btnResetWishes');
-        
-        if (!id) {
-            detailsDiv.classList.add('hidden');
-            btn.classList.add('hidden');
+
+    window.doublantsArray = [];
+
+    window.addDoublantToList = async function () {
+        const idInput = document.getElementById('doublantEtudiantId');
+        const scoreInput = document.getElementById('doublantZScore');
+        const id = parseInt(idInput.value);
+        const score = parseFloat(scoreInput.value);
+
+        if (!id || isNaN(score)) {
+            alert('Veuillez renseigner un ID et un score valide.');
             return;
         }
 
-        const student = window.submittedStudentsList.find(s => s.id_etudiant == id);
-        if (student) {
-            document.getElementById('rsName').textContent = `${student.nom} ${student.prenom}`;
-            document.getElementById('rsEmail').textContent = student.mail;
-            document.getElementById('rsFiliere').textContent = student.nom_filiere;
-            detailsDiv.classList.remove('hidden');
-            btn.classList.remove('hidden');
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/campaign/doublant/" + id, {
+                headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+            });
+            
+            if (!response.ok) {
+                const err = await response.json();
+                alert("Erreur: " + (err.detail || "Étudiant non valide."));
+                return;
+            }
+            
+            const student = await response.json();
+
+            const existingIdx = window.doublantsArray.findIndex(d => d.id_etudiant === id);
+            if (existingIdx !== -1) {
+                window.doublantsArray[existingIdx].z_score = score;
+            } else {
+                window.doublantsArray.push({ 
+                    id_etudiant: id, 
+                    z_score: score,
+                    nom: student.nom,
+                    prenom: student.prenom,
+                    filiere: student.nom_filiere
+                });
+            }
+
+            idInput.value = '';
+            scoreInput.value = '';
+            window.renderDoublantsList();
+        } catch (error) {
+            console.error("Erreur vérification doublant", error);
+            alert("Erreur lors de la vérification de l'étudiant.");
         }
     };
 
-    window.resetStudentWishes = async function() {
-        const select = document.getElementById('resetStudentSelect');
-        const id = select.value;
+    window.removeDoublant = function (id) {
+        window.doublantsArray = window.doublantsArray.filter(d => d.id_etudiant !== id);
+        window.renderDoublantsList();
+    };
+
+    window.renderDoublantsList = function () {
+        const ul = document.getElementById('doublantsList');
+        const header = document.getElementById('doublantsHeader');
+        const countSpan = document.getElementById('doublantsCount');
+        const filiereCounters = document.getElementById('doublantsFiliereCounters');
+
+        if (window.doublantsArray.length > 0) {
+            header.classList.remove('hidden');
+            countSpan.textContent = window.doublantsArray.length + (window.doublantsArray.length > 1 ? ' Total' : ' Total');
+            
+            // Calculer les compteurs par filière
+            const filieresCount = {};
+            window.doublantsArray.forEach(d => {
+                filieresCount[d.filiere] = (filieresCount[d.filiere] || 0) + 1;
+            });
+            
+            const colors = [
+                {bg: 'bg-indigo-50', text: 'text-indigo-800', border: 'border-indigo-200', badge: 'bg-indigo-100 text-indigo-800 border-indigo-200'},
+                {bg: 'bg-emerald-50', text: 'text-emerald-800', border: 'border-emerald-200', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200'},
+                {bg: 'bg-amber-50', text: 'text-amber-800', border: 'border-amber-200', badge: 'bg-amber-100 text-amber-800 border-amber-200'},
+                {bg: 'bg-rose-50', text: 'text-rose-800', border: 'border-rose-200', badge: 'bg-rose-100 text-rose-800 border-rose-200'},
+                {bg: 'bg-fuchsia-50', text: 'text-fuchsia-800', border: 'border-fuchsia-200', badge: 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200'},
+                {bg: 'bg-cyan-50', text: 'text-cyan-800', border: 'border-cyan-200', badge: 'bg-cyan-100 text-cyan-800 border-cyan-200'}
+            ];
+            
+            const filiereColorsMap = {};
+            let colorIndex = 0;
+            const getFiliereColor = (filiereName) => {
+                if (!filiereName) return colors[0];
+                if (!filiereColorsMap[filiereName]) {
+                    filiereColorsMap[filiereName] = colors[colorIndex % colors.length];
+                    colorIndex++;
+                }
+                return filiereColorsMap[filiereName];
+            };
+
+            // Afficher les petits compteurs
+            filiereCounters.innerHTML = Object.entries(filieresCount).map(([filiere, count]) => {
+                const c = getFiliereColor(filiere);
+                return `<span class="${c.badge} text-xs font-bold px-2.5 py-1 rounded shadow-sm border">${filiere || 'N/A'}: ${count}</span>`;
+            }).join('');
+
+            ul.innerHTML = window.doublantsArray.map(d => {
+                const c = getFiliereColor(d.filiere);
+                return `
+                <li class="flex items-center justify-between gap-2 p-2.5 rounded-lg border ${c.bg} ${c.border} shadow-sm transition-all hover:shadow-md">
+                    <div class="flex-1 min-w-0">
+                        <div class="text-xs font-bold text-gray-800 truncate" title="${d.nom} ${d.prenom}">${d.nom} ${d.prenom}</div>
+                        <div class="text-[10px] text-gray-600 mt-0.5 flex items-center gap-1.5">
+                            <span class="bg-white px-1 py-0.5 rounded font-medium border border-gray-200">ID: ${d.id_etudiant}</span>
+                            <span class="truncate font-bold text-xs ${c.text}">${d.filiere}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="text-right">
+                            <div class="text-[8px] uppercase font-bold text-gray-400 tracking-wider mb-0.5" title="Moyenne Centrée Réduite">MCR</div>
+                            <div class="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded">${parseFloat(d.z_score).toFixed(2)}</div>
+                        </div>
+                        <button type="button" onclick="window.removeDoublant(${d.id_etudiant})" class="flex-shrink-0 w-6 h-6 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1" title="Retirer cet étudiant">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                </li>`;
+            }).join('');
+
+        } else {
+            header.classList.add('hidden');
+            ul.innerHTML = '';
+        }
+    };
+
+    window.launchCampaignExec = async function () {
+        try {
+            document.getElementById('campaignLaunchControls').classList.add('hidden');
+            const progressContainer = document.getElementById('campaignProgressContainer');
+            const progressBar = document.getElementById('campaignProgressBar');
+            const progressPercent = document.getElementById('campaignProgressPercent');
+            const progressText = document.getElementById('campaignProgressText');
+            
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '0%';
+            progressPercent.textContent = '0%';
+            progressText.textContent = "Nettoyage et initialisation...";
+            
+            // Simuler l'avancement pendant le fetch (qui est synchrone et peut prendre quelques secondes)
+            let currentProgress = 0;
+            const simulateProgress = setInterval(() => {
+                if (currentProgress < 90) {
+                    currentProgress += Math.random() * 15;
+                    if (currentProgress > 90) currentProgress = 90;
+                    progressBar.style.width = currentProgress + '%';
+                    progressPercent.textContent = Math.floor(currentProgress) + '%';
+                    
+                    if (currentProgress > 30 && currentProgress < 60) {
+                        progressText.textContent = "Calcul des Z-scores en cours...";
+                    } else if (currentProgress >= 60) {
+                        progressText.textContent = "Sauvegarde des données...";
+                    }
+                }
+            }, 500);
+
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/campaign/launch", {
+                method: 'POST',
+                headers: { 
+                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ doublants: window.doublantsArray })
+            });
+            
+            clearInterval(simulateProgress);
+            progressBar.style.width = '100%';
+            progressPercent.textContent = '100%';
+            progressText.textContent = "Campagne lancée avec succès !";
+
+            if (response.ok) {
+                setTimeout(() => {
+                    alert("Campagne lancée et scores calculés avec succès !");
+                    window.doublantsArray = [];
+                    window.renderDoublantsList();
+                    progressContainer.classList.add('hidden');
+                    document.getElementById('campaignLaunchControls').classList.remove('hidden');
+                    if (typeof refreshAllData === 'function') {
+                        refreshAllData();
+                    }
+                }, 500);
+            } else {
+                const err = await response.json();
+                alert("Erreur: " + (err.detail || "Impossible de lancer la campagne"));
+                progressContainer.classList.add('hidden');
+                document.getElementById('campaignLaunchControls').classList.remove('hidden');
+            }
+        } catch (e) {
+            console.error("Erreur lancement campagne", e);
+            alert("Erreur lors du lancement de la campagne.");
+            document.getElementById('campaignProgressContainer').classList.add('hidden');
+            document.getElementById('campaignLaunchControls').classList.remove('hidden');
+        }
+    };
+
+    window.launchCampaign = function () {
+        window.requireConfirmation(
+            "Êtes-vous sûr de vouloir lancer la campagne ? Cela calculera les Moyennes Centrées Réduites de tous les étudiants de 4ème/5ème année et écrasera les affectations/vœux des doublants ajoutés.",
+            window.launchCampaignExec
+        );
+    };
+
+    window.resetStudentWishes = async function (idParam) {
+        let id = typeof idParam === 'string' || typeof idParam === 'number' ? idParam : null;
         if (!id) return;
 
         if (!confirm("Êtes-vous sûr de vouloir annuler la soumission de cet étudiant ? Il repassera en statut 'En cours'.")) {
@@ -1778,24 +2355,16 @@ crossorigin=""/>
     // --- Validation manuelle des affectations (Etape 3) ---
     window.assignedStudentsList = [];
 
-    window.fetchAssignedStudents = async function() {
+    window.fetchAssignedStudents = async function () {
         try {
             const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/assigned-students", {
                 headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
             });
             if (response.ok) {
                 window.assignedStudentsList = await response.json();
-                
-                const select = document.getElementById('validationStudentSelect');
-                select.innerHTML = '<option value="">Sélectionnez un étudiant...</option>';
-                window.assignedStudentsList.forEach(student => {
-                    const opt = document.createElement('option');
-                    opt.value = student.id_assignment; // On se base sur id_assignment
-                    opt.textContent = `${student.id_etudiant} - ${student.nom} ${student.prenom}`;
-                    select.appendChild(opt);
-                });
-                document.getElementById('validationStudentDetails').classList.add('hidden');
-                
+
+
+
                 if (typeof Chart !== 'undefined') {
                     window.renderEtape3Chart();
                 }
@@ -1805,51 +2374,12 @@ crossorigin=""/>
         }
     };
 
-    window.onValidationStudentChange = function() {
-        const select = document.getElementById('validationStudentSelect');
-        const id_assignment = select.value;
-        const detailsDiv = document.getElementById('validationStudentDetails');
-        
-        if (!id_assignment) {
-            detailsDiv.classList.add('hidden');
+    window.updateAssignmentStatusExec = async function (id_assignment, new_status) {
+        let actionStr = new_status === 'accepted' ? 'accepter' : (new_status === 'declined' ? 'refuser' : 'mettre en attente');
+        if (!confirm(`Êtes-vous sûr de vouloir ${actionStr} cette affectation ?`)) {
             return;
         }
 
-        const student = window.assignedStudentsList.find(s => s.id_assignment == id_assignment);
-        if (student) {
-            document.getElementById('vsNom').textContent = `${student.nom} ${student.prenom}`;
-            document.getElementById('vsFiliere').textContent = student.nom_filiere;
-            document.getElementById('vsUniversity').textContent = student.university_name;
-            
-            const badge = document.getElementById('vsStatusBadge');
-            
-            const btnAccept = document.getElementById('btnForceAccept');
-            const btnDecline = document.getElementById('btnForceDecline');
-            const btnPending = document.getElementById('btnForcePending');
-
-            btnAccept.style.display = '';
-            btnDecline.style.display = '';
-            btnPending.style.display = '';
-
-            if (student.status === 'accepted') {
-                badge.textContent = 'Accepté';
-                badge.className = 'px-2 py-0.5 rounded text-xs font-bold text-white bg-green-500';
-                btnAccept.style.display = 'none';
-            } else if (student.status === 'declined') {
-                badge.textContent = 'Refusé';
-                badge.className = 'px-2 py-0.5 rounded text-xs font-bold text-white bg-red-500';
-                btnDecline.style.display = 'none';
-            } else {
-                badge.textContent = 'En attente';
-                badge.className = 'px-2 py-0.5 rounded text-xs font-bold text-white bg-amber-500';
-                btnPending.style.display = 'none';
-            }
-            
-            detailsDiv.classList.remove('hidden');
-        }
-    };
-
-    window.updateAssignmentStatusExec = async function(id_assignment, new_status) {
         try {
             const payload = {
                 id_assignment: parseInt(id_assignment, 10),
@@ -1865,10 +2395,9 @@ crossorigin=""/>
             });
 
             if (response.ok) {
-                alert("Statut mis à jour avec succès.");
-                window.fetchAssignedStudents();
+                window.fetchAssignedStudents(); // Met à jour le graphe
                 if (typeof refreshAllData === 'function') {
-                    refreshAllData();
+                    refreshAllData(); // Met à jour la liste des étudiants
                 }
             } else {
                 alert("Erreur lors de la mise à jour.");
@@ -1878,27 +2407,12 @@ crossorigin=""/>
         }
     };
 
-    window.updateAssignmentStatusUI = function(new_status) {
-        const id_assignment = document.getElementById('validationStudentSelect').value;
-        if (!id_assignment) return;
-        
-        let actionStr = "";
-        if (new_status === 'accepted') actionStr = "l'acceptation";
-        else if (new_status === 'declined') actionStr = "le refus";
-        else actionStr = "la remise en attente";
-
-        window.requireConfirmation(
-            `Vous êtes sur le point de forcer ${actionStr} de cette affectation.`,
-            () => window.updateAssignmentStatusExec(id_assignment, new_status)
-        );
-    };
-
     window.chartEtape3 = null;
-    
-    window.renderEtape3Chart = function() {
+
+    window.renderEtape3Chart = function () {
         const ctx = document.getElementById('chartEtape3Status');
         if (!ctx) return;
-        
+
         let countAcc = 0, countPend = 0, countDec = 0;
         window.assignedStudentsList.forEach(s => {
             if (s.status === 'accepted') countAcc++;
@@ -1929,7 +2443,7 @@ crossorigin=""/>
             },
             plugins: [{
                 id: 'textInsideSlices',
-                afterDraw: function(chart) {
+                afterDraw: function (chart) {
                     const ctx = chart.ctx;
                     chart.data.datasets.forEach((dataset, i) => {
                         const meta = chart.getDatasetMeta(i);
@@ -1955,7 +2469,7 @@ crossorigin=""/>
         });
     };
 
-    window.exportAssignedData = async function(status) {
+    window.exportAssignedData = async function (status) {
         try {
             const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/assigned-students/export/" + status, {
                 method: 'GET',
@@ -1972,7 +2486,7 @@ crossorigin=""/>
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
-            a.download = `Export_Affectations_${status}_${new Date().toISOString().slice(0,10)}.xlsx`;
+            a.download = `Export_Affectations_${status}_${new Date().toISOString().slice(0, 10)}.xlsx`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -1985,7 +2499,7 @@ crossorigin=""/>
     let currentActionCallback = null;
     let expectedCode = "";
 
-    window.requireConfirmation = function(description, callback) {
+    window.requireConfirmation = function (description, callback) {
         const modal = document.getElementById('confirmActionModal');
         const descEl = document.getElementById('confirmActionDescription');
         const codeDisplay = document.getElementById('confirmActionCodeDisplay');
@@ -1994,20 +2508,20 @@ crossorigin=""/>
 
         // Generate random 6 character alphanumeric code
         expectedCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-        
+
         descEl.textContent = description;
         codeDisplay.textContent = expectedCode;
         codeInput.value = "";
         btnConfirm.disabled = true;
         btnConfirm.classList.add('opacity-50', 'cursor-not-allowed');
-        
+
         currentActionCallback = callback;
         modal.classList.remove('hidden');
-        
+
         setTimeout(() => codeInput.focus(), 100);
     };
 
-    document.getElementById('confirmActionCodeInput').addEventListener('input', function(e) {
+    document.getElementById('confirmActionCodeInput').addEventListener('input', function (e) {
         const val = e.target.value.trim().toUpperCase();
         const btnConfirm = document.getElementById('confirmActionButton');
         if (val === expectedCode) {
@@ -2019,29 +2533,29 @@ crossorigin=""/>
         }
     });
 
-    document.getElementById('confirmActionButton').addEventListener('click', function() {
+    document.getElementById('confirmActionButton').addEventListener('click', function () {
         if (!document.getElementById('confirmActionButton').disabled && currentActionCallback) {
             document.getElementById('confirmActionModal').classList.add('hidden');
             currentActionCallback();
         }
     });
 
-    window.forceSubmitWishesUI = function() {
+    window.forceSubmitWishesUI = function () {
         window.requireConfirmation(
-            "Vous êtes sur le point de clôturer définitivement toutes les soumissions de vœux. Tous les étudiants ayant fait au moins 1 choix verront leur dossier verrouillé.", 
+            "Vous êtes sur le point de clôturer définitivement toutes les soumissions de vœux. Tous les étudiants ayant fait au moins 1 choix verront leur dossier verrouillé.",
             window.forceSubmitWishesExec
         );
     };
 
-    window.runAssignmentUI = function() {
+    window.runAssignmentUI = function () {
         window.requireConfirmation(
-            "Vous êtes sur le point de lancer l'algorithme d'affectation automatique. Ceci écrase les affectations précédentes non validées.", 
+            "Vous êtes sur le point de lancer l'algorithme d'affectation automatique. Ceci écrase les affectations précédentes non validées.",
             window.runAssignmentExec
         );
     };
 
     // Diagnostics Logic
-    window.exportDiagnosticData = async function(category) {
+    window.exportDiagnosticData = async function (category) {
         try {
             const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/diagnostics/export/" + category, {
                 method: 'GET',
@@ -2058,7 +2572,7 @@ crossorigin=""/>
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
-            a.download = `Export_Mobilite_Stats_${category}_${new Date().toISOString().slice(0,10)}.xlsx`;
+            a.download = `Export_Mobilite_Stats_${category}_${new Date().toISOString().slice(0, 10)}.xlsx`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -2071,7 +2585,12 @@ crossorigin=""/>
     let chartWishes = null;
     let chartDist = null;
 
-    window.toggleDiagnostics = function() {
+    window.toggleWishesModal = function () {
+        const modal = document.getElementById('wishesModal');
+        modal.classList.toggle('hidden');
+    };
+
+    window.toggleDiagnostics = function () {
         const modal = document.getElementById('diagnosticsModal');
         if (modal.classList.contains('hidden')) {
             modal.classList.remove('hidden');
@@ -2081,7 +2600,7 @@ crossorigin=""/>
         }
     };
 
-    window.loadDiagnostics = async function() {
+    window.loadDiagnostics = async function () {
         try {
             const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/diagnostics", {
                 method: 'GET',
@@ -2089,11 +2608,11 @@ crossorigin=""/>
                     "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
                 }
             });
-            
+
             if (!response.ok) return;
-            
+
             const data = await response.json();
-            
+
             if (chartGlobal) chartGlobal.destroy();
             if (chartWishes) chartWishes.destroy();
             if (chartDist) chartDist.destroy();
@@ -2119,7 +2638,7 @@ crossorigin=""/>
                         datalabels: {
                             color: '#ffffff',
                             font: { weight: 'bold', size: 14 },
-                            formatter: function(value) {
+                            formatter: function (value) {
                                 return value > 0 ? value : null;
                             }
                         }
@@ -2149,7 +2668,7 @@ crossorigin=""/>
                         datalabels: {
                             color: '#ffffff',
                             font: { weight: 'bold', size: 14 },
-                            formatter: function(value) {
+                            formatter: function (value) {
                                 return value > 0 ? value : null;
                             }
                         }
@@ -2188,32 +2707,42 @@ crossorigin=""/>
         }
     };
 
-    window.closeAssignmentPhase = async function() {
-        if (!confirm("Attention : Cette action va clôturer la phase d'acceptation.\nTOUTES les affectations actuellement 'en attente' seront définitivement passées à 'refusé'.\nVoulez-vous continuer ?")) {
-            return;
-        }
-        
-        try {
-            const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/admin/mobility/assignment/close";
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
-                    'Content-Type': 'application/json'
+    window.saveQuotas = async function() {
+        // Implementation logic for saving quotas
+    };
+
+    window.loadQuotas = async function() {
+        // Implementation logic for loading quotas
+    };
+
+    window.closeAssignmentPhase = function () {
+        window.requireConfirmation(
+            "Cette action va clôturer la phase d'acceptation. TOUTES les affectations actuellement 'en attente' seront définitivement passées à 'refusé'.",
+            async function () {
+                try {
+                    const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/admin/mobility/assignment/close";
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (!response.ok) throw new Error("Erreur lors de la clôture des affectations");
+
+                    alert("Opération terminée avec succès. Toutes les affectations en attente ont été refusées.");
+
+                    // Recharger les données pour rafraîchir l'interface
+                    if (typeof refreshAllData === 'function') {
+                        refreshAllData();
+                    }
+
+                } catch (error) {
+                    console.error(error);
+                    alert("Erreur: " + error.message);
                 }
-            });
-            if (!response.ok) throw new Error("Erreur lors de la clôture des affectations");
-            
-            alert("Opération terminée avec succès. Toutes les affectations en attente ont été refusées.");
-            
-            // Recharger les données pour rafraîchir l'interface
-            window.fetchStatsAndPopulate();
-            fetchAssignmentsForValidation();
-            
-        } catch (error) {
-            console.error(error);
-            alert("Erreur: " + error.message);
-        }
+            }
+        );
     };
 
 </script>
