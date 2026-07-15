@@ -53,8 +53,8 @@ def _evaluate_role_list(roles: list[str], user) -> bool:
 
     if user is None:
         return False
-
-    return user.type in roles
+    intersection = [role for role in user.roles if role in roles]
+    return len(intersection) > 0
 
 
 def _evaluate_dict(rule: dict, user, params: dict) -> bool:
