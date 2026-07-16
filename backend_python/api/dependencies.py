@@ -257,44 +257,44 @@ async def get_current_active_user(
 #######################
 # Permissions
 
-def has_role(role_required: str):
-    async def check_role(
-        current_user: Annotated[User, Depends(get_current_user)],
-    ):
-        if role_required not in current_user.roles:
-            logger.error(f"User {current_user.id} has no role {role_required}")
-            raise HTTPException(status_code=403, detail="Unauthorized access")
-
-    return check_role
-
-
-def has_responsabilite(user, type_objet: str, scope: dict) -> bool:
-    """
-    scope = dict de dimensions requises, ex: {"filiere": "IDU", "niveau": "FI4"}
-
-    Logique de subsomption :
-      - type_objet 'all' couvre tout
-      - une dimension absente en BD = wildcard (couvre toutes les valeurs)
-      - une dimension présente en BD doit matcher exactement le scope demandé
-      - une responsabilité avec MOINS de dimensions que le scope est plus large → couvre
-    """
-    for responsability in user.responsabilites:
-
-        # type_objet doit matcher ou être 'all'
-        if responsability["type_objet"] not in (type_objet, "all"):
-            continue
-
-        # Chaque dimension définie en BD doit être satisfaite par le scope
-        # (les dimensions absentes en BD sont des wildcards)
-        match = all(
-            scope.get(dim) == val
-            for dim, val in responsability["dimensions"].items()
-        )
-
-        if match:
-            return True
-
-    return False
+# def has_role(role_required: str):
+#     async def check_role(
+#         current_user: Annotated[User, Depends(get_current_user)],
+#     ):
+#         if role_required not in current_user.roles:
+#             logger.error(f"User {current_user.id} has no role {role_required}")
+#             raise HTTPException(status_code=403, detail="Unauthorized access")
+#
+#     return check_role
+#
+#
+# def has_responsabilite(user, type_objet: str, scope: dict) -> bool:
+#     """
+#     scope = dict de dimensions requises, ex: {"filiere": "IDU", "niveau": "FI4"}
+#
+#     Logique de subsomption :
+#       - type_objet 'all' couvre tout
+#       - une dimension absente en BD = wildcard (couvre toutes les valeurs)
+#       - une dimension présente en BD doit matcher exactement le scope demandé
+#       - une responsabilité avec MOINS de dimensions que le scope est plus large → couvre
+#     """
+#     for responsability in user.responsabilites:
+#
+#         # type_objet doit matcher ou être 'all'
+#         if responsability["type_objet"] not in (type_objet, "all"):
+#             continue
+#
+#         # Chaque dimension définie en BD doit être satisfaite par le scope
+#         # (les dimensions absentes en BD sont des wildcards)
+#         match = all(
+#             scope.get(dim) == val
+#             for dim, val in responsability["dimensions"].items()
+#         )
+#
+#         if match:
+#             return True
+#
+#     return False
 
 
 ##############################

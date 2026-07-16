@@ -147,10 +147,14 @@ function get_rendus_etudiant($token, $id_etudiant){
 }
 
 function get_stages($token){
-$url = get_python_backend_url("etudiants/stages/");
-return get_endpoint($url, $token);
+    $url = get_python_backend_url("etudiants/stages/");
+    return get_endpoint($url, $token);
 }
 
+function get_stages2($token){
+    $url = get_python_backend_url("filieres/stages/");
+    return get_endpoint($url, $token);
+}
 function get_filieres($token) {
     $url = get_python_backend_url("filieres/");
     return get_endpoint($url, $token);

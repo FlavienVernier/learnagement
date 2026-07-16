@@ -1,4 +1,10 @@
-requests = {
+import copy
+
+
+def requests(key: str):
+    return copy.deepcopy(__requests[key])
+
+__requests = {
     "get_filieres" : {
         "request" : """
                         SELECT LNM_filiere.*, ExplicitSecondaryKs_LNM_filiere.ExplicitSecondaryK
@@ -98,12 +104,12 @@ requests = {
             LEFT JOIN LNM_stage ON LNM_stage.id_etudiant = LNM_etudiant.id_etudiant
             LEFT JOIN LNM_enseignant ON LNM_enseignant.id_enseignant = LNM_stage.id_enseignant
             LEFT JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = LNM_enseignant.id_enseignant
-            WHERE LNM_filiere.id_filiere = %(id_filiere)s;
+            WHERE LNM_filiere.nom_filiere LIKE %(nom_filiere)s AND LNM_promo.annee LIKE %(annee)s;
                     """,
-        "params": lambda id_filiere: {"id_filiere": id_filiere,},
+        "params": lambda nom_filiere, annee: {"nom_filiere": nom_filiere, "annee": annee},
         "allowedRolesRequester": {
             "roles": ["responsable_etudes"],
-            "any": {"type_objet": "stage"},
+            "any": [{"type_objet": "stage", "filiere": "any", "annee": "any"}],
         }
     },
 }

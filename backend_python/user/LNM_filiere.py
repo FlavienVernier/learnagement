@@ -72,26 +72,30 @@ def dags(
 def stages(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
-    request = requests["get_" + inspect.currentframe().f_code.co_name]
+    request = requests("get_" + inspect.currentframe().f_code.co_name)
 
-    # Résolution de id_filiere :
+    # Résolution de nom_filiere :
     # 1. Si l'user a une responsabilité stage avec une dimension filiere → on l'utilise
-    # 2. Sinon on utilise "id_filiere"
+    # 2. Sinon on utilise la valeur "id_filiere" pour que la requête test id_filiere=id_filiere
     stage_resp = next(
-        (r for r in current_user.responsibilities if r["type_objet"] in ("stage", "all") and "filiere" in r["dimensions"]),
+        (r for r in current_user.responsibilities if r["type_objet"] in ("stage", "all")),
         None
     )
-    id_filiere = stage_resp["dimensions"]["filiere"] \
-                    if stage_resp \
-                    else "id_filiere"
+    nom_filiere = stage_resp["dimensions"]["filiere"] \
+                    if stage_resp and "filiere" in stage_resp["dimensions"] \
+                    else "%"
 
-    request["params"] = request["params"](id_filiere) \
+    annee = stage_resp["dimensions"]["annee"] \
+                    if stage_resp and "annee" in stage_resp["dimensions"] \
+                    else "%"
+
+    request["params"] = request["params"](nom_filiere, annee) \
                             if callable(request["params"]) \
                             else request["params"]
-    request["allowedRolesRequester"] = request["allowedRolesRequester"](id_filiere) \
+    request["allowedRolesRequester"] = request["allowedRolesRequester"](nom_filiere) \
                                         if callable(request["allowedRolesRequester"]) \
                                         else request["allowedRolesRequester"]
-    print(request, flush=True)
+    
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/promos/",

@@ -1,7 +1,7 @@
-from access_control.types import Responsabilite
+from access_control.types import Responsibility
+from models.user import User
 
-
-def _responsabilite_covers(stored: dict, required: Responsabilite) -> bool:
+def _responsibility_covers(stored: dict, required: Responsibility) -> bool:
     """
     Vérifie qu'une responsabilité stockée en BD couvre la responsabilité requise.
 
@@ -12,30 +12,30 @@ def _responsabilite_covers(stored: dict, required: Responsabilite) -> bool:
         return False
 
     return all(
-        required.dimensions.get(dim) == val
+        required.dimensions.get(dim) == val or required.dimensions.get(dim) == "any"
         for dim, val in stored["dimensions"].items()
     )
 
-def has_any_of_responsabilites(user, required_list: list[Responsabilite]) -> bool:
+def has_any_of_responsibilities(user: User, required_list: list[Responsibility]) -> bool:
     """
     L'utilisateur doit couvrir AU MOINS UNE des responsabilités de la liste.
     """
     return any(
-        any(_responsabilite_covers(stored, required) for stored in user.responsabilites)
+        any(_responsibility_covers(stored, required) for stored in user.responsibilities)
         for required in required_list
     )
 
-def has_all_responsabilites(user, required_list: list[Responsabilite]) -> bool:
+def has_all_responsibilities(user: User, required_list: list[Responsibility]) -> bool:
     """
     L'utilisateur doit avoir UNE responsabilité couvrant CHACUNE des entrées.
     """
     return all(
-        has_any_of_responsabilites(user, [required])
+        has_any_of_responsibilities(user, [required])
         for required in required_list
     )
 
 
-def has_hierarchy_responsabilites(user, ordered_list: list[Responsabilite]) -> bool:
+def has_hierarchy_responsibilities(user: User, ordered_list: list[Responsibility]) -> bool:
     """
     L'utilisateur doit satisfaire un préfixe non vide de la hiérarchie :
     [R1] ou [R1, R2] ou [R1, R2, R3] ...
@@ -47,13 +47,13 @@ def has_hierarchy_responsabilites(user, ordered_list: list[Responsabilite]) -> b
         return False
 
     for i, required in enumerate(ordered_list):
-        if not has_any_of_responsabilites(user, [required]):
+        if not has_any_of_responsibilities(user, [required]):
             return i > 0
 
     return True  # toute la hiérarchie est satisfaite
 
 
-def parse_responsabilite(raw: dict) -> Responsabilite:
+def parse_responsibility(raw: dict) -> Responsibility:
     """
     Convertit une entrée du dictionnaire requests en objet Responsabilite.
     ex: {"type_objet": "stage", "filiere": "IDU", "niveau": "FI4"}
@@ -61,4 +61,4 @@ def parse_responsabilite(raw: dict) -> Responsabilite:
     """
     type_objet = raw.get("type_objet", "all")
     dimensions = {k: v for k, v in raw.items() if k != "type_objet"}
-    return Responsabilite(type_objet=type_objet, dimensions=dimensions)
+    return Responsibility(type_objet=type_objet, dimensions=dimensions)

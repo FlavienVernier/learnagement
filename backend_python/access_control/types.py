@@ -8,6 +8,6 @@ AccessRule = Union[
     dict,           # {"roles": [...], "one": {...}, "all": {...}, "hierarchy": {...}}
 ]
 
-class Responsabilite(BaseModel):
+class Responsibility(BaseModel):
     type_objet:  str
     dimensions:  dict[str, str] = {}  # {"resp": "stage", "filiere": "IDU", "niveau": "FI4", ...}

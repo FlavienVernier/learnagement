@@ -1,9 +1,9 @@
 from access_control.types import AccessRule
-from access_control.responsabilites import (
-    has_any_of_responsabilites,
-    has_all_responsabilites,
-    has_hierarchy_responsabilites,
-    parse_responsabilite,
+from access_control.responsibilities import (
+    has_any_of_responsibilities,
+    has_all_responsibilities,
+    has_hierarchy_responsibilities,
+    parse_responsibility,
 )
 
 
@@ -72,17 +72,17 @@ def _evaluate_dict(rule: dict, user, params: dict) -> bool:
 
     evaluators = {
         "roles":     lambda v: _evaluate_role_list(v, user),
-        "any":       lambda v: has_any_of_responsabilites(
+        "any":       lambda v: has_any_of_responsibilities(
                                    user,
-                                   [parse_responsabilite(r) for r in v]
+                                   [parse_responsibility(r) for r in v]
                                ),
-        "all":       lambda v: has_all_responsabilites(
+        "all":       lambda v: has_all_responsibilities(
                                    user,
-                                   [parse_responsabilite(r) for r in v]
+                                   [parse_responsibility(r) for r in v]
                                ),
-        "hierarchy": lambda v: has_hierarchy_responsabilites(
+        "hierarchy": lambda v: has_hierarchy_responsibilities(
                                    user,
-                                   [parse_responsabilite(r) for r in v]
+                                   [parse_responsibility(r) for r in v]
                                ),
     }
 
