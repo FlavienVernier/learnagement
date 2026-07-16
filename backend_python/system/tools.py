@@ -14,8 +14,8 @@ def get_all_requests(package_name: str) -> dict:
         full_name = f"{package_name}.{module_name}"
         module = importlib.import_module(full_name)
 
-        if hasattr(module, "requests"):
-            results[module_name] = module.requests
+        if hasattr(module, "__requests"):
+            results[module_name] = module.__requests
 
     return results
 
@@ -31,7 +31,7 @@ def get_all_local_requests() -> dict:
         full_name = f"{package_name}.{module_name}"
         module = importlib.import_module(full_name)
 
-        if hasattr(module, "requests"):
-            results[module_name] = module.requests
+        if hasattr(module, "__requests"):
+            results[module_name] = module.__requests
 
     return results

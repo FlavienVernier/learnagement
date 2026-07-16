@@ -22,6 +22,7 @@ from fastapi import HTTPException
 def make_user(type_role: str = "enseignant", responsibilities: list[dict] = None):
     user = MagicMock()
     user.type = type_role
+    user.roles = [type_role]
     user.id = 99
     user.responsibilities = responsibilities or []
     return user
@@ -41,9 +42,9 @@ def make_required(type_objet: str, **dims) -> Responsibility:
 
 class TestResponsibilityCovers:
 
-    def test_wildcard_vide_ne_couvre_pas(self):
+    def test_wildcard_vide(self):
         """
-        {} en BD ne doit PAS couvrir un scope quelconque.
+        {} en BD couvre un scope quelconque.
         """
         stored = make_stored("stage", {})
         required = make_required("stage", filiere="IDU", niveau="FI4")
@@ -105,6 +106,14 @@ class TestResponsibilityCovers:
         required = make_required("stage", filiere="IDU", niveau="FI4")
         assert _responsibility_covers(stored, required) is True
 
+    def test_type_objet_all_ne_couvre_pas_valeur_differente(self):
+        """
+        type_objet="all" couvre n'importe quel type_objet si dimensions ok.
+        """
+        stored = make_stored("all", {"filiere": "SEA"})
+        required = make_required("stage", filiere="IDU", niveau="FI4")
+        assert _responsibility_covers(stored, required) is False
+
     def test_type_objet_different_ne_couvre_pas(self):
         """
         type_objet différent
@@ -113,6 +122,29 @@ class TestResponsibilityCovers:
         required = make_required("stage", filiere="IDU")
         assert _responsibility_covers(stored, required) is False
 
+    def test_dimension_a_valeur_any_couvre_plus_large(self):
+        """
+        {"filiere":"IDU","niveau":"S8"} couvre {"filiere":"IDU","niveau":"any"}.
+        """
+        stored = make_stored("stage", {"filiere": "IDU",})
+        required = make_required("stage", filiere="any", niveau="FI4")
+        assert _responsibility_covers(stored, required) is True
+
+    def test_dimension_a_valeur_any_couvre_exact(self):
+        """
+        {"filiere":"IDU","niveau":"S8"} couvre {"filiere":"IDU","niveau":"any"}.
+        """
+        stored = make_stored("stage", {"filiere": "IDU", "niveau": "FI4"})
+        required = make_required("stage", filiere="IDU", niveau="any")
+        assert _responsibility_covers(stored, required) is True
+
+    def test_dimension_a_valeur_any_ne_couvre_pas_trop_precis(self):
+        """
+        {"filiere":"IDU","niveau":"S8"} couvre {"filiere":"IDU","niveau":"any"}.
+        """
+        stored = make_stored("stage", {"filiere": "IDU", "niveau": "FI4"})
+        required = make_required("stage", filiere="any")
+        assert _responsibility_covers(stored, required) is False
 
 # ─────────────────────────────────────────────
 # has_any_of_responsabilites
