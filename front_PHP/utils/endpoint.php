@@ -91,7 +91,7 @@ function python_endpoint($method, $url, $data, $token) {
 
 
 function cas_endpoint($method, $url, $data = null) {
-    $casToken = getenv("CAS_SERVICE_TOKEN");
+    $casToken = getenv("INSTANCE_SECRET");
     $headers = [
         "X-Cas-Token: $casToken",
         "Content-Type: application/json",

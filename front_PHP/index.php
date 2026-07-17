@@ -35,19 +35,17 @@
         if (isset($_GET['ticket'])) {
             require_once __DIR__ . "/utils/cas.php";
 
-            $serviceUrl = "https://learnagement.local.univ-savoie.fr/";
+            $serviceUrl = getenv("FRONT_PHP_PROTOCOL") . "://" . getenv("INSTANCE_URL") . "/";
             $casData = validateCasTicket($_GET['ticket'], $serviceUrl);
-
-            getLogger()->info('CAS data: ' . json_encode($casData));
 
             if ($casData === null) {
                 getLogger()->warning('CAS ticket invalide', ['ticket' => $_GET['ticket']]);
                 $t->router->redirect('login');
             }
 
+            //getLogger()->info("Cas Data: " . json_encode($casData));
 
-
-            $result = casLogin($casData, getenv("CAS_SERVICE_TOKEN"));
+            $result = casLogin($casData);
             if ($result && isset($result['access_token'])) {
                 // Le backend a géré seul le lookup/provisionnement
                 login(

@@ -2,7 +2,7 @@
 
 function validateCasTicket(string $ticket, string $serviceUrl): ?array
 {
-    $casValidateUrl = "https://cas-uds.grenet.fr/serviceValidate"
+    $casValidateUrl = getenv("CAS_HOST") . "/serviceValidate"
         . "?service=" . urlencode($serviceUrl)
         . "&ticket=" . urlencode($ticket);
 
@@ -10,6 +10,7 @@ function validateCasTicket(string $ticket, string $serviceUrl): ?array
     if ($response === false) {
         return null;
     }
+    //getLogger()->info("Prout" . json_encode($response));
 
     // Parse la réponse XML du CAS
     $xml = simplexml_load_string($response);
@@ -27,20 +28,28 @@ function validateCasTicket(string $ticket, string $serviceUrl): ?array
     $user = (string) $cas->authenticationSuccess->user;
 
     // Attributs supplémentaires si ton CAS en renvoie
+    $groups = getenv("CAS_ALLOWED_GROUPS");
+    $allowedGroups = array_map('trim', explode(' ', $groups));
     $attributes = [];
+    $members = [];
     if (isset($cas->authenticationSuccess->attributes)) {
-        foreach ($cas->authenticationSuccess->attributes->children() as $key => $value) {
-            $attributes[$key] = (string) $value;
+        foreach ($cas->authenticationSuccess->attributes->children($ns['cas'] ?? 'cas') as $key => $value) {
+            if ($key === 'member') {
+                $members[] = (string) $value;  // collecte tous les cas:member
+            } else {
+                $attributes[$key] = (string) $value;
+            }
         }
     }
 
     return [
         'login' => $user,
         'attributes' => $attributes,
+        'members'    => $members,
     ];
 }
 
-function casLogin(array $casData, string $serviceToken): ?array
+function casLogin(array $casData): ?array
 {
     $url  = get_python_backend_url("token-cas/");
     $data = [
@@ -48,7 +57,8 @@ function casLogin(array $casData, string $serviceToken): ?array
         'email'  => $casData['attributes']['mail']      ?? $casData['login'] . '@univ-savoie.fr',
         'nom'    => $casData['attributes']['sn']         ?? '',
         'prenom' => $casData['attributes']['givenName']  ?? '',
-        'type'   => 'etudiant',
+        'members' => $casData['members'],
     ];
-    return cas_endpoint("POST", $url, $data, $serviceToken);
+    //getLogger()->info('Backend data: ' . json_encode($data));
+    return cas_endpoint("POST", $url, $data);
 }

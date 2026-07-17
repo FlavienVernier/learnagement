@@ -13,7 +13,7 @@
         </label>
         <!-- Bouton de connexion CAS -->
         <div class="flex items-center justify-center mt-4">
-            <a href="https://cas-uds.grenet.fr/login?service=<?= urlencode("https://learnagement.local.univ-savoie.fr/") ?>"
+            <a href="<?= getenv("CAS_HOST") . "/login?service=" . urlencode(getenv("FRONT_PHP_PROTOCOL") . "://" . getenv("INSTANCE_URL") . "/") ?>"
                class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-semibold rounded-xl text-sm px-5 py-3 text-center transition-colors duration-200">
                 Se connecter / avec CAS - USMB
             </a>
