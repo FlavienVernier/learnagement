@@ -98,10 +98,13 @@ def get_student_wishes(current_user: User) -> List[dict]:
     Trie par id_etudiant puis par priorité croissante.
     """
     query = """
-        SELECT id_etudiant, id_partner_university, id_semestre, priority
-        FROM MOB_wishes
-        WHERE submission_date IS NOT NULL
-        ORDER BY id_etudiant ASC, priority ASC
+        SELECT w.id_etudiant, w.id_partner_university, w.id_semestre, w.priority
+        FROM MOB_wishes w
+        JOIN LNM_etudiant e ON w.id_etudiant = e.id_etudiant
+        JOIN LNM_promo p ON e.id_promo = p.id_promo
+        WHERE w.submission_date IS NOT NULL
+          AND p.annee = 4
+        ORDER BY w.id_etudiant ASC, w.priority ASC
     """
     request = {
         "request": query,
@@ -300,7 +303,7 @@ def run_round_robin_assignment(
                 "id_etudiant":           id_etudiant,
                 "id_partner_university": id_university,
                 "id_semestre":           id_semestre,
-                "status":                "accepted" if is_stage else "pending"
+                "status":                "pending"
             })
 
             # Décrémentation des stocks (sauf stage)
