@@ -589,7 +589,7 @@ def list_all_wishes_ri(
                         LEFT JOIN MOB_wishes w ON e.id_etudiant = w.id_etudiant
                         LEFT JOIN MOB_partner_university u ON u.id_partner_university = w.id_partner_university
                         LEFT JOIN MOB_assignment a ON a.id_etudiant = e.id_etudiant
-                        WHERE p.annee = 4 AND e.mobility_completed != 1
+                        WHERE p.annee = 4
                         ORDER BY e.nom ASC, e.prenom ASC, w.priority ASC
                     """,
         "allowedRolesRequester": ["relations_internationales"],
@@ -811,6 +811,7 @@ def export_admin_wishes(
     sql_request = SQLRequest(
         request='''
             SELECT
+                e.id_etudiant AS ID_Etudiant,
                 e.nom AS Nom,
                 e.prenom AS Prenom,
                 e.mail AS Email,
@@ -829,6 +830,7 @@ def export_admin_wishes(
             JOIN LNM_statut s ON s.id_statut = p.id_statut
             JOIN MOB_partner_university u ON u.id_partner_university = w.id_partner_university
             JOIN LNM_semestre sem ON sem.id_semestre = w.id_semestre
+            WHERE p.annee = 4
             ORDER BY e.nom ASC, e.prenom ASC, w.priority ASC
         ''',
         params=None,
@@ -841,7 +843,7 @@ def export_admin_wishes(
     ws.title = "Voeux Etudiants"
     
     headers = [
-        "Nom", "Prénom", "Email", "Filière", "Statut", 
+        "ID Etudiant", "Nom", "Prénom", "Email", "Filière", "Statut", 
         "Note de Mobilité", "Priorité", "Université Partenaire", 
         "Pays", "Semestre Demandé", "Date de Soumission"
     ]
@@ -849,7 +851,7 @@ def export_admin_wishes(
     
     for row in result:
         ws.append([
-            row.get("Nom", ""), row.get("Prenom", ""), row.get("Email", ""),
+            row.get("ID_Etudiant", ""), row.get("Nom", ""), row.get("Prenom", ""), row.get("Email", ""),
             row.get("Filiere", ""), row.get("Statut", ""),
             row.get("Note", ""), row.get("Priorite", ""), row.get("Universite_Partenaire", ""),
             row.get("Pays", ""), row.get("Semestre_Demande", ""),
@@ -879,6 +881,7 @@ def export_admin_assignments(
     sql_request = SQLRequest(
         request='''
             SELECT
+                e.id_etudiant AS ID_Etudiant,
                 e.nom AS Nom,
                 e.prenom AS Prenom,
                 e.mail AS Email,
@@ -926,7 +929,7 @@ def export_admin_assignments(
     ws.title = "Affectations Etudiants"
     
     headers = [
-        "Nom", "Prénom", "Email", "Filière", "Statut", 
+        "ID Etudiant", "Nom", "Prénom", "Email", "Filière", "Statut", 
         "Note de Mobilité", "Moyenne Centrée Réduite", "Université Affectée", "Pays", 
         "Semestre Affecté", "Statut de l'affectation"
     ]
@@ -934,7 +937,7 @@ def export_admin_assignments(
     
     for row in result:
         ws.append([
-            row.get("Nom", ""), row.get("Prenom", ""), row.get("Email", ""),
+            row.get("ID_Etudiant", ""), row.get("Nom", ""), row.get("Prenom", ""), row.get("Email", ""),
             row.get("Filiere", ""), row.get("Statut", ""),
             row.get("Note", ""), row.get("Moyenne_Centree_Reduite", ""), row.get("Universite_Affectee", ""),
             row.get("Pays", ""), row.get("Semestre_Affecte", ""), row.get("Statut_Affectation", "")
@@ -967,7 +970,6 @@ def get_submitted_students(
             JOIN LNM_promo p ON e.id_promo = p.id_promo
             JOIN LNM_filiere f ON p.id_filiere = f.id_filiere
             WHERE p.annee = 4
-              AND e.mobility_completed = 0
               AND EXISTS (
                   SELECT 1 FROM MOB_wishes w 
                   WHERE w.id_etudiant = e.id_etudiant 
@@ -992,7 +994,7 @@ def reset_student_wishes(
         request='''
             SELECT 1 FROM LNM_etudiant e
             JOIN LNM_promo p ON e.id_promo = p.id_promo
-            WHERE e.id_etudiant = %(id)s AND p.annee = 4 AND e.mobility_completed = 0
+            WHERE e.id_etudiant = %(id)s AND p.annee = 4
         ''',
         params={"id": id_etudiant},
         allowedRolesRequester=["relations_internationales"]
@@ -1032,6 +1034,7 @@ def get_assigned_students(
             JOIN LNM_promo p ON e.id_promo = p.id_promo
             JOIN LNM_filiere f ON p.id_filiere = f.id_filiere
             JOIN MOB_partner_university u ON a.id_partner_university = u.id_partner_university
+            WHERE p.annee = 4
             ORDER BY e.nom ASC, e.prenom ASC
         ''',
         params=None,
@@ -1059,7 +1062,7 @@ def export_assigned_students_status(
             JOIN LNM_promo p ON e.id_promo = p.id_promo
             JOIN LNM_filiere f ON p.id_filiere = f.id_filiere
             JOIN MOB_partner_university u ON a.id_partner_university = u.id_partner_university
-            WHERE a.status = %(status)s
+            WHERE p.annee = 4 AND a.status = %(status)s
             ORDER BY e.nom ASC, e.prenom ASC
         ''',
         params={"status": status},
@@ -1150,29 +1153,30 @@ def get_mobility_diagnostics(
     retardataires = 0
     
     wishes_distribution = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0}
-
+    
     if result:
         for row in result:
             if row.get("mobility_completed") == 1:
                 validated_mobility += 1
             else:
                 remaining_students += 1
-                wish_count = row.get("wish_count", 0)
-                last_sub = row.get("last_submission_date")
                 
-                # Distribution of wishes (only for remaining students)
-                if wish_count == 0:
-                    retardataires += 1
+            wish_count = row.get("wish_count", 0)
+            last_sub = row.get("last_submission_date")
+            
+            # Distribution of wishes (for all students)
+            if wish_count == 0:
+                retardataires += 1
+            else:
+                last_sub_str = str(last_sub).strip().lower() if last_sub is not None else ""
+                if last_sub_str and last_sub_str not in ["none", "null", "0000-00-00 00:00:00", "0000-00-00", "0"]:
+                    wishes_submitted += 1
                 else:
-                    last_sub_str = str(last_sub).strip().lower() if last_sub is not None else ""
-                    if last_sub_str and last_sub_str not in ["none", "null", "0000-00-00 00:00:00", "0000-00-00", "0"]:
-                        wishes_submitted += 1
-                    else:
-                        wishes_in_progress += 1
-                    
-                    # Update distribution (clamp to max 5)
-                    w_key = str(min(wish_count, 5))
-                    wishes_distribution[w_key] = wishes_distribution.get(w_key, 0) + 1
+                    wishes_in_progress += 1
+                
+                # Update distribution (clamp to max 5)
+                w_key = str(min(wish_count, 5))
+                wishes_distribution[w_key] = wishes_distribution.get(w_key, 0) + 1
 
     return {
         "validated_mobility": validated_mobility,
@@ -1229,11 +1233,11 @@ def export_mobility_diagnostics(
                 match = True
             elif category == "remaining" and not is_completed:
                 match = True
-            elif category == "submitted" and not is_completed and wish_count > 0 and is_submitted:
+            elif category == "submitted" and wish_count > 0 and is_submitted:
                 match = True
-            elif category == "in_progress" and not is_completed and wish_count > 0 and not is_submitted:
+            elif category == "in_progress" and wish_count > 0 and not is_submitted:
                 match = True
-            elif category == "retardataires" and not is_completed and wish_count == 0:
+            elif category == "retardataires" and wish_count == 0:
                 match = True
                 
             if match:
