@@ -40,6 +40,7 @@ CREATE TABLE `MOB_assignment` (
     `status` ENUM('pending', 'accepted', 'declined') NOT NULL DEFAULT 'pending',
     PRIMARY KEY (`id_assignment`),
     UNIQUE KEY `UX_assignment_etudiant` (`id_etudiant`),
+    UNIQUE KEY `SECONDARY` (`id_etudiant`, `id_partner_university`,`id_semestre`) USING BTREE,
     CONSTRAINT `FK_assignment_etudiant` FOREIGN KEY (`id_etudiant`) REFERENCES `LNM_etudiant` (`id_etudiant`) ON DELETE CASCADE ON UPDATE RESTRICT,
     CONSTRAINT `FK_assignment_partner_university` FOREIGN KEY (`id_partner_university`) REFERENCES `MOB_partner_university` (`id_partner_university`) ON DELETE RESTRICT ON UPDATE RESTRICT,
     CONSTRAINT `FK_assignment_semestre` FOREIGN KEY (`id_semestre`) REFERENCES `LNM_semestre` (`id_semestre`) ON DELETE RESTRICT ON UPDATE RESTRICT
@@ -68,6 +69,6 @@ CREATE TABLE `MOB_filiere_quotas` (
     `id_semestre` INT NOT NULL,
     `places` INT NOT NULL,
     PRIMARY KEY (`id_quota`),
-    CONSTRAINT `fk_mob_filiere_quotas_filiere` FOREIGN KEY (`id_filiere`) REFERENCES `LNM_filiere` (`id_filiere`),
-    UNIQUE KEY `uq_filiere_annee_semestre` (`id_filiere`, `annee_scolaire`, `id_semestre`)
+    UNIQUE KEY `SECONDARY` (`id_filiere`, `annee_scolaire`,`id_semestre`) USING BTREE,
+    CONSTRAINT `fk_mob_filiere_quotas_filiere` FOREIGN KEY (`id_filiere`) REFERENCES `LNM_filiere` (`id_filiere`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

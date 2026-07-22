@@ -1,13 +1,11 @@
-import os
-import dotenv
 import logging
-import json
 import inspect
 
 from fastapi import APIRouter, Depends
 from typing import Annotated
-from dependencies import db_request, get_current_active_user, User, SQLRequest
-
+from api.dependencies import db_request, get_current_active_user
+from models.request import SQLRequest
+from models.user import User
 
 logger = logging.getLogger(__name__)
 
@@ -186,9 +184,11 @@ requests = {
                         GROUP BY code_module) PROJsequenced ON  PROJsequenced.code_module = MAQUETTE_module.code_module
                     WHERE MAQUETTE_module.id_responsable = %(id_responsable)s
                     """,
+        # I don't know why I set lambda params
         "params":
             lambda id_responsable: {"id_responsable": id_responsable},
         #"allowedRolesRequester": ["administratif", "responsable_etudes"],
+        # request allowed if the user is reponsible of the module, or an administratif, or has "responsable_etudes" role
         "allowedRolesRequester": lambda id_responsable, current_user: [current_user.ExplicitSecondaryK] if id_responsable and current_user.id == id_responsable else ["administratif", "responsable_etudes"],
 
     },

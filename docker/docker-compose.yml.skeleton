@@ -52,6 +52,7 @@ services:
         ports:
             - ${BACKEND_PYTHON_PORT}:${BACKEND_PYTHON_DOCKER_PORT}
         environment:
+            - INSTANCE_NAME=${INSTANCE_NAME}
             - ENV=${ENV}
         volumes:
             - ../backend_python/:/app/
@@ -73,6 +74,7 @@ services:
         ports:
             - "${FRONT_PHP_PORT}:${FRONT_PHP_DOCKER_PORT}"
         environment:
+            - INSTANCE_NAME=${INSTANCE_NAME}
             - ENV=${ENV}
         volumes:
             - ../front_PHP:/var/www/html
@@ -91,6 +93,7 @@ services:
         ports:
             - "${FRONT_NEXTAUTH_PORT}:${FRONT_NEXTAUTH_DOCKER_PORT}"
         environment:
+            - INSTANCE_NAME=${INSTANCE_NAME}
             - ENV=${ENV}
         volumes:
             - ../front_NextJS:/app
@@ -108,6 +111,7 @@ services:
         ports:
             - "${FRONT_DASH_PORT}:${FRONT_DASH_DOCKER_PORT}"
         environment:
+            - INSTANCE_NAME=${INSTANCE_NAME}
             - ENV=${ENV}
         volumes:
             - ../front_DashPlotly/:/app/

@@ -7,7 +7,8 @@ from typing import Annotated
 from pwdlib import PasswordHash
 from pwdlib.hashers.bcrypt import BcryptHasher
 
-from dependencies import logger, get_user, Token
+from api.dependencies import logger, get_user
+from models.token import Token
 from auth.authenticate_tools import create_access_token
 
 

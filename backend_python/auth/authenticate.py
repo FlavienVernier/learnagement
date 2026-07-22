@@ -1,17 +1,17 @@
 import os
 import dotenv
-import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import APIRouter, Depends, Header
 from fastapi.security import OAuth2PasswordRequestForm
 
-from dependencies import logger, get_user, Token
+from api.dependencies import logger
+from models.token import Token
 import auth.authenticate_lnm as authenticate_lnm
 import auth.authenticate_cas as authenticate_cas
 #import auth.authenticate_ldap
 #import auth.authenticate_proxy_cas
 
-from typing import Annotated, Optional
+from typing import Annotated
 
 dotenv.load_dotenv(".env")
 
