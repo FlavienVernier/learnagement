@@ -5,6 +5,18 @@ function _mockCasResponse(string $ticket): ?array
 {
     // Tickets de test prédéfinis
     $mocks = [
+        "ST-MOCK-ADMINISTRATIF" => [
+            "login"      => "bidule",
+            "attributes" => [
+                "sn"          => "bidule",
+                "givenName"   => "Machin",
+                "email"       => "machin.bidule@lnm.fr",
+                "displayName" => "Machin Bidule",
+            ],
+            "members" => [
+                "cn=personnels,ou=groups,dc=lnm,dc=fr",
+            ],
+        ],
         "ST-MOCK-ENSEIGNANT" => [
             "login"      => "tartampion",
             "attributes" => [

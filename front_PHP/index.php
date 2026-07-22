@@ -36,6 +36,7 @@
    // NO Prod env
     if (getenv("ENV") !== "prod") {
 
+        // Test .../localhost/mock-cas-login?ticket=ST-MOCK-ADMINISTRATIF
         // Test .../localhost/mock-cas-login?ticket=ST-MOCK-ENSEIGNANT
         // Test .../localhost/mock-cas-login?ticket=ST-MOCK-ETUDIANT
         $t->router->get('/mock-cas-login', 'mock-cas-login', function () use ($t, $user) {

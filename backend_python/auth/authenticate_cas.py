@@ -95,15 +95,18 @@ def _determine_role_from_cas_groups(members: list[str]) -> str | None:
         val = os.getenv(key, "").strip()
         return set(val.split()) if val else set()
 
-    # Ordre de priorité : administratif > enseignant > etudiant
+    main_role = None
+    # Ordre de priorité : enseignant > etudiant > administratif
+    # Ex. administratif is institution member neither enseignant nor etudiant
+    # phd student is  etudiant and enseignant, its main role is enseignant
     if member_cns & groups_from_env("CAS_ALLOWED_GROUPS_4_ADMINISTRATIF"):
-        return "administratif"
-    if member_cns & groups_from_env("CAS_ALLOWED_GROUPS_4_ENSEIGNANT"):
-        return "enseignant"
+        main_role = "administratif"
     if member_cns & groups_from_env("CAS_ALLOWED_GROUPS_4_ETUDIANT"):
-        return "etudiant"
+        main_role = "etudiant"
+    if member_cns & groups_from_env("CAS_ALLOWED_GROUPS_4_ENSEIGNANT"):
+        main_role = "enseignant"
 
-    return None  # aucun groupe autorisé
+    return main_role  # aucun groupe autorisé
 
 
 def _create_cas_user(data: CasUserProvision, main_role: str) -> dict | None:

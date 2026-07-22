@@ -14,18 +14,18 @@ from auth.authenticate_cas import (
 # Fixtures
 # ─────────────────────────────────────────────
 
-def make_cas_data(login="flver", role="enseignant") -> CasUserProvision:
+def make_cas_data(login="tartampion", role="enseignant") -> CasUserProvision:
     members_by_role = {
         "enseignant": [
             "cn=personnels-enseignants.polytech,ou=groups,dc=uds,dc=fr",
-            "cn=personnels,ou=groups,dc=uds,dc=fr",
+            "cn=permanents,ou=groups,dc=uds,dc=fr",
         ],
         "etudiant": [
             "cn=etudiants-ige4-idu,ou=groups,dc=uds,dc=fr",
             "cn=usmb-etudiants-polytech,ou=groups,dc=uds,dc=fr",
         ],
         "administratif": [
-            "cn=administratif-polytech,ou=groups,dc=uds,dc=fr",
+            "cn=personnels.polytech,ou=groups,dc=uds,dc=fr",
         ],
         "inconnu": [
             "cn=groupe-inconnu,ou=groups,dc=uds,dc=fr",
@@ -33,9 +33,9 @@ def make_cas_data(login="flver", role="enseignant") -> CasUserProvision:
     }
     return CasUserProvision(
         login=login,
-        email=f"{login}@univ-savoie.fr",
-        nom="Vernier",
-        prenom="Flavien",
+        email=f"{login}@lnm.fr",
+        nom="Tartampion",
+        prenom="Pierre",
         members=members_by_role[role],
     )
 
