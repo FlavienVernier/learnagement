@@ -14,6 +14,5 @@ CREATE TABLE LNM_enseignant_responsabilite_dimensions (
     dimension                             VARCHAR(50) NOT NULL,   -- 'filiere', 'niveau', 'semestre', ...
     valeur                                VARCHAR(100) NOT NULL,  -- 'IDU', 'FI4', 'S8', ...
     FOREIGN KEY (id_enseignant_responsabilites) REFERENCES LNM_enseignant_responsabilites(id_enseignant_responsabilites) ON DELETE CASCADE,
-    UNIQUE KEY unique_dim (id_enseignant_responsabilites, dimension),
-    UNIQUE KEY SECONDARY (id_enseignant_responsabilites, dimension, valeur)
+    UNIQUE KEY SECONDARY (id_enseignant_responsabilites, dimension)
 );

@@ -31,13 +31,8 @@ async def get_query_token(token: str):
         raise HTTPException(status_code=400, detail="No Jessica token provided")
 
 
-def get_administratif(user_login: str, method: str = "byMail"):
-    password_required = False
-    if method == "byMail":
-        login_field = "mail"
-        password_required = True
-    elif method == "byLogin":
-        login_field = "login"
+def get_administratif(user_login: str):
+
     users=[]
     try:
         connection = mysql.connector.connect(**db_connexion())
@@ -47,13 +42,14 @@ def get_administratif(user_login: str, method: str = "byMail"):
                                  ExplicitSecondaryKs_LNM_administratif.ExplicitSecondaryK
                           FROM LNM_administratif 
                           JOIN ExplicitSecondaryKs_LNM_administratif ON ExplicitSecondaryKs_LNM_administratif.id_administratif = LNM_administratif.id_administratif
-                          WHERE {login_field} = %s""", (user_login,))
+                          WHERE login = %s""",
+                       (user_login,))
         users = cursor.fetchall()
     except Exception as e:
         logger.exception(e)
     if len(users) != 0:
         user_dict = users[0]
-        if password_required and not user_dict.get("password"):
+        if user_dict.get("intern_account") != 0  and not user_dict.get("password"):
             logger.warning(f"Inactive user '{user_login}' try to connect")
             return None
         user_dict["main_role"] = "administratif"
@@ -65,20 +61,15 @@ def get_administratif(user_login: str, method: str = "byMail"):
                         FROM LNM_administratif 
                         JOIN LNM_administratif_as_role on LNM_administratif_as_role.id_administratif = LNM_administratif.id_administratif
                         JOIN LNM_role on LNM_role.id_role = LNM_administratif_as_role.id_role
-                        WHERE {login_field} = %s""",
+                        WHERE login = %s""",
             (user_login,))
         roles = cursor.fetchall()
         user_dict["roles"] += [item for t in roles for item in t]
         return UserInDB(**user_dict)
     return None
 
-def get_enseignant(user_login: str, method: str = "byMail"):
-    password_required = False
-    if method == "byMail":
-        login_field = "mail"
-        password_required = True
-    elif method == "byLogin":
-        login_field = "login"
+def get_enseignant(user_login: str):
+
     users=[]
     try:
         connection = mysql.connector.connect(**db_connexion())
@@ -89,14 +80,15 @@ def get_enseignant(user_login: str, method: str = "byMail"):
                               ExplicitSecondaryKs_LNM_enseignant.ExplicitSecondaryK
                        FROM LNM_enseignant 
                        JOIN ExplicitSecondaryKs_LNM_enseignant ON ExplicitSecondaryKs_LNM_enseignant.id_enseignant = LNM_enseignant.id_enseignant
-                       WHERE {login_field} = %s""",
+                       WHERE login = %s""",
                        (user_login,))
         users = cursor.fetchall()
     except Exception as e:
         logger.exception(e)
     if len(users) != 0:
         user_dict = users[0]
-        if password_required and not user_dict.get("password"):
+        logger.info(f"{user_dict['intern_account']}, {type(user_dict['intern_account'])}")
+        if user_dict.get("intern_account") != 0  and not user_dict.get("password"):
             logger.warning(f"Inactive user '{user_login}' try to connect")
             return None
         user_dict["main_role"] = "enseignant"
@@ -108,7 +100,7 @@ def get_enseignant(user_login: str, method: str = "byMail"):
                         FROM LNM_enseignant 
                         JOIN LNM_enseignant_as_role ON LNM_enseignant_as_role.id_enseignant = LNM_enseignant.id_enseignant
                         JOIN LNM_role on LNM_role.id_role = LNM_enseignant_as_role.id_role
-                        WHERE {login_field} = %s""",
+                        WHERE login = %s""",
             (user_login,))
         roles = cursor.fetchall()
         user_dict["roles"] += [item for t in roles for item in t]
@@ -125,7 +117,7 @@ def get_enseignant(user_login: str, method: str = "byMail"):
                 FROM LNM_enseignant_responsabilites
                 JOIN LNM_enseignant ON LNM_enseignant.id_enseignant = LNM_enseignant_responsabilites.id_enseignant
                 LEFT JOIN LNM_enseignant_responsabilite_dimensions ON LNM_enseignant_responsabilite_dimensions.id_enseignant_responsabilites = LNM_enseignant_responsabilites.id_enseignant_responsabilites
-                WHERE {login_field} = %s""",
+                WHERE login = %s""",
             (user_login,))
         responsibilities = cursor.fetchall()
         user_dict["responsibilities"] = load_enseignant_responsibilities(responsibilities)
@@ -134,13 +126,8 @@ def get_enseignant(user_login: str, method: str = "byMail"):
     return None
 
 
-def get_etudiant(user_login: str, method: str = "byMail"):
-    password_required = False
-    if method == "byMail":
-        login_field = "mail"
-        password_required = True
-    elif method == "byLogin":
-        login_field = "login"
+def get_etudiant(user_login: str):
+
     users=[]
     try:
         connection = mysql.connector.connect(**db_connexion())
@@ -150,14 +137,15 @@ def get_etudiant(user_login: str, method: str = "byMail"):
                                  ExplicitSecondaryKs_LNM_etudiant.ExplicitSecondaryK
                           FROM LNM_etudiant 
                           JOIN ExplicitSecondaryKs_LNM_etudiant ON ExplicitSecondaryKs_LNM_etudiant.id_etudiant = LNM_etudiant.id_etudiant
-                          WHERE {login_field} = %s""",
+                          WHERE login = %s""",
                        (user_login,))
         users = cursor.fetchall()
     except Exception as e:
         logger.exception(e)
     if len(users) != 0:
         user_dict = users[0]
-        if password_required and not user_dict.get("password"):
+
+        if user_dict.get("intern_account") != 0 and not user_dict.get("password"):
             logger.warning(f"Inactive user '{user_login}' try to connect")
             return None
         user_dict["main_role"] = "etudiant"
@@ -165,7 +153,7 @@ def get_etudiant(user_login: str, method: str = "byMail"):
         return UserInDB(**user_dict)
     return None
 
-def get_user(user_login: str, method: str = "byMail"):
+def get_user(user_login: str):
     """
     Allowed methods are byMail (default) or byLogin.
     "byMail" is the default local login, it requires a local password.
@@ -174,14 +162,14 @@ def get_user(user_login: str, method: str = "byMail"):
     fetchers = [get_administratif, get_enseignant, get_etudiant]
 
     user = next(
-        filter(None, (f(user_login, method) for f in fetchers)),
+        filter(None, (f(user_login) for f in fetchers)),
         None
     )
 
     if user is not None:
-        logger.info(f"User {user_login} logged with {method}")
+        logger.info(f"User {user_login} logged")
     else:
-        logger.error(f"Loging error with login: {user_login}, with method: {method}")
+        logger.error(f"Loging error with login: {user_login}")
 
     return user
 
@@ -241,17 +229,17 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     #print(token, flush=True)
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_login = payload.get("email")
+        user_login = payload.get("login")
         #print("userlogin", userlogin, flush=True)
         if user_login is None:
             logger.error(f"Login error with payload: {payload}")
             raise credentials_exception
-        token_data = TokenData(mail=user_login)
+        token_data = TokenData(login=user_login)
         #print("token_data", token_data, flush=True)
     except InvalidTokenError as e:
         logger.error(f"Invalid token : {e}")
         raise credentials_exception
-    user = get_user(token_data.mail)
+    user = get_user(token_data.login)
     if user is None:
         logger.error(f"Login error with payload: {payload}")
         raise credentials_exception

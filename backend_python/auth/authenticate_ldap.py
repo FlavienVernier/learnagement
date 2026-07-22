@@ -21,7 +21,7 @@ def authenticate_user_ldap(user_login: str, password: str):
     if not is_ldap_user:
         logger.info(f"Incorect LDAP user or password")
         return None
-    user = get_user(user_login, method="byLogin")
+    user = get_user(user_login)
     return user
 
 def validate_ldap(user_login, password):

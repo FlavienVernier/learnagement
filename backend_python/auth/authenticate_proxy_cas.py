@@ -139,7 +139,7 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = get_user(form_data.username, method="byLogin")
+    user = get_user(form_data.username)
 
     # --- Génération du token ---
     access_token = create_access_token(

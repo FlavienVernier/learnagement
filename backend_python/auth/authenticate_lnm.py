@@ -19,7 +19,7 @@ def verify_password(plain_password, hashed_password):
 
 
 def __authenticate_user_lnm(user_login: str, password: str):
-    user = get_user(user_login, method="byMail")
+    user = get_user(user_login)
     if not user:
         logger.info(f"User {user_login} does not exist")
         return None
@@ -41,6 +41,7 @@ async def login_for_access_token(
         )
     access_token = create_access_token(
         data={"id": user.id,
+              "login": user.mail,
               "email": user.mail,
               "firstname": user.prenom,
               "lastname": user.nom,

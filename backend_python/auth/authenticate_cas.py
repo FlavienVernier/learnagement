@@ -34,7 +34,7 @@ async def authenticate_cas(data: CasUserProvision) -> Token:
     Point d'entrée unique pour l'auth CAS.
     Cherche l'user, le crée si premier login, retourne toujours un JWT.
     """
-    user = get_user(data.login, method="byLogin")
+    user = get_user(data.login)
     main_role = ""
     if not user:
 
@@ -61,6 +61,7 @@ async def authenticate_cas(data: CasUserProvision) -> Token:
 
     access_token = create_access_token(
         data={"id": user.id,
+              "login": user.login,
               "email": user.mail,
               "firstname": user.prenom,
               "lastname": user.nom,
@@ -114,8 +115,8 @@ def _create_cas_user(data: CasUserProvision, main_role: str) -> dict | None:
             cursor.execute(
                 """
                 INSERT INTO LNM_enseignant 
-                    (prenom, nom, mail, login, password, `service statutaire`, décharge)
-                VALUES (%s, %s, %s, %s, NULL, 192, 0)
+                    (prenom, nom, mail, login, inter_account, password, `service statutaire`, décharge)
+                VALUES (%s, %s, %s, %s, 0, NULL, 192, 0)
                 """,
                 (data.prenom, data.nom, data.email, data.login)
             )
@@ -125,7 +126,7 @@ def _create_cas_user(data: CasUserProvision, main_role: str) -> dict | None:
                 """
                 INSERT INTO LNM_administratif 
                     (nom, prenom, mail, login, password)
-                VALUES (%s, %s, %s, %s, NULL)
+                VALUES (%s, %s, %s, %s, 0, NULL)
                 """,
                 (data.nom, data.prenom, data.email, data.login)
             )
@@ -138,8 +139,8 @@ def _create_cas_user(data: CasUserProvision, main_role: str) -> dict | None:
             cursor.execute(
                 """
                 INSERT INTO LNM_etudiant 
-                    (nom, prenom, mail, login, password, id_promo)
-                VALUES (%s, %s, %s, %s, NULL, %s)
+                    (nom, prenom, mail, login, inter_account, password, id_promo)
+                VALUES (%s, %s, %s, %s, 0, NULL, %s)
                 """,
                 (data.nom, data.prenom, data.email, data.login, id_promo)
             )
@@ -149,7 +150,7 @@ def _create_cas_user(data: CasUserProvision, main_role: str) -> dict | None:
             return None
 
         connection.commit()
-        return get_user(data.login, method="byLogin")
+        return get_user(data.login)
 
     except Exception as e:
         logger.error(f"DB error during CAS provisioning: {e}")
