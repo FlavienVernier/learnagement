@@ -10,7 +10,8 @@
     require_once __DIR__ . "/config.php";
     include __DIR__ . "/utils/connectDB.php"; # must be refactored to load env here
 
-
+    use Firebase\JWT\JWT;
+    use Firebase\JWT\Key;
 
     create_session();
     $r = new Router('');
@@ -73,19 +74,46 @@
                 $t->router->redirect('login');
             }
 
-            //getLogger()->info("Cas Data: " . json_encode($casData));
+            getLogger()->info("Cas Data: " . json_encode($casData));
 
             $result = casLogin($casData);
+
+            getLogger()->info("Cas result: " . json_encode($result));
+
             if ($result && isset($result['access_token'])) {
                 // Le backend a géré seul le lookup/provisionnement
+                $jwt = $result["access_token"];
+                $secretKey = $_ENV["INSTANCE_SECRET"];
+                try {
+                    $decoded = JWT::decode(
+                        $jwt,
+                        new Key($secretKey, 'HS256')
+                    );
+
+                    //echo "Utilisateur : " . $decoded->email . " " . $decoded->firstname . " " . $decoded->lastname . PHP_EOL;
+                    //echo "Expire à : " . date('Y-m-d H:i:s', $decoded->exp) . PHP_EOL;
+
+                    if ($decoded->exp < time()) {
+                        $t->router->redirect('login');
+                        throw new Exception("Token expiré");
+                    }
+                } catch (Exception $e) {
+                    // ToDo manage expired token, expired password...
+                    echo "Token invalide : " . $e->getMessage();
+                    $t->router->redirect('login');
+                }
+
+                $types = array("enseignant", "etudiant", "administratif");
+
                 login(
-                    id: $result['id'],
-                    email: $result['email'],
-                    type: $result['type'],
-                    jwt: $result['access_token']
+                    id: $decoded->id,
+                    email: $decoded->email,
+                    type: array_values(array_intersect($decoded->roles,$types))[0],
+                    jwt: $result["access_token"]
                 );
                 $_SESSION['auth_method'] = 'cas';
                 $t->router->redirect('dashboard');
+
             }
 
             $t->router->redirect('login');

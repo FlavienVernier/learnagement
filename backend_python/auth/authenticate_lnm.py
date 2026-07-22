@@ -48,7 +48,7 @@ async def login_for_access_token(
               "password2update" : user.password2update
               },
     )
-    logger.info(f"User {user.mail} connected with roles {user.roles}")
+    logger.info(f"LNM user {user.mail} connected with roles {user.roles}")
     return Token(access_token=access_token, token_type="bearer")
 
 

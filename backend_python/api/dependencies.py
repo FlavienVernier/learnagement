@@ -32,9 +32,11 @@ async def get_query_token(token: str):
 
 
 def get_administratif(user_login: str, method: str = "byMail"):
+    password_required = False
     if method == "byMail":
         login_field = "mail"
-    elif method == "byLoggin":
+        password_required = True
+    elif method == "byLogin":
         login_field = "login"
     users=[]
     try:
@@ -51,7 +53,7 @@ def get_administratif(user_login: str, method: str = "byMail"):
         logger.exception(e)
     if len(users) != 0:
         user_dict = users[0]
-        if not user_dict.get("password"):
+        if password_required and not user_dict.get("password"):
             logger.warning(f"Inactive user '{user_login}' try to connect")
             return None
         user_dict["main_role"] = "administratif"
@@ -71,9 +73,11 @@ def get_administratif(user_login: str, method: str = "byMail"):
     return None
 
 def get_enseignant(user_login: str, method: str = "byMail"):
+    password_required = False
     if method == "byMail":
         login_field = "mail"
-    elif method == "byLoggin":
+        password_required = True
+    elif method == "byLogin":
         login_field = "login"
     users=[]
     try:
@@ -92,7 +96,7 @@ def get_enseignant(user_login: str, method: str = "byMail"):
         logger.exception(e)
     if len(users) != 0:
         user_dict = users[0]
-        if not user_dict.get("password"):
+        if password_required and not user_dict.get("password"):
             logger.warning(f"Inactive user '{user_login}' try to connect")
             return None
         user_dict["main_role"] = "enseignant"
@@ -131,9 +135,11 @@ def get_enseignant(user_login: str, method: str = "byMail"):
 
 
 def get_etudiant(user_login: str, method: str = "byMail"):
+    password_required = False
     if method == "byMail":
         login_field = "mail"
-    elif method == "byLoggin":
+        password_required = True
+    elif method == "byLogin":
         login_field = "login"
     users=[]
     try:
@@ -151,7 +157,7 @@ def get_etudiant(user_login: str, method: str = "byMail"):
         logger.exception(e)
     if len(users) != 0:
         user_dict = users[0]
-        if not user_dict.get("password"):
+        if password_required and not user_dict.get("password"):
             logger.warning(f"Inactive user '{user_login}' try to connect")
             return None
         user_dict["main_role"] = "etudiant"
@@ -160,6 +166,11 @@ def get_etudiant(user_login: str, method: str = "byMail"):
     return None
 
 def get_user(user_login: str, method: str = "byMail"):
+    """
+    Allowed methods are byMail (default) or byLogin.
+    "byMail" is the default local login, it requires a local password.
+    "byLogin" is used for remote login like CAS, no local password is required
+    """
     fetchers = [get_administratif, get_enseignant, get_etudiant]
 
     user = next(
@@ -170,7 +181,7 @@ def get_user(user_login: str, method: str = "byMail"):
     if user is not None:
         logger.info(f"User {user_login} logged with {method}")
     else:
-        logger.error(f"Logging error with login: {user_login}, with method: {method}")
+        logger.error(f"Loging error with login: {user_login}, with method: {method}")
 
     return user
 
@@ -217,7 +228,7 @@ def load_enseignant_responsibilities(rows: list[dict]) -> list[dict]:
 #     return user
 
 # def invalidate_user_cache(user_login: str):
-#     for method in ["byMail", "byLoggin"]:
+#     for method in ["byMail", "byLogin"]:
 #         redis_client.delete(f"user:{method}:{user_login}")
 # # À appeler dans vos endpoints de modification d'utilisateur, logout, voire périodiquement "timeout".
 
