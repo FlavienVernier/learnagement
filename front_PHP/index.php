@@ -145,7 +145,7 @@
         $wasCas = ($_SESSION['auth_method'] ?? '') === 'cas';
         logout();
 
-        if ($wasCas) {
+        if ($wasCas && getenv("CAS_MOCK_ENABLED") === "false"){
             $casLogoutUrl = "https://cas-uds.grenet.fr/cas/logout"
                 . "?service=" . urlencode("https://learnagement.local.univ-savoie.fr/login");
             header("Location: " . $casLogoutUrl);

@@ -115,8 +115,8 @@ def _create_cas_user(data: CasUserProvision, main_role: str) -> dict | None:
             cursor.execute(
                 """
                 INSERT INTO LNM_enseignant 
-                    (prenom, nom, mail, login, inter_account, password, `service statutaire`, décharge)
-                VALUES (%s, %s, %s, %s, 0, NULL, 192, 0)
+                    (prenom, nom, mail, login, intern_account, password)
+                VALUES (%s, %s, %s, %s, 0, NULL)
                 """,
                 (data.prenom, data.nom, data.email, data.login)
             )
@@ -125,7 +125,7 @@ def _create_cas_user(data: CasUserProvision, main_role: str) -> dict | None:
             cursor.execute(
                 """
                 INSERT INTO LNM_administratif 
-                    (nom, prenom, mail, login, password)
+                    (nom, prenom, mail, login, intern_account, password)
                 VALUES (%s, %s, %s, %s, 0, NULL)
                 """,
                 (data.nom, data.prenom, data.email, data.login)
@@ -139,7 +139,7 @@ def _create_cas_user(data: CasUserProvision, main_role: str) -> dict | None:
             cursor.execute(
                 """
                 INSERT INTO LNM_etudiant 
-                    (nom, prenom, mail, login, inter_account, password, id_promo)
+                    (nom, prenom, mail, login, intern_account, password, id_promo)
                 VALUES (%s, %s, %s, %s, 0, NULL, %s)
                 """,
                 (data.nom, data.prenom, data.email, data.login, id_promo)
@@ -179,8 +179,8 @@ def _determine_promo_from_cas_groups(members: list[str]) -> int | None:
     raw = os.getenv("CAS_ETUDIANTS_2_PROMO", "[]")
     try:
         mapping = json.loads(raw)
-    except json.JSONDecodeError:
-        logger.error("CAS_ETUDIANTS_2_PROMO mal formé dans .env")
+    except json.JSONDecodeError as e:
+        logger.error(f"CAS_ETUDIANTS_2_PROMO mal formé dans .env {e}")
         return None
 
     # Cherche la première correspondance
