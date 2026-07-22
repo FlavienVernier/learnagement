@@ -1,7 +1,48 @@
 <?php
 
+
+function _mockCasResponse(string $ticket): ?array
+{
+    // Tickets de test prédéfinis
+    $mocks = [
+        "ST-MOCK-ENSEIGNANT" => [
+            "login"      => "tartampion",
+            "attributes" => [
+                "sn"          => "tartampion",
+                "givenName"   => "Pierre",
+                "email"       => "pierre.tartampion@lnm.fr",
+                "displayName" => "Pierre Tartampion",
+            ],
+            "members" => [
+                "cn=enseignants,ou=groups,dc=lnm,dc=fr",
+                "cn=permanents,ou=groups,dc=lnm,dc=fr",
+            ],
+        ],
+        "ST-MOCK-ETUDIANT" => [
+            "login"      => "titgoute",
+            "attributes" => [
+                "sn"          => "titgoute",
+                "givenName"   => "Corine",
+                "email"       => "Corine.Titgoute@etu.lnm.fr",
+                "displayName" => "Corine Titgoute",
+            ],
+            "members" => [
+                "cn=etudiants-idu4,ou=groups,dc=lnm,dc=fr",
+                "cn=etudiants,ou=groups,dc=lnm,dc=fr",
+            ],
+        ],
+        "ST-MOCK-INCONNU" => null,  // ticket invalide
+    ];
+
+    return $mocks[$ticket] ?? null;
+}
 function validateCasTicket(string $ticket, string $serviceUrl): ?array
 {
+    // Mode mock pour les tests sans serveur CAS
+    if (getenv("CAS_MOCK_ENABLED") === "true") {
+        return _mockCasResponse($ticket);
+    }
+
     $casValidateUrl = getenv("CAS_HOST") . "/serviceValidate"
         . "?service=" . urlencode($serviceUrl)
         . "&ticket=" . urlencode($ticket);
@@ -54,7 +95,7 @@ function casLogin(array $casData): ?array
     $url  = get_python_backend_url("token-cas/");
     $data = [
         'login'  => $casData['login'],
-        'email'  => $casData['attributes']['mail']      ?? $casData['login'] . '@univ-savoie.fr',
+        'email'  => $casData['attributes']['email']      ?? '',
         'nom'    => $casData['attributes']['sn']         ?? '',
         'prenom' => $casData['attributes']['givenName']  ?? '',
         'members' => $casData['members'],

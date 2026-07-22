@@ -28,12 +28,42 @@
     $t->share('user', $user);
     $t->share('toasts', []);
 
+
+
     // Define routes
+
+   // NO Prod env
+    if (getenv("ENV") !== "prod") {
+
+        // Test .../localhost/mock-cas-login?ticket=ST-MOCK-ENSEIGNANT
+        // Test .../localhost/mock-cas-login?ticket=ST-MOCK-ETUDIANT
+        $t->router->get('/mock-cas-login', 'mock-cas-login', function () use ($t, $user) {
+            $ticket = $_GET['ticket'] ?? 'ST-MOCK-ENSEIGNANT';
+
+            getLogger()->info("CAS Mock Login: " . $ticket);
+
+            // Simule exactement le retour du serveur CAS :
+            // CAS redirige vers /?ticket=ST-xxxx
+            // On fait la même chose avec notre ticket de mock
+            $redirectUrl = "/" . "?ticket=" . urlencode($ticket);
+            header("Location: " . $redirectUrl);
+            exit;
+        });
+
+        $t->router->get('/dashboard/nextjs', 'dashboard-nextjs', function () use ($t, $user) {
+            requireAuth($user, $t->router);
+            echo $t->render('dashboard/nextjs');
+        });
+
+    }
+    // all env
     $t->router->get('/', 'home', function () use ($t, $user) {
 
         // Retour depuis le CAS avec un ticket
         if (isset($_GET['ticket'])) {
             require_once __DIR__ . "/utils/cas.php";
+
+            getLogger()->info("CAS Login");
 
             $serviceUrl = getenv("FRONT_PHP_PROTOCOL") . "://" . getenv("INSTANCE_URL") . "/";
             $casData = validateCasTicket($_GET['ticket'], $serviceUrl);
@@ -161,12 +191,7 @@
         requireAuth($user, $t->router);
         echo $t->render('dashboard/python');
     });
-    if (getenv("ENV") == "prod") {
-        $t->router->get('/dashboard/nextjs', 'dashboard-nextjs', function () use ($t, $user) {
-            requireAuth($user, $t->router);
-            echo $t->render('dashboard/nextjs');
-        });
-    }
+
     $t->router->get('/dashboard/ressource', 'dashboard-ressource', function () use ($t, $user) {
         requireAuth($user, $t->router);
         echo $t->render('dashboard/ressource');
