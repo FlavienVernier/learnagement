@@ -377,40 +377,7 @@ def save_assignments(assignments: List[dict], final_places: dict, current_user: 
         )
         db_request(current_user, sql_request)
 
-    # --- 6b. Mettre à jour les places globales restantes (S8 / S9) ---
-    global_remaining = (final_places or {}).get("global_places") or {}
-    for id_univ_str, semesters in global_remaining.items():
-        params_g = {
-            "s8": semesters.get("S8"),
-            "s9": semesters.get("S9"),
-            "id_university": int(id_univ_str),
-        }
-        query_g = """
-            UPDATE MOB_partner_university
-            SET S8_remaining_places = %(s8)s,
-                S9_remaining_places = %(s9)s
-            WHERE id_partner_university = %(id_university)s
-        """
-        sql_g = SQLRequest(request=query_g, params=params_g, allowedRolesRequester=["relations_internationales"])
-        db_request(current_user, sql_g)
 
-    # --- 6c. Mettre à jour les places restantes par spécialité ---
-    specialty_remaining = (final_places or {}).get("specialty_places") or {}
-    for id_univ_str, promos in specialty_remaining.items():
-        for id_promo_str, remaining in promos.items():
-            params_sp = {
-                "remaining": remaining,
-                "id_university": int(id_univ_str),
-                "id_promo": int(id_promo_str),
-            }
-            query_sp = """
-                UPDATE MOB_partner_university_places
-                SET remaining_places = %(remaining)s
-                WHERE id_partner_university = %(id_university)s
-                  AND id_promo              = %(id_promo)s
-            """
-            sql_sp = SQLRequest(request=query_sp, params=params_sp, allowedRolesRequester=["relations_internationales"])
-            db_request(current_user, sql_sp)
 
 @router.get("/university/admin/assignment/status", tags=["admin", "mobility"], summary="Get assignment progress")
 def get_assignment_status():

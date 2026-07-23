@@ -1105,6 +1105,66 @@ def export_assigned_students_status(
     }
     return StreamingResponse(iter([stream.getvalue()]), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers=headers_res)
 
+@router.get("/university/admin/mobility/unassigned-students/export",
+            tags=["admin", "mobility"],
+            summary="Export students with submitted wishes but no assignments")
+def export_unassigned_students(
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    sql_request = SQLRequest(
+        request='''
+            SELECT DISTINCT e.id_etudiant, e.nom, e.prenom, e.mail, e.mobility_z_score,
+                   f.nom_filiere
+            FROM MOB_wishes w
+            JOIN LNM_etudiant e ON w.id_etudiant = e.id_etudiant
+            JOIN LNM_promo p ON e.id_promo = p.id_promo
+            JOIN LNM_filiere f ON p.id_filiere = f.id_filiere
+            LEFT JOIN MOB_assignment a ON e.id_etudiant = a.id_etudiant
+            WHERE p.annee = 4 
+              AND w.date_soumission IS NOT NULL 
+              AND a.id_etudiant IS NULL
+            ORDER BY e.nom ASC, e.prenom ASC
+        ''',
+        params={},
+        allowedRolesRequester=["relations_internationales"]
+    )
+    result = db_request(current_user, sql_request)
+    
+    import openpyxl
+    import io
+    from fastapi.responses import StreamingResponse
+    from datetime import datetime
+    
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Non Affectes"
+    
+    headers = ["ID Etudiant", "Nom", "Prénom", "Email", "Filière", "Moyenne Centrée Réduite", "Statut"]
+    ws.append(headers)
+    
+    if result:
+        for row in result:
+            ws.append([
+                row.get("id_etudiant", ""),
+                row.get("nom", ""),
+                row.get("prenom", ""),
+                row.get("mail", ""),
+                row.get("nom_filiere", ""),
+                row.get("mobility_z_score", ""),
+                "Non Affecté"
+            ])
+            
+    stream = io.BytesIO()
+    wb.save(stream)
+    stream.seek(0)
+    
+    filename = f"Export_Non_Affectes_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx"
+    headers_res = {
+        'Content-Disposition': f'attachment; filename="{filename}"'
+    }
+    return StreamingResponse(iter([stream.getvalue()]), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers=headers_res)
+
+
 @router.post("/university/admin/mobility/update-assignment-status",
              tags=["admin", "mobility"],
              summary="Update assignment status")
@@ -1283,12 +1343,51 @@ def export_mobility_diagnostics(
         headers=headers_dict
     )
 
+def sync_db_remaining_places(current_user):
+    """
+    Recalculates the remaining places for all universities and specialties based
+    strictly on the number of 'accepted' assignments.
+    """
+    query1 = """
+        UPDATE MOB_partner_university u
+        SET S8_remaining_places = IFNULL(u.S8_total_places, 0) - (
+            SELECT COUNT(*)
+            FROM MOB_assignment a
+            WHERE a.id_partner_university = u.id_partner_university
+              AND a.id_semestre = 8
+              AND a.status = 'accepted'
+        ),
+        S9_remaining_places = IFNULL(u.S9_total_places, 0) - (
+            SELECT COUNT(*)
+            FROM MOB_assignment a
+            WHERE a.id_partner_university = u.id_partner_university
+              AND a.id_semestre = 9
+              AND a.status = 'accepted'
+        )
+    """
+    db_request(current_user, SQLRequest(request=query1, params=None, allowedRolesRequester=["relations_internationales"]))
+
+    query2 = """
+        UPDATE MOB_partner_university_places p
+        SET p.remaining_places = p.number_of_places - (
+            SELECT COUNT(*)
+            FROM MOB_assignment a
+            JOIN LNM_etudiant e ON a.id_etudiant = e.id_etudiant
+            WHERE a.id_partner_university = p.id_partner_university
+              AND e.id_promo = p.id_promo
+              AND a.status = 'accepted'
+        )
+    """
+    db_request(current_user, SQLRequest(request=query2, params=None, allowedRolesRequester=["relations_internationales"]))
+
 @router.get("/university/admin/places/export",
             tags=["admin", "mobility"],
             summary="Export partner university places status to Excel")
 def export_admin_places(
     current_user: Annotated[User, Depends(get_current_active_user)]
 ):
+    sync_db_remaining_places(current_user)
+    
     # Requête pour récupérer les universités, leurs places globales (S8/S9) et le détail par filière.
     sql_request = SQLRequest(
         request='''
@@ -1511,6 +1610,7 @@ def close_assignment_phase(
         allowedRolesRequester=["relations_internationales"]
     )
     db_request(current_user, sql_request)
+    sync_db_remaining_places(current_user)
     return {"message": "Toutes les affectations en attente ont été refusées."}
 
 @router.post("/university/admin/campaign/launch",
