@@ -71,3 +71,32 @@ CREATE TABLE `MOB_filiere_quotas` (
     CONSTRAINT `fk_mob_filiere_quotas_filiere` FOREIGN KEY (`id_filiere`) REFERENCES `LNM_filiere` (`id_filiere`),
     UNIQUE KEY `uq_filiere_annee_semestre` (`id_filiere`, `annee_scolaire`, `id_semestre`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `MOB_partner_university_places`
+    ADD `id_filiere` INT NULL AFTER `id_partner_university`,
+    ADD `annee` INT NULL AFTER `id_filiere`;
+
+-- Alternative : Si la base ne contient pas encore de places, ou pour réinitialiser complètement
+-- la table avant de changer la structure, on peut utiliser :
+-- TRUNCATE TABLE `MOB_partner_university_places`;
+
+-- Migration des données : On récupère id_filiere et annee via id_promo
+UPDATE `MOB_partner_university_places` m
+JOIN `LNM_promo` p ON m.id_promo = p.id_promo
+SET m.id_filiere = p.id_filiere,
+    m.annee = p.annee;
+
+-- On supprime les lignes qui n'ont pas pu être matchées (au cas où, bien que ça ne devrait pas arriver)
+DELETE FROM `MOB_partner_university_places` WHERE id_filiere IS NULL OR annee IS NULL;
+
+ALTER TABLE `MOB_partner_university_places`
+    DROP FOREIGN KEY `FK_partner_university_places_as_promo`,
+    DROP KEY `FK_partner_university_places_as_promo`,
+    DROP INDEX `SECONDARY`,
+    DROP PRIMARY KEY,
+    DROP COLUMN `id_promo`,
+    MODIFY `id_filiere` INT NOT NULL,
+    MODIFY `annee` INT NOT NULL,
+    ADD PRIMARY KEY (`id_partner_university`, `id_filiere`, `annee`),
+    ADD UNIQUE KEY `SECONDARY` (`id_partner_university`, `id_filiere`, `annee`) USING BTREE,
+    ADD CONSTRAINT `FK_partner_university_places_as_filiere` FOREIGN KEY (`id_filiere`) REFERENCES `LNM_filiere` (`id_filiere`) ON DELETE RESTRICT ON UPDATE RESTRICT;

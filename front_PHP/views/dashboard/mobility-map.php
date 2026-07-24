@@ -132,7 +132,7 @@ crossorigin=""/>
 <!-- ToDo : Déplacer dans un fichier global ex db.js -->
 <script>
     window.ENV = {
-        BACKEND_URL: "<?= 'http://' . getenv('INSTANCE_URL') ?>",
+        BACKEND_URL: "<?= getenv('INSTANCE_PROTOCOL') . '://' . getenv('INSTANCE_URL') ?>",
         BACKEND_PORT: "<?= getenv('BACKEND_PYTHON_PORT') ?>",
         USER_TOKEN: "<?= $_SESSION["jwt_token"] ?>",
         USER_ID: "<?= $_SESSION["id"] ?>"

@@ -131,9 +131,9 @@ def get_available_places(current_user: User) -> dict:
 
     Gère la spécificité des stages (places illimitées).
     """
-    # 1. Capacités de référence par spécialité/promo
+    # 1. Capacités de référence par spécialité/filiere
     query_places = """
-        SELECT id_partner_university, id_promo, number_of_places
+        SELECT id_partner_university, id_filiere, annee, number_of_places
         FROM MOB_partner_university_places
     """
     sql_places = SQLRequest(request=query_places, params={}, allowedRolesRequester=["relations_internationales"])
@@ -158,14 +158,14 @@ def get_available_places(current_user: User) -> dict:
     sql_stages = SQLRequest(request=query_stages, params={}, allowedRolesRequester=["relations_internationales"])
     stage_rows = db_request(current_user, sql_stages) or []
 
-    # Formatage : specialty_places[str(id_university)][str(id_promo)] = nombre_de_places
+    # Formatage : specialty_places[str(id_university)][f"{id_filiere}_{annee}"] = nombre_de_places
     specialty_places = {}
     for row in places_rows:
         id_univ = str(row["id_partner_university"])
-        id_promo = str(row["id_promo"])
+        filiere_key = f"{row['id_filiere']}_{row['annee']}"
         if id_univ not in specialty_places:
             specialty_places[id_univ] = {}
-        specialty_places[id_univ][id_promo] = int(row["number_of_places"])
+        specialty_places[id_univ][filiere_key] = int(row["number_of_places"])
 
     # Formatage : global_places[str(id_university)] = {"S8": n, "S9": n}
     global_places = {}
@@ -216,10 +216,10 @@ def run_round_robin_assignment(
     for id_univ, semesters in (places.get("global_places") or {}).items():
         global_places_left[id_univ] = dict(semesters)  # copie
 
-    # specialty_places_left[str(id_university)][str(id_promo)] = places restantes
+    # specialty_places_left[str(id_university)][f"{id_filiere}_{annee}"] = places restantes
     specialty_places_left: Dict[str, Dict[str, int]] = {}
-    for id_univ, promos in (places.get("specialty_places") or {}).items():
-        specialty_places_left[id_univ] = dict(promos)  # copie
+    for id_univ, filieres in (places.get("specialty_places") or {}).items():
+        specialty_places_left[id_univ] = dict(filieres)  # copie
 
     stages_set = set(places.get("stages") or [])
 
@@ -244,7 +244,6 @@ def run_round_robin_assignment(
     assignments = []
     for student in students:
         id_etudiant  = student["id_etudiant"]
-        id_promo     = str(student["id_promo"])
         id_filiere   = student["id_filiere"]
         student_wishes = wishes_by_student.get(id_etudiant, [])
 
@@ -254,6 +253,11 @@ def run_round_robin_assignment(
             id_univ_str   = str(id_university)
             id_semestre   = wish["id_semestre"]
             sem_key       = "S8" if id_semestre == 8 else "S9"
+            
+            # Le frontend gère les places avec annee = 4 pour le S8, et annee = 5 pour le S9
+            annee_for_wish = 4 if id_semestre == 8 else 5
+            filiere_key    = f"{id_filiere}_{annee_for_wish}"
+            
             is_stage      = id_university in stages_set
 
             # --- Condition 1 : places globales disponibles ---
@@ -275,7 +279,7 @@ def run_round_robin_assignment(
                 cond2 = True
             else:
                 univ_specialty = specialty_places_left.get(id_univ_str, {})
-                cond2 = univ_specialty.get(id_promo, 0) > 0
+                cond2 = univ_specialty.get(filiere_key, 0) > 0
 
             if not cond2:
                 logger.debug(
@@ -309,7 +313,7 @@ def run_round_robin_assignment(
             # Décrémentation des stocks (sauf stage)
             if not is_stage:
                 global_places_left[id_univ_str][sem_key] -= 1
-                specialty_places_left[id_univ_str][id_promo] -= 1
+                specialty_places_left[id_univ_str][filiere_key] -= 1
                 remaining_quotas[id_filiere][id_semestre] -= 1
 
             assigned = True

@@ -17,11 +17,6 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 
--- Nettoyage : on supprime tous les vœux, affectations, et étudiants des années 3 et 4 existants.
--- Cela garantit que la base de test ne contient *que* les 39 étudiants générés ci-dessous.
-DELETE FROM MOB_assignment;
-DELETE FROM MOB_wishes;
-DELETE FROM LNM_etudiant WHERE id_promo IN (SELECT id_promo FROM LNM_promo WHERE annee IN (3, 4));
 
 -- =============================================================================
 -- ÉTUDIANTS — ANNÉE N (annee=4, éligibles à la mobilité)
@@ -30,30 +25,30 @@ DELETE FROM LNM_etudiant WHERE id_promo IN (SELECT id_promo FROM LNM_promo WHERE
 -- IDU4 — Info, promo 15, Annecy (5 étudiants)
 INSERT INTO LNM_etudiant (id_etudiant, nom, prenom, mail, password, password_updated, id_promo, id_origine, mobility_completed, mobility_note) VALUES
 (9501, 'Durand',    'Camille',   'camille.durand@mob-test.local',    '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 15, NULL, FALSE, 19),
-(9502, 'Moreau',    'Lucas',     'lucas.moreau@mob-test.local',      '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 15, NULL, FALSE, 16),
+(9502, 'Moreau',    'Lucas',     'lucas.moreau@mob-test.local',      '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 15, NULL, TRUE, 16),
 (9503, 'Bernard',   'Lea',       'lea.bernard@mob-test.local',       '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 15, NULL, FALSE, 13),
 (9504, 'Petit',     'Antoine',   'antoine.petit@mob-test.local',     '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 15, NULL, FALSE, 11),
-(9505, 'Martin',    'Sophie',    'sophie.martin@mob-test.local',     '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 15, NULL, FALSE, 10);
+(9505, 'Martin',    'Sophie',    'sophie.martin@mob-test.local',     '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 15, NULL, TRUE, 10);
 
 -- MM4 — Meca, promo 18, Annecy (4 étudiants)
 INSERT INTO LNM_etudiant (id_etudiant, nom, prenom, mail, password, password_updated, id_promo, id_origine, mobility_completed, mobility_note) VALUES
-(9511, 'Rousseau',  'Maxime',    'maxime.rousseau@mob-test.local',   '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 18, NULL, FALSE, 18),
+(9511, 'Rousseau',  'Maxime',    'maxime.rousseau@mob-test.local',   '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 18, NULL, TRUE, 18),
 (9512, 'Garcia',    'Julie',     'julie.garcia@mob-test.local',      '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 18, NULL, FALSE, 15),
 (9513, 'Lefebvre',  'Thomas',    'thomas.lefebvre@mob-test.local',   '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 18, NULL, FALSE, 12),
-(9514, 'Simon',     'Clara',     'clara.simon@mob-test.local',       '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 18, NULL, FALSE, 10);
+(9514, 'Simon',     'Clara',     'clara.simon@mob-test.local',       '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 18, NULL, TRUE, 10);
 
 -- SNI4 — Sys, promo 21, Annecy (4 étudiants)
 INSERT INTO LNM_etudiant (id_etudiant, nom, prenom, mail, password, password_updated, id_promo, id_origine, mobility_completed, mobility_note) VALUES
 (9521, 'Laurent',   'Emma',      'emma.laurent@mob-test.local',      '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 21, NULL, FALSE, 17),
-(9522, 'Thomas',    'Nathan',    'nathan.thomas@mob-test.local',     '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 21, NULL, FALSE, 14),
+(9522, 'Thomas',    'Nathan',    'nathan.thomas@mob-test.local',     '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 21, NULL, TRUE, 14),
 (9523, 'Robert',    'Ines',      'ines.robert@mob-test.local',       '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 21, NULL, FALSE, 11),
-(9524, 'Richard',   'Alexis',    'alexis.richard@mob-test.local',    '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 21, NULL, FALSE, 10);
+(9524, 'Richard',   'Alexis',    'alexis.richard@mob-test.local',    '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 21, NULL, TRUE, 10);
 
 -- BAT4 — Bat, promo 24, Chambéry (4 étudiants)
 INSERT INTO LNM_etudiant (id_etudiant, nom, prenom, mail, password, password_updated, id_promo, id_origine, mobility_completed, mobility_note) VALUES
 (9531, 'Dupont',    'Marion',    'marion.dupont@mob-test.local',     '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 24, NULL, FALSE, 18),
 (9532, 'Leroy',     'Florian',   'florian.leroy@mob-test.local',     '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 24, NULL, FALSE, 14),
-(9533, 'Morel',     'Pauline',   'pauline.morel@mob-test.local',     '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 24, NULL, FALSE, 11),
+(9533, 'Morel',     'Pauline',   'pauline.morel@mob-test.local',     '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 24, NULL, TRUE, 11),
 (9534, 'Fournier',  'Kevin',     'kevin.fournier@mob-test.local',    '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 24, NULL, FALSE, 10);
 
 -- EIT4 — Eco, promo 27, Chambéry (4 étudiants)
@@ -61,13 +56,13 @@ INSERT INTO LNM_etudiant (id_etudiant, nom, prenom, mail, password, password_upd
 (9541, 'Mercier',   'Lucie',     'lucie.mercier@mob-test.local',     '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 27, NULL, FALSE, 17),
 (9542, 'Leroux',    'Remy',      'remy.leroux@mob-test.local',       '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 27, NULL, FALSE, 14),
 (9543, 'David',     'Celine',    'celine.david@mob-test.local',      '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 27, NULL, FALSE, 11),
-(9544, 'Bertrand',  'Victor',    'victor.bertrand@mob-test.local',   '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 27, NULL, FALSE, 10);
+(9544, 'Bertrand',  'Victor',    'victor.bertrand@mob-test.local',   '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 27, NULL, TRUE, 10);
 
 -- MC4 — Mat, promo 30, Chambéry (3 étudiants)
 INSERT INTO LNM_etudiant (id_etudiant, nom, prenom, mail, password, password_updated, id_promo, id_origine, mobility_completed, mobility_note) VALUES
 (9551, 'Nguyen',    'Alice',     'alice.nguyen@mob-test.local',      '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 30, NULL, FALSE, 16),
 (9552, 'Henry',     'Pierre',    'pierre.henry@mob-test.local',      '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 30, NULL, FALSE, 12),
-(9553, 'Denis',     'Margot',    'margot.denis@mob-test.local',      '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 30, NULL, FALSE, 10);
+(9553, 'Denis',     'Margot',    'margot.denis@mob-test.local',      '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 30, NULL, TRUE, 10);
 
 -- =============================================================================
 -- ÉTUDIANTS — ANNÉE N+1 (annee=3, passeront en annee=4 l'année suivante)
@@ -77,12 +72,12 @@ INSERT INTO LNM_etudiant (id_etudiant, nom, prenom, mail, password, password_upd
 -- IDU3 → IDU4 (promo 5 → 15) : 4 étudiants (Wait, 3 etudiants: 9561-9563)
 INSERT INTO LNM_etudiant (id_etudiant, nom, prenom, mail, password, password_updated, id_promo, id_origine, mobility_completed, mobility_note) VALUES
 (9561, 'Girard',    'Manon',     'manon.girard@mob-test.local',      '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 5, NULL, FALSE, NULL),
-(9562, 'Bonnet',    'Quentin',   'quentin.bonnet@mob-test.local',    '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 5, NULL, FALSE, NULL),
+(9562, 'Bonnet',    'Quentin',   'quentin.bonnet@mob-test.local',    '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 5, NULL, TRUE, NULL),
 (9563, 'Vincent',   'Chloe',     'chloe.vincent@mob-test.local',     '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 5, NULL, FALSE, NULL);
 
 -- MM3 → MM4 (promo 17 → 18) : 3 étudiants
 INSERT INTO LNM_etudiant (id_etudiant, nom, prenom, mail, password, password_updated, id_promo, id_origine, mobility_completed, mobility_note) VALUES
-(9571, 'Lecomte',   'Laura',     'laura.lecomte@mob-test.local',     '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 17, NULL, FALSE, NULL),
+(9571, 'Lecomte',   'Laura',     'laura.lecomte@mob-test.local',     '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 17, NULL, TRUE, NULL),
 (9572, 'Fontaine',  'Julien',    'julien.fontaine@mob-test.local',   '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 17, NULL, FALSE, NULL),
 (9573, 'Chevalier', 'Sarah',     'sarah.chevalier@mob-test.local',   '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 17, NULL, FALSE, NULL);
 
@@ -93,8 +88,8 @@ INSERT INTO LNM_etudiant (id_etudiant, nom, prenom, mail, password, password_upd
 
 -- BAT3 → BAT4 (promo 23 → 24) : 3 étudiants
 INSERT INTO LNM_etudiant (id_etudiant, nom, prenom, mail, password, password_updated, id_promo, id_origine, mobility_completed, mobility_note) VALUES
-(9591, 'Marchand',  'Elisa',     'elisa.marchand@mob-test.local',    '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 23, NULL, FALSE, NULL),
-(9592, 'Blanc',     'Arthur',    'arthur.blanc@mob-test.local',      '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 23, NULL, FALSE, NULL),
+(9591, 'Marchand',  'Elisa',     'elisa.marchand@mob-test.local',    '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 23, NULL, TRUE, NULL),
+(9592, 'Blanc',     'Arthur',    'arthur.blanc@mob-test.local',      '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 23, NULL, TRUE, NULL),
 (9593, 'Guerin',    'Lucie',     'lucie.guerin@mob-test.local',      '$2y$12$xf7wgqNCc1U3YM2KfLxAIeiAYLo.qtkzfm3j2jaaSRwh6tpTp72wm', 0, 23, NULL, FALSE, NULL);
 
 -- EIT3 → EIT4 (promo 26 → 27) : 2 étudiants
