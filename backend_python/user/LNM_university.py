@@ -1355,7 +1355,7 @@ def sync_db_remaining_places(current_user):
             JOIN LNM_promo pr ON e.id_promo = pr.id_promo
             WHERE a.id_partner_university = p.id_partner_university
               AND pr.id_filiere = p.id_filiere
-              AND pr.annee = p.annee
+              AND p.annee = CASE WHEN a.id_semestre = 8 THEN 4 ELSE 5 END
               AND a.status = 'accepted'
         )
     """
