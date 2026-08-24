@@ -6,6 +6,11 @@ def requests(key: str):
 
 __requests = {
     "get_filieres" : {
+        "route":   "/filieres/",
+        "tags":    ["filiere"],
+        "summary": "Filiere",
+        "description": "Return the list of filieres",
+        "auth":    True,
         "request" : """
                         SELECT LNM_filiere.*, ExplicitSecondaryKs_LNM_filiere.ExplicitSecondaryK
                         FROM LNM_filiere
@@ -14,6 +19,11 @@ __requests = {
         "allowedRolesRequester" : ["connected_user"],
     },
     "get_statuts" : {
+        "route":   "/statuts/",
+        "tags":    ["filiere"],
+        "summary": "Status",
+        "description": "Return the list of statuts",
+        "auth":    True,
         "request" : """
                         SELECT LNM_statut.*, ExplicitSecondaryKs_LNM_statut.ExplicitSecondaryK
                         FROM LNM_statut
@@ -22,6 +32,11 @@ __requests = {
         "allowedRolesRequester" : ["connected_user"],
     },
     "get_groupe_types" : {
+        "route":   "/groupe_types/",
+        "tags":    ["filiere"],
+        "summary": "Groupe types",
+        "description": "Return the list of groupe types",
+        "auth":    True,
         "request" : """
                         SELECT LNM_groupe_type.*, ExplicitSecondaryKs_LNM_groupe_type.ExplicitSecondaryK
                         FROM LNM_groupe_type
@@ -30,6 +45,11 @@ __requests = {
         "allowedRolesRequester" : ["connected_user"],
     },
     "get_seance_types" : {
+        "route":   "/seance_types/",
+        "tags":    ["filiere"],
+        "summary": "Seance types",
+        "description": "Return the list of seance types",
+        "auth":    True,
         "request" : """
                         SELECT LNM_seance_type.*, ExplicitSecondaryKs_LNM_seance_type.ExplicitSecondaryK
                         FROM LNM_seance_type
@@ -38,6 +58,11 @@ __requests = {
         "allowedRolesRequester" : ["connected_user"],
     },
     "get_dags" : {
+        "route":   "/filieres/dags",
+        "tags":    ["anonymous", "filiere"],
+        "summary": "DAGs",
+        "description": "Return the DAGs",
+        "auth":    False,   # ← endpoint anonyme
         "request" : """
                         SELECT 
                             LNM_filiere.nom_filiere, 
@@ -66,6 +91,11 @@ __requests = {
         "allowedRolesRequester" : ["anonymous"],
     },
     "get_promos" : {
+        "route":   "/promos/",
+        "tags":    ["filiere"],
+        "summary": "Promos",
+        "description": "Return the list of promos",
+        "auth":    True,
         "request" : """
                         SELECT LNM_promo.`id_promo`, ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK AS promo
                         FROM `LNM_promo`
@@ -74,6 +104,12 @@ __requests = {
         "allowedRolesRequester" : ["connected_user"],
     },
     "get_stages" : {
+        "route":   "/filieres/stages",
+        "tags":    ["filiere", "internship"],
+        "summary": "Stages",
+        "description": "Return the list of stages",
+        "auth":    True,
+        "auto":    False,   # ← exclu de la génération automatique
         "request" : """
             SELECT 
                 LNM_stage.id_stage,
