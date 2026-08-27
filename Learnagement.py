@@ -196,8 +196,6 @@ def __generate_base_env():
 
     default_env_vars["COMPOSE_PROJECT_NAME"] = f"learnagement_{instance_name}"
 
-    default_env_vars["CAS_SERVICE_TOKEN"] = str(__generate_secret__().hex())
-
     default_env_vars["INSTANCE_SECRET"] = str(__generate_secret__().hex())
     protocol = "http"
     default_env_vars["FRONT_PHP_PROTOCOL"] = protocol

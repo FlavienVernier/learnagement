@@ -10,7 +10,8 @@
     require_once __DIR__ . "/config.php";
     include __DIR__ . "/utils/connectDB.php"; # must be refactored to load env here
 
-
+    use Firebase\JWT\JWT;
+    use Firebase\JWT\Key;
 
     create_session();
     $r = new Router('');
@@ -28,36 +29,92 @@
     $t->share('user', $user);
     $t->share('toasts', []);
 
+
+
     // Define routes
+
+   // NO Prod env
+    if (getenv("ENV") !== "prod") {
+
+        // Test .../localhost/mock-cas-login?ticket=ST-MOCK-ADMINISTRATIF
+        // Test .../localhost/mock-cas-login?ticket=ST-MOCK-ENSEIGNANT
+        // Test .../localhost/mock-cas-login?ticket=ST-MOCK-ETUDIANT
+        $t->router->get('/mock-cas-login', 'mock-cas-login', function () use ($t, $user) {
+            $ticket = $_GET['ticket'] ?? 'ST-MOCK-ENSEIGNANT';
+
+            getLogger()->info("CAS Mock Login: " . $ticket);
+
+            // Simule exactement le retour du serveur CAS :
+            // CAS redirige vers /?ticket=ST-xxxx
+            // On fait la même chose avec notre ticket de mock
+            $redirectUrl = "/" . "?ticket=" . urlencode($ticket);
+            header("Location: " . $redirectUrl);
+            exit;
+        });
+
+        $t->router->get('/dashboard/nextjs', 'dashboard-nextjs', function () use ($t, $user) {
+            requireAuth($user, $t->router);
+            echo $t->render('dashboard/nextjs');
+        });
+
+    }
+    // all env
     $t->router->get('/', 'home', function () use ($t, $user) {
 
         // Retour depuis le CAS avec un ticket
         if (isset($_GET['ticket'])) {
             require_once __DIR__ . "/utils/cas.php";
 
-            $serviceUrl = "https://learnagement.local.univ-savoie.fr/";
-            $casData = validateCasTicket($_GET['ticket'], $serviceUrl);
+            getLogger()->info("CAS Login");
 
-            getLogger()->info('CAS data: ' . json_encode($casData));
+            $serviceUrl = getenv("FRONT_PHP_PROTOCOL") . "://" . getenv("INSTANCE_URL") . "/";
+            $casData = validateCasTicket($_GET['ticket'], $serviceUrl);
 
             if ($casData === null) {
                 getLogger()->warning('CAS ticket invalide', ['ticket' => $_GET['ticket']]);
                 $t->router->redirect('login');
             }
 
+            getLogger()->info("Cas Data: " . json_encode($casData));
 
+            $result = casLogin($casData);
 
-            $result = casLogin($casData, getenv("CAS_SERVICE_TOKEN"));
+            getLogger()->info("Cas result: " . json_encode($result));
+
             if ($result && isset($result['access_token'])) {
                 // Le backend a géré seul le lookup/provisionnement
+                $jwt = $result["access_token"];
+                $secretKey = $_ENV["INSTANCE_SECRET"];
+                try {
+                    $decoded = JWT::decode(
+                        $jwt,
+                        new Key($secretKey, 'HS256')
+                    );
+
+                    getLogger()->info("Utilisateur : " . $decoded->email . " " . $decoded->firstname . " " . $decoded->lastname . PHP_EOL);
+                    getLogger()->info( "Expire à : " . date('Y-m-d H:i:s', $decoded->exp) . PHP_EOL);
+
+                    if ($decoded->exp < time()) {
+                        $t->router->redirect('login');
+                        throw new Exception("Token expiré");
+                    }
+                } catch (Exception $e) {
+                    // ToDo manage expired token, expired password...
+                    echo "Token invalide : " . $e->getMessage();
+                    $t->router->redirect('login');
+                }
+
+                $types = array("enseignant", "etudiant", "administratif");
+
                 login(
-                    id: $result['id'],
-                    email: $result['email'],
-                    type: $result['type'],
-                    jwt: $result['access_token']
+                    id: $decoded->id,
+                    email: $decoded->email,
+                    type: array_values(array_intersect($decoded->roles,$types))[0],
+                    jwt: $result["access_token"]
                 );
                 $_SESSION['auth_method'] = 'cas';
                 $t->router->redirect('dashboard');
+
             }
 
             $t->router->redirect('login');
@@ -89,7 +146,7 @@
         $wasCas = ($_SESSION['auth_method'] ?? '') === 'cas';
         logout();
 
-        if ($wasCas) {
+        if ($wasCas && getenv("CAS_MOCK_ENABLED") === "false"){
             $casLogoutUrl = "https://cas-uds.grenet.fr/cas/logout"
                 . "?service=" . urlencode("https://learnagement.local.univ-savoie.fr/login");
             header("Location: " . $casLogoutUrl);
@@ -163,12 +220,7 @@
         requireAuth($user, $t->router);
         echo $t->render('dashboard/python');
     });
-    if (getenv("ENV") == "prod") {
-        $t->router->get('/dashboard/nextjs', 'dashboard-nextjs', function () use ($t, $user) {
-            requireAuth($user, $t->router);
-            echo $t->render('dashboard/nextjs');
-        });
-    }
+
     $t->router->get('/dashboard/ressource', 'dashboard-ressource', function () use ($t, $user) {
         requireAuth($user, $t->router);
         echo $t->render('dashboard/ressource');
