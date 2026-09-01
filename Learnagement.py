@@ -18,6 +18,8 @@ import click
 from getpass import getpass
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes
+from pwdlib import PasswordHash
+from pwdlib.hashers.bcrypt import BcryptHasher
 from pathlib import Path
 
 from sqlalchemy import true
@@ -207,6 +209,10 @@ def __generate_base_env():
     default_env_vars["MYSQL_SERVER"] = f"learnagement_mysql_{instance_name}"
     default_env_vars["MYSQL_ROOT_PASSWORD"] = getpass("Give the MySQL Root password: ")
     default_env_vars["MYSQL_USER_PASSWORD"] = getpass("Give the MySQL User password: ")
+    default_env_vars["LEARNAGEMENT_ADMINISTRATOR_PASSWORD"] = getpass("Give the Learnagement Administrator password: ")
+
+    #ToDo check if passwords are different if prod env
+    # ...
 
     # Backend
     default_env_vars["BACKEND_PYTHON_DOCKER_URL"] = f"http://learnagement_backend_python_{instance_name}"
@@ -241,6 +247,103 @@ def propagate_env():
 
 #############################################################
 # Lernagement BD
+
+password_hash = PasswordHash((BcryptHasher(),))
+
+def __set_lnm_administrator__():
+    admin_passwd = os.environ["LEARNAGEMENT_ADMINISTRATOR_PASSWORD"]
+    hashed_passwd = password_hash.hash(admin_passwd)
+
+    request = f"""INSERT INTO `LNM_administratif`(`id_administratif`, `nom`, `prenom`, `mail`, `login`, `password`, `password_updated`)
+                VALUES(NULL, 'Administrator', 'Administrator', 'administrator@lnm.fr', NULL, '{hashed_passwd}', '0')"""
+
+    container_name = "learnagement_mysql_" + os.environ["INSTANCE_NAME"]
+    db_user = os.environ["MYSQL_USER_LOGIN"]
+    db_password = os.environ["MYSQL_USER_PASSWORD"]
+    db_name = os.environ["MYSQL_DB"]
+
+    cmd = os.environ["DOCKER_COMMAND"].split(" ") + [
+        "exec", "-i", container_name,
+        "mysql", "-u", db_user, f"-p{db_password}", db_name,
+        "-e", request
+    ]
+
+    result = subprocess.run(cmd, capture_output=True, text=True)
+
+    if result.returncode != 0:
+        stderr = result.stderr.strip()
+
+        # Code MySQL 1062 = Duplicate entry -> l'administrateur existe déjà, ce n'est pas une erreur
+        if "1062" in stderr or "Duplicate entry" in stderr:
+            print("L'administrateur existe déjà, aucune action nécessaire.")
+            return None
+
+        raise RuntimeError(result.stderr.strip())
+
+    return result.stdout
+
+
+async def __wait_for_mysql_healthy__(container_name: str, timeout: int = 300, poll_interval: int = 2):
+    """Attend que le conteneur MySQL soit 'healthy' selon son healthcheck Docker."""
+    elapsed = 0
+    while elapsed < timeout:
+        cmd = os.environ["DOCKER_COMMAND"].split(" ") + [
+            "inspect", "--format={{.State.Health.Status}}", container_name
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        status = result.stdout.strip()
+
+        if status == "healthy":
+            return True
+        elif status == "unhealthy":
+            raise RuntimeError(f"Le conteneur {container_name} est en état 'unhealthy'")
+
+        await asyncio.sleep(poll_interval)
+        elapsed += poll_interval
+
+    raise TimeoutError(f"Timeout : {container_name} n'est pas devenu 'healthy' après {timeout}s")
+
+
+async def __set_lnm_administrator_with_retry__(max_retries: int = 10, retry_delay: int = 3):
+    """Insère l'administrateur, avec retry en cas d'erreur SQL transitoire
+    (ex: table pas encore créée par un script d'init concurrent)."""
+    last_error = None
+
+    for attempt in range(1, max_retries + 1):
+        print("Tentative d'ajout de l'Administrateur")
+        try:
+            result = await asyncio.to_thread(__set_lnm_administrator__)
+            return result
+        except RuntimeError as e:
+            last_error = e
+            error_msg = str(e).lower()
+
+            # Erreurs transitoires connues : table absente, connexion pas encore prête
+            transient_errors = ["doesn't exist", "unknown database", "can't connect", "access denied"]
+            is_transient = any(err in error_msg for err in transient_errors)
+
+            if not is_transient:
+                # Erreur non transitoire (ex: doublon si déjà inséré) -> on arrête direct
+                raise
+
+            if attempt < max_retries:
+                await asyncio.sleep(retry_delay)
+
+    raise RuntimeError(
+        f"Échec de l'insertion de l'administrateur après {max_retries} tentatives. "
+        f"Dernière erreur : {last_error}"
+    )
+
+
+# async def __setup_administrator_when_ready__(docker_option):
+#     task = asyncio.create_task(__run_dockers__(docker_option))
+#     await task
+#
+#     container_name = "learnagement_mysql_" + os.environ["INSTANCE_NAME"]
+#     await __wait_for_mysql_healthy__(container_name)
+#
+#     await __set_lnm_administrator_with_retry__()
+
 
 def __dbConfiguration__():
 
@@ -361,16 +464,16 @@ async def __run_dockers__(docker_option):
         subprocess.run(os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + ["up"] + docker_option, check=True)
 
     # Pause pour laisser Docker démarrer
-    time.sleep(5)
-
-    if os.name == 'nt':
-        #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose ps'],stdin=subprocess.PIPE)
-        #prog.stdin.write(b'password')
-        prog = subprocess.Popen(['docker', 'compose', 'ps'])
-        #prog.stdin.write(b'password')
-        prog.communicate()
-    else:            
-        subprocess.run(os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + ["ps"], check=True)
+    # time.sleep(5)
+    #
+    # if os.name == 'nt':
+    #     #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose ps'],stdin=subprocess.PIPE)
+    #     #prog.stdin.write(b'password')
+    #     prog = subprocess.Popen(['docker', 'compose', 'ps'])
+    #     #prog.stdin.write(b'password')
+    #     prog.communicate()
+    # else:
+    #     subprocess.run(os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + ["ps"], check=True)
         
     os.chdir("..")
     return "done"
@@ -543,6 +646,13 @@ async def __start__(docker_option=None):
     __security_check()
     task = asyncio.create_task(__run_dockers__(docker_option))
 
+    await task
+
+    container_name = "learnagement_mysql_" + os.environ["INSTANCE_NAME"]
+    await __wait_for_mysql_healthy__(container_name)
+
+    await __set_lnm_administrator_with_retry__()
+
     logging.info(f"{GREEN}Web Apps will run on: {os.environ['INSTANCE_URL']}{NC}")
     logging.info(f"{GREEN}PHPMyAdmin will run on: http://127.0.0.1:{os.environ['PHPMYADMIN_PORT']}{NC}")
 
@@ -635,7 +745,7 @@ def __searchReplaceInFile__(fileName, patern, value):
         file.write(filedata)
 
 @cli.command(help="Backup the database (structure, data and triggers)")
-@click.option("--backup_folder")
+@click.option("--backup_folder", default="db/backup")
 def backupDB(backup_folder="db/backup"):
 
     """
@@ -762,5 +872,19 @@ def import_instance(instanceArchive):
 def stop():
     __stop__()
 
+@cli.command()
+def gui():
+    """Lance l'interface graphique click-gui-runner pour explorer cette application."""
+    from click_gui_runner.__main__ import main
+    path = os.path.abspath(__file__)
+    main(caller=path)
+
+import signal
+
+def handle_signal(signum, _frame):
+    stop()
+
 if __name__ == "__main__":
+    signal.signal(signal.SIGTERM, handle_signal)
+    signal.signal(signal.SIGINT, handle_signal)
     cli()
