@@ -143,8 +143,10 @@ def list_universities_etudiant(
         "params": {
             "id_etudiant": id_etudiant
         },
-        "allowedRolesRequester" : ["etudiant"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester" : [],
     }
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 
@@ -156,12 +158,14 @@ def get_campaign_status(
     id_etudiant: int,
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
-    req = SQLRequest(
+    request = SQLRequest(
         request="SELECT mobility_z_score FROM LNM_etudiant WHERE id_etudiant = %(id)s",
         params={"id": id_etudiant},
-        allowedRolesRequester=["etudiant"]  # ToDo check allowedRolesRequester
+        allowedRolesRequester=[]
     )
-    result = db_request(current_user, req)
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    result = db_request(current_user, request)
     is_open = bool(result and result[0].get("mobility_z_score") is not None)
     return {"is_open": is_open}
 
@@ -189,8 +193,11 @@ def list_university_wishes_etudiant(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": [],
     }
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+
     return db_request(current_user, SQLRequest(**request))
 
 
@@ -211,16 +218,19 @@ def add_university_to_wishes(
     id_semestre = payload.get("id_semestre", 8) if payload else 8
 
     # Sécurité : bloquer l'ajout de vœux si la campagne n'est pas encore ouverte
-    campaign_check = SQLRequest(
+    request = SQLRequest(
         request="SELECT mobility_z_score FROM LNM_etudiant WHERE id_etudiant = %(id)s",
         params={"id": id_etudiant},
-        allowedRolesRequester=["etudiant"]  # ToDo check allowedRolesRequester
+        allowedRolesRequester=[]
     )
-    student_data = db_request(current_user, campaign_check)
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+
+    student_data = db_request(current_user, request)
     if not student_data or student_data[0].get("mobility_z_score") is None:
         raise HTTPException(status_code=403, detail="La campagne de mobilité n'est pas encore ouverte. Vous ne pouvez pas ajouter de vœux.")
 
-    check_request = {
+    request = {
         "request": """
                         SELECT
                             COUNT(*) AS wishes_count,
@@ -235,9 +245,12 @@ def add_university_to_wishes(
             "id_partner_university": id_partner_university,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": [],
     }
-    check_rows = db_request(current_user, SQLRequest(**check_request))
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+
+    check_rows = db_request(current_user, SQLRequest(**request))
     wishes_count = int((check_rows[0].get("wishes_count") or 0)) if check_rows else 0
     max_priority = int((check_rows[0].get("max_priority") or 0)) if check_rows else 0
     already_exists = int((check_rows[0].get("already_exists") or 0)) if check_rows else 0
@@ -265,8 +278,11 @@ def add_university_to_wishes(
             "priority": next_priority,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": [],
     }
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+
     return db_request(current_user, SQLRequest(**request))
 
 
@@ -283,7 +299,7 @@ def delete_university_from_wishes(
     if current_user.id != id_etudiant:
         raise HTTPException(status_code=403, detail="Unauthorized access")
 
-    check_request = {
+    request = {
         "request": """
                         SELECT priority, submission_date
                         FROM MOB_wishes
@@ -296,9 +312,12 @@ def delete_university_from_wishes(
             "id_partner_university": id_partner_university,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": [],
     }
-    check_rows = db_request(current_user, SQLRequest(**check_request))
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+
+    check_rows = db_request(current_user, SQLRequest(**request))
     if not check_rows:
         raise HTTPException(status_code=404, detail="Voeu introuvable.")
 
@@ -307,7 +326,7 @@ def delete_university_from_wishes(
 
     removed_priority = int(check_rows[0]["priority"])
 
-    delete_request = {
+    request = {
         "request": """
                         DELETE FROM MOB_wishes
                         WHERE id_etudiant = %(id_etudiant)s
@@ -319,11 +338,14 @@ def delete_university_from_wishes(
             "id_partner_university": id_partner_university,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": [],
     }
-    db_request(current_user, SQLRequest(**delete_request))
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
-    shift_request = {
+    db_request(current_user, SQLRequest(**request))
+
+    request = {
         "request": """
                         UPDATE MOB_wishes
                         SET priority = priority - 1
@@ -334,9 +356,12 @@ def delete_university_from_wishes(
             "id_etudiant": id_etudiant,
             "removed_priority": removed_priority,
         },
-        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": [],
     }
-    db_request(current_user, SQLRequest(**shift_request))
+
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    db_request(current_user, SQLRequest(**request))
 
     return {"message": "Voeu supprime."}
 
@@ -358,7 +383,7 @@ def move_university_wish(
     if direction not in ["up", "down"]:
         raise HTTPException(status_code=400, detail="Direction invalide. Utilisez 'up' ou 'down'.")
 
-    current_request = {
+    request = {
         "request": """
                         SELECT priority, submission_date
                         FROM MOB_wishes
@@ -371,9 +396,11 @@ def move_university_wish(
             "id_partner_university": id_partner_university,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": [],
     }
-    current_rows = db_request(current_user, SQLRequest(**current_request))
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    current_rows = db_request(current_user, SQLRequest(**request))
     if not current_rows:
         raise HTTPException(status_code=404, detail="Voeu introuvable.")
 
@@ -383,7 +410,7 @@ def move_university_wish(
     current_priority = int(current_rows[0]["priority"])
     target_priority = current_priority - 1 if direction == "up" else current_priority + 1
 
-    target_request = {
+    request = {
         "request": """
                         SELECT id_partner_university, id_semestre
                         FROM MOB_wishes
@@ -394,9 +421,12 @@ def move_university_wish(
             "id_etudiant": id_etudiant,
             "target_priority": target_priority,
         },
-        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": [],
     }
-    target_rows = db_request(current_user, SQLRequest(**target_request))
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+
+    target_rows = db_request(current_user, SQLRequest(**request))
     if not target_rows:
         raise HTTPException(status_code=400, detail="Impossible de deplacer ce voeu plus loin.")
 
@@ -404,7 +434,7 @@ def move_university_wish(
     target_id_semestre = int(target_rows[0]["id_semestre"])
 
     # Step 1: move current wish to a temporary priority to avoid unique collisions.
-    temp_request = {
+    request = {
         "request": """
                         UPDATE MOB_wishes
                         SET priority = 0
@@ -417,12 +447,14 @@ def move_university_wish(
             "current_id_partner_university": id_partner_university,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": [],
     }
-    db_request(current_user, SQLRequest(**temp_request))
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    db_request(current_user, SQLRequest(**request))
 
     # Step 2: move target wish into current position.
-    target_to_current_request = {
+    request = {
         "request": """
                         UPDATE MOB_wishes
                         SET priority = %(current_priority)s
@@ -436,12 +468,14 @@ def move_university_wish(
             "target_id_semestre": target_id_semestre,
             "current_priority": current_priority,
         },
-        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": [],
     }
-    db_request(current_user, SQLRequest(**target_to_current_request))
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    db_request(current_user, SQLRequest(**request))
 
     # Step 3: move current wish from temporary value to target position.
-    current_to_target_request = {
+    request = {
         "request": """
                         UPDATE MOB_wishes
                         SET priority = %(target_priority)s
@@ -456,9 +490,11 @@ def move_university_wish(
             "id_semestre": id_semestre,
             "target_priority": target_priority,
         },
-        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": [],
     }
-    db_request(current_user, SQLRequest(**current_to_target_request))
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    db_request(current_user, SQLRequest(**request))
 
     return {"message": "Voeu deplace.", "direction": direction}
 
@@ -474,7 +510,7 @@ def submit_university_wishes(
     if current_user.id != id_etudiant:
         raise HTTPException(status_code=403, detail="Unauthorized access")
 
-    check_request = {
+    request = {
         "request": """
                         SELECT 
                             COUNT(*) AS wishes_count,
@@ -485,9 +521,11 @@ def submit_university_wishes(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": [],
     }
-    check_rows = db_request(current_user, SQLRequest(**check_request))
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    check_rows = db_request(current_user, SQLRequest(**request))
     wishes_count = int((check_rows[0].get("wishes_count") or 0)) if check_rows else 0
     is_submitted = int((check_rows[0].get("is_submitted") or 0)) if check_rows else 0
 
@@ -498,7 +536,7 @@ def submit_university_wishes(
         raise HTTPException(status_code=400, detail="Vous devez avoir au moins 1 voeu pour soumettre votre dossier.")
 
     # Update the submission date for all submitted wishes
-    update_request = {
+    request = {
         "request": """
                         UPDATE MOB_wishes
                         SET submission_date = NOW()
@@ -507,9 +545,11 @@ def submit_university_wishes(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": [],
     }
-    db_request(current_user, SQLRequest(**update_request))
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    db_request(current_user, SQLRequest(**request))
 
     return {"message": "Voeux soumis avec succes."}
 
@@ -1527,7 +1567,7 @@ def get_student_assignment(
     id_etudiant: int,
     current_user: Annotated[User, Depends(get_current_active_user)]
 ):
-    sql_request = SQLRequest(
+    request = SQLRequest(
         request='''
             SELECT a.id_assignment, a.status, u.id_partner_university, u.name, u.code, u.country, u.address
             FROM MOB_assignment a
@@ -1535,9 +1575,14 @@ def get_student_assignment(
             WHERE a.id_etudiant = %(id)s
         ''',
         params={"id": id_etudiant},
-        allowedRolesRequester=["etudiant"],  # ToDo check allowedRolesRequester
+        allowedRolesRequester=[],
     )
-    result = db_request(current_user, sql_request)
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+
+    result = db_request(current_user, request)
+
+    # ToDo Check uncoherent return, does not return all assignments
     if result and len(result) > 0:
         return result[0]
     return None
@@ -1557,12 +1602,15 @@ def submit_student_decision(
         raise HTTPException(status_code=400, detail="Invalid decision. Must be 'accepted' or 'declined'.")
 
     # Vérifier que l'affectation existe et est "pending"
-    check_request = SQLRequest(
+    request = SQLRequest(
         request='SELECT id_assignment, status FROM MOB_assignment WHERE id_etudiant = %(id)s',
         params={"id": id_etudiant},
-        allowedRolesRequester=["etudiant"],  # ToDo check allowedRolesRequester
+        allowedRolesRequester=[],
     )
-    assignment = db_request(current_user, check_request)
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+
+    assignment = db_request(current_user, request)
     
     if not assignment or len(assignment) == 0:
         raise HTTPException(status_code=404, detail="Aucune affectation trouvée pour cet étudiant.")
@@ -1571,12 +1619,14 @@ def submit_student_decision(
         raise HTTPException(status_code=400, detail="La décision a déjà été prise pour cette affectation.")
 
     # Mettre à jour le statut
-    update_request = SQLRequest(
+    request = SQLRequest(
         request='UPDATE MOB_assignment SET status = %(status)s WHERE id_etudiant = %(id)s',
         params={"status": payload.decision, "id": id_etudiant},
-        allowedRolesRequester=["etudiant"],  # ToDo check allowedRolesRequester
+        allowedRolesRequester=[],
     )
-    db_request(current_user, update_request)
+    if(current_user.id == id_etudiant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    db_request(current_user, request)
     
     return {"message": "Décision enregistrée avec succès"}
 
