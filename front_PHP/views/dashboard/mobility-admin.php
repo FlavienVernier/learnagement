@@ -401,6 +401,12 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4" />
                                         </svg> Refusés</a>
+                                    <a href="#" onclick="exportUnassignedData()"
+                                        class="hover:underline flex items-center gap-1 text-red-600"><svg class="w-3 h-3" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-3 3m0 0l-3-3m3 3V4" />
+                                        </svg> Non affectés</a>
                                 </div>
                             </div>
                         </div>
@@ -801,7 +807,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
 <script>
     window.ENV = {
-        BACKEND_URL: "<?= 'http://' . getenv('INSTANCE_URL') ?>",
+        BACKEND_URL: "<?= getenv('INSTANCE_PROTOCOL') . '://' . getenv('INSTANCE_URL') ?>",
         BACKEND_PORT: "<?= getenv('BACKEND_PYTHON_PORT') ?>",
         USER_TOKEN: "<?= $_SESSION["jwt_token"] ?>",
         USER_ID: "<?= $_SESSION["id"] ?>"
@@ -2487,6 +2493,32 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             a.style.display = 'none';
             a.href = url;
             a.download = `Export_Affectations_${status}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            alert("Erreur de connexion.");
+        }
+    };
+
+    window.exportUnassignedData = async function () {
+        try {
+            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/unassigned-students/export", {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
+                }
+            });
+            if (!response.ok) {
+                alert("Erreur lors de l'exportation des données des non affectés.");
+                return;
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `Export_Non_Affectes_${new Date().toISOString().slice(0, 10)}.xlsx`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);

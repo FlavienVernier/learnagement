@@ -1,0 +1,196 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{tcolorbox}
+\usepackage{booktabs}
+\usepackage{enumitem}
+
+\geometry{top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
+
+\title{\textbf{Manuel Opérationnel : Gestion de la Mobilité Internationale}\\ \large Guide d'Instruction Étape par Étape pour l'Administration RI}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Accès au Module de Mobilité}
+Pour commencer à utiliser le système, veuillez suivre cette instruction initiale :
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Action]
+Allez sur la barre de navigation située à gauche de votre écran et cliquez sur l'onglet \textbf{« Gestion de mobilité RI »}.
+\end{tcolorbox}
+C'est depuis cette interface centrale que vous piloterez l'intégralité de la campagne, de l'ajout des partenaires jusqu'aux affectations finales.
+
+\section{Le Catalogue : Consultation, Ajout et Gestion des Universités}
+\subsection{La Carte Interactive et la Liste}
+\textbf{Différence majeure avec la vue Étudiant :} Contrairement à la carte des étudiants (qui filtre automatiquement et n'affiche que les universités offrant des places pour leur filière), \textbf{la carte de l'administrateur affiche systématiquement TOUTES les universités enregistrées dans le système}, qu'elles proposent des places actuellement ou non.
+\newline La consultation détaillée et la gestion de vos partenaires s'effectuent au niveau de la \textbf{liste située juste en bas de cette carte interactive}. C'est dans ce tableau que vous pouvez ajouter, modifier ou cacher des universités.
+
+\subsection{Création d'une nouvelle université (Panneau d'ajout)}
+Pour intégrer un nouveau partenaire au catalogue :
+\begin{enumerate}
+    \item Cliquez sur le bouton bleu \textbf{« Ajouter une université »} situé en haut à droite du tableau des universités.
+    \item Un grand panneau \textbf{« Nouvelle université partenaire »} s'ouvre. Remplissez scrupuleusement les champs généraux (Nom, Pays, Adresse, Site web, Langues, Note min, Type d'accord).
+    \item \textbf{Définition des places globales :} Le panneau est divisé en deux sections (Semestre 8 et Semestre 9). Pour chaque semestre, saisissez le nombre total dans la case \textbf{« Places globales S8/S9 »}. Ce chiffre représente le total des places offertes par cette université.
+    \item \textbf{Allocation détaillée par filière :} C'est ici que vous définissez qui a le droit de postuler.
+    \begin{itemize}[leftmargin=*]
+        \item Cliquez sur le petit bouton gris \textbf{« Ajouter une ligne »} situé à droite, juste sous la case des places globales.
+        \item Une nouvelle ligne apparaît avec un menu déroulant et une case chiffrée.
+        \item Sélectionnez la filière concernée (ex: Bat, INFO, Meca...) dans le menu déroulant.
+        \item Entrez le nombre de places exact réservé à cette filière dans la case chiffrée.
+        \item Répétez l'opération en recliquant sur \textbf{« Ajouter une ligne »} pour chaque filière que vous souhaitez autoriser.
+        \item En cas d'erreur sur une ligne, cliquez sur le texte rouge \textbf{« Supprimer »} à son extrémité pour l'enlever.
+    \end{itemize}
+    \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=⚠️ VALIDATION FINALE OBLIGATOIRE ET RISQUE D'EXPIRATION]
+    Toutes les lignes et informations que vous venez d'entrer \textbf{ne sont pas encore sauvegardées} ! Vous \textbf{DEVEZ IMPÉRATIVEMENT} cliquer sur le gros bouton bleu \textbf{« Créer l'université »} situé tout en bas à droite du panneau pour valider la création dans la base de données. Sans ce clic final, tout votre travail de saisie sera perdu.
+    \newline \textbf{Attention au temps passé :} Comme pour la liste des redoublants, si vous mettez trop de temps à remplir toutes ces cases (au point que votre session de sécurité expire), le clic sur "Créer" échouera. Préparez vos données à l'avance et saisissez-les sans faire de longue pause.
+    \end{tcolorbox}
+\end{enumerate}
+
+\subsection{Modification (Édition) des places d'une université existante}
+Si l'université est déjà présente dans le tableau mais que vous souhaitez ajuster ses quotas :
+\begin{enumerate}
+    \item Dans la colonne "Actions" du tableau, cliquez sur le bouton bleu \textbf{« Éditer les places »} correspondant à l'université ciblée.
+    \item Le bloc d'édition de l'université s'ouvre directement dans la ligne du tableau.
+    \item Vous pouvez modifier le chiffre des \textbf{« Places globales S8/S9 »} directement dans la case.
+    \item \textbf{Pour ajouter une nouvelle filière :} Sélectionnez la filière dans le menu déroulant, puis cliquez sur le petit bouton gris \textbf{« Ajouter »} pour créer la ligne, puis saisissez le nombre de places.
+    \item \textbf{Pour supprimer l'accès d'une filière :} Cliquez sur le texte rouge \textbf{« Supprimer »} situé sur la ligne de la filière concernée. 
+    \newline \textit{(Astuce : C'est la méthode recommandée pour "cacher" une université aux étudiants d'une filière spécifique sans avoir à supprimer l'université entière du système).}
+    \item \textbf{Pour modifier une filière existante :} Changez simplement le chiffre dans la case de sa ligne.
+    \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=⚠️ ENREGISTREMENT FINAL OBLIGATOIRE ET RISQUE D'EXPIRATION]
+    Vos ajouts, modifications de chiffres et suppressions de lignes ne s'appliquent pas instantanément. Vous \textbf{DEVEZ IMPÉRATIVEMENT} cliquer sur le bouton vert \textbf{« Enregistrer »} situé en bas à droite du bloc d'édition pour valider toutes vos manipulations en une seule fois ! Si vous quittez ou fermez sans cliquer sur "Enregistrer", toutes vos modifications seront annulées par le système.
+    \newline \textbf{Attention au temps passé :} De la même manière, ne laissez pas l'interface d'édition ouverte pendant de longues minutes sans valider. Si votre session expire avant que vous n'ayez cliqué sur "Enregistrer", l'enregistrement échouera et vous devrez tout refaire.
+    \end{tcolorbox}
+\end{enumerate}
+
+\section{Pilotage de la Campagne : Centre de Contrôle}
+Pour lancer et faire avancer la procédure, cliquez sur le bouton bleu \textbf{« Centre de Contrôle : Procédure »} situé en haut de la page. Le système est découpé en 4 étapes obligatoires et chronologiques.
+
+\subsection{Étape 1 : Préparation et Lancement}
+\begin{tcolorbox}[colback=yellow!10!white,colframe=orange!80!black,title=Vérification Préalable Cruciale]
+Avant de commencer, il est impératif de vérifier rigoureusement le \textbf{nombre d'étudiants éligibles} pour la mobilité. Pour cela, rendez-vous sur le panneau \textbf{« Diagnostique \& Statistiques »} :
+\begin{itemize}[leftmargin=*]
+    \item Le nombre total attendu doit être strictement égal à la somme des deux catégories du \textbf{premier graphique} (camembert).
+    \item Il doit également être égal à la somme des trois catégories du \textbf{deuxième graphique}.
+\end{itemize}
+\textbf{⚠️ ATTENTION :} S'il manque un seul étudiant dans ces totaux, \textbf{ne commencez surtout pas la procédure}. Vous devez attendre que l'étudiant manquant soit correctement enregistré dans la base de données avant de procéder au lancement de la campagne.
+\end{tcolorbox}
+
+\begin{enumerate}
+    \item Cliquez sur \textbf{« Gestion des Quotas »} pour vérifier et ajuster la répartition de vos places par filière et par semestre.
+    \begin{tcolorbox}[colback=yellow!10!white,colframe=orange!80!black,title=Règle sur les Quotas de Filière (Cas de mobilité illimitée)]
+    L'algorithme d'affectation est mathématiquement strict : si vous ne définissez aucun quota (ou si la valeur par défaut est 0) pour une filière sur un semestre donné, \textbf{l'algorithme refusera systématiquement toutes les demandes} pour ce semestre, considérant qu'il n'y a plus de budget/places pour cette filière.
+    \newline Si tous les étudiants d'une filière sont autorisés à partir en mobilité sans restriction de quota, vous \textbf{devez obligatoirement saisir un nombre grand} (au moins égal ou supérieur au nombre total d'étudiants de cette filière). L'essentiel est de ne pas mettre un chiffre inférieur au nombre d'étudiants concernés, afin de garantir que l'algorithme ne bloquera personne.
+    \end{tcolorbox}
+    \textbf{Remarque :} Tant que vous n'avez pas exécuté l'algorithme d'affectation (Étape 2), vous gardez toujours la possibilité de modifier ces valeurs.
+    
+    \item Cliquez sur \textbf{« Lancement de la campagne \& Redoublants »}.
+    
+    \item \textbf{Gestion des étudiants doublants :}
+    \newline Le système ne sait pas par défaut qui sont les étudiants doublants. Il ne conserve aucune information stipulant qu'un étudiant est redoublant. C'est donc à vous de les indiquer manuellement.
+    \newline Afin d'éviter que les notes de ces redoublants ne faussent le calcul de la Moyenne Centrée Réduite (Z-score) de la nouvelle cohorte, vous devez saisir l'\textbf{ID Étudiant} de chaque doublant ainsi que sa \textbf{Moyenne C. Réduite} (\textbf{Attention : vous devez avoir calculé ces valeurs vous-même au préalable}). Cliquez ensuite sur \textbf{« Ajouter à la liste »}.
+    \newline \textit{Que fait le système ?} En lui fournissant cette liste, le système va chercher ces étudiants, mettre à jour leur score avec vos valeurs, et les exclure du calcul mathématique du Z-score des autres étudiants. Il fera tout cela sans jamais enregistrer en base de données qu'il s'agit d'étudiants "doublants".
+    
+    \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=⚠️ RISQUE DE PERTE DE DONNÉES (EXPIRATION DE SESSION)]
+    La liste des doublants que vous construisez à l'écran est temporaire et n'est envoyée au serveur \textbf{qu'au moment où vous cliquez sur le bouton final} de lancement de la campagne.
+    \newline Si vous prenez trop de temps pour chercher et saisir tous les étudiants un par un, votre session de sécurité de l'application risque d'expirer. Si cela arrive, lorsque vous tenterez de lancer la campagne, l'action échouera et \textbf{vous perdrez toute la liste que vous venez de taper}.
+    \newline \textbf{Bonne pratique pour éviter cela :} 
+    \begin{itemize}[leftmargin=*]
+        \item Préparez impérativement toute votre liste d'ID et de moyennes à l'avance sur un document séparé.
+        \item Saisissez-les rapidement l'un après l'autre.
+        \item \textbf{Vérifiez grâce aux compteurs automatiques :} L'interface vous affiche en temps réel le nombre total d'étudiants ajoutés, ainsi que la répartition \textbf{par filière} (en haut à droite de la liste). Fiez-vous à ces compteurs pour vérifier d'un coup d'œil que vous n'avez oublié personne.
+        \item Lancez l'algorithme immédiatement après !
+    \end{itemize}
+    \end{tcolorbox}
+    
+    \item Cliquez sur le bouton vert \textbf{« Ouvrir la campagne \& Calculer les scores »} pour ouvrir les accès et générer les scores de mérite.
+    \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=⚠️ ACTION CRITIQUE UNIQUE]
+    Le lancement de la campagne est une opération qui ne s'exécute \textbf{qu'une seule fois}. Assurez-vous que le moment est opportun et que tous les quotas sont corrects avant de cliquer.
+    \end{tcolorbox}
+\end{enumerate}
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Suivi de l'avancement]
+Durant toute cette étape d'ouverture, vous pouvez suivre l'avancement de la procédure et des soumissions en consultant le panneau \textbf{« Diagnostique \& Statistiques »}.
+\end{tcolorbox}
+
+Une fois le délai officiel de soumission écoulé, revenez dans ce menu et cliquez sur le bouton rouge \textbf{« Clôturer l'étape 1 (Fermer les soumissions) »} pour verrouiller les paniers.
+\newline \textbf{Que fait ce bouton ?} Il gère automatiquement les \textbf{retardataires}. Tous les étudiants qui ont rempli des vœux mais qui ont oublié de cliquer sur "Soumettre" verront leur panier être \textbf{soumis de force} dans l'état actuel par le système.
+\begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=⚠️ ACTION CRITIQUE UNIQUE]
+La clôture de l'étape 1 est définitive. Soyez absolument certain que la date limite est passée car cela bloquera l'interface de tous les étudiants.
+\end{tcolorbox}
+
+\subsection{Étape 2 : Exécution de l'algorithme}
+Puisque la Clôture de l'Étape 1 a verrouillé et soumis de force tous les paniers des retardataires, vous pouvez prendre votre temps avant de lancer l'algorithme. Les données ne bougeront plus.
+\newline \textbf{Lancer l'affectation automatique :} Cliquez sur le gros bouton bleu pour que l'algorithme distribue les places en respectant strictement l'ordre de mérite (Z-score), les choix de l'étudiant, et les limites de quotas.
+
+\begin{enumerate}
+    \item Cliquez sur le bouton bleu \textbf{« Lancer l'affectation automatique »}.
+    \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=⚠️ ACTION CRITIQUE UNIQUE]
+    L'algorithme d'affectation est l'opération finale majeure. Elle ne peut être exécutée \textbf{qu'une seule fois}. Assurez-vous d'avoir bien clôturé l'étape 1 juste avant.
+    \end{tcolorbox}
+    \item Laissez la barre de progression (affichant \textit{« Démarrage... »}) se remplir. Le système répartit les étudiants automatiquement selon leurs vœux et leur Z-score.
+\end{enumerate}
+
+\subsection{Étape 3 : Validation manuelle}
+Le système affiche un graphique \textbf{« Statut des Affectations »} et plusieurs boutons d'exportation.
+\begin{enumerate}
+    \item \textbf{Gestion des étudiants Non Affectés (Action Requise) :} Certains étudiants n'ont reçu aucune affectation à cause d'un manque de places ou de quotas. \textbf{Le système n'envoie aucune notification d'échec} sur leur session. Ils ne remarqueront aucun changement (ils n'auront rien à accepter ou refuser). C'est au service RI de les informer.
+    \newline \textit{Comment faire ?} Cliquez sur le petit bouton \textbf{« Non affectés »} (en rouge, sous le graphique). Cela vous exportera la liste Excel de ces étudiants avec leurs adresses e-mail pour que vous puissiez les contacter.
+    \item Consultez les affectations ayant le statut \textit{En attente}.
+    \item Validez ou refusez manuellement certains dossiers si nécessaire (cas de force majeure).
+    \item Une fois le délai de réponse accordé aux étudiants écoulé, cliquez sur le bouton rouge \textbf{« Clôture de la phase d'acceptation »}.
+    \newline \textbf{Que fait ce bouton ?} La clôture signifie que tous les étudiants qui n'ont pas explicitement accepté l'affectation qui leur a été proposée (ceux dont le statut est toujours \textit{En attente}) subiront un \textbf{refus automatique}. Le système annulera définitivement ces propositions non confirmées.
+    \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=⚠️ ACTION CRITIQUE UNIQUE]
+    La clôture de la phase d'acceptation est une opération irréversible qui ne s'exécute \textbf{qu'une seule fois}. Ne cliquez sur ce bouton que lorsque vous êtes absolument certain que le délai de réflexion des étudiants est terminé.
+    \end{tcolorbox}
+\end{enumerate}
+
+\subsection{Étape 4 : Exportation des Résultats}
+Téléchargez vos livrables en cliquant sur les trois boutons verts prévus à cet effet :
+\begin{itemize}[leftmargin=*]
+    \item \textbf{« Vœux (XLSX) »} : Pour les archives de l'école.
+    \item \textbf{« Affectations (XLSX) »} : Pour la scolarité et les universités d'accueil.
+    \item \textbf{« État des places (XLSX) »} : Pour vérifier les reliquats.
+    \newline \textbf{Détail du calcul des places restantes :} Dans ce fichier d'export, le système calcule le nombre de places restantes en se basant \textbf{exclusivement sur les affectations acceptées}. Les places occupées par les étudiants ayant le statut "Accepté" sont déduites des places initialement proposées par les universités. Si un étudiant a refusé son affectation, la place n'est pas déduite et retourne au quota disponible.
+\end{itemize}
+
+\section{Outils d'Analyse et de Relance}
+
+\subsection{Liste des Vœux Étudiants : Filtres et Actions Manuelles}
+Cliquez sur le bouton blanc \textbf{« Liste des Vœux Étudiants »}. Ce tableau est votre outil principal pour l'investigation et l'intervention manuelle directe sur les dossiers.
+
+\begin{enumerate}
+    \item \textbf{Filtres de recherche et Suivi :}
+    \begin{itemize}[leftmargin=*]
+        \item \textbf{Pendant l'Étape 1 :} Utilisez le filtre \textbf{« Phase 1: Soumission »} (\textit{Incomplet} ou \textit{Retardataire}) pour identifier les étudiants à relancer.
+        \item \textbf{Pendant l'Étape 3 :} Utilisez le filtre \textbf{« Phase 3: Acceptation »} (\textit{En attente}) pour identifier qui n'a pas encore validé son départ.
+        \item Utilisez la barre \textbf{« Rechercher un étudiant, email ou université... »} pour cibler un cas spécifique, ou \textbf{« Réinitialiser »} pour tout effacer.
+    \end{itemize}
+    
+    \item \textbf{Intervention manuelle (Modification des statuts) :}
+    Depuis cette liste, l'administrateur a tous les droits pour forcer l'état d'un dossier :
+    \begin{itemize}[leftmargin=*]
+        \item \textbf{Sur la Phase 1 (Annuler une soumission) :} Si un étudiant a soumis son panier par erreur avant la date limite, vous pouvez cliquer sur le bouton d'annulation (icône de retour/réinitialisation) sur sa ligne. Son statut repassera "En cours" et il récupérera l'accès à son panier.
+        \item \textbf{Sur la Phase 1 (Modification manuelle) :} Vous pouvez aussi modifier directement l'état de soumission de n'importe quel étudiant.
+        \item \textbf{Sur la Phase 3 :} Vous pouvez forcer ou modifier la décision finale d'affectation de l'étudiant (\textit{Accepté}, \textit{En attente}, ou \textit{Refusé}).
+    \end{itemize}
+
+    \item \textbf{Modification après clôture et Ré-exportation :}
+    La flexibilité du système vous permet d'intervenir même si la procédure est terminée. Si une situation change (ex: désistement tardif) après la clôture de la Phase 3 et l'exportation des fichiers (Étape 4), vous pouvez à tout moment :
+    \begin{enumerate}[label=\alph*)]
+        \item Retourner dans cette \textbf{Liste des Vœux Étudiants}.
+        \item Modifier manuellement la décision d'acceptation de l'étudiant concerné.
+        \item Retourner au Centre de Contrôle (Étape 4) pour \textbf{réexporter} les fichiers Excel. Ceux-ci seront instantanément mis à jour avec la nouvelle donne.
+    \end{enumerate}
+    \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=⚠️ EXIGENCE TECHNIQUE IMPÉRATIVE]
+    Lors d'une modification manuelle de l'acceptation d'un étudiant après la clôture de la phase 3, vous devez \textbf{impérativement cliquer à nouveau sur le bouton d'exportation de l'état des places}.
+    \newline En effet, le calcul et la mise à jour des places restantes dans la base de données ne se font pas automatiquement après la modification individuelle d'un étudiant. La synchronisation de la base de données est déclenchée \textbf{directement et exclusivement par l'action d'exporter}. Même si vous n'avez pas physiquement besoin de ce nouveau fichier Excel, vous devez impérativement l'exporter pour forcer le système à enregistrer les bonnes valeurs de places restantes !
+    \end{tcolorbox}
+\end{enumerate}
+
+\end{document}
