@@ -65,6 +65,17 @@ services:
             interval: 5s
             timeout: 5s
             retries: 55
+    etl_${INSTANCE_NAME}:
+        container_name: learnagement_etl_${INSTANCE_NAME}
+        image: mageai/mageai:latest
+        restart: always
+        networks:
+            - learnagement_back_${INSTANCE_NAME}
+        ports:
+            - ${ETL_PORT}:${ETL_DOCKER_PORT}
+        depends_on:
+            backend_python_${INSTANCE_NAME}:
+                condition: service_healthy
     front_php_${INSTANCE_NAME}:
         container_name: learnagement_php_${INSTANCE_NAME}
         build: ./front_PHP/
