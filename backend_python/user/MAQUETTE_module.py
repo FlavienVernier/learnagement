@@ -47,7 +47,7 @@ def __participate(id_module: int, id_etudiant: int, current_user: Annotated[User
             "id_module": id_module,
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
     }
     res = db_request(current_user, SQLRequest(**request))
     print(("res", res), flush=True)
@@ -165,7 +165,7 @@ def get_modules_responsable(
         "params": {
             "id_responsable": id_responsable,
         },
-        "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -254,7 +254,7 @@ SELECT
         "params": {
             "id_intervenant": id_intervenant,
         },
-        "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -282,7 +282,7 @@ def get_modules_etudiant(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -314,7 +314,7 @@ def get_sequencages_responsable(
         "params": {
             "id_responsable": id_responsable,
         },
-        "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -352,7 +352,7 @@ def get_sequences_responsable(
         "params": {
             "id_responsable": id_responsable,
         },
-        "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -396,7 +396,7 @@ def get_sessions_responsable(
         "params": {
             "id_responsable": id_responsable,
         },
-        "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -527,7 +527,7 @@ def get_data_gantt_endpoint(
             "id_responsable_prv": id_responsable,
             "id_responsable_nxt": id_responsable,
         },
-        "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -600,7 +600,7 @@ def get_data_gantt_endpoint_etudiant(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
     }
     return db_request(current_user, SQLRequest(**request))
 

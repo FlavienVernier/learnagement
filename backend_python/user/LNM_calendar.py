@@ -28,7 +28,7 @@ def get_user_role_and_id(current_user: User):
         # Assure-toi que l'attribut s'appelle bien "mail" dans ton modèle User.
         # Si c'est "mail" ou "username", modifie la ligne ci-dessous.
         "params": {"mail": current_user.mail}, 
-        "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": ["connected_user"], # ToDo check allowedRolesRequester
     }
     
     response = db_request(current_user, SQLRequest(**req))
@@ -84,7 +84,9 @@ def get_user_calendar_urls(
         "params": {
             "role_id": id,
         },
-        "allowedRolesRequester": ["connected_user"],
+        # FixMe  Security vulnerability user is not check and structural role cannot be discriminate : access removed
+        # "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": [],
     }
 
     return db_request(current_user, SQLRequest(**request))
@@ -118,7 +120,9 @@ def update_user_calendar_url(
             "role_id": id,
             "url": data.url,
         },
-        "allowedRolesRequester": ["connected_user"],
+        # FixMe  Security vulnerability user is not check and structural role cannot be discriminate : access removed
+        # "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": [],
     }
     
     return db_request(current_user, SQLRequest(**request))
@@ -145,8 +149,9 @@ def update_user_calendar_url(
             "url": data.url,
             "id_calendar": id_calendar,
         },
-        "allowedRolesRequester": ["connected_user"],
+        # FixMe  Security vulnerability user is not check and structural role cannot be discriminate : access removed
+        # "allowedRolesRequester": ["connected_user"].
+        "allowedRolesRequester": [],
     }
-    logging.info(request)
 
     return db_request(current_user, SQLRequest(**request))

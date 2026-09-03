@@ -244,7 +244,7 @@ CREATE TABLE `LNM_enseignant` (
   `id_discipline` int DEFAULT NULL,
   `composante` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `service statutaire` int NOT NULL,
-  `décharge` int NOT NULL,
+  `decharge` int NOT NULL,
   `service effectif` float NOT NULL DEFAULT '192',
   `HCAutorisees` tinyint(1) NOT NULL DEFAULT '1',
   `commentaire` varchar(150) DEFAULT NULL,

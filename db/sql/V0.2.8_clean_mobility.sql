@@ -48,11 +48,11 @@ CREATE TABLE `MOB_assignment` (
 
 
 
--- Ajout du faux choix pour les stages
-INSERT INTO `MOB_partner_university` 
-    (`name`, `code`, `latitude`, `longitude`, `address`, `country`, `languages`,`type`) 
-VALUES 
-    ('Polytech Annecy-Chambery', 'MOB_STAGE', 45.919731, 6.157739, '5 chemin de Bellevue, 74940 Annecy-le-Vieux', 'France', 'francais','stage');
+-- Ajout du faux choix pour les stages !!! NE DOIT PAS ETRE DANS LA STRUCTURE !!!
+-- INSERT INTO `MOB_partner_university`
+--    (`name`, `code`, `latitude`, `longitude`, `address`, `country`, `languages`,`type`)
+-- VALUES
+--    ('Polytech Annecy-Chambery', 'MOB_STAGE', 45.919731, 6.157739, '5 chemin de Bellevue, 74940 Annecy-le-Vieux', 'France', 'francais','stage');
 
 ALTER TABLE `MOB_partner_university`
     ADD `S8_remaining_places` INT NULL AFTER `S9_total_places`,

@@ -194,7 +194,7 @@ def get_etudiant(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester" : ["connected_user"],
+        "allowedRolesRequester" : ["connected_user"],  # ToDo check allowedRolesRequester
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -328,7 +328,7 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -350,7 +350,7 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -381,7 +381,7 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
     }
     return db_request(current_user, SQLRequest(**request))
 
