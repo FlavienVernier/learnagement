@@ -65,7 +65,7 @@
         if (isset($_GET['ticket'])) {
             require_once __DIR__ . "/utils/cas.php";
 
-            getLogger()->info("CAS Login");
+            //getLogger()->info("CAS Login");
 
             $serviceUrl = getenv("FRONT_PHP_PROTOCOL") . "://" . getenv("INSTANCE_URL") . "/";
             $casData = validateCasTicket($_GET['ticket'], $serviceUrl);
@@ -75,7 +75,7 @@
                 $t->router->redirect('login');
             }
 
-            getLogger()->info("Cas Data: " . json_encode($casData));
+            //getLogger()->info("Cas Data: " . json_encode($casData));
 
             $result = casLogin($casData);
 

@@ -63,7 +63,7 @@ function validateCasTicket(string $ticket, string $serviceUrl): ?array
     if ($response === false) {
         return null;
     }
-    //getLogger()->info("Prout" . json_encode($response));
+    getLogger()->info("CAS response" . json_encode($response));
 
     // Parse la réponse XML du CAS
     $xml = simplexml_load_string($response);

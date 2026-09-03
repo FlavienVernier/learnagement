@@ -39,7 +39,7 @@ async def cas_login(
     data: authenticate_cas.CasUserProvision,
     x_cas_token: Annotated[str | None , Header()] = None
 ) -> Token:
-    logger.info(f"CAS login {data}")
+    #logger.info(f"CAS login {data}")
     authenticate_cas.verify_cas_service_token(x_cas_token)
     return await authenticate_cas.authenticate_cas(data)
 

@@ -170,7 +170,7 @@ def list_universities_etudiant(
         "params": {
             "id_etudiant": id_etudiant
         },
-        "allowedRolesRequester" : ["etudiant"],
+        "allowedRolesRequester" : ["etudiant"],  # ToDo check allowedRolesRequester
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -186,7 +186,7 @@ def get_campaign_status(
     req = SQLRequest(
         request="SELECT mobility_z_score FROM LNM_etudiant WHERE id_etudiant = %(id)s",
         params={"id": id_etudiant},
-        allowedRolesRequester=["etudiant"]
+        allowedRolesRequester=["etudiant"]  # ToDo check allowedRolesRequester
     )
     result = db_request(current_user, req)
     is_open = bool(result and result[0].get("mobility_z_score") is not None)
@@ -216,7 +216,7 @@ def list_university_wishes_etudiant(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["etudiant"],
+        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -241,7 +241,7 @@ def add_university_to_wishes(
     campaign_check = SQLRequest(
         request="SELECT mobility_z_score FROM LNM_etudiant WHERE id_etudiant = %(id)s",
         params={"id": id_etudiant},
-        allowedRolesRequester=["etudiant"]
+        allowedRolesRequester=["etudiant"]  # ToDo check allowedRolesRequester
     )
     student_data = db_request(current_user, campaign_check)
     if not student_data or student_data[0].get("mobility_z_score") is None:
@@ -262,7 +262,7 @@ def add_university_to_wishes(
             "id_partner_university": id_partner_university,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": ["etudiant"],
+        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
     }
     check_rows = db_request(current_user, SQLRequest(**check_request))
     wishes_count = int((check_rows[0].get("wishes_count") or 0)) if check_rows else 0
@@ -292,7 +292,7 @@ def add_university_to_wishes(
             "priority": next_priority,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": ["etudiant"],
+        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -323,7 +323,7 @@ def delete_university_from_wishes(
             "id_partner_university": id_partner_university,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": ["etudiant"],
+        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
     }
     check_rows = db_request(current_user, SQLRequest(**check_request))
     if not check_rows:
@@ -346,7 +346,7 @@ def delete_university_from_wishes(
             "id_partner_university": id_partner_university,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": ["etudiant"],
+        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
     }
     db_request(current_user, SQLRequest(**delete_request))
 
@@ -361,7 +361,7 @@ def delete_university_from_wishes(
             "id_etudiant": id_etudiant,
             "removed_priority": removed_priority,
         },
-        "allowedRolesRequester": ["etudiant"],
+        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
     }
     db_request(current_user, SQLRequest(**shift_request))
 
@@ -398,7 +398,7 @@ def move_university_wish(
             "id_partner_university": id_partner_university,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": ["etudiant"],
+        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
     }
     current_rows = db_request(current_user, SQLRequest(**current_request))
     if not current_rows:
@@ -421,7 +421,7 @@ def move_university_wish(
             "id_etudiant": id_etudiant,
             "target_priority": target_priority,
         },
-        "allowedRolesRequester": ["etudiant"],
+        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
     }
     target_rows = db_request(current_user, SQLRequest(**target_request))
     if not target_rows:
@@ -444,7 +444,7 @@ def move_university_wish(
             "current_id_partner_university": id_partner_university,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": ["etudiant"],
+        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
     }
     db_request(current_user, SQLRequest(**temp_request))
 
@@ -463,7 +463,7 @@ def move_university_wish(
             "target_id_semestre": target_id_semestre,
             "current_priority": current_priority,
         },
-        "allowedRolesRequester": ["etudiant"],
+        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
     }
     db_request(current_user, SQLRequest(**target_to_current_request))
 
@@ -483,7 +483,7 @@ def move_university_wish(
             "id_semestre": id_semestre,
             "target_priority": target_priority,
         },
-        "allowedRolesRequester": ["etudiant"],
+        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
     }
     db_request(current_user, SQLRequest(**current_to_target_request))
 
@@ -512,7 +512,7 @@ def submit_university_wishes(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["etudiant"],
+        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
     }
     check_rows = db_request(current_user, SQLRequest(**check_request))
     wishes_count = int((check_rows[0].get("wishes_count") or 0)) if check_rows else 0
@@ -534,7 +534,7 @@ def submit_university_wishes(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["etudiant"],
+        "allowedRolesRequester": ["etudiant"],  # ToDo check allowedRolesRequester
     }
     db_request(current_user, SQLRequest(**update_request))
 
@@ -1456,7 +1456,7 @@ def get_student_assignment(
             WHERE a.id_etudiant = %(id)s
         ''',
         params={"id": id_etudiant},
-        allowedRolesRequester=["etudiant"]
+        allowedRolesRequester=["etudiant"],  # ToDo check allowedRolesRequester
     )
     result = db_request(current_user, sql_request)
     if result and len(result) > 0:
@@ -1481,7 +1481,7 @@ def submit_student_decision(
     check_request = SQLRequest(
         request='SELECT id_assignment, status FROM MOB_assignment WHERE id_etudiant = %(id)s',
         params={"id": id_etudiant},
-        allowedRolesRequester=["etudiant"]
+        allowedRolesRequester=["etudiant"],  # ToDo check allowedRolesRequester
     )
     assignment = db_request(current_user, check_request)
     
@@ -1495,7 +1495,7 @@ def submit_student_decision(
     update_request = SQLRequest(
         request='UPDATE MOB_assignment SET status = %(status)s WHERE id_etudiant = %(id)s',
         params={"status": payload.decision, "id": id_etudiant},
-        allowedRolesRequester=["etudiant"]
+        allowedRolesRequester=["etudiant"],  # ToDo check allowedRolesRequester
     )
     db_request(current_user, update_request)
     
