@@ -103,15 +103,16 @@ def _sync_university_places(
             summary="Universities",
             description="Return the list of partner universities")
 def list_universities(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    #current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     request = {
         "request" : """
                         SELECT * FROM MOB_partner_university
                     """,
-        "allowedRolesRequester" : ["connected_user"],
+        "allowedRolesRequester" : "anonymous",
     }
-    return db_request(current_user, SQLRequest(**request))
+    #return db_request(current_user, SQLRequest(**request))
+    return db_request(None, SQLRequest(**request))
 
 @router.get("/university/etudiant/{id_etudiant:int}",
             tags=["mobility"],
