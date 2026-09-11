@@ -186,7 +186,17 @@ def __set_env(env_vars: dict, filepath: str) -> dict:
 
 
 # Generate default env variables
-
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # Ne se connecte pas vraiment, juste pour déterminer l'interface sortante
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = "127.0.0.1"
+    finally:
+        s.close()
+    return ip
 def __generate_base_env():
     default_env_vars = __load_env_file("__env_skeleton.env")
 
@@ -203,7 +213,8 @@ def __generate_base_env():
     default_env_vars["FRONT_PHP_PROTOCOL"] = protocol
 
     default_env_vars["INSTANCE_PROTOCOL"] = protocol
-    default_env_vars["INSTANCE_URL"] = socket.gethostname()
+    #default_env_vars["INSTANCE_URL"] = socket.gethostname()
+    default_env_vars["INSTANCE_URL"] = get_local_ip()
 
     # MySQL
     default_env_vars["MYSQL_SERVER"] = f"learnagement_mysql_{instance_name}"
@@ -426,6 +437,7 @@ def __docker_configuration__():
     
     if not os.path.exists("docker-compose.yml"):
         shutil.copy("docker-compose.yml.skeleton", "docker-compose.yml")
+        __searchReplaceInFile__("docker-compose.yml", "${INSTANCE_PROTOCOL}", os.environ["INSTANCE_PROTOCOL"])
         __searchReplaceInFile__("docker-compose.yml", "${INSTANCE_NAME}", os.environ["INSTANCE_NAME"])
         __searchReplaceInFile__("docker-compose.yml", "${ENV}", str(os.environ["ENV"]))
         __searchReplaceInFile__("docker-compose.yml", "${PHPMYADMIN_PORT}", str(os.environ["PHPMYADMIN_PORT"]))

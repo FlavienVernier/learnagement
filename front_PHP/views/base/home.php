@@ -5,22 +5,20 @@
 <?php $t->startSlot('content'); ?>
 <!-- Hero -->
 <section class="px-8 pt-16 pb-14 text-center bg-primary">
-    <div class="inline-flex items-center gap-2 bg-blue-600/20 border border-blue-500/40 text-blue-300 text-xs px-4 py-1.5 rounded-full mb-6">
-        <span class="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
-        École d'ingénieurs publique · USMB
-    </div>
     <h1 class="text-white text-4xl font-medium leading-tight mb-4 max-w-xl mx-auto">
-        Toutes vos infos <span class="text-blue-400">Polytech</span> au même endroit
+        Toutes vos <span class="text-blue-400">infos</span> au même endroit
     </h1>
     <p class="text-white/60 text-sm leading-relaxed max-w-md mx-auto mb-8">
-        Learnagement centralise les ressources pédagogiques, documents administratifs et actualités pour les étudiants et personnels de Polytech Annecy-Chambéry.
+        Learnagement est développé par et pour les étudiants de l'USMB (Polytech & Licence Info). Il a vocation à centralise les ressources pédagogiques, mobilités, documents administratifs et actualités pour les étudiants et personnels.
     </p>
     <div class="flex gap-3 justify-center flex-wrap">
         <a href="<?= $t->router->href('login') ?>" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-7 py-3 rounded-xl transition-colors">
             Accéder à mon espace
         </a>
-        <a href="https://www.univ-smb.fr/polytech/" class="bg-white/8 hover:bg-white/14 text-white/85 border border-white/20 text-sm px-7 py-3 rounded-xl transition-colors">
-            Découvrir l'école
+    </div>
+    <div class="flex gap-3 justify-center flex-wrap">
+        <a href="<?= $t->router->href('dashboard-mobility-map_open') ?>" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-7 py-3 rounded-xl transition-colors">
+            Mobility Map
         </a>
     </div>
 </section>

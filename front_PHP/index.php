@@ -196,6 +196,10 @@
         echo $t->render('dashboard/@post/create_stage');
     });
 
+$t->router->get('/dashboard/mobility-map_open', 'dashboard-mobility-map_open', function () use ($t) {
+    echo $t->render('dashboard/mobility-map_open');
+});
+
     $t->router->get('/dashboard/mobility-map', 'dashboard-mobility-map', function () use ($t, $user) {
         requireAuth($user, $t->router);
         echo $t->render('dashboard/mobility-map');

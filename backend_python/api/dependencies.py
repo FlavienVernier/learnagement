@@ -301,16 +301,19 @@ async def get_current_active_user(
 
 def db_request(requester: User, request: SQLRequest):
     # vérification via le système de règles
+
+
+    if requester:
+        logger.info(f"User {requester.id} has role {requester.roles} requests {request}")
+
+    else:
+        logger.info(f"Anonymous user requests {request}")
+
     check_access(
         request=request,
         user=requester,
     )
-
-    if requester:
-        logger.info(f"User {requester.id} has role {requester.roles} requests {request}")
-    else:
-        logger.info(f"Anonymous user requests {request}")
-
+    
     rows = []
     connection = None
     cursor = None

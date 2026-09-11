@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+import os
 import uvicorn
 import logging
 
@@ -26,6 +27,13 @@ class HealthFilter(logging.Filter):
         return "/health" not in record.getMessage()
 
 access_logger.addFilter(HealthFilter())
+
+formatter = logging.Formatter(
+    fmt="%(levelname)s:     %(filename)s:%(lineno)d - %(message)s"
+)
+
+for handler in access_logger.handlers:
+    handler.setFormatter(formatter)
 
 #app = FastAPI(dependencies=[Depends(get_query_token)])
 origins = [
@@ -83,4 +91,19 @@ if __name__ == "__main__":
     print(bcolors.OKGREEN + "Init BD framework..." + bcolors.ENDC)
     init.init()
     print(bcolors.OKGREEN + "Start backend Python..." + bcolors.ENDC)
-    uvicorn.run(app, host="0.0.0.0", port=4000)
+
+    is_prod = os.getenv("ENV", "dev") == "prod"
+    ssl_dir = os.getenv("DOCKER_SSL_DIR")
+
+    uvicorn_kwargs = {
+        "host": "0.0.0.0",
+        "port": 4000,
+    }
+
+    if is_prod:
+        uvicorn_kwargs.update({
+            "ssl_certfile": os.path.join(ssl_dir, "cert.pem"),
+            "ssl_keyfile": os.path.join(ssl_dir, "key.pem"),
+        })
+
+    uvicorn.run(app, **uvicorn_kwargs)
