@@ -2,6 +2,7 @@
     "require": {
         "firebase/php-jwt": "^v7.1.0",
         "apereo/phpcas": "^1.6.2",
-        "monolog/monolog": "^3.10.0"
+        "monolog/monolog": "^3.10.0",
+        "ext-simplexml": "^8.5.7"
     }
 }

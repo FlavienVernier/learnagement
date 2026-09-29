@@ -18,8 +18,11 @@ import click
 from getpass import getpass
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes
+from pwdlib import PasswordHash
+from pwdlib.hashers.bcrypt import BcryptHasher
 from pathlib import Path
 
+from sqlalchemy import true
 
 # Couleurs pour les messages (non directement nécessaires dans Python mais émulation via ANSI codes)
 RED = "\033[0;31m"
@@ -32,7 +35,7 @@ YELLOW='\033[0;33m'
 NC = "\033[0m"  # No color
 
 containers = ["docker", "backend_python", "front_PHP", "front_DashPlotly", "front_NextJS", ]
-envs = set()
+envs = {"dev", "prod"}
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
@@ -51,7 +54,10 @@ def __get_git_branch():
 
 def __check_certificates():
     dotenv.load_dotenv()
-    if os.environ["ENV"] != "prod" and (not os.path.exists(os.environ["SSL_DIR"] + "learnagement/cert.pem") or  not os.path.exists(os.environ["SSL_DIR"] + "learnagement/key.pem")):
+    if os.environ["ENV"] != "prod" and (not os.path.exists(os.environ["SSL_INTERNAL_DIR"] + "cert.pem")
+                                        or  not os.path.exists(os.environ["SSL_INTERNAL_DIR"] + "key.pem")
+                                        or not os.path.exists(os.environ["SSL_EXTERNAL_DIR"] + "cert.pem")
+                                        or  not os.path.exists(os.environ["SSL_EXTERNAL_DIR"] + "key.pem")):
         logging.error("Certificate not found. Please run learnagement.py first.")
         sys.exit(1)
 
@@ -183,6 +189,24 @@ def __set_env(env_vars: dict, filepath: str) -> dict:
 
 
 # Generate default env variables
+def get_local_ip_and_hostname() -> tuple[str, str]:
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # Ne se connecte pas vraiment, juste pour déterminer l'interface sortante
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = "127.0.0.1"
+    finally:
+        s.close()
+
+    # Résolution DNS inverse (équivalent nslookup) : si pas de PTR record, hostname = IP
+    try:
+        hostname = socket.gethostbyaddr(ip)[0]
+    except (socket.herror, socket.gaierror):
+        hostname = ip
+
+    return ip, hostname
 
 def __generate_base_env():
     default_env_vars = __load_env_file("__env_skeleton.env")
@@ -198,15 +222,21 @@ def __generate_base_env():
     default_env_vars["INSTANCE_SECRET"] = str(__generate_secret__().hex())
     protocol = "http"
     default_env_vars["FRONT_PHP_PROTOCOL"] = protocol
-    default_env_vars["INSTANCE_URL"] = protocol + "://" + socket.gethostname()
+
+    default_env_vars["INSTANCE_PROTOCOL"] = protocol
+    default_env_vars["INSTANCE_IP"], default_env_vars["INSTANCE_URL"] = get_local_ip_and_hostname()
 
     # MySQL
     default_env_vars["MYSQL_SERVER"] = f"learnagement_mysql_{instance_name}"
     default_env_vars["MYSQL_ROOT_PASSWORD"] = getpass("Give the MySQL Root password: ")
     default_env_vars["MYSQL_USER_PASSWORD"] = getpass("Give the MySQL User password: ")
+    default_env_vars["LEARNAGEMENT_ADMINISTRATOR_PASSWORD"] = getpass("Give the Learnagement Administrator password: ")
+
+    #ToDo check if passwords are different if prod env
+    # ...
 
     # Backend
-    default_env_vars["BACKEND_PYTHON_DOCKER_URL"] = f"http://learnagement_backend_python_{instance_name}"
+    default_env_vars["BACKEND_PYTHON_DOCKER_URL"] = f"learnagement_backend_python_{instance_name}"
 
     return default_env_vars
 
@@ -238,6 +268,103 @@ def propagate_env():
 
 #############################################################
 # Lernagement BD
+
+password_hash = PasswordHash((BcryptHasher(),))
+
+def __set_lnm_administrator__():
+    admin_passwd = os.environ["LEARNAGEMENT_ADMINISTRATOR_PASSWORD"]
+    hashed_passwd = password_hash.hash(admin_passwd)
+
+    request = f"""INSERT INTO `LNM_administratif`(`id_administratif`, `nom`, `prenom`, `mail`, `login`, `password`, `password_updated`)
+                VALUES(NULL, 'Administrator', 'Administrator', 'administrator@lnm.fr', NULL, '{hashed_passwd}', '0')"""
+
+    container_name = "learnagement_mysql_" + os.environ["INSTANCE_NAME"]
+    db_user = os.environ["MYSQL_USER_LOGIN"]
+    db_password = os.environ["MYSQL_USER_PASSWORD"]
+    db_name = os.environ["MYSQL_DB"]
+
+    cmd = os.environ["DOCKER_COMMAND"].split(" ") + [
+        "exec", "-i", container_name,
+        "mysql", "-u", db_user, f"-p{db_password}", db_name,
+        "-e", request
+    ]
+
+    result = subprocess.run(cmd, capture_output=True, text=True)
+
+    if result.returncode != 0:
+        stderr = result.stderr.strip()
+
+        # Code MySQL 1062 = Duplicate entry -> l'administrateur existe déjà, ce n'est pas une erreur
+        if "1062" in stderr or "Duplicate entry" in stderr:
+            print("L'administrateur existe déjà, aucune action nécessaire.")
+            return None
+
+        raise RuntimeError(result.stderr.strip())
+
+    return result.stdout
+
+
+async def __wait_for_mysql_healthy__(container_name: str, timeout: int = 300, poll_interval: int = 2):
+    """Attend que le conteneur MySQL soit 'healthy' selon son healthcheck Docker."""
+    elapsed = 0
+    while elapsed < timeout:
+        cmd = os.environ["DOCKER_COMMAND"].split(" ") + [
+            "inspect", "--format={{.State.Health.Status}}", container_name
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        status = result.stdout.strip()
+
+        if status == "healthy":
+            return True
+        elif status == "unhealthy":
+            raise RuntimeError(f"Le conteneur {container_name} est en état 'unhealthy'")
+
+        await asyncio.sleep(poll_interval)
+        elapsed += poll_interval
+
+    raise TimeoutError(f"Timeout : {container_name} n'est pas devenu 'healthy' après {timeout}s")
+
+
+async def __set_lnm_administrator_with_retry__(max_retries: int = 10, retry_delay: int = 3):
+    """Insère l'administrateur, avec retry en cas d'erreur SQL transitoire
+    (ex: table pas encore créée par un script d'init concurrent)."""
+    last_error = None
+
+    for attempt in range(1, max_retries + 1):
+        print("Tentative d'ajout de l'Administrateur")
+        try:
+            result = await asyncio.to_thread(__set_lnm_administrator__)
+            return result
+        except RuntimeError as e:
+            last_error = e
+            error_msg = str(e).lower()
+
+            # Erreurs transitoires connues : table absente, connexion pas encore prête
+            transient_errors = ["doesn't exist", "unknown database", "can't connect", "access denied"]
+            is_transient = any(err in error_msg for err in transient_errors)
+
+            if not is_transient:
+                # Erreur non transitoire (ex: doublon si déjà inséré) -> on arrête direct
+                raise
+
+            if attempt < max_retries:
+                await asyncio.sleep(retry_delay)
+
+    raise RuntimeError(
+        f"Échec de l'insertion de l'administrateur après {max_retries} tentatives. "
+        f"Dernière erreur : {last_error}"
+    )
+
+
+# async def __setup_administrator_when_ready__(docker_option):
+#     task = asyncio.create_task(__run_dockers__(docker_option))
+#     await task
+#
+#     container_name = "learnagement_mysql_" + os.environ["INSTANCE_NAME"]
+#     await __wait_for_mysql_healthy__(container_name)
+#
+#     await __set_lnm_administrator_with_retry__()
+
 
 def __dbConfiguration__():
 
@@ -320,8 +447,9 @@ def __docker_configuration__():
     
     if not os.path.exists("docker-compose.yml"):
         shutil.copy("docker-compose.yml.skeleton", "docker-compose.yml")
+        __searchReplaceInFile__("docker-compose.yml", "${INSTANCE_PROTOCOL}", os.environ["INSTANCE_PROTOCOL"])
         __searchReplaceInFile__("docker-compose.yml", "${INSTANCE_NAME}", os.environ["INSTANCE_NAME"])
-        #__searchReplaceInFile__("docker-compose.yml", "${INSTANCE_NUMBER}", str(os.environ["INSTANCE_NUMBER"]))
+        __searchReplaceInFile__("docker-compose.yml", "${ENV}", str(os.environ["ENV"]))
         __searchReplaceInFile__("docker-compose.yml", "${PHPMYADMIN_PORT}", str(os.environ["PHPMYADMIN_PORT"]))
         __searchReplaceInFile__("docker-compose.yml", "${PHPMYADMIN_DOCKER_PORT}", str(os.environ["PHPMYADMIN_DOCKER_PORT"]))
         __searchReplaceInFile__("docker-compose.yml", "${BACKEND_PYTHON_PORT}", str(os.environ["BACKEND_PYTHON_PORT"]))
@@ -332,11 +460,13 @@ def __docker_configuration__():
         __searchReplaceInFile__("docker-compose.yml", "${FRONT_DASH_DOCKER_PORT}", str(os.environ["FRONT_DASH_DOCKER_PORT"]))
         __searchReplaceInFile__("docker-compose.yml", "${FRONT_NEXTAUTH_PORT}", str(os.environ["FRONT_NEXTAUTH_PORT"]))
         __searchReplaceInFile__("docker-compose.yml", "${FRONT_NEXTAUTH_DOCKER_PORT}", str(os.environ["FRONT_NEXTAUTH_DOCKER_PORT"]))
-        __searchReplaceInFile__("docker-compose.yml", "${SSL_DIR}", str(os.environ["SSL_DIR"]))
-        __searchReplaceInFile__("docker-compose.yml", "${DOCKER_SSL_DIR}", str(os.environ["DOCKER_SSL_DIR"]))
+        __searchReplaceInFile__("docker-compose.yml", "${SSL_INTERNAL_DIR}", str(os.environ["SSL_INTERNAL_DIR"]))
+        __searchReplaceInFile__("docker-compose.yml", "${SSL_EXTERNAL_DIR}", str(os.environ["SSL_EXTERNAL_DIR"]))
+        __searchReplaceInFile__("docker-compose.yml", "${DOCKER_SSL_INTERNAL_DIR}", str(os.environ["DOCKER_SSL_INTERNAL_DIR"]))
+        __searchReplaceInFile__("docker-compose.yml", "${DOCKER_SSL_EXTERNAL_DIR}", str(os.environ["DOCKER_SSL_EXTERNAL_DIR"]))
     elif(os.path.getmtime("docker-compose.yml.skeleton") > os.path.getmtime("docker-compose.yml")):
         logging.warning(f"{YELLOW}docker-compose.yml.skeleton has been updated, your docker-compose.yml can be deprecated{NC}")
-    
+
     os.chdir("..")
 
 
@@ -358,16 +488,16 @@ async def __run_dockers__(docker_option):
         subprocess.run(os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + ["up"] + docker_option, check=True)
 
     # Pause pour laisser Docker démarrer
-    time.sleep(5)
-
-    if os.name == 'nt':
-        #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose ps'],stdin=subprocess.PIPE)
-        #prog.stdin.write(b'password')
-        prog = subprocess.Popen(['docker', 'compose', 'ps'])
-        #prog.stdin.write(b'password')
-        prog.communicate()
-    else:            
-        subprocess.run(os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + ["ps"], check=True)
+    # time.sleep(5)
+    #
+    # if os.name == 'nt':
+    #     #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose ps'],stdin=subprocess.PIPE)
+    #     #prog.stdin.write(b'password')
+    #     prog = subprocess.Popen(['docker', 'compose', 'ps'])
+    #     #prog.stdin.write(b'password')
+    #     prog.communicate()
+    # else:
+    #     subprocess.run(os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + ["ps"], check=True)
         
     os.chdir("..")
     return "done"
@@ -456,10 +586,10 @@ def __from_env__(env=None):
 
         env_vars = __load_env_file(".env")
         if env == "prod":
-            env_vars = __set_env(env_vars, "env_prod.env")
+            env_vars = __set_env(env_vars, ".env_prod.env")
 
         else:
-            env_vars = __set_env(env_vars, "env_dev.env")
+            env_vars = __set_env(env_vars, ".env_dev.env")
 
         save_env_file(env_vars, ".env")
 
@@ -502,6 +632,8 @@ def __from_scratch__():
             logging.exception(e)
         try:
             os.remove(".env")
+            os.remove(".env_dev.env")
+            os.remove(".env_prod.env")
         except FileNotFoundError as e:
             logging.exception(e)
 
@@ -537,6 +669,13 @@ async def __start__(docker_option=None):
     __docker_configuration__()
     __security_check()
     task = asyncio.create_task(__run_dockers__(docker_option))
+
+    await task
+
+    container_name = "learnagement_mysql_" + os.environ["INSTANCE_NAME"]
+    await __wait_for_mysql_healthy__(container_name)
+
+    await __set_lnm_administrator_with_retry__()
 
     logging.info(f"{GREEN}Web Apps will run on: {os.environ['INSTANCE_URL']}{NC}")
     logging.info(f"{GREEN}PHPMyAdmin will run on: http://127.0.0.1:{os.environ['PHPMYADMIN_PORT']}{NC}")
@@ -603,6 +742,7 @@ def start(docker_option=None, restart:bool=False, rebuild:bool=False, test:bool=
 
     if env:
         __from_env__(env)
+        rebuild = True
 
     if rebuild and not test:
         asyncio.run(__start__(docker_option=["--build"] + docker_option))
@@ -629,7 +769,7 @@ def __searchReplaceInFile__(fileName, patern, value):
         file.write(filedata)
 
 @cli.command(help="Backup the database (structure, data and triggers)")
-@click.option("--backup_folder")
+@click.option("--backup_folder", default="db/backup")
 def backupDB(backup_folder="db/backup"):
 
     """
@@ -756,5 +896,19 @@ def import_instance(instanceArchive):
 def stop():
     __stop__()
 
+@cli.command()
+def gui():
+    """Lance l'interface graphique click-gui-runner pour explorer cette application."""
+    from click_gui_runner.__main__ import main
+    path = os.path.abspath(__file__)
+    main(caller=path)
+
+import signal
+
+def handle_signal(signum, _frame):
+    stop()
+
 if __name__ == "__main__":
+    signal.signal(signal.SIGTERM, handle_signal)
+    signal.signal(signal.SIGINT, handle_signal)
     cli()

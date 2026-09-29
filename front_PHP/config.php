@@ -31,6 +31,7 @@ function getLogger(): \Monolog\Logger {
     }
     return $log;
 }
+
 //$log = new Logger('name');
 //$log->pushHandler(new StreamHandler('php://stdout', Level::Info));
 

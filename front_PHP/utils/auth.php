@@ -37,7 +37,7 @@
     }
 
     function getCurrentUser() {
-        if (isset($_SESSION["jwt_token"])) {
+        if (isset($_SESSION["jwt_token"]) && $_SESSION["jwt_token"] !== '') {
             $expiration = getJWTExpiration($_SESSION["jwt_token"]);
             if ($expiration && $expiration < new DateTime()) {
                 logout();
@@ -75,6 +75,18 @@
         $_SESSION["type"] = $type;
         $_SESSION["id"] = $id;
         $_SESSION["jwt_token"] = $jwt;
+    }
+
+    function loginFromCas(array $userFromDb): void {
+        // Réutilise ta fonction login() existante
+        // Le JWT CAS n'existe pas, on met une chaîne vide ou un marqueur
+        login(
+            id:    $userFromDb['id'],
+            email: $userFromDb['email'],
+            type:  $userFromDb['type'],
+            jwt:   '' // pas de JWT pour une auth CAS
+        );
+        $_SESSION['auth_method'] = 'cas'; // utile pour le logout CAS
     }
 
     function logout() {

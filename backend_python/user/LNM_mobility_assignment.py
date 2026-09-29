@@ -1,7 +1,7 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
-from typing import Annotated, Any, Dict, List, Optional
+from typing import Annotated, Any, Dict, List
 import time
 
 assignment_progress = {
@@ -11,7 +11,9 @@ assignment_progress = {
     "error": None
 }
 
-from dependencies import db_request, get_current_active_user, User, SQLRequest
+from api.dependencies import db_request, get_current_active_user
+from models.request import SQLRequest
+from models.user import User
 
 logger = logging.getLogger(__name__)
 
@@ -27,21 +29,23 @@ class MobilityQuota(BaseModel):
 
 class AssignmentRunPayload(BaseModel):
     annee_eligible: int = 4
+    annee_scolaire: str = "2025-2026"
     mobility_quotas: List[MobilityQuota] = []
 
 def get_eligible_students(current_user: User) -> List[dict]:
     """
-    Étape 1: Récupérer les étudiants éligibles (4ème et 5ème année).
+    Étape 1: Récupérer les étudiants éligibles (4ème année uniquement).
     Retourne une liste de dictionnaires avec id_etudiant, mobility_note, id_promo, id_filiere et submission_date.
     """
     query = """
-        SELECT e.id_etudiant, e.mobility_note, e.id_promo, p.id_filiere, MAX(w.submission_date) as submission_date
+        SELECT e.id_etudiant, e.mobility_z_score as z_score, e.id_promo, p.id_filiere, p.annee, MAX(w.submission_date) as submission_date
         FROM LNM_etudiant e
         JOIN LNM_promo p ON e.id_promo = p.id_promo
         JOIN MOB_wishes w ON e.id_etudiant = w.id_etudiant
-        WHERE p.annee IN (4, 5)
+        WHERE p.annee = 4
           AND w.submission_date IS NOT NULL
-        GROUP BY e.id_etudiant, e.mobility_note, e.id_promo, p.id_filiere
+          AND e.mobility_z_score IS NOT NULL
+        GROUP BY e.id_etudiant, e.mobility_z_score, e.id_promo, p.id_filiere, p.annee
     """
     request = {
         "request": query,
@@ -52,45 +56,41 @@ def get_eligible_students(current_user: User) -> List[dict]:
     result = db_request(current_user, sql_request)
     return result if result else []
 
-def calculate_z_scores(students: List[dict]) -> List[dict]:
+def get_mobility_quotas_from_db(annee_scolaire: str, current_user: User) -> List[MobilityQuota]:
     """
-    Étape 2: Calculer la moyenne centrée réduite (Z-score) par filière.
-    Trie les étudiants par Z-score décroissant (et date de soumission des vœux en cas d'égalité).
+    Récupère les quotas depuis la base de données pour une année scolaire donnée.
     """
-    import math
-    from collections import defaultdict
+    query = """
+        SELECT id_filiere, id_semestre, places
+        FROM MOB_filiere_quotas
+        WHERE annee_scolaire = %(annee_scolaire)s
+    """
+    request = {
+        "request": query,
+        "params": {"annee_scolaire": annee_scolaire},
+        "allowedRolesRequester": ["relations_internationales"]
+    }
+    sql_request = SQLRequest(**request)
+    result = db_request(current_user, sql_request)
+    
+    quotas = []
+    if result:
+        for row in result:
+            quotas.append(MobilityQuota(
+                id_filiere=row["id_filiere"],
+                id_semestre=row["id_semestre"],
+                places=row["places"]
+            ))
+    return quotas
 
-    # Regrouper les notes par filière
-    filiere_notes = defaultdict(list)
-    for s in students:
-        filiere_notes[s["id_filiere"]].append(float(s["mobility_note"]))
-            
-    # Calculer la moyenne et l'écart-type par filière
-    filiere_stats = {}
-    for filiere, notes in filiere_notes.items():
-        n = len(notes)
-        if n == 0:
-            mean, std = 0.0, 0.0
-        else:
-            mean = sum(notes) / n
-            variance = sum((x - mean) ** 2 for x in notes) / n
-            std = math.sqrt(variance)
-        filiere_stats[filiere] = {"mean": mean, "std": std}
-        
-    # Calculer le z-score pour chaque étudiant
-    for s in students:
-        note = float(s["mobility_note"])
-        stats = filiere_stats[s["id_filiere"]]
-        if stats["std"] > 0:
-            s["z_score"] = (note - stats["mean"]) / stats["std"]
-        else:
-            s["z_score"] = 0.0
-                
-    # Trier par z_score (décroissant), puis par submission_date (croissant)
-    # L'utilisation du tuple (-z_score, date) permet ce double tri
+def sort_students_by_z_score(students: List[dict]) -> List[dict]:
+    """
+    Étape 2: Trier les étudiants par Z-score (lu en BDD) décroissant 
+    (et date de soumission des vœux en cas d'égalité).
+    """
     sorted_students = sorted(
         students,
-        key=lambda x: (-x["z_score"], x["submission_date"])
+        key=lambda x: (-float(x["z_score"] or 0), x["submission_date"])
     )
     return sorted_students
 
@@ -100,10 +100,13 @@ def get_student_wishes(current_user: User) -> List[dict]:
     Trie par id_etudiant puis par priorité croissante.
     """
     query = """
-        SELECT id_etudiant, id_partner_university, id_semestre, priority
-        FROM MOB_wishes
-        WHERE submission_date IS NOT NULL
-        ORDER BY id_etudiant ASC, priority ASC
+        SELECT w.id_etudiant, w.id_partner_university, w.id_semestre, w.priority
+        FROM MOB_wishes w
+        JOIN LNM_etudiant e ON w.id_etudiant = e.id_etudiant
+        JOIN LNM_promo p ON e.id_promo = p.id_promo
+        WHERE w.submission_date IS NOT NULL
+          AND p.annee = 4
+        ORDER BY w.id_etudiant ASC, w.priority ASC
     """
     request = {
         "request": query,
@@ -130,11 +133,10 @@ def get_available_places(current_user: User) -> dict:
 
     Gère la spécificité des stages (places illimitées).
     """
-    # 1. Capacités de référence par spécialité/promo
+    # 1. Capacités de référence par spécialité/filiere
     query_places = """
-        SELECT id_partner_university, id_promo, number_of_places
+        SELECT id_partner_university, id_filiere, annee, number_of_places
         FROM MOB_partner_university_places
-        WHERE number_of_places > 0
     """
     sql_places = SQLRequest(request=query_places, params={}, allowedRolesRequester=["relations_internationales"])
     places_rows = db_request(current_user, sql_places) or []
@@ -158,14 +160,14 @@ def get_available_places(current_user: User) -> dict:
     sql_stages = SQLRequest(request=query_stages, params={}, allowedRolesRequester=["relations_internationales"])
     stage_rows = db_request(current_user, sql_stages) or []
 
-    # Formatage : specialty_places[str(id_university)][str(id_promo)] = nombre_de_places
+    # Formatage : specialty_places[str(id_university)][f"{id_filiere}_{annee}"] = nombre_de_places
     specialty_places = {}
     for row in places_rows:
         id_univ = str(row["id_partner_university"])
-        id_promo = str(row["id_promo"])
+        filiere_key = f"{row['id_filiere']}_{row['annee']}"
         if id_univ not in specialty_places:
             specialty_places[id_univ] = {}
-        specialty_places[id_univ][id_promo] = int(row["number_of_places"])
+        specialty_places[id_univ][filiere_key] = int(row["number_of_places"])
 
     # Formatage : global_places[str(id_university)] = {"S8": n, "S9": n}
     global_places = {}
@@ -216,10 +218,10 @@ def run_round_robin_assignment(
     for id_univ, semesters in (places.get("global_places") or {}).items():
         global_places_left[id_univ] = dict(semesters)  # copie
 
-    # specialty_places_left[str(id_university)][str(id_promo)] = places restantes
+    # specialty_places_left[str(id_university)][f"{id_filiere}_{annee}"] = places restantes
     specialty_places_left: Dict[str, Dict[str, int]] = {}
-    for id_univ, promos in (places.get("specialty_places") or {}).items():
-        specialty_places_left[id_univ] = dict(promos)  # copie
+    for id_univ, filieres in (places.get("specialty_places") or {}).items():
+        specialty_places_left[id_univ] = dict(filieres)  # copie
 
     stages_set = set(places.get("stages") or [])
 
@@ -244,7 +246,6 @@ def run_round_robin_assignment(
     assignments = []
     for student in students:
         id_etudiant  = student["id_etudiant"]
-        id_promo     = str(student["id_promo"])
         id_filiere   = student["id_filiere"]
         student_wishes = wishes_by_student.get(id_etudiant, [])
 
@@ -254,6 +255,11 @@ def run_round_robin_assignment(
             id_univ_str   = str(id_university)
             id_semestre   = wish["id_semestre"]
             sem_key       = "S8" if id_semestre == 8 else "S9"
+            
+            # Le frontend gère les places avec annee = 4 pour le S8, et annee = 5 pour le S9
+            annee_for_wish = 4 if id_semestre == 8 else 5
+            filiere_key    = f"{id_filiere}_{annee_for_wish}"
+            
             is_stage      = id_university in stages_set
 
             # --- Condition 1 : places globales disponibles ---
@@ -275,7 +281,7 @@ def run_round_robin_assignment(
                 cond2 = True
             else:
                 univ_specialty = specialty_places_left.get(id_univ_str, {})
-                cond2 = univ_specialty.get(id_promo, 0) > 0
+                cond2 = univ_specialty.get(filiere_key, 0) > 0
 
             if not cond2:
                 logger.debug(
@@ -303,12 +309,13 @@ def run_round_robin_assignment(
                 "id_etudiant":           id_etudiant,
                 "id_partner_university": id_university,
                 "id_semestre":           id_semestre,
+                "status":                "pending"
             })
 
             # Décrémentation des stocks (sauf stage)
             if not is_stage:
                 global_places_left[id_univ_str][sem_key] -= 1
-                specialty_places_left[id_univ_str][id_promo] -= 1
+                specialty_places_left[id_univ_str][filiere_key] -= 1
                 remaining_quotas[id_filiere][id_semestre] -= 1
 
             assigned = True
@@ -316,6 +323,9 @@ def run_round_robin_assignment(
 
         if not assigned:
             logger.debug("Étudiant %s — aucun vœu accepté, non inséré dans MOB_assignment.", id_etudiant)
+            # SUPPRESSION À LA DEMANDE DE L'UTILISATEUR :
+            # Il n'y a plus d'affectation par défaut au stage pour les étudiants non affectés
+            # (ni pour les retardataires, ni pour ceux dont les vœux ont tous été refusés).
 
     # --- Construction de l'état final des places restantes (pour persistance) ---
     final_places = {
@@ -338,15 +348,25 @@ def save_assignments(assignments: List[dict], final_places: dict, current_user: 
       - S8_remaining_places / S9_remaining_places dans MOB_partner_university
       - remaining_places dans MOB_partner_university_places
     """
-    # --- 6a. Insérer les affectations dans MOB_assignment ---
+    # --- 6a. Supprimer les affectations précédentes non validées pour éviter les fantômes ---
+    delete_pending = SQLRequest(
+        request="DELETE FROM MOB_assignment WHERE status = 'pending'",
+        params={},
+        allowedRolesRequester=["relations_internationales"]
+    )
+    db_request(current_user, delete_pending)
+
+    # --- 6b. Insérer les nouvelles affectations dans MOB_assignment ---
     if assignments:
         values_clause = []
         params = {}
         for i, assign in enumerate(assignments):
-            values_clause.append(f"(%(e{i})s, %(u{i})s, %(s{i})s, 'pending')")
+            status = assign.get("status", "pending")
+            values_clause.append(f"(%(e{i})s, %(u{i})s, %(s{i})s, %(st{i})s)")
             params[f"e{i}"] = assign["id_etudiant"]
             params[f"u{i}"] = assign["id_partner_university"]
             params[f"s{i}"] = assign["id_semestre"]
+            params[f"st{i}"] = status
 
         query = f"""
             INSERT INTO MOB_assignment (id_etudiant, id_partner_university, id_semestre, status)
@@ -363,40 +383,7 @@ def save_assignments(assignments: List[dict], final_places: dict, current_user: 
         )
         db_request(current_user, sql_request)
 
-    # --- 6b. Mettre à jour les places globales restantes (S8 / S9) ---
-    global_remaining = (final_places or {}).get("global_places") or {}
-    for id_univ_str, semesters in global_remaining.items():
-        params_g = {
-            "s8": semesters.get("S8"),
-            "s9": semesters.get("S9"),
-            "id_university": int(id_univ_str),
-        }
-        query_g = """
-            UPDATE MOB_partner_university
-            SET S8_remaining_places = %(s8)s,
-                S9_remaining_places = %(s9)s
-            WHERE id_partner_university = %(id_university)s
-        """
-        sql_g = SQLRequest(request=query_g, params=params_g, allowedRolesRequester=["relations_internationales"])
-        db_request(current_user, sql_g)
 
-    # --- 6c. Mettre à jour les places restantes par spécialité ---
-    specialty_remaining = (final_places or {}).get("specialty_places") or {}
-    for id_univ_str, promos in specialty_remaining.items():
-        for id_promo_str, remaining in promos.items():
-            params_sp = {
-                "remaining": remaining,
-                "id_university": int(id_univ_str),
-                "id_promo": int(id_promo_str),
-            }
-            query_sp = """
-                UPDATE MOB_partner_university_places
-                SET remaining_places = %(remaining)s
-                WHERE id_partner_university = %(id_university)s
-                  AND id_promo              = %(id_promo)s
-            """
-            sql_sp = SQLRequest(request=query_sp, params=params_sp, allowedRolesRequester=["relations_internationales"])
-            db_request(current_user, sql_sp)
 
 @router.get("/university/admin/assignment/status", tags=["admin", "mobility"], summary="Get assignment progress")
 def get_assignment_status():
@@ -418,8 +405,8 @@ def execute_assignment_task(payload: AssignmentRunPayload, current_user: User):
         
         time.sleep(0.5)
         assignment_progress["progress"] = 30
-        assignment_progress["step"] = "Étape 2 : Calcul des scores Z..."
-        sorted_students = calculate_z_scores(students)
+        assignment_progress["step"] = "Étape 2 : Tri des étudiants..."
+        sorted_students = sort_students_by_z_score(students)
         
         time.sleep(0.5)
         assignment_progress["progress"] = 50
@@ -430,7 +417,13 @@ def execute_assignment_task(payload: AssignmentRunPayload, current_user: User):
         time.sleep(0.5)
         assignment_progress["progress"] = 70
         assignment_progress["step"] = "Étape 4 : Exécution de l'algorithme Round-Robin..."
-        result = run_round_robin_assignment(sorted_students, wishes, places, payload.mobility_quotas)
+        
+        # Récupération des quotas persistés depuis la base de données
+        quotas_from_db = get_mobility_quotas_from_db(payload.annee_scolaire, current_user)
+        # S'ils sont vides, on utilise ceux du payload en fallback
+        active_quotas = quotas_from_db if quotas_from_db else payload.mobility_quotas
+        
+        result = run_round_robin_assignment(sorted_students, wishes, places, active_quotas)
         assignments = result["assignments"]
         final_places = result["final_places"]
         
@@ -466,4 +459,92 @@ def run_mobility_assignment(
         
     background_tasks.add_task(execute_assignment_task, payload, current_user)
     return {"message": "Algorithme d'affectation démarré en arrière-plan."}
+
+class MobilityQuotasUpdatePayload(BaseModel):
+    annee_scolaire: str
+    quotas: List[MobilityQuota]
+
+@router.get("/university/admin/mobility-quotas",
+            tags=["admin", "mobility"],
+            summary="Get mobility quotas",
+            description="Récupérer les quotas de mobilité par filière")
+def get_mobility_quotas(
+    annee_scolaire: str,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    query = """
+        SELECT id_filiere, id_semestre, places
+        FROM MOB_filiere_quotas
+        WHERE annee_scolaire = %(annee_scolaire)s
+    """
+    sql_request = SQLRequest(request=query, params={"annee_scolaire": annee_scolaire}, allowedRolesRequester=["relations_internationales"])
+    return db_request(current_user, sql_request)
+
+@router.post("/university/admin/mobility-quotas",
+            tags=["admin", "mobility"],
+            summary="Save mobility quotas",
+            description="Sauvegarder les quotas de mobilité par filière")
+def save_mobility_quotas(
+    payload: MobilityQuotasUpdatePayload,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    # D'abord, supprimer les anciens quotas pour cette année
+    delete_query = """
+        DELETE FROM MOB_filiere_quotas 
+        WHERE annee_scolaire = %(annee_scolaire)s
+    """
+    sql_request = SQLRequest(request=delete_query, params={"annee_scolaire": payload.annee_scolaire}, allowedRolesRequester=["relations_internationales"])
+    db_request(current_user, sql_request)
+    
+    # Ensuite, insérer les nouveaux quotas
+    insert_query = """
+        INSERT INTO MOB_filiere_quotas (id_filiere, annee_scolaire, id_semestre, places)
+        VALUES (%(id_filiere)s, %(annee_scolaire)s, %(id_semestre)s, %(places)s)
+    """
+    for quota in payload.quotas:
+        params = {
+            "id_filiere": quota.id_filiere,
+            "annee_scolaire": payload.annee_scolaire,
+            "id_semestre": quota.id_semestre,
+            "places": quota.places
+        }
+        sql_request = SQLRequest(request=insert_query, params=params, allowedRolesRequester=["relations_internationales"])
+        db_request(current_user, sql_request)
+        
+    return {"message": "Quotas sauvegardés avec succès."}
+
+@router.get("/university/etudiant/{id_etudiant}/quota",
+            tags=["etudiant", "mobility"],
+            summary="Get student mobility quota",
+            description="Récupérer les quotas disponibles pour la filière d'un étudiant")
+def get_student_quota(
+    id_etudiant: int,
+    annee_scolaire: str,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    # Récupérer la filière de l'étudiant
+    # Note : allowedRolesRequester contient "connected_user" pour permettre à l'étudiant de l'appeler.
+    query = """
+        SELECT q.id_semestre, q.places, f.nom_filiere
+        FROM MOB_filiere_quotas q
+        JOIN LNM_promo p ON p.id_filiere = q.id_filiere
+        JOIN LNM_etudiant e ON e.id_promo = p.id_promo
+        JOIN LNM_filiere f ON f.id_filiere = q.id_filiere
+        WHERE e.id_etudiant = %(id_etudiant)s
+          AND q.annee_scolaire = %(annee_scolaire)s
+    """
+    sql_request = SQLRequest(request=query, params={"id_etudiant": id_etudiant, "annee_scolaire": annee_scolaire}, allowedRolesRequester=["connected_user"])
+    result = db_request(current_user, sql_request)
+    
+    if not result:
+        return {"S8": 0, "S9": 0, "filiere": "Inconnue"}
+        
+    quotas_dict = {"S8": 0, "S9": 0, "filiere": result[0]["nom_filiere"]}
+    for row in result:
+        if row["id_semestre"] == 8:
+            quotas_dict["S8"] = row["places"]
+        elif row["id_semestre"] == 9:
+            quotas_dict["S9"] = row["places"]
+            
+    return quotas_dict
 

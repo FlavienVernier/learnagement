@@ -80,14 +80,14 @@ while not finished :
             id_discipline='null'
             composante='null'
             service_statutaire='null'
-            décharge='null'
+            decharge='null'
             service_effectif='null'
-            HCAutorisées='null'
+            HCAutorisees='null'
             fullName='null'
             commentaire='null'
 
             # Ajouter les informations à la requête sql
-            query += f"INSERT INTO LNM_enseignants (prenom, nom, mail, password, password_updated, statut, id_discipline, composante, service statutaire, décharge, service effectif, HCAutorisées, fullName, commentaire) VALUES ('{nom}', '{prenom}','{email}', '{password}', '{password_updated}', '{statut, id_discipline}', '{composante}', '{service_statutaire}', '{décharge}', '{service_effectif}', '{HCAutorisées}', '{fullName}', '{commentaire}');\n"
+            query += f"INSERT INTO LNM_enseignants (prenom, nom, mail, password, password_updated, statut, id_discipline, composante, service statutaire, decharge, service effectif, HCAutorisees, fullName, commentaire) VALUES ('{nom}', '{prenom}','{email}', '{password}', '{password_updated}', '{statut, id_discipline}', '{composante}', '{service_statutaire}', '{decharge}', '{service_effectif}', '{HCAutorisees}', '{fullName}', '{commentaire}');\n"
 
     except Exception as e:
         print(f"Une exception s'est produite : {e}")

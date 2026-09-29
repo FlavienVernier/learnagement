@@ -2,10 +2,10 @@ import logging
 
 from fastapi import APIRouter, Depends
 from typing import Annotated, Dict, Any
-from pydantic import BaseModel
 
-from dependencies import db_request, get_current_active_user, User, SQLRequest
-
+from api.dependencies import db_request, get_current_active_user
+from models.request import SQLRequest
+from models.user import User
 
 logger = logging.getLogger(__name__)
 
@@ -194,7 +194,7 @@ def get_etudiant(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester" : ["connected_user"],
+        "allowedRolesRequester" : ["connected_user"],  # ToDo check allowedRolesRequester
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -328,8 +328,10 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": [],
     }
+    if current_user.id == id_etudiant:
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/etudiants/{id_etudiant}/polypoints/",
@@ -350,8 +352,10 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": [],
     }
+    if current_user.id == id_etudiant:
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/etudiants/{id_etudiant}/rendus/",
@@ -381,8 +385,10 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["connected_user"],
+        "allowedRolesRequester": [],
     }
+    if current_user.id == id_etudiant:
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/etudiants/{id_etudiant:int}/stages/",

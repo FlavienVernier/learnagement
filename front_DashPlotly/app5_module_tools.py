@@ -61,6 +61,13 @@ def set_intervenant_principal_sequencage(token, id_module: int, id_sequencage: i
     )
     return df
 
+def reset_intervenant_principal_sequencage(token, id_module: int, id_sequencage: int):
+    df = app_tools.patch_endpoint(
+        url = app_tools.get_python_backend_url(f"/modules/{id_module}/sequencages/{id_sequencage}/"),
+        data = {'id_intervenant_principal': None},
+        token = token
+    )
+    return df
 
 def check_moduleSequencage(token, id_enseignant):
     df = app_tools.get_endpoint(
@@ -88,6 +95,14 @@ def set_intervenant_principal_sequence(token, id_module, id_sequence, id_interve
     return df
 
 
+def reset_intervenant_principal_sequence(token, id_module, id_sequence):
+    df = app_tools.patch_endpoint(
+        url = app_tools.get_python_backend_url(f"/modules/{id_module}/sequences/{id_sequence}/"),
+        data = {'id_intervenant_principal': None},
+        token = token
+    )
+    return df
+
 ######################
 # Session
 
@@ -106,3 +121,10 @@ def set_intervenant_session(token, id_module, id_session, id_intervenant):
     )
     return df
 
+def reset_intervenant_session(token, id_module, id_session):
+    df = app_tools.patch_endpoint(
+        url = app_tools.get_python_backend_url(f"/modules/{id_module}/sessions/{id_session}/"),
+        data = {'id_enseignant': None},
+        token = token
+    )
+    return df

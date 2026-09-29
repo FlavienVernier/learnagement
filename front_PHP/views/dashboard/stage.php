@@ -9,7 +9,8 @@
 
     $enseignants = get_enseignants($token);
 
-$etudiants = get_stages($token);
+//$etudiants = get_stages($token);
+$etudiants = get_stages2($token);
 
 $total       = count($etudiants);
 $sans_stage  = array_values(array_filter($etudiants, fn($e) => $e['status'] === 'no-internship'));
@@ -78,7 +79,7 @@ if ($recherche !== '' || $filtre_enseignant !== '') {
                     </span>
                 </div>
                 <div class="text-4xl font-extrabold text-red-600"><?= count($sans_stage) ?></div>
-                <div class="mt-1 text-xs"><?= round(count($sans_stage) / $total * 100) ?>% du total</div>
+                <div class="mt-1 text-xs"><?= $total > 0 ? round(count($sans_stage) / $total * 100) : 0 ?>% du total</div>
             </a>
 
             <a href="?filtre=sans_tuteur" class="block rounded-2xl p-5 border <?= $filtre === 'sans_tuteur' ? 'border-yellow-500 ring-2 ring-yellow-200' : 'border-gray-200' ?> hover:shadow-md transition">
@@ -89,7 +90,7 @@ if ($recherche !== '' || $filtre_enseignant !== '') {
                     </span>
                 </div>
                 <div class="text-4xl font-extrabold text-yellow-600"><?= count($sans_tuteur) ?></div>
-                <div class="mt-1 text-xs"><?= round(count($sans_tuteur) / $total * 100) ?>% du total</div>
+                <div class="mt-1 text-xs"><?= $total > 0 ? round(count($sans_tuteur) / $total * 100) : 0 ?>% du total</div>
             </a>
 
             <a href="?filtre=complet" class="block rounded-2xl p-5 border <?= $filtre === 'complet' ? 'border-green-500 ring-2 ring-green-200' : 'border-gray-200' ?> hover:shadow-md transition">
@@ -100,7 +101,7 @@ if ($recherche !== '' || $filtre_enseignant !== '') {
                     </span>
                 </div>
                 <div class="text-4xl font-extrabold text-green-600"><?= count($complets) ?></div>
-                <div class="mt-1 text-xs"><?= round(count($complets) / $total * 100) ?>% du total</div>
+                <div class="mt-1 text-xs"><?= $total > 0 ? round(count($complets) / $total * 100) : 0 ?>% du total</div>
             </a>
 
         </div>

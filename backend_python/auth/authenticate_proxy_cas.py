@@ -12,7 +12,8 @@ from fastapi.responses import JSONResponse
 import httpx
 import re
 
-from dependencies import logger, get_user, Token
+from api.dependencies import logger, get_user
+from models.token import Token
 from auth.authenticate_tools import create_access_token
 
 dotenv.load_dotenv(".env")
@@ -138,7 +139,7 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = get_user(form_data.username, method="byLogin")
+    user = get_user(form_data.username)
 
     # --- Génération du token ---
     access_token = create_access_token(

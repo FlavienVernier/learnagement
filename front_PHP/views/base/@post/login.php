@@ -55,6 +55,8 @@ try {
 
     echo "Utilisateur : " . $decoded->email . " " . $decoded->firstname . " " . $decoded->lastname . PHP_EOL;
     echo "Expire à : " . date('Y-m-d H:i:s', $decoded->exp) . PHP_EOL;
+    getLogger()->info("Utilisateur : " . $decoded->email . " " . $decoded->firstname . " " . $decoded->lastname . PHP_EOL);
+    getLogger()->info("Expire à : " . date('Y-m-d H:i:s', $decoded->exp) . PHP_EOL);
 
     if ($decoded->exp < time()) {
         $t->router->redirect('login');

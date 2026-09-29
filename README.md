@@ -14,6 +14,8 @@ Python 3.
 
 ## Installation et lancement
 
+### Dev Mode
+
 Initialisation de l'environnement à ne faire qu'une seule fois
 ```bash
 python3 -m venv venv
@@ -37,6 +39,29 @@ For any help
 ```bash
 python Learnagement.py --help
 ```
+
+### Production Mode
+
+Generate self certificate:
+```bash
+mkdir certs
+cd certs
+openssl req \                                                  
+  -x509 \
+  -newkey rsa:4096 \
+  -nodes \
+  -keyout key.pem \
+  -out cert.pem \
+  -days 365
+cd -
+```
+
+Run with prod environnement (secure):
+```bash
+python Learnagement.py start --env
+```
+Note, containers will rebuild.
+
 
 ## Utilisation
 

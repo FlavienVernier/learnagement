@@ -63,7 +63,7 @@ def update_table_sequencage(token, user_id, selected_module):
     #data=df.to_dict('records')
     #print(data, flush=True)
     dfi = app_tools.get_enseignants(token)
-    intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id_enseignant']} for _, row in dfi.iterrows()]
+    intervenant_options = [{'label': 'Aucun intervenant', 'value': None}] + [{'label': row['ExplicitSecondaryK'], 'value': row['id_enseignant']} for _, row in dfi.iterrows()]
 
     table_sequencage = dash_table.DataTable(
         id='table_sequencage',
@@ -99,7 +99,7 @@ def update_table_sequence(token, user_id, selected_module, selected_seance_type)
             df = df[df['id_module'] == selected_module][['id_sequence', 'type', 'numero_ordre', 'duree_h', 'groupe_type', 'intervenant_principal', 'commentaire']]
 
         dfi = app_tools.get_enseignants(token)
-        intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id_enseignant']} for _, row in dfi.iterrows()]
+        intervenant_options = [{'label': 'Aucun intervenant', 'value': None}] + [{'label': row['ExplicitSecondaryK'], 'value': row['id_enseignant']} for _, row in dfi.iterrows()]
 
         table_sequence = dash_table.DataTable(
             id='table_sequence',
@@ -154,7 +154,7 @@ def update_table_session(token, user_id, selected_module, selected_seance_type, 
                 ['id_session', 'type', 'numero_ordre', 'duree_h', 'nom_groupe', 'intervenant', 'commentaire']].sort_values(by=['type', 'numero_ordre'], ascending=[False, False])
 
         dfi = app_tools.get_enseignants(token)
-        intervenant_options = [{'label': row['ExplicitSecondaryK'], 'value': row['id_enseignant']} for _, row in dfi.iterrows()]
+        intervenant_options = [{'label': 'Aucun intervenant', 'value': None}] + [{'label': row['ExplicitSecondaryK'], 'value': row['id_enseignant']} for _, row in dfi.iterrows()]
 
         table_session = dash_table.DataTable(
             id='table_session',
@@ -328,13 +328,22 @@ def register_callbacks_edit(app):
             row_changed = [row for row in current  if row not in previous]
             if len(row_changed) > 0: # else callback invoked by data deleted
                 df = app5_module_tools.get_moduleSequencageByEnseignantId(token, user_id)
+                print(df, flush=True)
                 row_changed = row_changed[0]
                 new_intervenant_id = row_changed['nouvel_intervenant']
-                id_sequencage = int(df[(df['nombre'] == row_changed['nombre'])
+                if new_intervenant_id is None or new_intervenant_id == "":
+                    new_intervenant_id = None
+                id_sequencage = int(df[(df['id_module'] == id_module)
+                                  & (df['nombre'] == row_changed['nombre'])
                                   & (df['type'] == row_changed['type'])
                                   & (df['duree_h'] == row_changed['duree_h'])
                                   & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0])
-                ret = app5_module_tools.set_intervenant_principal_sequencage(token, id_module, id_sequencage, new_intervenant_id)
+                # ToDo refactoring required to get it directly
+                #id_sequencage = row_changed['id_module_sequencage']
+                if new_intervenant_id is None or new_intervenant_id == "":
+                    ret = app5_module_tools.reset_intervenant_principal_sequencage(token, id_module, id_sequencage)
+                else:
+                    ret = app5_module_tools.set_intervenant_principal_sequencage(token, id_module, id_sequencage, new_intervenant_id)
             return update_table_sequencage(token, user_id, id_module), update_table_sequence(token, user_id, id_module, None)
 
     # Mise à jour de la table des séquençages selon le module sélectionné
@@ -428,7 +437,10 @@ def register_callbacks_edit(app):
                 #                    & (df['numero_ordre'] == row_changed['numero_ordre'])
                 #                    & (df['duree_h'] == row_changed['duree_h'])
                 #                    & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0]
-                ret = app5_module_tools.set_intervenant_principal_sequence(token, selected_module, id_sequence, new_intervenant_id)
+                if new_intervenant_id is None or new_intervenant_id == "":
+                    ret = app5_module_tools.reset_intervenant_principal_sequence(token, selected_module, id_sequence)
+                else:
+                    ret = app5_module_tools.set_intervenant_principal_sequence(token, selected_module, id_sequence, new_intervenant_id)
                 return (update_table_sequencage(token, user_id, selected_module),
                         update_table_session(token, user_id, selected_module, selected_type, selected_promo)
                         )
@@ -492,5 +504,8 @@ def register_callbacks_edit(app):
                 #                    & (df['numero_ordre'] == row_changed['numero_ordre'])
                 #                    & (df['duree_h'] == row_changed['duree_h'])
                 #                    & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0]
-                ret = app5_module_tools.set_intervenant_session(token, selected_module, id_session, new_intervenant_id)
+                if new_intervenant_id is None or new_intervenant_id == "":
+                    ret = app5_module_tools.reset_intervenant_session(token, selected_module, id_session)
+                else:
+                    ret = app5_module_tools.set_intervenant_session(token, selected_module, id_session, new_intervenant_id)
                 return update_table_session(token, user_id, selected_module, selected_type, selected_promo)

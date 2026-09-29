@@ -25,7 +25,8 @@ ALTER TABLE `MOB_partner_university`
 
 ALTER TABLE `LNM_etudiant`
     ADD `mobility_completed` BOOLEAN NOT NULL DEFAULT FALSE AFTER `id_origine`,
-    add `mobility_note` INT NULL AFTER `mobility_completed`;
+    ADD `mobility_note` INT NULL AFTER `mobility_completed`,
+    ADD `mobility_z_score` FLOAT NULL DEFAULT NULL AFTER `mobility_note`;
 
 ALTER TABLE `MOB_wishes`
     ADD `id_semestre` TINYINT NOT NULL AFTER `id_partner_university`,
@@ -39,37 +40,64 @@ CREATE TABLE `MOB_assignment` (
     `status` ENUM('pending', 'accepted', 'declined') NOT NULL DEFAULT 'pending',
     PRIMARY KEY (`id_assignment`),
     UNIQUE KEY `UX_assignment_etudiant` (`id_etudiant`),
+    UNIQUE KEY `SECONDARY` (`id_etudiant`, `id_partner_university`,`id_semestre`) USING BTREE,
     CONSTRAINT `FK_assignment_etudiant` FOREIGN KEY (`id_etudiant`) REFERENCES `LNM_etudiant` (`id_etudiant`) ON DELETE CASCADE ON UPDATE RESTRICT,
     CONSTRAINT `FK_assignment_partner_university` FOREIGN KEY (`id_partner_university`) REFERENCES `MOB_partner_university` (`id_partner_university`) ON DELETE RESTRICT ON UPDATE RESTRICT,
     CONSTRAINT `FK_assignment_semestre` FOREIGN KEY (`id_semestre`) REFERENCES `LNM_semestre` (`id_semestre`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- ALTER TABLE `MOB_partner_university`
---    ADD `important` TEXT NULL,
---    ADD `commentaire` TEXT NULL,
---    ADD `criteres_academiques` TEXT NULL,
---    ADD `integration_et_vie_sociale` TEXT NULL,
---    ADD `logement_et_vie_quotidienne` TEXT NULL,
---    ADD `organisation_et_demarches` TEXT NULL,
---    ADD `experience_globale` TEXT NULL;
 
--- Ajout du faux choix pour les stages
-INSERT INTO `MOB_partner_university` 
-    (`name`, `code`, `latitude`, `longitude`, `address`, `country`, `languages`,`type`) 
-VALUES 
-    ('Polytech Annecy-Chambery', 'MOB_STAGE', 45.919731, 6.157739, '5 chemin de Bellevue, 74940 Annecy-le-Vieux', 'France', 'francais','stage');
 
--- -----------------------------------------------------------------------
--- Capacités de référence par semestre (entrées de l'algorithme)
--- et colonnes de suivi des places restantes (persistance après calcul)
--- -----------------------------------------------------------------------
+-- Ajout du faux choix pour les stages !!! NE DOIT PAS ETRE DANS LA STRUCTURE !!!
+-- INSERT INTO `MOB_partner_university`
+--    (`name`, `code`, `latitude`, `longitude`, `address`, `country`, `languages`,`type`)
+-- VALUES
+--    ('Polytech Annecy-Chambery', 'MOB_STAGE', 45.919731, 6.157739, '5 chemin de Bellevue, 74940 Annecy-le-Vieux', 'France', 'francais','stage');
 
--- Ajout de S8_remaining_places et S9_remaining_places
 ALTER TABLE `MOB_partner_university`
     ADD `S8_remaining_places` INT NULL AFTER `S9_total_places`,
     ADD `S9_remaining_places` INT NULL AFTER `S8_remaining_places`;
 
--- Ajout de remaining_places dans MOB_partner_university_places
--- (nombre de places par spécialité restantes après le calcul)
+
 ALTER TABLE `MOB_partner_university_places`
     ADD `remaining_places` INT NULL AFTER `number_of_places`;
+
+CREATE TABLE `MOB_filiere_quotas` (
+    `id_quota` INT NOT NULL AUTO_INCREMENT,
+    `id_filiere` INT NOT NULL,
+    `annee_scolaire` VARCHAR(20) NOT NULL,
+    `id_semestre` INT NOT NULL,
+    `places` INT NOT NULL,
+    PRIMARY KEY (`id_quota`),
+    UNIQUE KEY `SECONDARY` (`id_filiere`, `annee_scolaire`,`id_semestre`) USING BTREE,
+    CONSTRAINT `fk_mob_filiere_quotas_filiere` FOREIGN KEY (`id_filiere`) REFERENCES `LNM_filiere` (`id_filiere`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `MOB_partner_university_places`
+    ADD `id_filiere` INT NULL AFTER `id_partner_university`,
+    ADD `annee` INT NULL AFTER `id_filiere`;
+
+-- Alternative : Si la base ne contient pas encore de places, ou pour réinitialiser complètement
+-- la table avant de changer la structure, on peut utiliser :
+-- TRUNCATE TABLE `MOB_partner_university_places`;
+
+-- Migration des données : On récupère id_filiere et annee via id_promo
+UPDATE `MOB_partner_university_places` m
+JOIN `LNM_promo` p ON m.id_promo = p.id_promo
+SET m.id_filiere = p.id_filiere,
+    m.annee = p.annee;
+
+-- On supprime les lignes qui n'ont pas pu être matchées (au cas où, bien que ça ne devrait pas arriver)
+DELETE FROM `MOB_partner_university_places` WHERE id_filiere IS NULL OR annee IS NULL;
+
+ALTER TABLE `MOB_partner_university_places`
+    DROP FOREIGN KEY `FK_partner_university_places_as_promo`,
+    DROP KEY `FK_partner_university_places_as_promo`,
+    DROP INDEX `SECONDARY`,
+    DROP PRIMARY KEY,
+    DROP COLUMN `id_promo`,
+    MODIFY `id_filiere` INT NOT NULL,
+    MODIFY `annee` INT NOT NULL,
+    ADD PRIMARY KEY (`id_partner_university`, `id_filiere`, `annee`),
+    ADD UNIQUE KEY `SECONDARY` (`id_partner_university`, `id_filiere`, `annee`) USING BTREE,
+    ADD CONSTRAINT `FK_partner_university_places_as_filiere` FOREIGN KEY (`id_filiere`) REFERENCES `LNM_filiere` (`id_filiere`) ON DELETE RESTRICT ON UPDATE RESTRICT;

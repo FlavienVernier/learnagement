@@ -1,11 +1,5 @@
 import os
 import dotenv
-import logging
-
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
-
-from dependencies import logger, get_user, Token
 
 from datetime import datetime, timedelta, timezone
 import jwt
