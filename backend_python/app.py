@@ -93,7 +93,7 @@ if __name__ == "__main__":
     print(bcolors.OKGREEN + "Start backend Python..." + bcolors.ENDC)
 
     is_prod = os.getenv("ENV", "dev") == "prod"
-    ssl_dir = os.getenv("DOCKER_SSL_DIR")
+    ssl_dir = os.getenv("DOCKER_SSL_INTERNAL_DIR")
 
     uvicorn_kwargs = {
         "host": "0.0.0.0",

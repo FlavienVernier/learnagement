@@ -13,6 +13,8 @@
     use Firebase\JWT\JWT;
     use Firebase\JWT\Key;
 
+    loadEnv(".");
+
     create_session();
     $r = new Router('');
     $t = new Template(
@@ -156,10 +158,10 @@
         $t->router->redirect('login');
     });
 
-    $t->router->post('/inscription', 'inscription-post', function () use ($t, $user) {
+    /*$t->router->post('/inscription', 'inscription-post', function () use ($t, $user) {
         requireGuest($user, $t->router);
         echo $t->render('base/@post/inscription');
-    });
+    });*/
 
     $t->router->get('/dashboard', 'dashboard', function () use ($t, $user) {
         requireAuth($user, $t->router);
@@ -255,5 +257,5 @@ $t->router->get('/dashboard/mobility-map_open', 'dashboard-mobility-map_open', f
         echo $t->render('dashboard/test');
     });
 
-    getLogger()->info('PHP app start');
+    getLogger()->info('PHP app start ('.getenv("ENV").')');
     $t->router->run();
