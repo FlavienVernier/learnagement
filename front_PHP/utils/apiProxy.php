@@ -1,10 +1,12 @@
 <?php
-require_once __DIR__ . '/auth.php';
+//require_once __DIR__ . '/vendor/autoload.php';
+//require_once __DIR__ . '/auth.php';
+//require_once __DIR__ . "/config.php";
 
 function forwardToBackend(string $path, string $method, ?string $body): array {
-    $backendUrl = getenv('INSTANCE_PROTOCOL') . '://' . getenv('INSTANCE_URL')
-        . ':' . getenv('BACKEND_PYTHON_PORT') . '/' . ltrim($path, '/');
-
+    $backendUrl = getenv('INSTANCE_PROTOCOL') . '://' . getenv('BACKEND_PYTHON_DOCKER_URL')
+        . ':' . getenv('BACKEND_PYTHON_DOCKER_PORT') . '/' . ltrim($path, '/');
+    getLogger()->info("Forwarding to backend url: " . $backendUrl);
     $headers = ["Content-Type: application/json"];
 
     // On ajoute le JWT SEULEMENT s'il existe et n'est pas vide (cas CAS = jwt vide)
@@ -19,7 +21,7 @@ function forwardToBackend(string $path, string $method, ?string $body): array {
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_HTTPHEADER => $headers,
         CURLOPT_SSL_VERIFYPEER => true,
-        CURLOPT_CAINFO => '/etc/ssl/learnagement/cert.pem',
+        CURLOPT_CAINFO => '/etc/ssl/learnagement-internal/cert.pem',
     ]);
 
     if (in_array($method, ['POST', 'PUT', 'PATCH']) && $body) {
@@ -29,7 +31,7 @@ function forwardToBackend(string $path, string $method, ?string $body): array {
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $curlError = curl_error($ch);
-    curl_close($ch);
+    // curl_close($ch); DEPRECATED
 
     if ($response === false) {
         return ['status' => 502, 'body' => json_encode(['error' => 'Backend unreachable', 'detail' => $curlError])];

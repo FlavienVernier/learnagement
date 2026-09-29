@@ -807,8 +807,8 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
 <script>
     window.ENV = {
-        BACKEND_URL: "<?= getenv('INSTANCE_PROTOCOL') . '://' . getenv('INSTANCE_URL') ?>",
-        BACKEND_PORT: "<?= getenv('BACKEND_PYTHON_PORT') ?>",
+        BACKEND_URL: "<?= getenv('INSTANCE_PROTOCOL') . '://' . getenv('BACKEND_PYTHON_DOCKER_URL') ?>",
+        BACKEND_PORT: "<?= getenv('BACKEND_PYTHON_DOCKER_PORT') ?>",
         USER_TOKEN: "<?= $_SESSION["jwt_token"] ?>",
         USER_ID: "<?= $_SESSION["id"] ?>"
     };

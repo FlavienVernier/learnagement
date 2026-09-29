@@ -162,15 +162,18 @@ crossorigin=""/>
     const markers = L.markerClusterGroup();
 
     const fetchUniversities = async () => {
-        const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID;
+        //const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/";
+
         let universities = [];
         try {
-            const response = await fetch(url, {
+            /*const response = await fetch(url, {
                 headers: {
                     "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
                     "Content-Type": "application/json"
                 }
-            });
+            });*/
+
+            const response = await fetch("/api.php?path=university/");
             if (!response.ok) {
                 throw new Error(`Response status: ${response.status}`);
             }
@@ -184,15 +187,18 @@ crossorigin=""/>
     }
 
     const fetchWishes = async () => {
-        const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID + "/wishes";
+        //const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID + "/wishes";
         let wishes = [];
         try {
-            const response = await fetch(url, {
+            /*const response = await fetch(url, {
                 headers: {
                     "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
                     "Content-Type": "application/json"
                 }
-            });
+
+            });*/
+
+            const response = await fetch("/api.php?path=university/etudiant/" + window.ENV.USER_ID + "/wishes/");
             if (!response.ok) {
                 throw new Error(`Response status: ${response.status}`);
             }
@@ -206,12 +212,14 @@ crossorigin=""/>
     }
 
     // Vérifier le statut de la campagne avant tout
-    const campaignStatusUrl = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID + "/campaign-status";
+    //const campaignStatusUrl = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID + "/campaign-status";
     let campaignOpen = false;
     try {
-        const statusRes = await fetch(campaignStatusUrl, {
+        /*const statusRes = await fetch(campaignStatusUrl, {
             headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
-        });
+        });*/
+
+        const statusRes = await fetch("/api.php?path=university/etudiant/" + window.ENV.USER_ID + "/campaign-status/");
         if (statusRes.ok) {
             const statusData = await statusRes.json();
             campaignOpen = statusData.is_open === true;
@@ -250,14 +258,16 @@ crossorigin=""/>
     window.MobilityMapState.universitiesById = universitiesById;
 
     const fetchAssignment = async () => {
-        const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID + "/assignment";
+        //const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID + "/assignment";
         try {
-            const response = await fetch(url, {
+            /*const response = await fetch(url, {
                 headers: {
                     "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
                     "Content-Type": "application/json"
                 }
-            });
+            });*/
+
+            const response = await fetch("/api.php?path=university/etudiant/" + window.ENV.USER_ID + "/assignment/");
             if (response.ok) {
                 return await response.json();
             }
@@ -484,7 +494,7 @@ crossorigin=""/>
         }
 
         try {
-            const wishesEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
+            /*const wishesEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
                 + "/university/etudiant/" + window.ENV.USER_ID
                 + "/wish/" + university.id_partner_university;
 
@@ -492,6 +502,16 @@ crossorigin=""/>
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id_semestre: id_semestre })
+            });*/
+
+            const wishesEndpoint = "/api.php?path=university/etudiant/" + window.ENV.USER_ID + "/wish/" + university.id_partner_university;
+
+            const response = await fetch(wishesEndpoint, {
+                method: 'POST',
+                headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ id_semestre: id_semestre })
@@ -512,7 +532,7 @@ crossorigin=""/>
 
     async function deleteWish(idPartnerUniversity, idSemestre) {
         try {
-            const deleteEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
+            /*const deleteEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
                 + "/university/etudiant/" + window.ENV.USER_ID
                 + "/wish/" + idPartnerUniversity
                 + "/semestre/" + idSemestre;
@@ -521,6 +541,16 @@ crossorigin=""/>
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+                    'Content-Type': 'application/json'
+                }
+            });*/
+
+            const deleteEndpoint = "/api.php?path=university/etudiant/" + window.ENV.USER_ID
+                + "/wish/" + idPartnerUniversity
+                + "/semestre/" + idSemestre;
+            const response = await fetch(deleteEndpoint, {
+                method: 'DELETE',
+                headers: {
                     'Content-Type': 'application/json'
                 }
             });
@@ -539,7 +569,7 @@ crossorigin=""/>
 
     async function moveWish(idPartnerUniversity, idSemestre, direction) {
         try {
-            const moveEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
+            /*const moveEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
                 + "/university/etudiant/" + window.ENV.USER_ID
                 + "/wish/" + idPartnerUniversity
                 + "/semestre/" + idSemestre
@@ -549,6 +579,17 @@ crossorigin=""/>
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+                    'Content-Type': 'application/json'
+                }
+            });*/
+
+            const moveEndpoint = "/api.php?path=university/etudiant/" + window.ENV.USER_ID
+                + "/wish/" + idPartnerUniversity
+                + "/semestre/" + idSemestre
+                + "/move/" + direction;
+            const response = await fetch(moveEndpoint, {
+                method: 'POST',
+                headers: {
                     'Content-Type': 'application/json'
                 }
             });
@@ -571,7 +612,7 @@ crossorigin=""/>
         }
 
         try {
-            const submitEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
+            /*const submitEndpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
                 + "/university/etudiant/" + window.ENV.USER_ID
                 + "/wishes/submit";
 
@@ -579,6 +620,16 @@ crossorigin=""/>
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+                    'Content-Type': 'application/json'
+                }
+            });*/
+
+            const submitEndpoint = ("/api.php?path=university/etudiant/" + window.ENV.USER_ID
+                + "/wishes/submit";
+
+            const response = await fetch(submitEndpoint, {
+                method: 'POST',
+                headers: {
                     'Content-Type': 'application/json'
                 }
             });
@@ -608,7 +659,7 @@ crossorigin=""/>
         }
         
         try {
-            const endpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
+            /*const endpoint = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT)
                 + "/university/etudiant/" + window.ENV.USER_ID
                 + "/assignment/decision";
 
@@ -616,6 +667,17 @@ crossorigin=""/>
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ decision })
+            });*/
+
+            const endpoint = ("/api.php?path=university/etudiant/" + window.ENV.USER_ID
+                + "/assignment/decision";
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ decision })
@@ -716,9 +778,10 @@ crossorigin=""/>
     }
 
     const fetchStudentQuota = async () => {
-        const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID + "/quota?annee_scolaire=2025-2026";
+        //const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID + "/quota?annee_scolaire=2025-2026";
         try {
-            const response = await fetch(url, { headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` } });
+            //const response = await fetch(url, { headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` } });
+            const response = await fetch("/api.php?path=university/etudiant/" + window.ENV.USER_ID + "/quota?annee_scolaire=2025-2026");
             if (response.ok) {
                 const data = await response.json();
                 if (data) {

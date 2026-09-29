@@ -1,5 +1,10 @@
 <?php
+require_once __DIR__ . '/vendor/autoload.php'; // Add this line
+require_once __DIR__ . "/config.php";
+require_once __DIR__ . '/utils/auth.php';
 require_once __DIR__ . '/utils/apiProxy.php';
+
+loadEnv(".");
 
 $path = $_GET['path'] ?? '';
 if (empty($path)) {
