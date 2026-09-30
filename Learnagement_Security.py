@@ -79,12 +79,13 @@ def generate_self_signed_cert(
 
 def generate_internal_cert(output_dir: str = "./certs/internal") -> None:
     """Certificat interne pour la communication PHP <-> Backend Python (réseau Docker)."""
+    instance_name = os.environ["INSTANCE_NAME"]
     generate_self_signed_cert(
         common_name="localhost",
         san_dns_names=[
             "localhost",
-            "backend_python_cas",
-            "learnagement_backend_python_cas",
+            f"backend_python_{instance_name}",
+            f"learnagement_backend_python_{instance_name}",
         ],
         san_ip_addresses=["127.0.0.1"],
         output_dir=output_dir,
