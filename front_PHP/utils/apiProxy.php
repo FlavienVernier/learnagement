@@ -1,27 +1,26 @@
 <?php
-//require_once __DIR__ . '/vendor/autoload.php';
-//require_once __DIR__ . '/auth.php';
-//require_once __DIR__ . "/config.php";
 
-function forwardToBackend(string $path, string $method, ?string $body): array {
+function forwardToBackend(
+    string $path,
+    string $method,
+    ?string $body,
+    string $contentType = 'application/json',
+    array $extraHeaders = []
+): array {
     $backendUrl = getenv('INSTANCE_PROTOCOL') . '://' . getenv('BACKEND_PYTHON_DOCKER_URL')
         . ':' . getenv('BACKEND_PYTHON_DOCKER_PORT') . '/' . ltrim($path, '/');
     getLogger()->info("Forwarding to backend url: " . $backendUrl);
-    $headers = ["Content-Type: application/json"];
 
-    // On ajoute le JWT SEULEMENT s'il existe et n'est pas vide (cas CAS = jwt vide)
-    $user = getCurrentUser();
-    if ($user && !empty($user['jwt_token'])) {
-        $headers[] = "Authorization: Bearer " . $user['jwt_token'];
-    }
+    $headers = array_merge(["Content-Type: " . $contentType], $extraHeaders);
 
     $ch = curl_init($backendUrl);
     curl_setopt_array($ch, [
         CURLOPT_CUSTOMREQUEST => $method,
         CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 30,
         CURLOPT_HTTPHEADER => $headers,
         CURLOPT_SSL_VERIFYPEER => true,
-        CURLOPT_CAINFO => '/etc/ssl/learnagement-internal/cert.pem',
+        CURLOPT_CAINFO => rtrim(getenv('DOCKER_SSL_INTERNAL_DIR'), '/') . '/cert.pem',
     ]);
 
     if (in_array($method, ['POST', 'PUT', 'PATCH']) && $body) {
@@ -31,11 +30,11 @@ function forwardToBackend(string $path, string $method, ?string $body): array {
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $curlError = curl_error($ch);
-    // curl_close($ch); DEPRECATED
+    unset($ch);
 
     if ($response === false) {
-        return ['status' => 502, 'body' => json_encode(['error' => 'Backend unreachable', 'detail' => $curlError])];
+        return ['status' => 0, 'body' => null, 'error' => $curlError];
     }
 
-    return ['status' => $httpCode, 'body' => $response];
+    return ['status' => $httpCode, 'body' => $response, 'error' => null];
 }

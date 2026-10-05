@@ -13,7 +13,9 @@ if (empty($path)) {
     exit(json_encode(['error' => 'Missing path']));
 }
 
-$result = forwardToBackend($path, $_SERVER['REQUEST_METHOD'], file_get_contents('php://input'));
+$user = getCurrentUser();
+$authHeaders = ($user && !empty($user['jwt_token'])) ? ["Authorization: Bearer " . $user['jwt_token']] : [];
+$result = forwardToBackend($path, $_SERVER['REQUEST_METHOD'], file_get_contents('php://input'), 'application/json', $authHeaders);
 
 http_response_code($result['status']);
 header('Content-Type: application/json');
