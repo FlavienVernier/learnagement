@@ -208,7 +208,7 @@ $t->router->get('/dashboard/mobility-map_open', 'dashboard-mobility-map_open', f
     });
 
     $t->router->get('/dashboard/mobility-admin', 'dashboard-mobility-admin', function () use ($t, $user) {
-        requireRole($user, "administratif", $t->router);
+        requireOneRole($user, ["administratif", "enseignant"], $t->router);
         echo $t->render('dashboard/mobility-admin');
     });
     
