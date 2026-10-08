@@ -43,7 +43,7 @@ export default function ModaleFiliere({nomFiliere, setNomFiliere}: { nomFiliere:
     useEffect(() => {
         let form_data = new FormData
         form_data.append("nom_filiere", nomFiliere[0])
-        axios.post("/api/proxy/list/listCompetencesOfFiliere", form_data, {withCredentials: true})
+        axios.get("/api/proxy/filiere/" + nomFiliere[0] + "/competences", form_data, {withCredentials: true})
             .then(response => {
                 setInfosCompetences(response.data)
             })
@@ -54,7 +54,7 @@ export default function ModaleFiliere({nomFiliere, setNomFiliere}: { nomFiliere:
         if(idCompetenceClicked >= 0){
             let form_data = new FormData
             form_data.append("idCompetence", idCompetenceClicked.toString())
-            axios.post("/api/proxy/list/listComposanteEssentielle", form_data, {withCredentials: true})
+            axios.get("/api/proxy/filiere/competence/" + idCompetenceClicked.toString() + "/composantes_essentielles", form_data, {withCredentials: true})
                 .then(response => {
                     setComposantesEssentielles(response.data)
                 })

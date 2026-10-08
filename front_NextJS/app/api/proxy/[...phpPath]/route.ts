@@ -12,7 +12,11 @@ export async function GET(req: NextRequest) {
 
 export async function handleRequest(req: NextRequest, method: string) {
     // Récupère l'url du backend php
-    const phpurl = process.env.PHP_BACKEND_DOCKER_URL;
+    //const phpurl = process.env.PHP_BACKEND_DOCKER_URL;
+    const backendUrl =
+                    process.env.INSTANCE_PROTOCOL + "://" +
+                    process.env.BACKEND_PYTHON_DOCKER_URL + ":" +
+                    process.env.BACKEND_PYTHON_DOCKER_PORT //+ "/token"
     // Récupère tout ce qu’il y a après /api/proxy/
     const fullPath = req.nextUrl.pathname.replace(/^\/api\/proxy\//, "");
     // Récupère le type de content utilisé
@@ -25,7 +29,7 @@ export async function handleRequest(req: NextRequest, method: string) {
 
         const response = await axios({
             method: method,
-	    url: `${phpurl}/${fullPath}.php`,
+	        url: `${backendUrl}/${fullPath}`,
             //url: `http://learnagement_phpbackend_dev/${fullPath}.php`, // 'php' correspond au nom docker du container php
             data: body,
             headers: {
@@ -44,7 +48,7 @@ export async function handleRequest(req: NextRequest, method: string) {
 
     } catch (error: any) {
         console.error("Erreur proxy:", error.message);
-        return new Response(JSON.stringify({ error: "Erreur dans le proxy." + phpurl}), {
+        return new Response(JSON.stringify({ error: "Erreur dans le proxy." + backendUrl}), {
             status: 500,
         });
     }

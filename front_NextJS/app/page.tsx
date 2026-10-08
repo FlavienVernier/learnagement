@@ -32,7 +32,7 @@ export default function Home() {
   useEffect(() => {
     setIsLoading(true);
   
-    axios.get('/api/proxy/list/listAllFilieres', {withCredentials: true})
+    axios.get('/api/proxy/filieres', {withCredentials: true})
       .then((response) => {
         setFilieres(response.data);
         setIsLoading(false);

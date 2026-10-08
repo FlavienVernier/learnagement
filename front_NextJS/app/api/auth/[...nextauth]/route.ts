@@ -1,48 +1,88 @@
-import NextAuth, {User} from "next-auth"
-
+import NextAuth, { User } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
-import axios from "axios";
+import axios from "axios"
+import { jwtDecode } from "jwt-decode"
 
-import SetCookie from "@/app/connection/setCookie"
-
-const handler= NextAuth({
+const handler = NextAuth({
     providers: [
         Credentials({
-
-            // You can specify which fields should be submitted, by adding keys to the `credentials` object.
-            // e.g. domain, username, password, 2FA token, etc.
             credentials: {
-                username: {label: "username", type: "text"},
-                password: {label: "password", type: "password"},
+                username: { label: "username", type: "text" },
+                password: { label: "password", type: "password" },
             },
             authorize: async (credentials): Promise<User | null> => {
                 if (!credentials) return null
 
-                let formData = new FormData()
+                const backendUrl =
+                    process.env.INSTANCE_PROTOCOL + "://" +
+                    process.env.BACKEND_PYTHON_DOCKER_URL + ":" +
+                    process.env.BACKEND_PYTHON_DOCKER_PORT + "/token"
+
+                const formData = new URLSearchParams()
                 formData.append("username", credentials.username)
                 formData.append("password", credentials.password)
+                formData.append("grant_type", "password")
 
+                let res
                 try {
-                    //const res = await axios.post("http://learnagement_phpbackend_dev/connection/authenticate.php", formData, {withCredentials: true})
-                    const res = await axios.post(process.env.PHP_BACKEND_DOCKER_URL+"/connection/authenticate.php", formData, {withCredentials: true})
-
-                    if (res.status === 200) {
-                        const sessionId = res.data['sessionId']
-                        await SetCookie(sessionId)
-                        return res.data['user'] as User
-                    } else {
-                        return null
-                    }
+                    res = await axios.post(backendUrl, formData, {
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    })
                 } catch (err) {
-                    console.error("Authentication failed", err)
-                    return null
+                    // Erreur réseau/serveur (backend injoignable, 500, etc.)
+                    // Symétrique au "Connection error" côté PHP/Dash
+                    console.error("Connection error calling backend:", err instanceof Error ? err.message : err)
+                    throw new Error("Connection error")
                 }
+
+                const responseData = res.data
+
+                if (!responseData || !responseData.access_token) {
+                    // Symétrique au message "Incorrect login or password." de login.php
+                    console.error("Incorrect login or password for user:", credentials.username)
+                    throw new Error("Incorrect login or password")
+                }
+
+                const jwt = responseData.access_token
+
+                let decoded
+                try {
+                    decoded = jwtDecode<{
+                        id: number
+                        email: string
+                        firstname: string
+                        lastname: string
+                        roles: string[]
+                        exp: number
+                        password2update: boolean
+                    }>(jwt)
+                } catch (err) {
+                    // Symétrique au bloc catch "Token invalide" de login.php
+                    console.error("Token invalide:", err instanceof Error ? err.message : err)
+                    throw new Error("Invalid token")
+                }
+
+                if (decoded.exp < Math.floor(Date.now() / 1000)) {
+                    // Symétrique à la vérification d'expiration de login.php
+                    console.error("Token expiré pour l'utilisateur:", decoded.email)
+                    throw new Error("Token expired")
+                }
+
+                console.log(`Utilisateur : ${decoded.email} ${decoded.firstname} ${decoded.lastname}`)
+                console.log(`Expire à : ${new Date(decoded.exp * 1000).toISOString()}`)
+
+                return {
+                    id: String(decoded.id),
+                    email: decoded.email,
+                    name: `${decoded.firstname} ${decoded.lastname}`,
+                    roles: decoded.roles,
+                    jwt_token: jwt,
+                } as User
             }
         }),
     ],
     callbacks: {
         async jwt({ token, user }) {
-            // `user` est défini uniquement à la connexion
             if (user) {
                 token.user = user
             }
@@ -50,21 +90,18 @@ const handler= NextAuth({
         },
 
         async session({ session, token }) {
-            // Injecte l'utilisateur dans la session
             session.user = token.user
             return session
         },
 
         async redirect({ url, baseUrl }) {
-
-            // Rediriger vers une page spécifique après la connexion
             return '/homepage';
         }
     },
     pages: {
-        signIn: "/connection", // page de connexion par défaut
+        signIn: "/connection",
     },
     secret: process.env.INSTANCE_SECRET
 })
 
-export {handler as GET, handler as POST}
+export { handler as GET, handler as POST }
