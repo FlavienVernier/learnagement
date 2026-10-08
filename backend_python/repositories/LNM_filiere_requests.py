@@ -7,16 +7,16 @@ def requests(key: str):
 __requests = {
     "get_filieres" : {
         "route":   "/filieres/",
-        "tags":    ["filiere"],
+        "tags":    ["anonymous", "filiere"],
         "summary": "Filiere",
         "description": "Return the list of filieres",
-        "auth":    True,
+        "auth":    False,
         "request" : """
                         SELECT LNM_filiere.*, ExplicitSecondaryKs_LNM_filiere.ExplicitSecondaryK
                         FROM LNM_filiere
                         JOIN ExplicitSecondaryKs_LNM_filiere ON ExplicitSecondaryKs_LNM_filiere.id_filiere = LNM_filiere.id_filiere
                     """,
-        "allowedRolesRequester" : ["connected_user"],
+        "allowedRolesRequester" : "anonymous",
     },
     "get_statuts" : {
         "route":   "/statuts/",
@@ -57,6 +57,34 @@ __requests = {
                     """,
         "allowedRolesRequester" : ["connected_user"],
     },
+    "get_competences":{
+        "route":   "/filiere/{nom_filiere:str}/competences",
+        "tags":    ["anonymous", "filiere"],
+        "summary": "DAGs",
+        "description": "Return the DAGs",
+        "auth":    False,   # ← endpoint anonyme
+        "request": """SELECT
+            `APC_competence`.`id_competence` AS `id_competence`,
+            `APC_competence`.`code_competence` AS `code_competence`,
+            `APC_competence`.`libelle_competence` AS `libelle_competence`,
+            `APC_competence`.`description` AS `description_competence`
+            FROM `APC_competence_as_filiere_as_statut`
+            JOIN `APC_competence` ON `APC_competence_as_filiere_as_statut`.`id_competence` = `APC_competence`.`id_competence`
+            JOIN `LNM_filiere` ON `APC_competence_as_filiere_as_statut`.`id_filiere` = `LNM_filiere`.`id_filiere`
+            WHERE `nom_filiere` = %(nom_filiere)s""",
+        "params": lambda nom_filiere: {"nom_filiere": nom_filiere},
+        "allowedRolesRequester": "anonymous",
+    },
+    "get_composante_essentielle":{
+        "route":   "/filiere/competence/{id_competence:int}/composantes_essentielles",
+        "tags":    ["anonymous", "filiere"],
+        "summary": "DAGs",
+        "description": "Return the DAGs",
+        "auth":    False,   # ← endpoint anonyme
+        "request": """SELECT * FROM `APC_composante_essentielle` WHERE `id_competence` = %(id_competence)s""",
+        "params": lambda id_competence: {"id_competence": id_competence},
+        "allowedRolesRequester": "anonymous",
+    },
     "get_dags" : {
         "route":   "/filieres/dags",
         "tags":    ["anonymous", "filiere"],
@@ -88,7 +116,7 @@ __requests = {
                                  JOIN APC_niveau ON APC_niveau.id_niveau = APC_apprentissage_critique.id_niveau
                                  JOIN APC_competence ON APC_competence.id_competence = APC_niveau.id_competence
                     """,
-        "allowedRolesRequester" : ["anonymous"],
+        "allowedRolesRequester" : "anonymous",
     },
     "get_promos" : {
         "route":   "/promos/",
