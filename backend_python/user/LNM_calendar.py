@@ -85,8 +85,8 @@ def get_user_calendar_urls(
             "role_id": id,
         },
         # FixMe  Security vulnerability user is not check and structural role cannot be discriminate : access removed
-        # "allowedRolesRequester": ["connected_user"],
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": ["connected_user"],
+        #"allowedRolesRequester": [],
     }
 
     return db_request(current_user, SQLRequest(**request))

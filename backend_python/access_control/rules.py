@@ -5,7 +5,7 @@ from access_control.responsibilities import (
     has_hierarchy_responsibilities,
     parse_responsibility,
 )
-
+from core.logging import logger
 
 def evaluate_rule(rule: AccessRule, user, params: dict | None) -> bool:
     """
@@ -15,7 +15,7 @@ def evaluate_rule(rule: AccessRule, user, params: dict | None) -> bool:
     # Résolution du lambda → valeur concrète
     if callable(rule):
         rule = rule(params, user)
-
+    
     if isinstance(rule, str):
         return _evaluate_string(rule, user)
 

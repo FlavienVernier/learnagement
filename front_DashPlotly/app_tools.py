@@ -13,10 +13,13 @@ from requests import HTTPError, Timeout, RequestException
 
 load_dotenv()
 
+INTERNAL_CERT_PATH = os.path.join(os.getenv("DOCKER_SSL_INTERNAL_DIR", "/etc/ssl/learnagement-internal/"), "cert.pem")
+
 def get_python_backend_url(endpoint):
+    protocol = os.getenv("INSTANCE_PROTOCOL")
     base_url = os.getenv("BACKEND_PYTHON_DOCKER_URL")
     port = os.getenv("BACKEND_PYTHON_DOCKER_PORT")
-    url = f"{base_url}:{port}/{endpoint}"
+    url = f"{protocol}://{base_url}:{port}/{endpoint.lstrip('/')}"
     return url
 
 def get_endpoint(url, token, data=None):
@@ -57,25 +60,25 @@ def python_endpoint(method, url, data, token):
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Authorization': f'Bearer {token}'
             }
-            resp = requests.get(url, headers=headers, params=data, timeout=30)
+            resp = requests.get(url, headers=headers, params=data, timeout=30, verify=INTERNAL_CERT_PATH)
         elif method == 'patch':
             headers = {
                 'Content-Type': 'application/json',
                 'Authorization': f'Bearer {token}'
             }
-            resp = requests.patch(url, headers=headers, json=data, timeout=30)
+            resp = requests.patch(url, headers=headers, json=data, timeout=30, verify=INTERNAL_CERT_PATH)
         elif method == 'post':
             headers = {
                 'Content-Type': 'application/json',
                 'Authorization': f'Bearer {token}'
             }
-            resp = requests.post(url, headers=headers, json=data, timeout=30)
+            resp = requests.post(url, headers=headers, json=data, timeout=30, verify=INTERNAL_CERT_PATH)
         elif method == 'delete':
             headers = {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Authorization': f'Bearer {token}'
             }
-            resp = requests.delete(url, headers=headers, timeout=30)
+            resp = requests.delete(url, headers=headers, timeout=30, verify=INTERNAL_CERT_PATH)
         else:
             raise Exception(f"Method {method} not supported")
 

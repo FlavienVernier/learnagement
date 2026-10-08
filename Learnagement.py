@@ -54,7 +54,10 @@ def __get_git_branch():
 
 def __check_certificates():
     dotenv.load_dotenv()
-    if os.environ["ENV"] != "prod" and (not os.path.exists(os.environ["SSL_DIR"] + "learnagement/cert.pem") or  not os.path.exists(os.environ["SSL_DIR"] + "learnagement/key.pem")):
+    if os.environ["ENV"] != "prod" and (not os.path.exists(os.environ["SSL_INTERNAL_DIR"] + "cert.pem")
+                                        or  not os.path.exists(os.environ["SSL_INTERNAL_DIR"] + "key.pem")
+                                        or not os.path.exists(os.environ["SSL_EXTERNAL_DIR"] + "cert.pem")
+                                        or  not os.path.exists(os.environ["SSL_EXTERNAL_DIR"] + "key.pem")):
         logging.error("Certificate not found. Please run learnagement.py first.")
         sys.exit(1)
 
@@ -186,6 +189,24 @@ def __set_env(env_vars: dict, filepath: str) -> dict:
 
 
 # Generate default env variables
+def get_local_ip_and_hostname() -> tuple[str, str]:
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # Ne se connecte pas vraiment, juste pour déterminer l'interface sortante
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = "127.0.0.1"
+    finally:
+        s.close()
+
+    # Résolution DNS inverse (équivalent nslookup) : si pas de PTR record, hostname = IP
+    try:
+        hostname = socket.gethostbyaddr(ip)[0]
+    except (socket.herror, socket.gaierror):
+        hostname = ip
+
+    return ip, hostname
 
 def __generate_base_env():
     default_env_vars = __load_env_file("__env_skeleton.env")
@@ -203,7 +224,7 @@ def __generate_base_env():
     default_env_vars["FRONT_PHP_PROTOCOL"] = protocol
 
     default_env_vars["INSTANCE_PROTOCOL"] = protocol
-    default_env_vars["INSTANCE_URL"] = socket.gethostname()
+    default_env_vars["INSTANCE_IP"], default_env_vars["INSTANCE_URL"] = get_local_ip_and_hostname()
 
     # MySQL
     default_env_vars["MYSQL_SERVER"] = f"learnagement_mysql_{instance_name}"
@@ -215,7 +236,7 @@ def __generate_base_env():
     # ...
 
     # Backend
-    default_env_vars["BACKEND_PYTHON_DOCKER_URL"] = f"http://learnagement_backend_python_{instance_name}"
+    default_env_vars["BACKEND_PYTHON_DOCKER_URL"] = f"learnagement_backend_python_{instance_name}"
 
     return default_env_vars
 
@@ -426,6 +447,7 @@ def __docker_configuration__():
     
     if not os.path.exists("docker-compose.yml"):
         shutil.copy("docker-compose.yml.skeleton", "docker-compose.yml")
+        __searchReplaceInFile__("docker-compose.yml", "${INSTANCE_PROTOCOL}", os.environ["INSTANCE_PROTOCOL"])
         __searchReplaceInFile__("docker-compose.yml", "${INSTANCE_NAME}", os.environ["INSTANCE_NAME"])
         __searchReplaceInFile__("docker-compose.yml", "${ENV}", str(os.environ["ENV"]))
         __searchReplaceInFile__("docker-compose.yml", "${PHPMYADMIN_PORT}", str(os.environ["PHPMYADMIN_PORT"]))
@@ -438,11 +460,13 @@ def __docker_configuration__():
         __searchReplaceInFile__("docker-compose.yml", "${FRONT_DASH_DOCKER_PORT}", str(os.environ["FRONT_DASH_DOCKER_PORT"]))
         __searchReplaceInFile__("docker-compose.yml", "${FRONT_NEXTAUTH_PORT}", str(os.environ["FRONT_NEXTAUTH_PORT"]))
         __searchReplaceInFile__("docker-compose.yml", "${FRONT_NEXTAUTH_DOCKER_PORT}", str(os.environ["FRONT_NEXTAUTH_DOCKER_PORT"]))
-        __searchReplaceInFile__("docker-compose.yml", "${SSL_DIR}", str(os.environ["SSL_DIR"]))
-        __searchReplaceInFile__("docker-compose.yml", "${DOCKER_SSL_DIR}", str(os.environ["DOCKER_SSL_DIR"]))
+        __searchReplaceInFile__("docker-compose.yml", "${SSL_INTERNAL_DIR}", str(os.environ["SSL_INTERNAL_DIR"]))
+        __searchReplaceInFile__("docker-compose.yml", "${SSL_EXTERNAL_DIR}", str(os.environ["SSL_EXTERNAL_DIR"]))
+        __searchReplaceInFile__("docker-compose.yml", "${DOCKER_SSL_INTERNAL_DIR}", str(os.environ["DOCKER_SSL_INTERNAL_DIR"]))
+        __searchReplaceInFile__("docker-compose.yml", "${DOCKER_SSL_EXTERNAL_DIR}", str(os.environ["DOCKER_SSL_EXTERNAL_DIR"]))
     elif(os.path.getmtime("docker-compose.yml.skeleton") > os.path.getmtime("docker-compose.yml")):
         logging.warning(f"{YELLOW}docker-compose.yml.skeleton has been updated, your docker-compose.yml can be deprecated{NC}")
-    
+
     os.chdir("..")
 
 

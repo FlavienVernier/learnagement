@@ -1,10 +1,10 @@
 <?php
 require_once("./config.php");
+require_once(__DIR__ . "/apiProxy.php");
 
+//ToDo Deprecated dependent functions must refactored before remove
 function get_python_backend_url($endpoint) {
-    $base_url = getenv("BACKEND_PYTHON_DOCKER_URL");
-    $port = getenv("BACKEND_PYTHON_DOCKER_PORT");
-    return $base_url . ":" . $port . "/" . $endpoint;
+    return $endpoint;
 }
 
 function get_endpoint($url, $token, $data = null) {
@@ -23,46 +23,31 @@ function delete_endpoint($url, $token) {
     return python_endpoint("DELETE", $url, null, $token);
 }
 
-function python_endpoint($method, $url, $data, $token) {
-    getLogger()->info("methode: " . $method . ", url: " . $url . ", data " . $data . ", token: " . $token);
-    $headers = [
-        "Authorization: Bearer $token"
-    ];
+function python_endpoint($method, $path, $data, $token) {
+    getLogger()->info("methode: " . $method . ", url: " . $path . ", data " . $data . ", token: " . $token);
 
-    if ($method === "GET" || $method === "DELETE") {
-        $headers[] = "Content-Type: application/x-www-form-urlencoded";
-    } else {
-        $headers[] = "Content-Type: application/json";
-    }
+    $contentType = ($method === "GET" || $method === "DELETE")
+        ? "application/x-www-form-urlencoded"
+        : "application/json";
+
 
     if ($method === "GET" && $data) {
-        $url .= "?" . http_build_query($data);
+        $path .= "?" . http_build_query($data);
     }
 
-    $ch = curl_init($url);
-
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
+    $body = null;
     if (($method === "POST" || $method === "PATCH") && $data) {
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        $body = json_encode($data);
     }
 
-    $response = curl_exec($ch);
+    $result = forwardToBackend($path, $method, $body, $contentType, ["Authorization: Bearer $token"]);
 
-    if ($response === false) {
-        getLogger()->error("Connection error: " . curl_error($ch));
-        curl_close($ch);
-        throw new Exception("Connection error: " . curl_error($ch));
-        return [];
+    if ($result['status'] === 0) {
+        getLogger()->error("Connection error: " . $result['error']);
+        throw new Exception("Connection error: " . $result['error']);
     }
 
-    $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-    //close curl (Warning curl_close($ch) is deprecated since 8.5)
-    unset($ch);
+    $status = $result['status'];
 
     if ($status == 401) {
         throw new Exception("Invalid or expired token");
@@ -76,49 +61,43 @@ function python_endpoint($method, $url, $data, $token) {
         throw new Exception("HTTP error: " . $status);
     }
 
-    if ($response == "[]") {
+    if ($result['body'] == "[]") {
         return [];
     }
 
-    $data = json_decode($response, true);
-    if ($data === null) {
+    $decoded = json_decode($result['body'], true);
+    if ($decoded === null) {
         getLogger()->error("JSON parsing error");
         return [];
     }
 
-    return $data;
+    return $decoded;
 }
 
 
-function cas_endpoint($method, $url, $data = null) {
+function cas_endpoint($method, $path, $data = null) {
     $casToken = getenv("INSTANCE_SECRET");
-    $headers = [
-        "X-Cas-Token: $casToken",
-        "Content-Type: application/json",
-    ];
 
     if ($method === "GET" && $data) {
-        $url .= "?" . http_build_query($data);
+        $path .= "?" . http_build_query($data);
     }
 
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
+    $body = null;
     if ($method === "POST" && $data) {
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        $body = json_encode($data);
     }
 
-    $response = curl_exec($ch);
-    $status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    unset($ch);
+    $result = forwardToBackend($path, $method, $body, 'application/json', ["X-Cas-Token: $casToken"]);
 
-    if ($status === 404) return null;      // user inexistant → à provisionner
-    if ($status >= 400) return null;
+    if ($result['status'] === 0) {
+        getLogger()->error("Connection error: " . $result['error']);
+        return null;
+    }
 
-    return json_decode($response, true);
+    if ($result['status'] === 404) return null;
+    if ($result['status'] >= 400) return null;
+
+    return json_decode($result['body'], true);
 }
 
 

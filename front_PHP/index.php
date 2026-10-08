@@ -13,6 +13,8 @@
     use Firebase\JWT\JWT;
     use Firebase\JWT\Key;
 
+    loadEnv(".");
+
     create_session();
     $r = new Router('');
     $t = new Template(
@@ -156,10 +158,10 @@
         $t->router->redirect('login');
     });
 
-    $t->router->post('/inscription', 'inscription-post', function () use ($t, $user) {
+    /*$t->router->post('/inscription', 'inscription-post', function () use ($t, $user) {
         requireGuest($user, $t->router);
         echo $t->render('base/@post/inscription');
-    });
+    });*/
 
     $t->router->get('/dashboard', 'dashboard', function () use ($t, $user) {
         requireAuth($user, $t->router);
@@ -196,13 +198,17 @@
         echo $t->render('dashboard/@post/create_stage');
     });
 
+$t->router->get('/dashboard/mobility-map_open', 'dashboard-mobility-map_open', function () use ($t) {
+    echo $t->render('dashboard/mobility-map_open');
+});
+
     $t->router->get('/dashboard/mobility-map', 'dashboard-mobility-map', function () use ($t, $user) {
         requireAuth($user, $t->router);
         echo $t->render('dashboard/mobility-map');
     });
 
     $t->router->get('/dashboard/mobility-admin', 'dashboard-mobility-admin', function () use ($t, $user) {
-        requireRole($user, "administratif", $t->router);
+        requireOneRole($user, ["administratif", "enseignant"], $t->router);
         echo $t->render('dashboard/mobility-admin');
     });
     
@@ -251,5 +257,5 @@
         echo $t->render('dashboard/test');
     });
 
-    getLogger()->info('PHP app start');
+    getLogger()->info('PHP app start ('.getenv("ENV").')');
     $t->router->run();

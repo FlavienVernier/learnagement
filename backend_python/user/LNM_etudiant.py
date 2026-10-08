@@ -328,8 +328,10 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": [],
     }
+    if current_user.id == id_etudiant:
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/etudiants/{id_etudiant}/polypoints/",
@@ -350,8 +352,10 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": [],
     }
+    if current_user.id == id_etudiant:
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/etudiants/{id_etudiant}/rendus/",
@@ -381,8 +385,10 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": [],
     }
+    if current_user.id == id_etudiant:
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/etudiants/{id_etudiant:int}/stages/",
