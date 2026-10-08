@@ -111,10 +111,11 @@ def get_enseignant(user_login: str):
             f"""
                 SELECT 
                     LNM_enseignant_responsabilites.id_enseignant_responsabilites,
-                    LNM_enseignant_responsabilites.type_objet,
+                    LNM_responsabilite.type_objet,
                     LNM_enseignant_responsabilite_dimensions.dimension,
                     LNM_enseignant_responsabilite_dimensions.valeur
-                FROM LNM_enseignant_responsabilites
+                FROM LNM_responsabilite
+                JOIN LNM_enseignant_responsabilites ON LNM_enseignant_responsabilites.id_responsabilite = LNM_responsabilite.id_responsabilite
                 JOIN LNM_enseignant ON LNM_enseignant.id_enseignant = LNM_enseignant_responsabilites.id_enseignant
                 LEFT JOIN LNM_enseignant_responsabilite_dimensions ON LNM_enseignant_responsabilite_dimensions.id_enseignant_responsabilites = LNM_enseignant_responsabilites.id_enseignant_responsabilites
                 WHERE login = %s""",
@@ -301,16 +302,19 @@ async def get_current_active_user(
 
 def db_request(requester: User, request: SQLRequest):
     # vérification via le système de règles
+
+
+    if requester:
+        logger.info(f"User {requester.id} has role {requester.roles} requests {request}")
+
+    else:
+        logger.info(f"Anonymous user requests {request}")
+
     check_access(
         request=request,
         user=requester,
     )
-
-    if requester:
-        logger.info(f"User {requester.id} has role {requester.roles} requests {request}")
-    else:
-        logger.info(f"Anonymous user requests {request}")
-
+    
     rows = []
     connection = None
     cursor = None

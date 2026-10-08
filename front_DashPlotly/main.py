@@ -320,7 +320,7 @@ for key, (_, register_cb) in apps.items():
 
 if __name__ == '__main__':
     is_prod = os.getenv("ENV", "dev") == "prod"
-    ssl_dir = os.getenv("DOCKER_SSL_DIR")
+    ssl_dir = os.getenv("DOCKER_SSL_EXTERNAL_DIR")
 
     if is_prod:
         import gunicorn.app.base

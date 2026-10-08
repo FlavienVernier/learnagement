@@ -40,10 +40,10 @@
                 class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
                 Filtres
             </button>
-            <button id="wishesBtn" onclick="document.getElementById('wishesPanel').classList.toggle('hidden')"
-                class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
-                Voeux
-            </button>
+<!--            <button id="wishesBtn" onclick="document.getElementById('wishesPanel').classList.toggle('hidden')"-->
+<!--                class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">-->
+<!--                Voeux-->
+<!--            </button>-->
             <div id="campaignOpenBadge" class="hidden bg-blue-50 text-blue-800 font-semibold py-2 px-4 border border-blue-200 rounded shadow text-sm flex items-center gap-2 pointer-events-none">
                 <span class="text-blue-500">ℹ️</span> Campagne en cours
             </div>
@@ -60,6 +60,17 @@
                     <option>Tous</option>
                     <option value="S8">S8</option>
                     <option value="S9">S9</option>
+                    </select>
+                </div>
+                <div class="flex flex-col">
+                    <label for="filiereSelect" class="text-xs font-semibold text-gray-600 mb-1">Filière</label>
+                    <select name="filiere" id="filiereSelect" onchange="updateMap()" class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary min-w-24">
+                        <option>Toutes</option>
+                        <option value="BAT">BAT</option>
+                        <option value="EIT">EIT</option>
+                        <option value="IDU">IDU</option>
+                        <option value="MM">MM</option>
+                        <option value="SEA">SEA</option>
                     </select>
                 </div>
                 <div class="flex flex-col">
@@ -135,7 +146,7 @@ crossorigin=""/>
         BACKEND_URL: "<?= getenv('INSTANCE_PROTOCOL') . '://' . getenv('INSTANCE_URL') ?>",
         BACKEND_PORT: "<?= getenv('BACKEND_PYTHON_PORT') ?>",
         USER_TOKEN: "<?= $_SESSION["jwt_token"] ?>",
-        USER_ID: "<?= $_SESSION["id"] ?>"
+        USER_ID: "0"
     };
     console.log("Environnement chargé :", window.ENV);
 </script>
@@ -179,6 +190,7 @@ crossorigin=""/>
             }
 
             universities = await response.json();
+            console.log("Universities: ", universities)
         } catch (error) {
             console.error(error.message);
         }
@@ -271,6 +283,8 @@ crossorigin=""/>
             if (response.ok) {
                 return await response.json();
             }
+
+
         } catch (error) {
             console.error(error.message);
         }
@@ -624,8 +638,7 @@ crossorigin=""/>
                 }
             });*/
 
-            const submitEndpoint = ("/api.php?path=university/etudiant/" + window.ENV.USER_ID
-                + "/wishes/submit";
+            const submitEndpoint = "/api.php?path=university/etudiant/" + window.ENV.USER_ID + "/wishes/submit";
 
             const response = await fetch(submitEndpoint, {
                 method: 'POST',
@@ -672,8 +685,7 @@ crossorigin=""/>
                 body: JSON.stringify({ decision })
             });*/
 
-            const endpoint = ("/api.php?path=university/etudiant/" + window.ENV.USER_ID
-                + "/assignment/decision";
+            const endpoint = "/api.php?path=university/etudiant/" + window.ENV.USER_ID + "/assignment/decision";
 
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -716,6 +728,7 @@ crossorigin=""/>
         } else {
             // Le marqueur est filtré : on désactive les filtres pour l'afficher
             document.getElementById('semestreSelect').value = 'Tous';
+            document.getElementById('filiereSelect').value = 'Toutes';
             const range = document.getElementById('noteMinRange');
             range.value = 20;
             document.getElementById('noteMinValue').innerText = 20;
@@ -746,6 +759,7 @@ crossorigin=""/>
         }
         
         const selectedSemestre = document.getElementById('semestreSelect').value;
+        const selectedFiliere = document.getElementById('filiereSelect').value;
         const selectedNote = parseFloat(document.getElementById('noteMinRange').value);
 
         const filtered = universities.filter(u => {
@@ -755,9 +769,11 @@ crossorigin=""/>
 
             // Filtre le semestre
             if (selectedSemestre === "S8") {
-                return u.annee === 4;
+                //return u.annee === 4;
+                return u.S8_total_places > 0
             } else if (selectedSemestre === "S9") {
-                return u.annee === 5;
+                //return u.annee === 5;
+                return u.S9_total_places > 0
             } else {
                 return true;
             }

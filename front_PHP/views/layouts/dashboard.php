@@ -34,6 +34,7 @@
         $urls[2]['items'][] = ["type" => "item", "label" => "Gérer les stages", "url" => $t->router->href('dashboard-stage'), "icon" => $t->asset('icons/company.svg')];
         // Not Yet operational
         //$urls[1]['items'][] = ["type" => "item", "label" => "Rendus", "url" => $t->router->href('dashboard-rendus-enseignant'), "icon" => $t->asset('icons/file.svg')];
+        $urls[3]['items'][] = ["type" => "item", "label" => "Gestion Mobilité (RI)", "url" => $t->router->href('dashboard-mobility-admin'), "icon" => $t->asset('icons/map.svg')];
     }
 
     if ($user && $user['type'] === 'administratif') {
