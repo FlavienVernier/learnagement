@@ -27,6 +27,7 @@ export default function Homepage(){
 
     const [filieres, setNomFilieres] = useState<Filiere[]>([])
     const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         if(status == 'unauthenticated'){
@@ -35,18 +36,28 @@ export default function Homepage(){
     }, [session, router]);
 
     useEffect(() => {
+        if (status !== 'authenticated') return
 
-        axios.get('/api/proxy/list/listUserFilieres', {withCredentials: true})
+       /* axios.get('/api/proxy/enseignant/' + session.user.id + '/filieres', {withCredentials: true})
             .then(response => {
-                if (response.status == 200){
+                if (response.status == 200) {
                     setNomFilieres(response.data)
                     setIsLoading(false)
-                }else{
+                } else {
                     console.log('error : filiere.tsx')
                 }
             })
 
-    }, []);
+
+    }, []);*/
+        axios.get(`/api/proxy/enseignant/${session.user.id}/filieres`)
+            .then(response => setNomFilieres(response.data))
+            .catch(err => {
+                console.error('Erreur chargement filières :', err)
+                setError(err.response?.status ? `Erreur ${err.response.status}` : 'Erreur réseau')
+            })
+            .finally(() => setIsLoading(false))
+    }, [status, session?.user?.id])
 
     return(
         <>

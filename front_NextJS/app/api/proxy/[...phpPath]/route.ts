@@ -1,6 +1,7 @@
 // app/api/proxy/[...phpPath]/route.ts
 import axios from "axios";
 import { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 export async function POST(req: NextRequest) {
     return handleRequest(req, 'POST');
@@ -24,19 +25,26 @@ export async function handleRequest(req: NextRequest, method: string) {
     // Récupère le corps tel quel
     const body = method === 'POST' ? await req.text() : undefined; // pas de body pour GET
 
-    try {
-        const cookie = req.headers.get("cookie") || "";
+    // Récupère le JWT du backend stocké dans la session NextAuth
+    const token = await getToken({ req, secret: process.env.INSTANCE_SECRET });
+    const backendJwt = (token?.user as any)?.jwt_token;
 
+    const headers: Record<string, string> = {
+        "Content-Type": contentType,
+    };
+    if (backendJwt) {
+        headers.Authorization = `Bearer ${backendJwt}`;
+    }
+
+    try {
         const response = await axios({
             method: method,
-	        url: `${backendUrl}/${fullPath}`,
-            //url: `http://learnagement_phpbackend_dev/${fullPath}.php`, // 'php' correspond au nom docker du container php
+	        url: `${backendUrl}/${fullPath}${req.nextUrl.search}`,
             data: body,
             headers: {
                 "Content-Type": contentType,
-                Cookie: cookie
+                Authorization: `Bearer ${backendJwt}`,
             },
-            withCredentials: true,
         })
 
         return new Response(JSON.stringify(response.data), {
@@ -48,8 +56,11 @@ export async function handleRequest(req: NextRequest, method: string) {
 
     } catch (error: any) {
         console.error("Erreur proxy:", error.message);
-        return new Response(JSON.stringify({ error: "Erreur dans le proxy." + backendUrl}), {
-            status: 500,
-        });
+        // Renvoie le vrai statut du backend (401, 403, 404...) au lieu d'un 500 systématique
+        const status = error.response?.status ?? 500;
+        return new Response(
+            JSON.stringify(error.response?.data ?? { error: "Erreur dans le proxy." }),
+            { status, headers: { "Content-Type": "application/json" } }
+        );
     }
 }
