@@ -90,6 +90,8 @@ def enseignants_load(
 #
 ######################################################
 
+
+
 @router.get("/enseignants/{id_enseignant:int}/charge/",
              tags=["administratif", "enseignant"],
              summary="Teachers load",
@@ -161,11 +163,37 @@ def get_etudiants_stages(
         request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
+@router.get("/enseignant/{id_enseignant:int}/module_responsabilities",
+            tags=["administratif", "enseignant",],
+            summary="Filieres de l'enseignant",
+            description="Return the list of filieres de l'enseignant")
+def get_enseignant_module_responsabilities(
+        id_enseignant: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request" : """
+            SELECT DISTINCT MAQUETTE_module.id_module, MAQUETTE_module.code_module, MAQUETTE_module.nom
+            FROM MAQUETTE_module 
+            JOIN LNM_enseignant ON LNM_enseignant.id_enseignant = MAQUETTE_module.id_responsable
+            WHERE LNM_enseignant.id_enseignant = %(id_enseignant)s;
+                    """,
+        "params": {
+            "id_enseignant": id_enseignant,
+        },
+        "allowedRolesRequester": ["responsable_etudes", ],
+    }
+    if(current_user.id == id_enseignant):
+        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    logger.info((request,current_user.id, id_enseignant))
+    return db_request(current_user, SQLRequest(**request))
+
+
 @router.get("/enseignant/{id_enseignant:int}/filieres",
             tags=["administratif", "enseignant",],
             summary="Filieres de l'enseignant",
             description="Return the list of filieres de l'enseignant")
-def get_etudiants_filieres(
+def get_enseignant_filieres(
         id_enseignant: int,
         current_user: Annotated[User, Depends(get_current_active_user)],
 ):

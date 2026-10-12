@@ -620,6 +620,27 @@ def get_disciplines(
     }
     return db_request(current_user, SQLRequest(**request))
 
+@router.get("/module/{id_module}/apc",
+            tags=["module"],
+            summary="Get APC of a module",
+            description="Get APC of a module")
+def get_module_apc(
+        id_module: int,
+        current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    request = {
+        "request" : f"""
+                SELECT 
+                    `APC_apprentissage_critique_as_module`.`id_apprentissage_critique`,
+                    `APC_apprentissage_critique`.`libelle_apprentissage`
+                FROM `APC_apprentissage_critique_as_module`
+                JOIN `APC_apprentissage_critique` ON `APC_apprentissage_critique_as_module`.`id_apprentissage_critique` = `APC_apprentissage_critique`.`id_apprentissage_critique`
+                WHERE `APC_apprentissage_critique_as_module`.`id_module` = %(id_module)s;
+            """,
+        "params": {"id_module": id_module,},
+        "allowedRolesRequester": ["connected_user"],
+    }
+    return db_request(current_user, SQLRequest(**request))
 
 #####################################
 #
