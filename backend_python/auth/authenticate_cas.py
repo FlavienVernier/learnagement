@@ -71,7 +71,6 @@ async def authenticate_cas(data: CasUserProvision) -> Token:
     )
 
     logger.info(f"CAS user {user.mail} connected with roles {user.roles}")
-    logger.info(user)
 
     return Token(access_token=access_token, token_type="bearer")
 
@@ -79,12 +78,10 @@ async def authenticate_cas(data: CasUserProvision) -> Token:
 def _determine_role_from_cas_groups(members: list[str]) -> str | None:
     """
     Détermine le rôle principal depuis les groupes CAS.
-    Les groupes dans .env sont des CN (ex: "personnels-enseignants.polytech").
-    Les membres CAS sont des DN complets (ex: "cn=personnels-enseignants.polytech,ou=groups,...").
-    On extrait le CN pour comparer.
+    Les groupes dans .env sont des CN (ex: "enseignants").
     """
     # Extrait les CN depuis les DN complets
-    # "cn=personnels-enseignants.polytech,ou=groups,dc=uds,dc=fr" → "personnels-enseignants.polytech"
+    # "cn=enseignants,..." → "enseignants"
     member_cns = set()
     for dn in members:
         parts = dn.split(",")
@@ -96,15 +93,13 @@ def _determine_role_from_cas_groups(members: list[str]) -> str | None:
         return set(val.split()) if val else set()
 
     main_role = None
-    # Ordre de priorité : enseignant > etudiant > administratif
-    # Ex. administratif is institution member neither enseignant nor etudiant
-    # phd student is  etudiant and enseignant, its main role is enseignant
+
     if member_cns & groups_from_env("CAS_ALLOWED_GROUPS_4_ADMINISTRATIF"):
         main_role = "administratif"
-    if member_cns & groups_from_env("CAS_ALLOWED_GROUPS_4_ETUDIANT"):
-        main_role = "etudiant"
-    if member_cns & groups_from_env("CAS_ALLOWED_GROUPS_4_ENSEIGNANT"):
+    elif member_cns & groups_from_env("CAS_ALLOWED_GROUPS_4_ENSEIGNANT"):
         main_role = "enseignant"
+    elif member_cns & groups_from_env("CAS_ALLOWED_GROUPS_4_ETUDIANT"):
+        main_role = "etudiant"
 
     return main_role  # aucun groupe autorisé
 

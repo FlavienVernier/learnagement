@@ -17,18 +17,18 @@ from auth.authenticate_cas import (
 def make_cas_data(login="tartampion", role="enseignant") -> CasUserProvision:
     members_by_role = {
         "enseignant": [
-            "cn=personnels-enseignants.polytech,ou=groups,dc=uds,dc=fr",
-            "cn=permanents,ou=groups,dc=uds,dc=fr",
+            "cn=enseignants,ou=polytech,dc=usmb,dc=fr",
+            "cn=permanents,ou=polytech,dc=usmb,dc=fr",
         ],
         "etudiant": [
-            "cn=etudiants-ige4-idu,ou=groups,dc=uds,dc=fr",
-            "cn=usmb-etudiants-polytech,ou=groups,dc=uds,dc=fr",
+            "cn=idu4-fise,ou=polytech,dc=usmb,dc=fr",
+            "cn=etudiants,ou=polytech,dc=usmb,dc=fr",
         ],
         "administratif": [
-            "cn=personnels.polytech,ou=groups,dc=uds,dc=fr",
+            "cn=administratif,ou=polytech,dc=usmb,dc=fr",
         ],
         "inconnu": [
-            "cn=groupe-inconnu,ou=groups,dc=uds,dc=fr",
+            "cn=groupe-inconnu,ou=polytech,dc=usmb,dc=fr",
         ],
     }
     return CasUserProvision(
@@ -39,6 +39,15 @@ def make_cas_data(login="tartampion", role="enseignant") -> CasUserProvision:
         members=members_by_role[role],
     )
 
+def make_mock_user(data):
+    user = MagicMock()
+    user.id = 1
+    user.login = data.login
+    user.mail = data.email
+    user.prenom = data.prenom
+    user.nom = data.nom
+    user.roles = ["connected_user", "enseignant"]
+    return user
 
 # ─────────────────────────────────────────────
 # _determine_role_from_cas_groups
@@ -48,9 +57,9 @@ class TestDetermineRole:
 
     @pytest.fixture(autouse=True)
     def set_env(self, monkeypatch):
-        monkeypatch.setenv("CAS_ALLOWED_GROUPS_4_ADMINISTRATIF", "administratif-polytech")
-        monkeypatch.setenv("CAS_ALLOWED_GROUPS_4_ENSEIGNANT", "personnels-enseignants.polytech")
-        monkeypatch.setenv("CAS_ALLOWED_GROUPS_4_ETUDIANT", "usmb-etudiants-polytech etudiants-polytech")
+        monkeypatch.setenv("CAS_ALLOWED_GROUPS_4_ADMINISTRATIF", "administratif")
+        monkeypatch.setenv("CAS_ALLOWED_GROUPS_4_ENSEIGNANT", "enseignants")
+        monkeypatch.setenv("CAS_ALLOWED_GROUPS_4_ETUDIANT", "etudiants idu4-fise")
 
     def test_enseignant(self):
         data = make_cas_data(role="enseignant")
@@ -71,10 +80,18 @@ class TestDetermineRole:
     def test_priorite_administratif_sur_enseignant(self):
         """Un user dans les deux groupes → administratif prioritaire."""
         members = [
-            "cn=administratif-polytech,ou=groups,dc=uds,dc=fr",
-            "cn=personnels-enseignants.polytech,ou=groups,dc=uds,dc=fr",
+            "cn=administratif,ou=polytech,dc=usmb,dc=fr",
+            "cn=enseignants,ou=polytech,dc=usmb,dc=fr",
         ]
         assert _determine_role_from_cas_groups(members) == "administratif"
+
+    def test_priorite_enseignant_sur_etudiant(self):
+        """Un user dans les deux groupes → administratif prioritaire."""
+        members = [
+            "cn=etudiant,ou=polytech,dc=usmb,dc=fr",
+            "cn=enseignants,ou=polytech,dc=usmb,dc=fr",
+        ]
+        assert _determine_role_from_cas_groups(members) == "enseignant"
 
     def test_env_vide_retourne_none(self, monkeypatch):
         monkeypatch.setenv("CAS_ALLOWED_GROUPS_4_ENSEIGNANT", "")
@@ -92,12 +109,12 @@ class TestDeterminePromo:
     def set_env(self, monkeypatch):
         monkeypatch.setenv(
             "CAS_ETUDIANTS_2_PROMO",
-            '[{"groupe":"etudiants-ige4-idu","promo":"IDU FISE 4 Annecy"},'
-            ' {"groupe":"etudiants-ige3-sea","promo":"SEA FISE 3 Annecy"}]'
+            '[{"groupe":"idu4-fise","promo":"IDU FISE 4 Annecy"},'
+            ' {"groupe":"SEA3-fise","promo":"SEA FISE 3 Annecy"}]'
         )
 
     def test_promo_trouvee(self):
-        members = ["cn=etudiants-ige4-idu,ou=groups,dc=uds,dc=fr"]
+        members = ["cn=idu4-fise,ou=polytech,dc=usmb,dc=fr"]
         with patch("auth.authenticate_cas.mysql.connector.connect") as mock_conn:
             mock_cursor = MagicMock()
             mock_cursor.fetchone.return_value = {"id_promo": 42}
@@ -107,12 +124,12 @@ class TestDeterminePromo:
             assert result == 42
 
     def test_groupe_inconnu(self):
-        members = ["cn=groupe-inconnu,ou=groups,dc=uds,dc=fr"]
+        members = ["cn=groupe-inconnu,ou=polytech,dc=usmb,dc=fr"]
         result = _determine_promo_from_cas_groups(members)
         assert result is None
 
     def test_promo_non_trouvee_en_bd(self):
-        members = ["cn=etudiants-ige4-idu,ou=groups,dc=uds,dc=fr"]
+        members = ["cn=idu4-fise,ou=polytech,dc=usmb,dc=fr"]
         with patch("auth.authenticate_cas.mysql.connector.connect") as mock_conn:
             mock_cursor = MagicMock()
             mock_cursor.fetchone.return_value = None  # promo absente de la BD
@@ -123,7 +140,7 @@ class TestDeterminePromo:
 
     def test_env_mal_forme(self, monkeypatch):
         monkeypatch.setenv("CAS_ETUDIANTS_2_PROMO", "pas_du_json")
-        members = ["cn=etudiants-ige4-idu,ou=groups,dc=uds,dc=fr"]
+        members = ["cn=idu4-fise,ou=polytech,dc=usmb,dc=fr"]
         result = _determine_promo_from_cas_groups(members)
         assert result is None
 
@@ -137,8 +154,8 @@ class TestAuthenticateCas:
     @pytest.fixture(autouse=True)
     def set_env(self, monkeypatch):
         monkeypatch.setenv("CAS_ALLOWED_GROUPS_4_ADMINISTRATIF", "")
-        monkeypatch.setenv("CAS_ALLOWED_GROUPS_4_ENSEIGNANT", "personnels-enseignants.polytech")
-        monkeypatch.setenv("CAS_ALLOWED_GROUPS_4_ETUDIANT", "usmb-etudiants-polytech etudiants-polytech")
+        monkeypatch.setenv("CAS_ALLOWED_GROUPS_4_ENSEIGNANT", "enseignants")
+        monkeypatch.setenv("CAS_ALLOWED_GROUPS_4_ETUDIANT", "etudiants idu4-fise")
         monkeypatch.setenv("INSTANCE_SECRET", "secret")
         monkeypatch.setenv("SESSION_TIMEOUT", "900")
 
@@ -146,10 +163,11 @@ class TestAuthenticateCas:
     async def test_user_existant_retourne_token(self):
         """User déjà en BD → pas de provisionnement, retourne un JWT."""
         data = make_cas_data(role="enseignant")
-        mock_user = MagicMock()
-        mock_user.email = data.email
-        mock_user.type = "enseignant"
-        mock_user.id = 1
+        # mock_user = MagicMock()
+        # mock_user.email = data.email
+        # mock_user.type = "enseignant"
+        # mock_user.id = 1
+        mock_user = make_mock_user(data)
 
         with patch("auth.authenticate_cas.get_user", return_value=mock_user):
             token = await authenticate_cas(data)
@@ -160,10 +178,11 @@ class TestAuthenticateCas:
     async def test_premier_login_enseignant(self):
         """Premier login → provisionnement → JWT."""
         data = make_cas_data(role="enseignant")
-        mock_user = MagicMock()
-        mock_user.email = data.email
-        mock_user.type = "enseignant"
-        mock_user.id = 1
+        # mock_user = MagicMock()
+        # mock_user.email = data.email
+        # mock_user.type = "enseignant"
+        # mock_user.id = 1
+        mock_user = make_mock_user(data)
 
         with patch("auth.authenticate_cas.get_user", side_effect=[None, mock_user]), \
              patch("auth.authenticate_cas._create_cas_user", return_value=mock_user):
