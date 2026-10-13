@@ -807,9 +807,9 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
 <script>
     window.ENV = {
-        BACKEND_URL: "<?= getenv('INSTANCE_PROTOCOL') . '://' . getenv('BACKEND_PYTHON_DOCKER_URL') ?>",
-        BACKEND_PORT: "<?= getenv('BACKEND_PYTHON_DOCKER_PORT') ?>",
-        USER_TOKEN: "<?= $_SESSION["jwt_token"] ?>",
+        //BACKEND_URL: "<?= getenv('INSTANCE_PROTOCOL') . '://' . getenv('BACKEND_PYTHON_DOCKER_URL') ?>",
+        //BACKEND_PORT: "<?= getenv('BACKEND_PYTHON_DOCKER_PORT') ?>",
+        //USER_TOKEN: "<?= $_SESSION["jwt_token"] ?>",
         USER_ID: "<?= $_SESSION["id"] ?>"
     };
     console.log("Environnement chargé :", window.ENV);
@@ -842,15 +842,20 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
     const markers = L.markerClusterGroup();
 
     const fetchUniversityCatalog = async () => {
-        const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/admin/catalog";
+        //const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/admin/catalog";
         let universities = [];
         try {
-            const response = await fetch(url, {
-                headers: {
-                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
-                    "Content-Type": "application/json"
-                }
-            });
+            // const response = await fetch(url, {
+            //     headers: {
+            //         "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+            //         "Content-Type": "application/json"
+            //     }
+            // });
+            // if (!response.ok) {
+            //     throw new Error(`Response status: ${response.status}`);
+            // }
+
+            const response = await fetch("/api.php?path=/university/admin/catalog");
             if (!response.ok) {
                 throw new Error(`Response status: ${response.status}`);
             }
@@ -878,15 +883,20 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
     }
 
     const fetchWishes = async () => {
-        const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/admin/wishes";
+        //const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/admin/wishes";
         let wishes = [];
         try {
-            const response = await fetch(url, {
-                headers: {
-                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
-                    "Content-Type": "application/json"
-                }
-            });
+            // const response = await fetch(url, {
+            //     headers: {
+            //         "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+            //         "Content-Type": "application/json"
+            //     }
+            // });
+            // if (!response.ok) {
+            //     throw new Error(`Response status: ${response.status}`);
+            // }
+
+            const response = await fetch("/api.php?path=/university/admin/wishes");
             if (!response.ok) {
                 throw new Error(`Response status: ${response.status}`);
             }
@@ -1484,23 +1494,35 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             return;
         }
 
-        const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + `/university/admin/${university.id_partner_university}`;
-        const method = 'PUT';
+        // const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + `/university/admin/${university.id_partner_university}`;
+        // const method = 'PUT';
+        //
+        // const response = await fetch(url, {
+        //     method,
+        //     headers: {
+        //         'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify(payload),
+        // });
+        //
+        // if (!response.ok) {
+        //     const detail = await parseApiError(response);
+        //     window.alert(`Enregistrement impossible: ${detail}`);
+        //     return;
+        // }
 
-        const response = await fetch(url, {
-            method,
-            headers: {
-                'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
-                'Content-Type': 'application/json',
-            },
+        //ToDo Check
+        const response = await fetch("/university/admin/${university.id_partner_university}", {
+            method: 'PUT',
             body: JSON.stringify(payload),
         });
-
         if (!response.ok) {
-            const detail = await parseApiError(response);
-            window.alert(`Enregistrement impossible: ${detail}`);
-            return;
+            throw new Error(`Response status: ${response.status}`);
         }
+
+
+
         await refreshAllData();
         window.alert('Université mise à jour avec succès !');
     };
@@ -1660,19 +1682,28 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             seen.add(key);
         }
 
-        const response = await fetch((window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + '/university/admin', {
+        // const response = await fetch((window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + '/university/admin', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify(payload),
+        // });
+        //
+        // if (!response.ok) {
+        //     const detail = await parseApiError(response);
+        //     window.alert(`Creation impossible: ${detail}`);
+        //     return;
+        // }
+
+        //ToDo Check
+        const response = await fetch("/university/admin", {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify(payload),
         });
-
         if (!response.ok) {
-            const detail = await parseApiError(response);
-            window.alert(`Creation impossible: ${detail}`);
-            return;
+            throw new Error(`Response status: ${response.status}`);
         }
 
         document.getElementById('addUniversityPanel').classList.add('hidden');
@@ -1796,18 +1827,27 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         if (!confirm("Êtes-vous sûr de vouloir forcer la clôture de tous les dossiers de vœux incomplets ?\n\nTous les étudiants ayant fait au moins 1 choix verront leur dossier verrouillé et soumis.")) return;
 
         try {
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/wishes/force-submit", {
-                method: 'POST',
-                headers: {
-                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
-                    "Content-Type": "application/json"
-                }
-            });
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/wishes/force-submit", {
+            //     method: 'POST',
+            //     headers: {
+            //         "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+            //         "Content-Type": "application/json"
+            //     }
+            // });
+            //
+            // if (!response.ok) {
+            //     const err = await parseApiError(response);
+            //     alert("Erreur: " + err);
+            //     return;
+            // }
 
+            //ToDo Check
+            const response = await fetch("/university/admin/wishes/force-submit", {
+                method: 'POST',
+                //body: JSON.stringify(payload),
+            });
             if (!response.ok) {
-                const err = await parseApiError(response);
-                alert("Erreur: " + err);
-                return;
+                throw new Error(`Response status: ${response.status}`);
             }
 
             alert("Tous les vœux incomplets ont été clôturés avec succès.");
@@ -1822,9 +1862,20 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
     window.fetchMobilityQuotas = async function () {
         try {
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility-quotas?annee_scolaire=2025-2026", {
-                headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility-quotas?annee_scolaire=2025-2026", {
+            //     headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+            // });
+
+            //ToDo Check
+            //FixMe hard coded url
+            const response = await fetch("/university/admin/mobility-quotas?annee_scolaire=2025-2026", {
+                method: 'GET',
+                //body: JSON.stringify(payload),
             });
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
             if (response.ok) {
                 window.mobilityQuotas = await response.json();
                 window.renderMobilityQuotas();
@@ -1856,14 +1907,24 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         window.mobilityQuotas = newQuotas;
 
         try {
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility-quotas", {
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility-quotas", {
+            //     method: 'POST',
+            //     headers: {
+            //         "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+            //         "Content-Type": "application/json"
+            //     },
+            //     body: JSON.stringify({ annee_scolaire: "2025-2026", quotas: window.mobilityQuotas })
+            // });
+
+            //ToDo Check
+            const response = await fetch("/university/admin/mobility-quotas", {
                 method: 'POST',
-                headers: { 
-                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
-                    "Content-Type": "application/json"
-                },
                 body: JSON.stringify({ annee_scolaire: "2025-2026", quotas: window.mobilityQuotas })
             });
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
             if (response.ok) {
                 alert("Quotas sauvegardés avec succès !");
                 document.getElementById('quotasModal').classList.add('hidden');
@@ -1880,9 +1941,15 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
     window.fetchGlobalFilieres = async function () {
         try {
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/filieres/", {
-                headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
-            });
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/filieres/", {
+            //     headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+            // });
+
+            const response = await fetch("/api.php?path=/filieres");
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
             if (response.ok) {
                 window.globalFilieres = await response.json();
                 // Removed dropdown populate logic, render will handle the grid
@@ -1938,13 +2005,18 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
         assignmentPollInterval = setInterval(async () => {
             try {
-                const res = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/assignment/status", {
-                    method: 'GET',
-                    headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
-                });
+                // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/assignment/status", {
+                //     method: 'GET',
+                //     headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+                // });
 
-                if (res.ok) {
-                    const status = await res.json();
+                const response = await fetch("/api.php?path=/university/admin/assignment/status");
+                if (!response.ok) {
+                    throw new Error(`Response status: ${response.status}`);
+                }
+
+                if (response.ok) {
+                    const status = await response.json();
 
                     document.getElementById('assignmentProgressBar').style.width = `${status.progress}%`;
                     document.getElementById('assignmentProgressPercent').innerText = `${status.progress}%`;
@@ -1985,19 +2057,28 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         };
 
         try {
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/assignment/run", {
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/assignment/run", {
+            //     method: 'POST',
+            //     headers: {
+            //         "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+            //         "Content-Type": "application/json"
+            //     },
+            //     body: JSON.stringify(payload)
+            // });
+            //
+            // if (!response.ok) {
+            //     const err = await parseApiError(response);
+            //     alert("Erreur lors de l'affectation: " + err);
+            //     return;
+            // }
+
+            //ToDo Check
+            const response = await fetch("/university/admin/assignment/run", {
                 method: 'POST',
-                headers: {
-                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
-                    "Content-Type": "application/json"
-                },
                 body: JSON.stringify(payload)
             });
-
             if (!response.ok) {
-                const err = await parseApiError(response);
-                alert("Erreur lors de l'affectation: " + err);
-                return;
+                throw new Error(`Response status: ${response.status}`);
             }
 
             document.getElementById('assignmentActions').classList.add('hidden');
@@ -2011,16 +2092,22 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
     window.exportWishes = async function () {
         try {
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/wishes/export", {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
-                }
-            });
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/wishes/export", {
+            //     method: 'GET',
+            //     headers: {
+            //         "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
+            //     }
+            // });
+            // if (!response.ok) {
+            //     alert("Erreur lors de l'exportation des vœux");
+            //     return;
+            // }
+
+            const response = await fetch("/api.php?path=/university/admin/wishes/export");
             if (!response.ok) {
-                alert("Erreur lors de l'exportation des vœux");
-                return;
+                throw new Error(`Response status: ${response.status}`);
             }
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -2037,16 +2124,22 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
     window.exportAssignments = async function () {
         try {
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/assignments/export", {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
-                }
-            });
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/assignments/export", {
+            //     method: 'GET',
+            //     headers: {
+            //         "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
+            //     }
+            // });
+            // if (!response.ok) {
+            //     alert("Erreur lors de l'exportation des affectations");
+            //     return;
+            // }
+
+            const response = await fetch("/api.php?path=/university/admin/assignments/export");
             if (!response.ok) {
-                alert("Erreur lors de l'exportation des affectations");
-                return;
+                throw new Error(`Response status: ${response.status}`);
             }
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -2063,16 +2156,22 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
     window.exportPlaces = async function () {
         try {
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/places/export", {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
-                }
-            });
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/places/export", {
+            //     method: 'GET',
+            //     headers: {
+            //         "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
+            //     }
+            // });
+            // if (!response.ok) {
+            //     alert("Erreur lors de l'exportation de l'état des places");
+            //     return;
+            // }
+
+            const response = await fetch("/api.php?path=/university/admin/places/export");
             if (!response.ok) {
-                alert("Erreur lors de l'exportation de l'état des places");
-                return;
+                throw new Error(`Response status: ${response.status}`);
             }
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -2098,9 +2197,15 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
     window.fetchSubmittedStudents = async function () {
         try {
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/submitted-students", {
-                headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
-            });
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/submitted-students", {
+            //     headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+            // });
+
+            const response = await fetch("/api.php?path=/university/admin/mobility/submitted-students");
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
             if (response.ok) {
                 window.submittedStudentsList = await response.json();
 
@@ -2144,14 +2249,18 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         }
 
         try {
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/campaign/doublant/" + id, {
-                headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
-            });
-            
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/campaign/doublant/" + id, {
+            //     headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+            // });
+            // if (!response.ok) {
+            //     const err = await response.json();
+            //     alert("Erreur: " + (err.detail || "Étudiant non valide."));
+            //     return;
+            // }
+
+            const response = await fetch("/api.php?path=/university/admin/campaign/doublant");
             if (!response.ok) {
-                const err = await response.json();
-                alert("Erreur: " + (err.detail || "Étudiant non valide."));
-                return;
+                throw new Error(`Response status: ${response.status}`);
             }
             
             const student = await response.json();
@@ -2284,14 +2393,23 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
                 }
             }, 500);
 
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/campaign/launch", {
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/campaign/launch", {
+            //     method: 'POST',
+            //     headers: {
+            //         "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+            //         "Content-Type": "application/json"
+            //     },
+            //     body: JSON.stringify({ doublants: window.doublantsArray })
+            // });
+
+            //ToDo Check
+            const response = await fetch("/university/admin/campaign/launch", {
                 method: 'POST',
-                headers: { 
-                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
-                    "Content-Type": "application/json"
-                },
                 body: JSON.stringify({ doublants: window.doublantsArray })
             });
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
             
             clearInterval(simulateProgress);
             progressBar.style.width = '100%';
@@ -2339,10 +2457,19 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         }
 
         try {
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/reset-wishes/" + id, {
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/reset-wishes/" + id, {
+            //     method: 'POST',
+            //     headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+            // });
+
+            //ToDo Check
+            const response = await fetch("/university/admin/mobility/reset-wishes/" + id, {
                 method: 'POST',
-                headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+                //body: JSON.stringify({ doublants: window.doublantsArray })
             });
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
 
             if (response.ok) {
                 alert("Soumission annulée avec succès.");
@@ -2363,9 +2490,15 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
     window.fetchAssignedStudents = async function () {
         try {
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/assigned-students", {
-                headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
-            });
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/assigned-students", {
+            //     headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
+            // });
+
+            const response = await fetch("/api.php?path=/university/admin/mobility/assigned-students");
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
             if (response.ok) {
                 window.assignedStudentsList = await response.json();
 
@@ -2391,14 +2524,23 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
                 id_assignment: parseInt(id_assignment, 10),
                 new_status: new_status
             };
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/update-assignment-status", {
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/update-assignment-status", {
+            //     method: 'POST',
+            //     headers: {
+            //         "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
+            //         "Content-Type": "application/json"
+            //     },
+            //     body: JSON.stringify(payload)
+            // });
+
+            //ToDo Check
+            const response = await fetch("/university/admin/mobility/update-assignment-status", {
                 method: 'POST',
-                headers: {
-                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`,
-                    "Content-Type": "application/json"
-                },
                 body: JSON.stringify(payload)
             });
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
 
             if (response.ok) {
                 window.fetchAssignedStudents(); // Met à jour le graphe
@@ -2477,16 +2619,22 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
     window.exportAssignedData = async function (status) {
         try {
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/assigned-students/export/" + status, {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
-                }
-            });
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/assigned-students/export/" + status, {
+            //     method: 'GET',
+            //     headers: {
+            //         "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
+            //     }
+            // });
+            // if (!response.ok) {
+            //     alert("Erreur lors de l'exportation des données.");
+            //     return;
+            // }
+
+            const response = await fetch("/api.php?path=/university/admin/mobility/assigned-students/export/" + status);
             if (!response.ok) {
-                alert("Erreur lors de l'exportation des données.");
-                return;
+                throw new Error(`Response status: ${response.status}`);
             }
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -2503,16 +2651,22 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
     window.exportUnassignedData = async function () {
         try {
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/unassigned-students/export", {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
-                }
-            });
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/unassigned-students/export", {
+            //     method: 'GET',
+            //     headers: {
+            //         "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
+            //     }
+            // });
+            // if (!response.ok) {
+            //     alert("Erreur lors de l'exportation des données des non affectés.");
+            //     return;
+            // }
+
+            const response = await fetch("/api.php?path=/university/admin/mobility/unassigned-students/export");
             if (!response.ok) {
-                alert("Erreur lors de l'exportation des données des non affectés.");
-                return;
+                throw new Error(`Response status: ${response.status}`);
             }
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -2589,16 +2743,22 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
     // Diagnostics Logic
     window.exportDiagnosticData = async function (category) {
         try {
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/diagnostics/export/" + category, {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
-                }
-            });
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/diagnostics/export/" + category, {
+            //     method: 'GET',
+            //     headers: {
+            //         "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
+            //     }
+            // });
+            // if (!response.ok) {
+            //     alert("Erreur lors de l'exportation des données de diagnostique");
+            //     return;
+            // }
+
+            const response = await fetch("/api.php?path=/university/admin/mobility/diagnostics/export/" + category);
             if (!response.ok) {
-                alert("Erreur lors de l'exportation des données de diagnostique");
-                return;
+                throw new Error(`Response status: ${response.status}`);
             }
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -2634,14 +2794,18 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
     window.loadDiagnostics = async function () {
         try {
-            const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/diagnostics", {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
-                }
-            });
+            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility/diagnostics", {
+            //     method: 'GET',
+            //     headers: {
+            //         "Authorization": `Bearer ${window.ENV.USER_TOKEN}`
+            //     }
+            // });
+            // if (!response.ok) return;
 
-            if (!response.ok) return;
+            const response = await fetch("/api.php?path=/university/admin/mobility/diagnostics");
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
 
             const data = await response.json();
 
@@ -2752,15 +2916,24 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             "Cette action va clôturer la phase d'acceptation. TOUTES les affectations actuellement 'en attente' seront définitivement passées à 'refusé'.",
             async function () {
                 try {
-                    const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/admin/mobility/assignment/close";
-                    const response = await fetch(url, {
+                    // const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/admin/mobility/assignment/close";
+                    // const response = await fetch(url, {
+                    //     method: 'POST',
+                    //     headers: {
+                    //         'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
+                    //         'Content-Type': 'application/json'
+                    //     }
+                    // });
+                    // if (!response.ok) throw new Error("Erreur lors de la clôture des affectations");
+
+                    //ToDo Check
+                    const response = await fetch("/university/admin/mobility/assignment/close", {
                         method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${window.ENV.USER_TOKEN}`,
-                            'Content-Type': 'application/json'
-                        }
+                        //body: JSON.stringify(payload)
                     });
-                    if (!response.ok) throw new Error("Erreur lors de la clôture des affectations");
+                    if (!response.ok) {
+                        throw new Error(`Response status: ${response.status}`);
+                    }
 
                     alert("Opération terminée avec succès. Toutes les affectations en attente ont été refusées.");
 

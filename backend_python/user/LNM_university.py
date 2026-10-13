@@ -98,7 +98,7 @@ def _sync_university_places(
         db_request(current_user, SQLRequest(**insert_place_request))
 
 
-@router.get("/university/",
+@router.get("/university",
             tags=["mobility"],
             summary="Universities",
             description="Return the list of partner universities")
@@ -159,14 +159,22 @@ def get_campaign_status(
     id_etudiant: int,
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
-    request = SQLRequest(
-        request="SELECT mobility_z_score FROM LNM_etudiant WHERE id_etudiant = %(id)s",
-        params={"id": id_etudiant},
-        allowedRolesRequester=[]
-    )
+    request = {
+        "request" : """
+                    SELECT mobility_z_score 
+                    FROM LNM_etudiant 
+                    WHERE id_etudiant = %(id)s""",
+        "params" : {
+            "id": id_etudiant
+        },
+        "allowedRolesRequester" : []
+    }
+
     if(current_user.id == id_etudiant):
         request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
-    result = db_request(current_user, request)
+
+    result = db_request(current_user, SQLRequest(**request))
+
     is_open = bool(result and result[0].get("mobility_z_score") is not None)
     return {"is_open": is_open}
 
@@ -219,15 +227,19 @@ def add_university_to_wishes(
     id_semestre = payload.get("id_semestre", 8) if payload else 8
 
     # Sécurité : bloquer l'ajout de vœux si la campagne n'est pas encore ouverte
-    request = SQLRequest(
-        request="SELECT mobility_z_score FROM LNM_etudiant WHERE id_etudiant = %(id)s",
-        params={"id": id_etudiant},
-        allowedRolesRequester=[]
-    )
+    request = {
+        "request" : """
+                    SELECT mobility_z_score 
+                    FROM LNM_etudiant 
+                    WHERE id_etudiant = %(id)s""",
+        "params" : {"id": id_etudiant},
+        "allowedRolesRequester" : []
+    }
     if(current_user.id == id_etudiant):
         request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
-    student_data = db_request(current_user, request)
+    student_data = db_request(current_user, SQLRequest(**request))
+
     if not student_data or student_data[0].get("mobility_z_score") is None:
         raise HTTPException(status_code=403, detail="La campagne de mobilité n'est pas encore ouverte. Vous ne pouvez pas ajouter de vœux.")
 
@@ -1568,20 +1580,22 @@ def get_student_assignment(
     id_etudiant: int,
     current_user: Annotated[User, Depends(get_current_active_user)]
 ):
-    request = SQLRequest(
-        request='''
+    request = {
+        "request":"""
             SELECT a.id_assignment, a.status, u.id_partner_university, u.name, u.code, u.country, u.address
             FROM MOB_assignment a
             JOIN MOB_partner_university u ON a.id_partner_university = u.id_partner_university
             WHERE a.id_etudiant = %(id)s
-        ''',
-        params={"id": id_etudiant},
-        allowedRolesRequester=[],
-    )
+        """,
+        "params":{
+            "id": id_etudiant
+        },
+        "allowedRolesRequester":[],
+    }
     if(current_user.id == id_etudiant):
         request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
-    result = db_request(current_user, request)
+    result = db_request(current_user, SQLRequest(**request))
 
     # ToDo Check uncoherent return, does not return all assignments
     if result and len(result) > 0:
@@ -1603,32 +1617,45 @@ def submit_student_decision(
         raise HTTPException(status_code=400, detail="Invalid decision. Must be 'accepted' or 'declined'.")
 
     # Vérifier que l'affectation existe et est "pending"
-    request = SQLRequest(
-        request='SELECT id_assignment, status FROM MOB_assignment WHERE id_etudiant = %(id)s',
-        params={"id": id_etudiant},
-        allowedRolesRequester=[],
-    )
+    request = {
+        "request" : """
+                    SELECT id_assignment, status 
+                    FROM MOB_assignment 
+                    WHERE id_etudiant = %(id)s""",
+        "params" : {
+            "id": id_etudiant
+        },
+        "allowedRolesRequester" : [],
+    }
     if(current_user.id == id_etudiant):
         request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
-    assignment = db_request(current_user, request)
-    
+    assignment = db_request(current_user, SQLRequest(**request))
+
     if not assignment or len(assignment) == 0:
         raise HTTPException(status_code=404, detail="Aucune affectation trouvée pour cet étudiant.")
-        
+
     if assignment[0]["status"] != 'pending':
         raise HTTPException(status_code=400, detail="La décision a déjà été prise pour cette affectation.")
 
     # Mettre à jour le statut
-    request = SQLRequest(
-        request='UPDATE MOB_assignment SET status = %(status)s WHERE id_etudiant = %(id)s',
-        params={"status": payload.decision, "id": id_etudiant},
-        allowedRolesRequester=[],
-    )
+    request = {
+        "request" : """
+                    UPDATE MOB_assignment 
+                    SET status = %(status)s 
+                    WHERE id_etudiant = %(id)s""",
+        "params" : {
+            "status": payload.decision,
+            "id": id_etudiant
+        },
+        "allowedRolesRequester" : [],
+    }
+
     if(current_user.id == id_etudiant):
         request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
-    db_request(current_user, request)
-    
+
+    db_request(current_user, SQLRequest(**request))
+
     return {"message": "Décision enregistrée avec succès"}
 
 @router.post("/university/admin/mobility/assignment/close",
@@ -1690,7 +1717,7 @@ def launch_mobility_campaign(
         GROUP BY p.id_filiere
     """
     stats_req = db_request(current_user, SQLRequest(request=stats_query, params=None, allowedRolesRequester=["relations_internationales"]))
-    
+
     stats_map = {}
     if stats_req and isinstance(stats_req, list):
         for row in stats_req:
@@ -1704,7 +1731,7 @@ def launch_mobility_campaign(
         WHERE p.annee = 4 {doublant_filter}
     """
     students_req = db_request(current_user, SQLRequest(request=students_query, params=None, allowedRolesRequester=["relations_internationales"]))
-    
+
     if students_req and isinstance(students_req, list):
         for student in students_req:
             note = student.get('mobility_note')
@@ -1716,7 +1743,7 @@ def launch_mobility_campaign(
                 mean = float(f_stats.get('mean_note') or 0.0)
                 if std > 0:
                     z_score = round((float(note) - mean) / std, 4)
-            
+
             # Update
             db_request(current_user, SQLRequest(
                 request="UPDATE LNM_etudiant SET mobility_z_score = %(z)s WHERE id_etudiant = %(id)s",
@@ -1742,13 +1769,13 @@ def verify_doublant(
     """
     req = SQLRequest(request=query, params={"id": id_etudiant}, allowedRolesRequester=["relations_internationales"])
     result = db_request(current_user, req)
-    
+
     if not result:
         raise HTTPException(status_code=404, detail="Étudiant introuvable.")
-    
+
     student = result[0]
     # L'utilisateur a demandé "si il est du 4 eme anne". On vérifie l'année.
     if student["annee"] != 4:
         raise HTTPException(status_code=400, detail=f"L'étudiant est en année {student['annee']} (doit être en 4ème année).")
-        
+
     return student

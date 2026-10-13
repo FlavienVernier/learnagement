@@ -31,7 +31,7 @@ async def login_for_access_token(
     return await authenticate_lnm.login_for_access_token(form_data)
 
 # ToDo refactor so that CAS data is CasTicket and endpoint validate the ticket
-@router.post("/token-cas/",
+@router.post("/token-cas",
     tags=["Auth"],
     summary="CAS login or provision",
     description="Internal endpoint — login or create user from CAS, returns JWT token")

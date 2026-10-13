@@ -17,7 +17,7 @@ router = APIRouter()
 #
 ######################################################
 
-@router.get("/enseignants/",
+@router.get("/enseignants",
             tags=["enseignant"],
             summary="Teachers",
             description="Return the list of teachers")
@@ -40,7 +40,7 @@ def enseignants(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/enseignant_responsabilite/",
+@router.get("/enseignant_responsabilite",
              tags=["enseignant"],
              summary="Teachers responsibilities",
              description="Return the list of teachers' responsibilities")
@@ -61,7 +61,7 @@ def enseignants_responsabilities(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/enseignants/charge/",
+@router.get("/enseignants/charge",
              tags=["administratif", "enseignant"],
              summary="Teachers load",
              description="Return the list of teachers load")
@@ -90,7 +90,7 @@ def enseignants_load(
 #
 ######################################################
 
-@router.get("/enseignants/{id_enseignant:int}/charge/",
+@router.get("/enseignants/{id_enseignant:int}/charge",
              tags=["administratif", "enseignant"],
              summary="Teachers load",
              description="Return the list of teachers load")

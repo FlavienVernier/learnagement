@@ -8,7 +8,7 @@ function forwardToBackend(
     array $extraHeaders = []
 ): array {
     $backendUrl = getenv('INSTANCE_PROTOCOL') . '://' . getenv('BACKEND_PYTHON_DOCKER_URL')
-        . ':' . getenv('BACKEND_PYTHON_DOCKER_PORT') . '/' . ltrim($path, '/');
+        . ':' . getenv('BACKEND_PYTHON_DOCKER_PORT') . '/' . ltrim(rtrim($path,'/'), '/');
     getLogger()->info("Forwarding to backend url: " . $backendUrl);
 
     $headers = array_merge(["Content-Type: " . $contentType], $extraHeaders);

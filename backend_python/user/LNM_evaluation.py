@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-@router.get("/competence/",
+@router.get("/competence",
             tags=["competence"],
             summary="Universities",
             description="Return the list of partner universities")
@@ -45,7 +45,7 @@ def tree_competence(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/competence_big/",
+@router.get("/competence_big",
             tags=["competence"],
             summary="Universities",
             description="Return the list of partner universities")

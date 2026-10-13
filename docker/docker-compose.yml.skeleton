@@ -80,6 +80,7 @@ services:
         volumes:
             - ../front_PHP:/var/www/html
             - ./log/php:/var/log/apache2
+            - ./front_PHP/lnm-php.ini:/usr/local/etc/php/conf.d/lnm-php.ini
             - ../${SSL_INTERNAL_DIR}:${DOCKER_SSL_INTERNAL_DIR}:ro
             - ../${SSL_EXTERNAL_DIR}:${DOCKER_SSL_EXTERNAL_DIR}:ro
         depends_on:

@@ -143,9 +143,9 @@ crossorigin=""/>
 <!-- ToDo : Déplacer dans un fichier global ex db.js -->
 <script>
     window.ENV = {
-        BACKEND_URL: "<?= getenv('INSTANCE_PROTOCOL') . '://' . getenv('INSTANCE_URL') ?>",
-        BACKEND_PORT: "<?= getenv('BACKEND_PYTHON_PORT') ?>",
-        USER_TOKEN: "<?= $_SESSION["jwt_token"] ?>",
+        //BACKEND_URL: "<?= getenv('INSTANCE_PROTOCOL') . '://' . getenv('INSTANCE_URL') ?>",
+        //BACKEND_PORT: "<?= getenv('BACKEND_PYTHON_PORT') ?>",
+        //USER_TOKEN: "<?= $_SESSION["jwt_token"] ?>",
         USER_ID: "0"
     };
     console.log("Environnement chargé :", window.ENV);
@@ -279,12 +279,10 @@ crossorigin=""/>
                 }
             });*/
 
-            const response = await fetch("/api.php?path=university/etudiant/" + window.ENV.USER_ID + "/assignment/");
+            const response = await fetch("/api.php?path=/university/etudiant/" + window.ENV.USER_ID + "/assignment/");
             if (response.ok) {
                 return await response.json();
             }
-
-
         } catch (error) {
             console.error(error.message);
         }
@@ -521,7 +519,7 @@ crossorigin=""/>
                 body: JSON.stringify({ id_semestre: id_semestre })
             });*/
 
-            const wishesEndpoint = "/api.php?path=university/etudiant/" + window.ENV.USER_ID + "/wish/" + university.id_partner_university;
+            const wishesEndpoint = "/api.php?path=/university/etudiant/" + window.ENV.USER_ID + "/wish/" + university.id_partner_university;
 
             const response = await fetch(wishesEndpoint, {
                 method: 'POST',
@@ -559,7 +557,7 @@ crossorigin=""/>
                 }
             });*/
 
-            const deleteEndpoint = "/api.php?path=university/etudiant/" + window.ENV.USER_ID
+            const deleteEndpoint = "/api.php?path=/university/etudiant/" + window.ENV.USER_ID
                 + "/wish/" + idPartnerUniversity
                 + "/semestre/" + idSemestre;
             const response = await fetch(deleteEndpoint, {
@@ -597,7 +595,7 @@ crossorigin=""/>
                 }
             });*/
 
-            const moveEndpoint = "/api.php?path=university/etudiant/" + window.ENV.USER_ID
+            const moveEndpoint = "/api.php?path=/university/etudiant/" + window.ENV.USER_ID
                 + "/wish/" + idPartnerUniversity
                 + "/semestre/" + idSemestre
                 + "/move/" + direction;
@@ -638,7 +636,7 @@ crossorigin=""/>
                 }
             });*/
 
-            const submitEndpoint = "/api.php?path=university/etudiant/" + window.ENV.USER_ID + "/wishes/submit";
+            const submitEndpoint = "/api.php?path=/university/etudiant/" + window.ENV.USER_ID + "/wishes/submit";
 
             const response = await fetch(submitEndpoint, {
                 method: 'POST',
@@ -685,7 +683,7 @@ crossorigin=""/>
                 body: JSON.stringify({ decision })
             });*/
 
-            const endpoint = "/api.php?path=university/etudiant/" + window.ENV.USER_ID + "/assignment/decision";
+            const endpoint = "/api.php?path=/university/etudiant/" + window.ENV.USER_ID + "/assignment/decision";
 
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -797,7 +795,7 @@ crossorigin=""/>
         //const url = (window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT) + "/university/etudiant/" + window.ENV.USER_ID + "/quota?annee_scolaire=2025-2026";
         try {
             //const response = await fetch(url, { headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` } });
-            const response = await fetch("/api.php?path=university/etudiant/" + window.ENV.USER_ID + "/quota?annee_scolaire=2025-2026");
+            const response = await fetch("/api.php?path=/university/etudiant/" + window.ENV.USER_ID + "/quota?annee_scolaire=2025-2026");
             if (response.ok) {
                 const data = await response.json();
                 if (data) {

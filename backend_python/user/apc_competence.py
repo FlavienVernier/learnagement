@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-@router.get("/competence_ac/",
+@router.get("/competence_ac",
             tags=["apc"],
             summary="Students",
             description="Return the list of competences and apprentissages for the students",)
@@ -29,7 +29,7 @@ def get_competence_ac(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/competence_ce/",
+@router.get("/competence_ce",
             tags=["apc"],
             summary="Students",
             description="Return the list of competences and essentiel composant",)

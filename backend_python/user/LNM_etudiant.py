@@ -18,7 +18,7 @@ router = APIRouter()
 #
 ######################################################
 
-@router.get("/etudiants/",
+@router.get("/etudiants",
             tags=["student"],
             summary="Students",
             description="Return the list of students")
@@ -44,7 +44,7 @@ def get_etudiants(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/etudiants/absences/",
+@router.get("/etudiants/absences",
             tags=["student", "administratif"],
             summary="Students",
             description="Return the list of students")
@@ -92,7 +92,7 @@ def get_etudiants_absences(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/etudiants/stages/",
+@router.get("/etudiants/stages",
             tags=["administratif", "student",  "internship",],
             summary="Students",
             description="Return the list of students")
@@ -136,7 +136,7 @@ def get_etudiants_stages(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/etudiants/without_stage/",
+@router.get("/etudiants/without_stage",
             tags=["administratif", "student", "internship"],
             summary="Students",
             description="Return the list of students")
@@ -198,7 +198,7 @@ def get_etudiant(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/etudiants/{id_etudiant:int}/absences/",
+@router.get("/etudiants/{id_etudiant:int}/absences",
             tags=["administratif", "student",],
             summary="Students",
             description="Return the list of students")
@@ -227,7 +227,7 @@ def get_etudiant_absences(
         request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/etudiants/{id_etudiant:int}/load/",
+@router.get("/etudiants/{id_etudiant:int}/load",
             tags=["student", "administratif", ],
             summary="Students",
             description="Return the list of students")
@@ -261,7 +261,7 @@ def get_etudiant_load(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/etudiants/{id_etudiant:int}/edt/",
+@router.get("/etudiants/{id_etudiant:int}/edt",
             tags=["student", "administratif", ],
             summary="Students",
             description="Return the list of students")
@@ -298,7 +298,7 @@ def get_etudiant_edt(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/etudiants/{id_etudiant:int}/pastedt/",
+@router.get("/etudiants/{id_etudiant:int}/pastedt",
             tags=["student",],
             summary="Students",
             description="Return the list of students")
@@ -334,7 +334,7 @@ def get_etudiant_pastedt(
         request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/etudiants/{id_etudiant}/polypoints/",
+@router.get("/etudiants/{id_etudiant}/polypoints",
             tags=["student", ],
             summary="Students",
             description="Return the list of students")
@@ -358,7 +358,7 @@ def get_etudiant_pastedt(
         request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/etudiants/{id_etudiant}/rendus/",
+@router.get("/etudiants/{id_etudiant}/rendus",
             tags=["student", ],
             summary="Students",
             description="Return the list of students")
@@ -391,7 +391,7 @@ def get_etudiant_pastedt(
         request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/etudiants/{id_etudiant:int}/stages/",
+@router.get("/etudiants/{id_etudiant:int}/stages",
             tags=["administratif", "student",  "internship",],
             summary="Students",
             description="Return the list of students")

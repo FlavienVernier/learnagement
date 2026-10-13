@@ -126,46 +126,46 @@ function get_rendus_etudiant($token, $id_etudiant){
 }
 
 function get_stages($token){
-    $url = get_python_backend_url("etudiants/stages/");
+    $url = get_python_backend_url("etudiants/stages");
     return get_endpoint($url, $token);
 }
 
 function get_stages2($token){
-    $url = get_python_backend_url("filieres/stages/");
+    $url = get_python_backend_url("filieres/stages");
     return get_endpoint($url, $token);
 }
 function get_filieres($token) {
-    $url = get_python_backend_url("filieres/");
+    $url = get_python_backend_url("filieres");
     return get_endpoint($url, $token);
 }
 
 function get_statuts($token) {
-    $url = get_python_backend_url("statuts/");
+    $url = get_python_backend_url("statuts");
     return get_endpoint($url, $token);
 }
 
 function get_promos($token) {
-    $url = get_python_backend_url("promos/");
+    $url = get_python_backend_url("promos");
     return get_endpoint($url, $token);
 }
 
 function get_groupe_types($token) {
-    $url = get_python_backend_url("groupe_types/");
+    $url = get_python_backend_url("groupe_types");
     return get_endpoint($url, $token);
 }
 
 function get_seance_types($token) {
-    $url = get_python_backend_url("seance_types/");
+    $url = get_python_backend_url("seance_types");
     return get_endpoint($url, $token);
 }
 
 function get_modules_responsables($token) {
-    $url = get_python_backend_url("modules/responsables/");
+    $url = get_python_backend_url("modules/responsables");
     return get_endpoint($url, $token);
 }
 
 function get_modules_intervenants($token) {
-    $url = get_python_backend_url("modules/intervenants/");
+    $url = get_python_backend_url("modules/intervenants");
     return get_endpoint($url, $token);
 }
 
@@ -175,18 +175,18 @@ function get_modules_responsable_by_id($id_responsable, $token) {
 }
 
 function get_modules_etudiant($id_etudiant, $token) {
-    $url = get_python_backend_url("modules/etudiants/" . $id_etudiant . "/");
+    $url = get_python_backend_url("modules/etudiants/" . $id_etudiant );
     return get_endpoint($url, $token);
 }
 
 function get_modules_intervenant_by_id($id_intervenant, $token) {
-    $url = get_python_backend_url("modules/intervenants/" . $id_intervenant . "/");
+    $url = get_python_backend_url("modules/intervenants/" . $id_intervenant);
     return get_endpoint($url, $token);
 }
 
 
 function get_modules_m2c3($id_filiere, $id_statut, $token) {
-    $url = get_python_backend_url("m2c3/");
+    $url = get_python_backend_url("m2c3");
     $data = [
         "id_filiere" => $id_filiere,
         "id_statut" => $id_statut
@@ -195,42 +195,42 @@ function get_modules_m2c3($id_filiere, $id_statut, $token) {
 }
 
 function get_data_gantt($id_responsable, $token) {
-    $url = get_python_backend_url("modules/gantt/" . $id_responsable . "/");
+    $url = get_python_backend_url("modules/gantt/" . $id_responsable);
     return get_endpoint($url, $token);
 }
 
 function get_data_gantt_etudiant($id_etudiant, $token) {
-    $url = get_python_backend_url("modules/gantt/etudiant/" . $id_etudiant . "/");
+    $url = get_python_backend_url("modules/gantt/etudiant/" . $id_etudiant);
     return get_endpoint($url, $token);
 }
 
 function get_module_dependencies($id_module, $token) {
-    $url = get_python_backend_url("modules/".$id_module."/dependencies/");
+    $url = get_python_backend_url("modules/".$id_module."/dependencies");
     return get_endpoint($url, $token);
 }
 
 function get_disciplines($token) {
-    $url = get_python_backend_url("disciplines/");
+    $url = get_python_backend_url("disciplines");
     return get_endpoint($url, $token);
 }
 
 function post_module($data, $token) {
-    $url = get_python_backend_url("modules/create/");
+    $url = get_python_backend_url("modules/create");
     return post_endpoint($url, $data, $token);
 }
 
 function get_stages_etudiant($token, $id_etudiant) {
-    $url = get_python_backend_url("etudiants/" . $id_etudiant . "/stages/");
+    $url = get_python_backend_url("etudiants/" . $id_etudiant . "/stages");
     return get_endpoint($url, $token);
 }
 
 function get_calendars($token, $id) {
-    $url = get_python_backend_url("user/" . $id . "/calendars/");
+    $url = get_python_backend_url("user/" . $id . "/calendars");
     return get_endpoint($url, $token);
 }
 
 function post_calendar($token, $id, $url_name, $url_calendar) {
-    $url = get_python_backend_url("user/" . $id . "/calendars/");
+    $url = get_python_backend_url("user/" . $id . "/calendars");
     $data = [
         "url_name" => $url_name,
         "url" => $url_calendar

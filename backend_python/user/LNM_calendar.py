@@ -56,7 +56,7 @@ def get_user_role_and_id(current_user: User):
 #
 ######################################################
 
-@router.get("/user/{id:int}/calendars/",
+@router.get("/user/{id:int}/calendars",
             tags=["calendar"],
             summary="Get User Calendar URLs",
             description="Returns all ADE iCal URLs for the currently logged-in user")
@@ -98,7 +98,7 @@ def get_user_calendar_urls(
 #
 ######################################################
 
-@router.post("/user/{id:int}/calendars/",
+@router.post("/user/{id:int}/calendars",
              tags=["calendar"],
              summary="Update User Calendar URL",
              description="Saves a specific iCal URL")

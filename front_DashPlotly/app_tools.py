@@ -19,7 +19,7 @@ def get_python_backend_url(endpoint):
     protocol = os.getenv("INSTANCE_PROTOCOL")
     base_url = os.getenv("BACKEND_PYTHON_DOCKER_URL")
     port = os.getenv("BACKEND_PYTHON_DOCKER_PORT")
-    url = f"{protocol}://{base_url}:{port}/{endpoint.lstrip('/')}"
+    url = f"{protocol}://{base_url}:{port}/{endpoint.lstrip('/').rstrip('/')}"
     return url
 
 def get_endpoint(url, token, data=None):
@@ -133,36 +133,36 @@ def python_endpoint(method, url, data, token):
 
 
 def get_enseignants(token):
-    url = get_python_backend_url("/enseignants/")
+    url = get_python_backend_url("/enseignants")
     df = get_endpoint(url, token=token)
     return df
 
 def get_etudiants(token):
-    url = get_python_backend_url("/etudiants/")
+    url = get_python_backend_url("/etudiants")
     df = get_endpoint(url, token=token)
     return df
 
 def get_filieres(token):
-    url = get_python_backend_url("/filieres/")
+    url = get_python_backend_url("/filieres")
     df = get_endpoint(url, token=token)
     return df
 
 def get_statuts(token):
-    url = get_python_backend_url("/statuts/")
+    url = get_python_backend_url("/statuts")
     df = get_endpoint(url, token=token)
     return df
 
 def get_promos(token):
-    url = get_python_backend_url("/promos/")
+    url = get_python_backend_url("/promos")
     df = get_endpoint(url, token=token)
     return df
 
 def get_groupe_types(token):
-    url = get_python_backend_url("/groupe_types/")
+    url = get_python_backend_url("/groupe_types")
     df = get_endpoint(url, token=token)
     return df
 
 def get_seance_types(token):
-    url = get_python_backend_url("/seance_types/")
+    url = get_python_backend_url("/seance_types")
     df = get_endpoint(url, token=token)
     return df

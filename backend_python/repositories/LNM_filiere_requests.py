@@ -6,7 +6,7 @@ def requests(key: str):
 
 __requests = {
     "get_filieres" : {
-        "route":   "/filieres/",
+        "route":   "/filieres",
         "tags":    ["anonymous", "filiere"],
         "summary": "Filiere",
         "description": "Return the list of filieres",
@@ -19,7 +19,7 @@ __requests = {
         "allowedRolesRequester" : "anonymous",
     },
     "get_statuts" : {
-        "route":   "/statuts/",
+        "route":   "/statuts",
         "tags":    ["filiere"],
         "summary": "Status",
         "description": "Return the list of statuts",
@@ -32,7 +32,7 @@ __requests = {
         "allowedRolesRequester" : ["connected_user"],
     },
     "get_groupe_types" : {
-        "route":   "/groupe_types/",
+        "route":   "/groupe_types",
         "tags":    ["filiere"],
         "summary": "Groupe types",
         "description": "Return the list of groupe types",
@@ -45,7 +45,7 @@ __requests = {
         "allowedRolesRequester" : ["connected_user"],
     },
     "get_seance_types" : {
-        "route":   "/seance_types/",
+        "route":   "/seance_types",
         "tags":    ["filiere"],
         "summary": "Seance types",
         "description": "Return the list of seance types",
@@ -119,7 +119,7 @@ __requests = {
         "allowedRolesRequester" : "anonymous",
     },
     "get_promos" : {
-        "route":   "/promos/",
+        "route":   "/promos",
         "tags":    ["filiere"],
         "summary": "Promos",
         "description": "Return the list of promos",

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/access_auth/",
+@router.get("/access_auth",
             tags=["check", "table"],
             summary="Teacher without session",
             description="Check teacher without session.")
@@ -180,7 +180,7 @@ def build_tree(config: dict) -> dict:
     return root
 
 
-@router.get("/access_auth_tree/",
+@router.get("/access_auth_tree",
             tags=["check", "tree"],
             summary="Teacher without session",
             description="Check teacher without session.")
@@ -430,7 +430,7 @@ def build_lineage_tree(config: dict) -> dict:
     return root
 
 
-@router.get("/access_auth_tree_sqlglot/",
+@router.get("/access_auth_tree_sqlglot",
             tags=["check", "tree"],
             summary="Teacher without session",
             description="Check teacher without session.")

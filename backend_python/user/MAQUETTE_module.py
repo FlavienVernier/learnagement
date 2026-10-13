@@ -58,7 +58,7 @@ def __participate(id_module: int, id_etudiant: int, current_user: Annotated[User
 # Get
 #####################################
 
-@router.get("/m2c3/",
+@router.get("/m2c3",
             tags=["module"],
             summary="M2c3",
             description="Return maquette et modalités de contrôle de connaissances et compétences")
@@ -100,7 +100,7 @@ def get_m2c3(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/modules/responsables/",
+@router.get("/modules/responsables",
             tags=["module"],
             summary="Get responsibles",
             description="Get modules responsibles")
@@ -169,7 +169,7 @@ def get_modules_responsable(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/modules/intervenants/",
+@router.get("/modules/intervenants",
             tags=["module"],
             summary="Get modules by responsible",
             description="Get all modules of a responsible")
@@ -211,7 +211,7 @@ def get_modules_intervenants(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/modules/intervenants/{id_intervenant}/",
+@router.get("/modules/intervenants/{id_intervenant}",
             tags=["module"],
             summary="Get modules by responsible",
             description="Get all modules of a responsible")
@@ -259,7 +259,7 @@ SELECT
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/modules/etudiants/{id_etudiant}/",
+@router.get("/modules/etudiants/{id_etudiant}",
             tags=["module"],
             summary="Get modules by responsible",
             description="Get all modules of a responsible")
@@ -286,7 +286,7 @@ def get_modules_etudiant(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/modules/sequencages/{id_responsable}/",
+@router.get("/modules/sequencages/{id_responsable}",
             tags=["module"],
             summary="Get modules by responsible",
             description="Get all modules of a responsible")
@@ -319,7 +319,7 @@ def get_sequencages_responsable(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/modules/sequences/{id_responsable}/",
+@router.get("/modules/sequences/{id_responsable}",
             tags=["module"],
             summary="Get modules by responsible",
             description="Get all modules of a responsible")
@@ -356,7 +356,7 @@ def get_sequences_responsable(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/modules/sessions/{id_responsable}/",
+@router.get("/modules/sessions/{id_responsable}",
             tags=["module"],
             summary="Get modules by responsible",
             description="Get all modules of a responsible")
@@ -400,7 +400,7 @@ def get_sessions_responsable(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/modules/{id_module}/dependencies/",
+@router.get("/modules/{id_module}/dependencies",
             tags=["module"],
             summary="Get modules dependencies",
             description="Get all modules dependencies")
@@ -435,7 +435,7 @@ def get_module_dependencies(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/modules/{id_module}/sequence_dependencies/",
+@router.get("/modules/{id_module}/sequence_dependencies",
             tags=["module"],
             summary="Get sequence dependencies",
             description="Get all modules sequence dependencies")
@@ -480,7 +480,7 @@ def get_module_sequence_dependencies(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/modules/gantt/{id_responsable}/",
+@router.get("/modules/gantt/{id_responsable}",
             tags=["module"],
             summary="Get sequence dependencies for Gantt",
             description="Get all modules sequence dependencies formatted for a Gantt chart")
@@ -532,7 +532,7 @@ def get_data_gantt_endpoint(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/modules/gantt/etudiant/{id_etudiant}/",
+@router.get("/modules/gantt/etudiant/{id_etudiant}",
             tags=["module"],
             summary="Get sequence dependencies for Gantt",
             description="Get all modules sequence dependencies formatted for a Gantt chart for an etudiant")
@@ -604,7 +604,7 @@ def get_data_gantt_endpoint_etudiant(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/disciplines/",
+@router.get("/disciplines",
             tags=["module"],
             summary="Get disciplines",
             description="Get disciplines")
@@ -659,7 +659,7 @@ def update_module(
             request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
-@router.patch("/modules/{id_module}/sequencages/{id_sequencage}/",
+@router.patch("/modules/{id_module}/sequencages/{id_sequencage}",
             tags=["module"],
             summary="Update sequencage",
             description="Update sequencage according to parameters")
@@ -688,7 +688,7 @@ def update_sequencage(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.patch("/modules/{id_module}/sequences/{id_sequence}/",
+@router.patch("/modules/{id_module}/sequences/{id_sequence}",
             tags=["module"],
             summary="Update sequencage",
             description="Update sequencage according to parameters")
@@ -716,7 +716,7 @@ def update_sequence(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.patch("/modules/{id_module}/sessions/{id_session}/",
+@router.patch("/modules/{id_module}/sessions/{id_session}",
             tags=["module"],
             summary="Update sequencage",
             description="Update sequencage according to parameters")
@@ -817,7 +817,7 @@ def add_sequencage(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.post("/modules/create/",
+@router.post("/modules/create",
              tags=["module"],
              summary="Create a new module",
              description="Create a module without sequencing")
@@ -877,7 +877,7 @@ def create_module(
 
     return db_request(current_user, SQLRequest(**request))
 
-@router.post("/modules/{id_module}/dependencies/",
+@router.post("/modules/{id_module}/dependencies",
             tags=["module"],
             summary="Update module",
             description="Update module according to parameters")

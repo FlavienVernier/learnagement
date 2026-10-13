@@ -385,7 +385,9 @@ def save_assignments(assignments: List[dict], final_places: dict, current_user: 
 
 
 
-@router.get("/university/admin/assignment/status", tags=["admin", "mobility"], summary="Get assignment progress")
+@router.get("/university/admin/assignment/status",
+            tags=["admin", "mobility"],
+            summary="Get assignment progress")
 def get_assignment_status():
     return assignment_progress
 

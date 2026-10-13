@@ -197,7 +197,7 @@ requests = {
 ##################
 # Enseignant
 ##################
-@router.get("/enseignant_sans_cours/",
+@router.get("/enseignant_sans_cours",
              tags=["check"],
             summary="Teacher without session",
             description="Check teacher without session.")
@@ -210,7 +210,7 @@ def checkLNM_enseignant_sans_cours(
 #########################
 # Module
 #########################
-@router.get("/module_sans_unite_d_enseignement/",
+@router.get("/module_sans_unite_d_enseignement",
              tags=["check"],
             summary="Module without learning unit",
             description="Check module not link to a learning unit.")
@@ -220,7 +220,7 @@ def  checkMAQUETTE_moduleWithoutLearningUnit(
     request =  requests["get_" + inspect.currentframe().f_code.co_name]
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/module_sans_apprentissage_critique/",
+@router.get("/module_sans_apprentissage_critique",
              tags=["check"],
             summary="Module without apprentissage critique",
             description="Check module without apprentissage critique.")
@@ -230,7 +230,7 @@ def module_sans_apprentissage_critique(
     request =  requests["get_" + inspect.currentframe().f_code.co_name]
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/module_detail_ects/",
+@router.get("/module_detail_ects",
              tags=["check"],
             summary="ECTs weight",
             description="Check ratio hours ECTs.")
@@ -244,7 +244,7 @@ def  module_detail_ects(
 # Class
 ########################
 
-@router.get("/session_sans_intervenant/",
+@router.get("/session_sans_intervenant",
              tags=["check"],
             summary="Session without teacher",
             description="Check session without teacher.")
@@ -255,7 +255,7 @@ def  session_sans_intervenant(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/session_reference_corruption/",
+@router.get("/session_reference_corruption",
              tags=["check"],
             summary="Session foreign K coruption",
             description="Check session not linked to module.")
@@ -266,7 +266,7 @@ def session_reference_corruption(
     return db_request(current_user, SQLRequest(**request))
 
 # ToDo to finished
-@router.get("/maquette_vs_sequencage/",
+@router.get("/maquette_vs_sequencage",
             tags=["check"],
             summary="Session hours Vs Program",
             description="Check whether the number of sequencage hours corresponds to the program.")
@@ -277,7 +277,7 @@ def maquette_vs_sequencage(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/maquette_vs_sequencage/{id_responsable}/",
+@router.get("/maquette_vs_sequencage/{id_responsable}",
             tags=["check"],
             summary="Session hours Vs Program",
             description="Check whether the number of sequencage hours corresponds to the program.")

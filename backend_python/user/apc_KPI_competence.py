@@ -51,7 +51,7 @@ def get_metier_ac(
 
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/metier/",
+@router.get("/metier",
             tags=["apc"],
             summary="Students",
             description="Return the list of situation_professionnelle ",)
@@ -67,7 +67,7 @@ def get_metier(
     }
     return db_request(current_user, SQLRequest(**request))
 
-@router.get("/acp_kpi/",
+@router.get("/acp_kpi",
             tags=["apc"],
             summary="nb competence",
             description="nombre de competence:")

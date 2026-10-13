@@ -62,7 +62,7 @@ requests["struct"]["link_table"] = f"""
     WHERE `TABLE_SCHEMA` =  '""" + os.getenv("MYSQL_DB") + """'
         AND `CONSTRAINT_NAME` = 'PRIMARY'
     GROUP BY `TABLE_NAME`
-    HAVING count(0) = 2;"""
+    HAVING count(0) >= 2;"""
 
 ''' 
 Return linked table that are not transition tables
@@ -78,7 +78,7 @@ requests["struct"]["linked_table"] = f"""
             WHERE `TABLE_SCHEMA` =  '""" + os.getenv("MYSQL_DB") + """'
                 AND `CONSTRAINT_NAME` = 'PRIMARY'
             GROUP BY `TABLE_NAME`
-            HAVING count(0) = 2);"""
+            HAVING count(0) >= 2);"""
 
 ''' 
 Return leaf table: witout foreign keys

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/apc/competences/",
+@router.get("/apc/competences",
             tags=["apc"],
             summary="APC Compétences",
             description="Retourne la liste des compétences APC")
@@ -29,7 +29,7 @@ def get_competences(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/apc/niveaux/",
+@router.get("/apc/niveaux",
             tags=["apc"],
             summary="APC Niveaux",
             description="Retourne la liste des niveaux de compétences")
@@ -46,7 +46,7 @@ def get_niveaux(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/apc/apprentissages/",
+@router.get("/apc/apprentissages",
             tags=["apc"],
             summary="APC Apprentissages critiques",
             description="Retourne la liste des apprentissages critiques")
@@ -63,7 +63,7 @@ def get_apprentissages(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/apc/ac_modules/",
+@router.get("/apc/ac_modules",
             tags=["apc"],
             summary="APC AC-Modules",
             description="Retourne les associations apprentissages critiques / modules")
@@ -80,7 +80,7 @@ def get_ac_modules(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/apc/modules/",
+@router.get("/apc/modules",
             tags=["apc"],
             summary="APC Modules",
             description="Retourne la liste des modules de la maquette")
@@ -98,7 +98,7 @@ def get_apc_modules(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/apc/composantes/",
+@router.get("/apc/composantes",
             tags=["apc"],
             summary="APC Composantes essentielles",
             description="Retourne la liste des composantes essentielles")
@@ -115,7 +115,7 @@ def get_composantes(
     return db_request(current_user, SQLRequest(**request))
 
 
-@router.get("/apc/situations/",
+@router.get("/apc/situations",
             tags=["apc"],
             summary="APC Situations professionnelles",
             description="Retourne la liste des situations professionnelles / métiers")

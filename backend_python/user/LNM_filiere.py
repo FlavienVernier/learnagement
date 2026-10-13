@@ -17,7 +17,7 @@ router = APIRouter()
 # ── Génération automatique des routes simples ──
 register_auto_routes(router, __requests)
 
-# @router.get("/filieres/",
+# @router.get("/filieres",
 #             tags=["filiere"],
 #             summary="Filiere",
 #             description="Return the list of filieres")
