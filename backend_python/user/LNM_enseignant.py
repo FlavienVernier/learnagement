@@ -117,10 +117,13 @@ def enseignants_load(
         "params": {
             "id_enseignant": id_enseignant,
         },
-        "allowedRolesRequester": ["administratif"],
+        "allowedRolesRequester": {
+            "roles": ["administratif"],
+            "owner": {"role": "enseignant", "id": "id_enseignant"},
+        },
     }
-    if(current_user.id == id_enseignant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_enseignant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/enseignants/{id_enseignant:int}/stages",
@@ -155,8 +158,11 @@ def get_etudiants_stages(
         "params": {
             "id_enseignant": id_enseignant,
         },
-        "allowedRolesRequester": ["responsable_etudes", "responsable_stages"],
+        "allowedRolesRequester": {
+            "roles":["responsable_etudes", "responsable_stages"],
+            "owner": {"role": "enseignant", "id": "id_enseignant"},
+        },
     }
-    if(current_user.id == id_enseignant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_enseignant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))

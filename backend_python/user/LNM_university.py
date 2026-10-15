@@ -144,10 +144,13 @@ def list_universities_etudiant(
         "params": {
             "id_etudiant": id_etudiant
         },
-        "allowedRolesRequester" : [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 
@@ -163,15 +166,18 @@ def get_campaign_status(
         "request" : """
                     SELECT mobility_z_score 
                     FROM LNM_etudiant 
-                    WHERE id_etudiant = %(id)s""",
+                    WHERE id_etudiant = %(id_etudiant)s""",
         "params" : {
-            "id": id_etudiant
+            "id_etudiant": id_etudiant
         },
-        "allowedRolesRequester" : []
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
 
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
     result = db_request(current_user, SQLRequest(**request))
 
@@ -202,10 +208,13 @@ def list_university_wishes_etudiant(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
     return db_request(current_user, SQLRequest(**request))
 
@@ -231,12 +240,17 @@ def add_university_to_wishes(
         "request" : """
                     SELECT mobility_z_score 
                     FROM LNM_etudiant 
-                    WHERE id_etudiant = %(id)s""",
-        "params" : {"id": id_etudiant},
-        "allowedRolesRequester" : []
+                    WHERE id_etudiant = %(id_etudiant)s""",
+        "params" : {
+            "id_etudiant": id_etudiant
+        },
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
     student_data = db_request(current_user, SQLRequest(**request))
 
@@ -258,10 +272,13 @@ def add_university_to_wishes(
             "id_partner_university": id_partner_university,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
     check_rows = db_request(current_user, SQLRequest(**request))
     wishes_count = int((check_rows[0].get("wishes_count") or 0)) if check_rows else 0
@@ -291,10 +308,13 @@ def add_university_to_wishes(
             "priority": next_priority,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
     return db_request(current_user, SQLRequest(**request))
 
@@ -325,10 +345,13 @@ def delete_university_from_wishes(
             "id_partner_university": id_partner_university,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
     check_rows = db_request(current_user, SQLRequest(**request))
     if not check_rows:
@@ -351,10 +374,13 @@ def delete_university_from_wishes(
             "id_partner_university": id_partner_university,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
     db_request(current_user, SQLRequest(**request))
 
@@ -369,11 +395,14 @@ def delete_university_from_wishes(
             "id_etudiant": id_etudiant,
             "removed_priority": removed_priority,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
 
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     db_request(current_user, SQLRequest(**request))
 
     return {"message": "Voeu supprime."}
@@ -409,10 +438,13 @@ def move_university_wish(
             "id_partner_university": id_partner_university,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     current_rows = db_request(current_user, SQLRequest(**request))
     if not current_rows:
         raise HTTPException(status_code=404, detail="Voeu introuvable.")
@@ -434,10 +466,13 @@ def move_university_wish(
             "id_etudiant": id_etudiant,
             "target_priority": target_priority,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
     target_rows = db_request(current_user, SQLRequest(**request))
     if not target_rows:
@@ -460,10 +495,13 @@ def move_university_wish(
             "current_id_partner_university": id_partner_university,
             "id_semestre": id_semestre,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     db_request(current_user, SQLRequest(**request))
 
     # Step 2: move target wish into current position.
@@ -481,10 +519,13 @@ def move_university_wish(
             "target_id_semestre": target_id_semestre,
             "current_priority": current_priority,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     db_request(current_user, SQLRequest(**request))
 
     # Step 3: move current wish from temporary value to target position.
@@ -503,10 +544,13 @@ def move_university_wish(
             "id_semestre": id_semestre,
             "target_priority": target_priority,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     db_request(current_user, SQLRequest(**request))
 
     return {"message": "Voeu deplace.", "direction": direction}
@@ -534,10 +578,13 @@ def submit_university_wishes(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     check_rows = db_request(current_user, SQLRequest(**request))
     wishes_count = int((check_rows[0].get("wishes_count") or 0)) if check_rows else 0
     is_submitted = int((check_rows[0].get("is_submitted") or 0)) if check_rows else 0
@@ -558,10 +605,13 @@ def submit_university_wishes(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     db_request(current_user, SQLRequest(**request))
 
     return {"message": "Voeux soumis avec succes."}
@@ -1585,15 +1635,18 @@ def get_student_assignment(
             SELECT a.id_assignment, a.status, u.id_partner_university, u.name, u.code, u.country, u.address
             FROM MOB_assignment a
             JOIN MOB_partner_university u ON a.id_partner_university = u.id_partner_university
-            WHERE a.id_etudiant = %(id)s
+            WHERE a.id_etudiant = %(id_etudiant)s
         """,
         "params":{
-            "id": id_etudiant
+            "id_etudiant": id_etudiant
         },
-        "allowedRolesRequester":[],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
     result = db_request(current_user, SQLRequest(**request))
 
@@ -1621,14 +1674,17 @@ def submit_student_decision(
         "request" : """
                     SELECT id_assignment, status 
                     FROM MOB_assignment 
-                    WHERE id_etudiant = %(id)s""",
+                    WHERE id_etudiant = %(id_etudiant)s""",
         "params" : {
-            "id": id_etudiant
+            "id_etudiant": id_etudiant
         },
-        "allowedRolesRequester" : [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
     assignment = db_request(current_user, SQLRequest(**request))
 
@@ -1643,16 +1699,19 @@ def submit_student_decision(
         "request" : """
                     UPDATE MOB_assignment 
                     SET status = %(status)s 
-                    WHERE id_etudiant = %(id)s""",
+                    WHERE id_etudiant = %(id_etudiant)s""",
         "params" : {
             "status": payload.decision,
-            "id": id_etudiant
+            "id_etudiant": id_etudiant
         },
-        "allowedRolesRequester" : [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
 
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
     db_request(current_user, SQLRequest(**request))
 

@@ -70,7 +70,9 @@ def get_etudiants_absences(
                                 JOIN ExplicitSecondaryKs_LNM_etudiant ON ExplicitSecondaryKs_LNM_etudiant.id_etudiant = LNM_etudiant.id_etudiant
                                 JOIN ExplicitSecondaryKs_LNM_promo ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_promo.id_promo
                     """,
-        "allowedRolesRequester": ["responsable_etudes"],
+        "allowedRolesRequester": {
+            "roles": ["responsable_etudes"],
+        }
     }
 
     # if id_responsable filter is set
@@ -79,7 +81,7 @@ def get_etudiants_absences(
         request["params"] = {
             "id_responsable": id_responsable,
         }
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        request["allowedRolesRequester"]["owner"] = {"role": "enseignant", "id": "id_responsable"},
 
     # if id_enseignant filter is set
     elif id_enseignant == current_user.id:
@@ -87,7 +89,7 @@ def get_etudiants_absences(
         request["params"] = {
             "id_enseignant": id_enseignant,
         }
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        request["allowedRolesRequester"]["owner"] = {"role": "enseignant", "id": "id_enseignant"},
 
     return db_request(current_user, SQLRequest(**request))
 
@@ -221,10 +223,13 @@ def get_etudiant_absences(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["responsable_etudes"],
+        "allowedRolesRequester": {
+            "roles": ["responsable_etudes"],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if current_user.id == id_etudiant:
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if current_user.id == id_etudiant:
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/etudiants/{id_etudiant:int}/load",
@@ -254,10 +259,13 @@ def get_etudiant_load(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["administratif", "enseignant"],
+        "allowedRolesRequester": {
+            "roles": ["administratif", "enseignant"],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if current_user.id == id_etudiant:
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if current_user.id == id_etudiant:
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 
@@ -291,10 +299,13 @@ def get_etudiant_edt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["administratif",],
+        "allowedRolesRequester": {
+            "roles": ["administratif",],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if current_user.id == id_etudiant:
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if current_user.id == id_etudiant:
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 
@@ -328,10 +339,13 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if current_user.id == id_etudiant:
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if current_user.id == id_etudiant:
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/etudiants/{id_etudiant}/polypoints",
@@ -352,10 +366,13 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if current_user.id == id_etudiant:
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if current_user.id == id_etudiant:
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/etudiants/{id_etudiant}/rendus",
@@ -385,10 +402,13 @@ def get_etudiant_pastedt(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if current_user.id == id_etudiant:
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if current_user.id == id_etudiant:
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/etudiants/{id_etudiant:int}/stages",
@@ -423,10 +443,13 @@ def get_etudiants_stages(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["responsable_etudes", "responsable_stages"],
+        "allowedRolesRequester": {
+            "roles": ["responsable_etudes", "responsable_stages"],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        },
     }
-    if(current_user.id == id_etudiant):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if(current_user.id == id_etudiant):
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 ######################################################

@@ -653,10 +653,12 @@ def update_module(
                 "id_responsable": data['id_responsable'],
                 "id_module": id_module,
             },
-            "allowedRolesRequester" : ["responsable_etudes"],
+            "allowedRolesRequester" : {
+                "roles": ["responsable_etudes"]
+            },
         }
         if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
-            request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+            request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.patch("/modules/{id_module}/sequencages/{id_sequencage}",
@@ -681,10 +683,12 @@ def update_sequencage(
                 "id_intervenant_principal": data['id_intervenant_principal'],
                 "id_sequencage": id_sequencage,
             },
-            "allowedRolesRequester" : [],
+            "allowedRolesRequester" : {
+                "roles": []
+            },
         }
         if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
-            request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+            request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 
@@ -709,10 +713,12 @@ def update_sequence(
                 "id_intervenant_principal": data['id_intervenant_principal'],
                 "id_sequence": id_sequence,
             },
-            "allowedRolesRequester": [],
+            "allowedRolesRequester" : {
+                "roles": []
+            },
         }
         if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
-            request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+            request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 
@@ -737,10 +743,12 @@ def update_session(
                 "id_enseignant": data['id_enseignant'],
                 "id_session": id_session,
             },
-            "allowedRolesRequester": [],
+            "allowedRolesRequester" : {
+                "roles": []
+            },
         }
         if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
-            request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+            request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 
@@ -808,12 +816,14 @@ def add_sequencage(
                 "id_seance_type": data['id_seance_type'],
                 "id_groupe_type": data['id_groupe_type'],
                 "duree_h": data['duree_h'],
-            }
+            },
+            "allowedRolesRequester": {
+                "roles": ["responsable_etudes"],
+            },
         }
-    request["allowedRolesRequester"] = ["responsable_etudes"]
     #print(type(__get_module_responsible_id(id_module, current_user)), flush=True)
     if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 
@@ -900,10 +910,12 @@ def add_dependencies(
             "id_sequence_prev": data['id_sequence_prev'],
             "id_sequence_next": data['id_sequence_next'],
         },
+        "allowedRolesRequester": {
+            "roles": ["responsable_etudes"],
+        },
     }
-    request["allowedRolesRequester"] = ["responsable_etudes"]
     if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 #####################################
@@ -931,10 +943,12 @@ def delete_sequencage(
         "params": {
             "id_sequencage": id_sequencage,
         },
-        "allowedRolesRequester" : [],
+        "allowedRolesRequester": {
+            "roles": [],
+        },
     }
     if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.delete("/modules/{id_module}/dependencies/{id_sequence_prev}/{id_sequence_next}",
@@ -959,8 +973,10 @@ def delete_dependencies(
             "id_sequence_prev": id_sequence_prev,
             "id_sequence_next": id_sequence_next,
         },
-        "allowedRolesRequester" : [],
+        "allowedRolesRequester": {
+            "roles": [],
+        },
     }
     if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))

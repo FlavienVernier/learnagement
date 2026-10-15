@@ -118,10 +118,13 @@ def get_apc_etudiant_evaluation(
             "params": {
                 "id_etudiant": id_etudiant,
             },
-            "allowedRolesRequester" : [],
+            "allowedRolesRequester": {
+                "roles": [],
+                "owner": {"role": "etudiant", "id": "id_etudiant"},
+            },
         }
-    if current_user.id == id_etudiant:
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if current_user.id == id_etudiant:
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/evaluations/classical/etudiants/{id_etudiant}",
@@ -146,10 +149,13 @@ def get_classical_etudiant_evaluation(
             "params": {
                 "id_etudiant": id_etudiant,
             },
-            "allowedRolesRequester" : [],
+            "allowedRolesRequester": {
+                "roles": [],
+                "owner": {"role": "etudiant", "id": "id_etudiant"},
+            },
         }
-    if current_user.id == id_etudiant:
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if current_user.id == id_etudiant:
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 
@@ -173,10 +179,12 @@ def get_classical_module_evaluation(
         "params": {
             "id_module": id_module,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": [],
+        },
     }
     if MAQUETTE_module.__participate(id_module, current_user.id, current_user):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/evaluations/classical/modules/{id_module}/average",
@@ -198,10 +206,12 @@ def get_classical_module_evaluation_average(
         "params": {
             "id_module": id_module,
         },
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles": []
+        },
     }
     if MAQUETTE_module.__participate(id_module, current_user.id, current_user):
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 
@@ -232,8 +242,11 @@ def tree_competence(
             "params": {
                 "id_enseignant": id_enseignant,
             },
-            "allowedRolesRequester" : [],
+            "allowedRolesRequester": {
+                "roles": [],
+                "owner": {"role": "enseignant", "id": "id_enseignant"},
+            },
         }
-    if current_user.id == id_enseignant:
-        request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+    #if current_user.id == id_enseignant:
+    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
