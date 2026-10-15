@@ -2,9 +2,20 @@ import json
 
 import pytest
 from system.tools import get_all_requests
+import sqlglot
+from system.tools import get_all_requests
 
 
 class TestRequestStructures:
+    def test_requests_portable_to_postgres(self):
+        errors = []
+        for module, reqs in get_all_requests("repositories").items():
+            for name, r in reqs.items():
+                try:
+                    sqlglot.transpile(r["request"], read="mysql", write="postgres")
+                except Exception as e:
+                    errors.append(f"{module}.{name}: {e}")
+        assert not errors, "\n".join(errors)
 
     def test_user_request_structures(self):
         all_requests = get_all_requests(package_name="repositories")
