@@ -7,6 +7,7 @@ from api.dependencies import db_request, get_current_active_user
 from models.request import SQLRequest
 from models.user import User
 
+from access_control.predicates import is_current_user_module_participant
 from user import MAQUETTE_module
 
 logger = logging.getLogger(__name__)
@@ -181,10 +182,11 @@ def get_classical_module_evaluation(
         },
         "allowedRolesRequester": {
             "roles": [],
+            "predicate": is_current_user_module_participant,
         },
     }
-    if MAQUETTE_module.__participate(id_module, current_user.id, current_user):
-        request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
+    #if MAQUETTE_module.__participate(id_module, current_user.id, current_user):
+    #    request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.get("/evaluations/classical/modules/{id_module}/average",
@@ -207,11 +209,12 @@ def get_classical_module_evaluation_average(
             "id_module": id_module,
         },
         "allowedRolesRequester": {
-            "roles": []
+            "roles": [],
+            "predicate": is_current_user_module_participant,
         },
     }
-    if MAQUETTE_module.__participate(id_module, current_user.id, current_user):
-        request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
+    #if MAQUETTE_module.__participate(id_module, current_user.id, current_user):
+    #    request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 

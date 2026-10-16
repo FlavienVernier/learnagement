@@ -70,6 +70,7 @@ def _evaluate_dict(rule: dict, user, params: dict) -> bool:
       "all"       → list[dict] : toutes les responsabilités
       "hierarchy" → list[dict] : préfixe valide de la hiérarchie
       "owner"     → dict{role, id} : les données appartiennent à l'utilisateur
+      "predicate" → fct(user, params) -> bool
     """
     if user is None:
         return False
@@ -90,6 +91,8 @@ def _evaluate_dict(rule: dict, user, params: dict) -> bool:
                                ),
         "owner": lambda v: user.main_role == v["role"]
                            and user.id == (params or {}).get(v["id"]),
+
+        "predicate": lambda fn: bool(fn(user, params)),
     }
 
     for key, value in rule.items():
