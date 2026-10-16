@@ -49,7 +49,10 @@ def _evaluate_role_list(roles: list[str], user) -> bool:
     L'utilisateur doit avoir AU MOINS UN des rôles listés.
     """
     if not roles:
-        raise ValueError("La liste de rôles ne peut pas être vide")
+        #raise ValueError("La liste de rôles ne peut pas être vide")
+        # Si la liste des rôles est vide, ceci ne signifie pas qu'il ne faut pas de rôle (cf. anonymous)
+        # L'utilisateur ne peut avoir de rôles explicitement définis, la liste étant vide, False est donc retourné
+        return False
 
     if user is None:
         return False

@@ -5,10 +5,13 @@ import mysql.connector
 from fastapi import HTTPException, status, Header
 from typing import Annotated, Optional
 from pydantic import BaseModel
+from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 
 from models.token import Token
+from models.user import UserInDB
 from api.dependencies import logger, get_user
-from db.connection import db_connexion
+from db.connection import get_connection
 from auth.authenticate_tools import create_access_token
 
 
@@ -104,76 +107,177 @@ def _determine_role_from_cas_groups(members: list[str]) -> str | None:
     return main_role  # aucun groupe autorisé
 
 
-def _create_cas_user(data: CasUserProvision, main_role: str) -> dict | None:
-    try:
-        connection = mysql.connector.connect(**db_connexion())
-        cursor = connection.cursor(dictionary=True)
+# def _create_cas_user(data: CasUserProvision, main_role: str) -> dict | None:
+#     try:
+#         connection = mysql.connector.connect(**db_connexion())
+#         cursor = connection.cursor(dictionary=True)
+#
+#         if main_role == "enseignant":
+#             cursor.execute(
+#                 """
+#                 INSERT INTO LNM_enseignant
+#                     (prenom, nom, mail, login, intern_account, password)
+#                 VALUES (%s, %s, %s, %s, 0, NULL)
+#                 """,
+#                 (data.prenom, data.nom, data.email, data.login)
+#             )
+#
+#         elif main_role == "administratif":
+#             cursor.execute(
+#                 """
+#                 INSERT INTO LNM_administratif
+#                     (nom, prenom, mail, login, intern_account, password)
+#                 VALUES (%s, %s, %s, %s, 0, NULL)
+#                 """,
+#                 (data.nom, data.prenom, data.email, data.login)
+#             )
+#
+#         elif main_role == "etudiant":
+#             id_promo = _determine_promo_from_cas_groups(data.members)
+#             if id_promo is None:
+#                 logger.error(f"Aucune promo trouvée pour '{data.login}' : {data.members}")
+#                 return None
+#             cursor.execute(
+#                 """
+#                 INSERT INTO LNM_etudiant
+#                     (nom, prenom, mail, login, intern_account, password, id_promo)
+#                 VALUES (%s, %s, %s, %s, 0, NULL, %s)
+#                 """,
+#                 (data.nom, data.prenom, data.email, data.login, id_promo)
+#             )
+#
+#         else:
+#             logger.error(f"Rôle inconnu '{main_role}' pour '{data.login}'")
+#             return None
+#
+#         connection.commit()
+#         return get_user(data.login)
+#
+#     except Exception as e:
+#         logger.error(f"DB error during CAS provisioning: {e}")
+#         return None
+#     finally:
+#         if cursor: cursor.close()
+#         if connection: connection.close()
+def _create_cas_user(data: CasUserProvision, main_role: str) -> UserInDB | None:
+    params = {
+        "prenom": data.prenom,
+        "nom": data.nom,
+        "mail": data.email,
+        "login": data.login,
+    }
 
-        if main_role == "enseignant":
-            cursor.execute(
-                """
-                INSERT INTO LNM_enseignant 
-                    (prenom, nom, mail, login, intern_account, password)
-                VALUES (%s, %s, %s, %s, 0, NULL)
-                """,
-                (data.prenom, data.nom, data.email, data.login)
-            )
-
-        elif main_role == "administratif":
-            cursor.execute(
-                """
-                INSERT INTO LNM_administratif 
-                    (nom, prenom, mail, login, intern_account, password)
-                VALUES (%s, %s, %s, %s, 0, NULL)
-                """,
-                (data.nom, data.prenom, data.email, data.login)
-            )
-
-        elif main_role == "etudiant":
-            id_promo = _determine_promo_from_cas_groups(data.members)
-            if id_promo is None:
-                logger.error(f"Aucune promo trouvée pour '{data.login}' : {data.members}")
-                return None
-            cursor.execute(
-                """
-                INSERT INTO LNM_etudiant 
-                    (nom, prenom, mail, login, intern_account, password, id_promo)
-                VALUES (%s, %s, %s, %s, 0, NULL, %s)
-                """,
-                (data.nom, data.prenom, data.email, data.login, id_promo)
-            )
-
-        else:
-            logger.error(f"Rôle inconnu '{main_role}' pour '{data.login}'")
+    if main_role == "enseignant":
+        sql = """
+            INSERT INTO LNM_enseignant
+                (prenom, nom, mail, login, intern_account, password)
+            VALUES (:prenom, :nom, :mail, :login, 0, NULL)
+        """
+    elif main_role == "administratif":
+        sql = """
+            INSERT INTO LNM_administratif
+                (nom, prenom, mail, login, intern_account, password)
+            VALUES (:nom, :prenom, :mail, :login, 0, NULL)
+        """
+    elif main_role == "etudiant":
+        id_promo = _determine_promo_from_cas_groups(data.members)
+        if id_promo is None:
+            logger.error(f"Aucune promo trouvée pour '{data.login}' : {data.members}")
             return None
+        params["id_promo"] = id_promo
+        sql = """
+            INSERT INTO LNM_etudiant
+                (nom, prenom, mail, login, intern_account, password, id_promo)
+            VALUES (:nom, :prenom, :mail, :login, 0, NULL, :id_promo)
+        """
+    else:
+        logger.error(f"Rôle inconnu '{main_role}' pour '{data.login}'")
+        return None
 
-        connection.commit()
-        return get_user(data.login)
-
+    try:
+        with get_connection() as conn:  # commit automatique à la sortie du with
+            conn.execute(text(sql), params)
+    except IntegrityError:
+        # Deux premiers logins simultanés : l'autre requête a déjà créé l'utilisateur
+        logger.warning(f"Utilisateur '{data.login}' déjà provisionné (accès concurrent)")
     except Exception as e:
         logger.error(f"DB error during CAS provisioning: {e}")
         return None
-    finally:
-        if cursor: cursor.close()
-        if connection: connection.close()
 
+    # En dehors du `with` : get_user emprunte sa propre connexion,
+    # on évite donc tout emprunt imbriqué dans le pool.
+    return get_user(data.login)
 
+# def _determine_promo_from_cas_groups(members: list[str]) -> int | None:
+#     """
+#     Détermine l'id_promo d'un étudiant depuis ses groupes CAS
+#     en croisant avec CAS_ETUDIANTS_2_PROMO du .env.
+#
+#     CAS_ETUDIANTS_2_PROMO est un JSON :
+#     [{"groupe": "idu4-fise", "promo": "IDU FISE 4 Annecy"}, ...]
+#     """
+#     # Extrait les CNs des groupes de l'étudiant
+#     member_cns = set()
+#     for dn in members:
+#         parts = dn.split(",")
+#         if parts and parts[0].startswith("cn="):
+#             member_cns.add(parts[0][3:])
+#
+#     # Charge le mapping groupe → nom de promo depuis .env
+#     raw = os.getenv("CAS_ETUDIANTS_2_PROMO", "[]")
+#     try:
+#         mapping = json.loads(raw)
+#     except json.JSONDecodeError as e:
+#         logger.error(f"CAS_ETUDIANTS_2_PROMO mal formé dans .env {e}")
+#         return None
+#
+#     # Cherche la première correspondance
+#     promo_name = None
+#     for entry in mapping:
+#         if entry["groupe"] in member_cns:
+#             promo_name = entry["promo"]
+#             break
+#
+#     if promo_name is None:
+#         logger.warning(f"Aucun groupe étudiant connu parmi : {member_cns}")
+#         return None
+#
+#     # Résout le nom de promo → id_promo en BD
+#     try:
+#         connection = mysql.connector.connect(**db_connexion())
+#         cursor = connection.cursor(dictionary=True)
+#         cursor.execute(
+#             """
+#             SELECT LNM_promo.id_promo
+#             FROM LNM_promo
+#             JOIN ExplicitSecondaryKs_LNM_promo
+#                 ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_promo.id_promo
+#             WHERE ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK = %s
+#             """,
+#             (promo_name,)
+#         )
+#         row = cursor.fetchone()
+#         return row["id_promo"] if row else None
+#     except Exception as e:
+#         logger.error(f"DB error lors de la résolution de promo '{promo_name}': {e}")
+#         return None
+#     finally:
+#         if cursor: cursor.close()
+#         if connection: connection.close()
 def _determine_promo_from_cas_groups(members: list[str]) -> int | None:
     """
     Détermine l'id_promo d'un étudiant depuis ses groupes CAS
     en croisant avec CAS_ETUDIANTS_2_PROMO du .env.
 
     CAS_ETUDIANTS_2_PROMO est un JSON :
-    [{"groupe": "etudiants-ige4-idu", "promo": "IDU FISE 4 Annecy"}, ...]
+    [{"groupe": "idu4-fise", "promo": "IDU FISE 4 Annecy"}, ...]
     """
-    # Extrait les CNs des groupes de l'étudiant
     member_cns = set()
     for dn in members:
         parts = dn.split(",")
         if parts and parts[0].startswith("cn="):
             member_cns.add(parts[0][3:])
 
-    # Charge le mapping groupe → nom de promo depuis .env
     raw = os.getenv("CAS_ETUDIANTS_2_PROMO", "[]")
     try:
         mapping = json.loads(raw)
@@ -181,40 +285,26 @@ def _determine_promo_from_cas_groups(members: list[str]) -> int | None:
         logger.error(f"CAS_ETUDIANTS_2_PROMO mal formé dans .env {e}")
         return None
 
-    # Cherche la première correspondance
-    promo_name = None
-    for entry in mapping:
-        if entry["groupe"] in member_cns:
-            promo_name = entry["promo"]
-            break
-
+    promo_name = next(
+        (entry["promo"] for entry in mapping if entry["groupe"] in member_cns),
+        None,
+    )
     if promo_name is None:
         logger.warning(f"Aucun groupe étudiant connu parmi : {member_cns}")
         return None
 
-    # Résout le nom de promo → id_promo en BD
     try:
-        connection = mysql.connector.connect(**db_connexion())
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute(
-            """
-            SELECT LNM_promo.id_promo
-            FROM LNM_promo
-            JOIN ExplicitSecondaryKs_LNM_promo 
-                ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_promo.id_promo
-            WHERE ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK = %s
-            """,
-            (promo_name,)
-        )
-        row = cursor.fetchone()
-        return row["id_promo"] if row else None
+        with get_connection() as conn:
+            return conn.execute(text("""
+                SELECT LNM_promo.id_promo
+                FROM LNM_promo
+                JOIN ExplicitSecondaryKs_LNM_promo
+                  ON ExplicitSecondaryKs_LNM_promo.id_promo = LNM_promo.id_promo
+                WHERE ExplicitSecondaryKs_LNM_promo.ExplicitSecondaryK = :promo_name
+            """), {"promo_name": promo_name}).scalar()  # 1re colonne de la 1re ligne, ou None
     except Exception as e:
         logger.error(f"DB error lors de la résolution de promo '{promo_name}': {e}")
         return None
-    finally:
-        if cursor: cursor.close()
-        if connection: connection.close()
-
 
 
 # def _create_cas_user(data: CasUserProvision, main_role) -> dict | None:

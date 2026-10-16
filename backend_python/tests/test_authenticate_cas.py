@@ -103,6 +103,16 @@ class TestDetermineRole:
 # _determine_promo_from_cas_groups
 # ─────────────────────────────────────────────
 
+def patch_get_connection(scalar_value):
+    """Simule `with get_connection() as conn: conn.execute(...).scalar()`."""
+    conn = MagicMock()
+    conn.execute.return_value.scalar.return_value = scalar_value
+
+    cm = MagicMock()
+    cm.__enter__.return_value = conn
+    cm.__exit__.return_value = False  # important : ne pas avaler les exceptions
+    return patch("auth.authenticate_cas.get_connection", return_value=cm)
+
 class TestDeterminePromo:
 
     @pytest.fixture(autouse=True)
@@ -113,30 +123,43 @@ class TestDeterminePromo:
             ' {"groupe":"SEA3-fise","promo":"SEA FISE 3 Annecy"}]'
         )
 
+    # def test_promo_trouvee(self):
+    #     members = ["cn=idu4-fise,ou=polytech,dc=usmb,dc=fr"]
+    #     with patch("auth.authenticate_cas.mysql.connector.connect") as mock_conn:
+    #         mock_cursor = MagicMock()
+    #         mock_cursor.fetchone.return_value = {"id_promo": 42}
+    #         mock_conn.return_value.cursor.return_value = mock_cursor
+    #
+    #         result = _determine_promo_from_cas_groups(members)
+    #         assert result == 42
     def test_promo_trouvee(self):
         members = ["cn=idu4-fise,ou=polytech,dc=usmb,dc=fr"]
-        with patch("auth.authenticate_cas.mysql.connector.connect") as mock_conn:
-            mock_cursor = MagicMock()
-            mock_cursor.fetchone.return_value = {"id_promo": 42}
-            mock_conn.return_value.cursor.return_value = mock_cursor
-
-            result = _determine_promo_from_cas_groups(members)
-            assert result == 42
+        with patch_get_connection(42):
+            assert _determine_promo_from_cas_groups(members) == 42
 
     def test_groupe_inconnu(self):
         members = ["cn=groupe-inconnu,ou=polytech,dc=usmb,dc=fr"]
         result = _determine_promo_from_cas_groups(members)
         assert result is None
 
+    # def test_promo_non_trouvee_en_bd(self):
+    #     members = ["cn=idu4-fise,ou=polytech,dc=usmb,dc=fr"]
+    #     with patch("auth.authenticate_cas.mysql.connector.connect") as mock_conn:
+    #         mock_cursor = MagicMock()
+    #         mock_cursor.fetchone.return_value = None  # promo absente de la BD
+    #         mock_conn.return_value.cursor.return_value = mock_cursor
+    #
+    #         result = _determine_promo_from_cas_groups(members)
+    #         assert result is None
     def test_promo_non_trouvee_en_bd(self):
         members = ["cn=idu4-fise,ou=polytech,dc=usmb,dc=fr"]
-        with patch("auth.authenticate_cas.mysql.connector.connect") as mock_conn:
-            mock_cursor = MagicMock()
-            mock_cursor.fetchone.return_value = None  # promo absente de la BD
-            mock_conn.return_value.cursor.return_value = mock_cursor
+        with patch_get_connection(None):
+            assert _determine_promo_from_cas_groups(members) is None
 
-            result = _determine_promo_from_cas_groups(members)
-            assert result is None
+    def test_erreur_bd_retourne_none(self):
+        members = ["cn=idu4-fise,ou=polytech,dc=usmb,dc=fr"]
+        with patch("auth.authenticate_cas.get_connection", side_effect=RuntimeError("boom")):
+            assert _determine_promo_from_cas_groups(members) is None
 
     def test_env_mal_forme(self, monkeypatch):
         monkeypatch.setenv("CAS_ETUDIANTS_2_PROMO", "pas_du_json")

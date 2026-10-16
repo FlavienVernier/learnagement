@@ -307,9 +307,8 @@ class TestEvaluateRule:
         user = make_user(type_role="etudiant")
         assert evaluate_rule(["administratif", "enseignant"], user, {}) is False
 
-    def test_liste_roles_vide_leve_erreur(self):
-        with pytest.raises(ValueError):
-            evaluate_rule([], make_user(), {})
+    def test_liste_roles_vide_retourne_false(self):
+        assert evaluate_rule([], make_user(), {}) is False
 
     def test_liste_roles_user_none(self):
         assert evaluate_rule(["administratif"], None, {}) is False

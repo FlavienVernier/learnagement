@@ -1,11 +1,11 @@
 import dotenv
 import re
-import mysql.connector
+#import mysql.connector
 from sqlalchemy import text
-from sqlalchemy.exc import TimeoutError as PoolTimeout
+from sqlalchemy.exc import TimeoutError as PoolTimeout, SQLAlchemyError
 from sqlalchemy.engine import Connection
 
-from db.connection import db_connexion, get_connection, get_read_connection
+from db.connection import get_connection, get_read_connection
 from models.request import SQLRequest
 from models.token import TokenData
 from models.user import User, UserInDB
@@ -278,14 +278,17 @@ def get_user(user_login: str):
     #     None
     # )
     try:
-        with get_read_connection as conn:  # UNE connexion pour tous les fetchers
+        with get_read_connection() as conn:  # UNE connexion pour tous les fetchers
             for fetcher in fetchers:
                 user = fetcher(conn, user_login)
                 if user:
                     break
-    except Exception as e:
+    except SQLAlchemyError as e:
         logger.exception(e)
         raise HTTPException(status_code=503, detail="Database unavailable")
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(status_code=500, detail="Undefined Get User Error")
 
 
     if user is not None:

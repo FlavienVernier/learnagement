@@ -34,22 +34,22 @@ def get_connection():
     """Connexion + transaction : commit à la sortie, rollback sur exception."""
     with get_engine().begin() as conn:
         yield conn
-        
+
 @contextmanager
 def get_read_connection():
     with get_engine().connect() as conn:
         yield conn  # fermeture = rollback implicite, retour au pool
 
-@deprecated("Migration to sqlalchemy, use get_connection() instead")
-def db_connexion():
-    try:
-        db_info={
-            "host": os.getenv("MYSQL_SERVER"),
-            "user": os.getenv("MYSQL_USER_LOGIN"),
-            "port": int(os.getenv("MYSQL_PORT")),
-            "password": os.getenv("MYSQL_USER_PASSWORD"),
-            "database": os.getenv("MYSQL_DB"),}
-        return db_info
-    except Exception as e:
-        logger.exception(e)
-        raise e
+# @deprecated("Migration to sqlalchemy, use get_connection() instead")
+# def db_connexion():
+#     try:
+#         db_info={
+#             "host": os.getenv("MYSQL_SERVER"),
+#             "user": os.getenv("MYSQL_USER_LOGIN"),
+#             "port": int(os.getenv("MYSQL_PORT")),
+#             "password": os.getenv("MYSQL_USER_PASSWORD"),
+#             "database": os.getenv("MYSQL_DB"),}
+#         return db_info
+#     except Exception as e:
+#         logger.exception(e)
+#         raise e

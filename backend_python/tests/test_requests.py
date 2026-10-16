@@ -1,18 +1,19 @@
 import json
-
+import re
 import pytest
-from system.tools import get_all_requests
 import sqlglot
 from system.tools import get_all_requests
 
+_PYFORMAT = re.compile(r"%\((\w+)\)s")
 
 class TestRequestStructures:
     def test_requests_portable_to_postgres(self):
         errors = []
         for module, reqs in get_all_requests("repositories").items():
             for name, r in reqs.items():
+                sql = _PYFORMAT.sub(r":\1", r["request"])  # %(x)s -> :x
                 try:
-                    sqlglot.transpile(r["request"], read="mysql", write="postgres")
+                    sqlglot.transpile(sql, read="mysql", write="postgres")
                 except Exception as e:
                     errors.append(f"{module}.{name}: {e}")
         assert not errors, "\n".join(errors)

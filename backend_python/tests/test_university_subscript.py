@@ -9,6 +9,7 @@ from models.user import User
 from user import LNM_university
 from user.LNM_university import StudentDecisionPayload
 
+from access_control.rules import evaluate_rule
 
 # ─────────────────────────────────────────────
 # Helpers
@@ -81,6 +82,11 @@ class TestRootCause:
 #    (ÉCHOUENT tant que le bug existe)
 # ─────────────────────────────────────────────
 
+EXPECTED_OWNER_RULE = {
+    "roles": [],
+    "owner": {"role": "etudiant", "id": "id_etudiant"},
+}
+
 @pytest.mark.parametrize("endpoint", ENDPOINT_CALLS.keys())
 class TestLegitStudent:
 
@@ -97,7 +103,22 @@ class TestLegitStudent:
         assert recorded, "db_request n'a jamais été appelé"
         first = recorded[0]
         assert isinstance(first, SQLRequest)
-        assert user.ExplicitSecondaryK in first.allowedRolesRequester
+        assert first.allowedRolesRequester == EXPECTED_OWNER_RULE
+
+
+    def test_first_request_declares_owner_rule(self, endpoint, recorded):
+        user = make_student(ID_ETUDIANT)
+        ENDPOINT_CALLS[endpoint](user)
+        assert recorded, "db_request n'a jamais été appelé"
+        first = recorded[0]
+        assert isinstance(first, SQLRequest)
+        assert first.allowedRolesRequester == EXPECTED_OWNER_RULE
+
+    def test_owner_rule_grants_student_on_own_data(self, endpoint, recorded):
+        user = make_student(ID_ETUDIANT)
+        ENDPOINT_CALLS[endpoint](user)
+        first = recorded[0]
+        assert evaluate_rule(first.allowedRolesRequester, user, first.params) is True
 
 
 # ─────────────────────────────────────────────
@@ -107,18 +128,20 @@ class TestLegitStudent:
 
 class TestOtherUserControl:
 
-    @pytest.mark.parametrize("endpoint", ["get_campaign_status", "get_student_assignment"])
-    def test_other_user_reaches_db_request_without_extra_role(self, endpoint, recorded):
-        other = make_student(user_id=999)
-        ENDPOINT_CALLS[endpoint](other)
-        assert recorded[0].allowedRolesRequester == []
-
     @pytest.mark.parametrize("endpoint", ["add_university_to_wishes", "submit_student_decision"])
     def test_other_user_gets_403_before_the_bug(self, endpoint, recorded):
         other = make_student(user_id=999)
         with pytest.raises(HTTPException) as exc:
             ENDPOINT_CALLS[endpoint](other)
         assert exc.value.status_code == 403
+
+    @pytest.mark.parametrize("endpoint", ["get_campaign_status", "get_student_assignment"])
+    def test_other_user_is_refused_by_owner_rule(self, endpoint, recorded):
+        other = make_student(user_id=999)
+        ENDPOINT_CALLS[endpoint](other)
+        first = recorded[0]
+        assert first.params["id_etudiant"] == ID_ETUDIANT   # la ressource visée est celle de 42
+        assert evaluate_rule(first.allowedRolesRequester, other, first.params) is False
 
 
 # ─────────────────────────────────────────────
