@@ -637,31 +637,33 @@ def update_module(
     current_user: Annotated[User, Depends(get_current_active_user)],
     data: Dict[str, Any],):
 
-    if 'id_responsable' in data.keys():
-        request = {
-            # ToDo use following with SQLAlchemy
-            # "request" : f"""
-            #     UPDATE MAQUETTE_module
-            #     SET id_responsable = :id_responsable
-            #     WHERE id_module = :id_module
-            # """,
-            # ToDo remove next when SQLAlchemy Core is up
-            "request" : f"""
-                UPDATE MAQUETTE_module
-                SET id_responsable = %(id_responsable)s
-                WHERE id_module = %(id_module)s
-            """,
-            "params": {
-                "id_responsable": data['id_responsable'],
-                "id_module": id_module,
-            },
-            "allowedRolesRequester" : {
-                "roles": ["responsable_etudes"],
-                "predicate": is_current_user_module_responsible,
-            },
-        }
-        #if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
-        #    request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
+    if 'id_responsable' not in data:
+        raise HTTPException(status_code=422, detail="Champ manquant : id_responsable")
+
+    request = {
+        # ToDo use following with SQLAlchemy
+        # "request" : f"""
+        #     UPDATE MAQUETTE_module
+        #     SET id_responsable = :id_responsable
+        #     WHERE id_module = :id_module
+        # """,
+        # ToDo remove next when SQLAlchemy Core is up
+        "request" : f"""
+            UPDATE MAQUETTE_module
+            SET id_responsable = %(id_responsable)s
+            WHERE id_module = %(id_module)s
+        """,
+        "params": {
+            "id_responsable": data['id_responsable'],
+            "id_module": id_module,
+        },
+        "allowedRolesRequester" : {
+            "roles": ["responsable_etudes"],
+            "predicate": is_current_user_module_responsible,
+        },
+    }
+    #if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
+    #    request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 @router.patch("/modules/{id_module}/sequencages/{id_sequencage}",
@@ -674,27 +676,29 @@ def update_sequencage(
     current_user: Annotated[User, Depends(get_current_active_user)],
     data: Dict[str, Any],):
 
-    if 'id_intervenant_principal' in data.keys():
-        request = {
-            # ToDo refactor when SQLAlchemy Core is up
-            # FixMe Security trap : never check if id_sequence is a sequence of the module
-            "request" : f"""
-                UPDATE MAQUETTE_module_sequencage
-                SET id_intervenant_principal = %(id_intervenant_principal)s
-                WHERE id_module_sequencage = %(id_sequencage)s
-            """,
-            "params": {
-                "id_intervenant_principal": data['id_intervenant_principal'],
-                "id_sequencage": id_sequencage,
-                "id_module": id_module, # required for predicate
-            },
-            "allowedRolesRequester" : {
-                "roles": [],
-                "predicate": is_current_user_module_responsible,
-            },
-        }
-        #if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
-        #    request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
+    if 'id_intervenant_principal' not in data:
+        raise HTTPException(status_code=422, detail="Champ manquant : id_intervenant_principal")
+
+    request = {
+        # ToDo refactor when SQLAlchemy Core is up
+        "request" : f"""
+            UPDATE MAQUETTE_module_sequencage
+            SET id_intervenant_principal = %(id_intervenant_principal)s
+            WHERE id_module_sequencage = %(id_sequencage)s  AND 
+                  id_module = %(id_module)s
+        """,
+        "params": {
+            "id_intervenant_principal": data['id_intervenant_principal'],
+            "id_sequencage": id_sequencage,
+            "id_module": id_module, # required for predicate
+        },
+        "allowedRolesRequester" : {
+            "roles": [],
+            "predicate": is_current_user_module_responsible,
+        },
+    }
+    #if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
+    #    request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 
@@ -707,27 +711,36 @@ def update_sequence(
     id_sequence: int,
     current_user: Annotated[User, Depends(get_current_active_user)],
     data: Dict[str, Any],):
-    if 'id_intervenant_principal' in data.keys():
-        request = {
-            # ToDo refactor when SQLAlchemy Core is up
-            # FixMe Security trap : never check if id_sequence is a sequence of the module
-            "request": f"""
-                   UPDATE MAQUETTE_module_sequence
-                   SET id_intervenant_principal = %(id_intervenant_principal)s
-                   WHERE id_module_sequence = %(id_sequence)s
-               """,
-            "params": {
-                "id_intervenant_principal": data['id_intervenant_principal'],
-                "id_sequence": id_sequence,
-                "id_module": id_module, # required for predicate
-            },
-            "allowedRolesRequester" : {
-                "roles": [],
-                "predicate": is_current_user_module_responsible,
-            },
-        }
-        #if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
-        #    request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
+
+    if 'id_intervenant_principal' not in data:
+        raise HTTPException(status_code=422, detail="Champ manquant : id_intervenant_principal")
+
+
+    request = {
+        # ToDo refactor when SQLAlchemy Core is up
+        "request": f"""
+               UPDATE MAQUETTE_module_sequence
+               SET id_intervenant_principal = %(id_intervenant_principal)s
+               WHERE id_module_sequence = %(id_sequence)s AND 
+                     id_module_sequencage IN (
+                          SELECT MAQUETTE_module_sequencage.id_module_sequencage
+                          FROM  MAQUETTE_module_sequencage 
+                          WHERE MAQUETTE_module_sequencage.id_module = %(id_module)s
+                     )
+           """,
+        "params": {
+            "id_intervenant_principal": data['id_intervenant_principal'],
+            "id_sequence": id_sequence,
+            "id_module": id_module, # required for predicate
+        },
+        "allowedRolesRequester" : {
+            "roles": [],
+            "predicate": is_current_user_module_responsible,
+        },
+    }
+    #if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
+    #    request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
+
     return db_request(current_user, SQLRequest(**request))
 
 
@@ -740,27 +753,35 @@ def update_session(
     id_session: int,
     current_user: Annotated[User, Depends(get_current_active_user)],
     data: Dict[str, Any],):
-    if 'id_enseignant' in data.keys():
-        request = {
-            # ToDo refactor when SQLAlchemy Core is up
-            # FixMe Security trap : never check if id_sequence is a sequence of the module
-            "request": f"""
-                   UPDATE CLASS_session
-                   SET id_enseignant = %(id_enseignant)s
-                   WHERE id_session = %(id_session)s
-               """,
-            "params": {
-                "id_enseignant": data['id_enseignant'],
-                "id_session": id_session,
-                "id_module": id_module, # required for predicate
-            },
-            "allowedRolesRequester" : {
-                "roles": [],
-                "predicate": is_current_user_module_responsible,
-            },
-        }
-        #if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
-        #    request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
+
+    if 'id_enseignant' not in data:
+        raise HTTPException(status_code=422, detail="Champ manquant : id_enseignant")
+
+    request = {
+        # ToDo refactor when SQLAlchemy Core is up
+        "request": f"""
+               UPDATE CLASS_session
+               SET id_enseignant = %(id_enseignant)s
+               WHERE id_session = %(id_session)s AND 
+                     id_module_sequence IN (
+                          SELECT MAQUETTE_module_sequence.id_module_sequence
+                          FROM MAQUETTE_module_sequence
+                          JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage
+                          WHERE MAQUETTE_module_sequencage.id_module = %(id_module)s
+                     )
+           """,
+        "params": {
+            "id_enseignant": data['id_enseignant'],
+            "id_session": id_session,
+            "id_module": id_module, # required for predicate
+        },
+        "allowedRolesRequester" : {
+            "roles": [],
+            "predicate": is_current_user_module_responsible,
+        },
+    }
+    #if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
+    #    request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
     return db_request(current_user, SQLRequest(**request))
 
 
@@ -778,7 +799,7 @@ def add_sequencage(
     id_module: int,
     current_user: Annotated[User, Depends(get_current_active_user)],
     data: Dict[str, Any],):
-    print(data)
+
     if 'id_intervenant_principal' in data.keys() and data['id_intervenant_principal'] is not None and data['id_intervenant_principal'] != "":
         request = {
             "request" : f"""
@@ -805,6 +826,10 @@ def add_sequencage(
                 "duree_h": data['duree_h'],
                 "id_intervenant_principal": data['id_intervenant_principal'],
             },
+            "allowedRolesRequester": {
+                "roles": [],
+                "predicate": is_current_user_module_responsible,
+            },
         }
     else:
         request = {
@@ -830,7 +855,7 @@ def add_sequencage(
                 "duree_h": data['duree_h'],
             },
             "allowedRolesRequester": {
-                "roles": ["responsable_etudes"],
+                "roles": [],
                 "predicate": is_current_user_module_responsible,
             },
         }
@@ -908,16 +933,25 @@ def add_dependencies(
     id_module: int,
     current_user: Annotated[User, Depends(get_current_active_user)],
     data: Dict[str, Any],):
+
+    if 'id_sequence_prev' not in data:
+        raise HTTPException(status_code=422, detail="Champ manquant : id_sequence_prev")
+    if 'id_sequence_next' not in data:
+        raise HTTPException(status_code=422, detail="Champ manquant : id_sequence_next")
+
     request = {
         "request" : f"""
-            INSERT INTO MAQUETTE_dependance_sequence ( 
-                id_sequence_prev, 
-                id_sequence_next
-            )
-            VALUES (
-                %(id_sequence_prev)s, 
-                %(id_sequence_next)s
-            )
+            INSERT INTO MAQUETTE_dependance_sequence (id_sequence_prev, id_sequence_next)
+                SELECT %(id_sequence_prev)s, %(id_sequence_next)s
+                FROM (SELECT 1) AS dummy
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM MAQUETTE_module_sequence ms
+                    JOIN MAQUETTE_module_sequencage msg
+                      ON msg.id_module_sequencage = ms.id_module_sequencage
+                    WHERE msg.id_module = %(id_module)s
+                      AND ms.id_module_sequence IN (%(id_sequence_prev)s, %(id_sequence_next)s)
+                )
         """,
         "params": {
             "id_sequence_prev": data['id_sequence_prev'],
@@ -951,10 +985,10 @@ def delete_sequencage(
 
     request = {
         # ToDo refactor next when SQLAlchemy Core is up
-        # FixMe Security trap : never check if id_sequence is a sequence of the module
         "request" : f"""
             DELETE FROM MAQUETTE_module_sequencage
-            WHERE id_module_sequencage = %(id_sequencage)s
+            WHERE id_module_sequencage = %(id_sequencage)s  AND 
+                  id_module = %(id_module)s
         """,
         "params": {
             "id_sequencage": id_sequencage,
@@ -982,11 +1016,24 @@ def delete_dependencies(
 
     request = {
         # ToDo refactor next when SQLAlchemy Core is up
-        # FixMe Security trap : never check if id_sequence is a sequence of the module
+
         "request" : f"""
             DELETE FROM MAQUETTE_dependance_sequence
             WHERE id_sequence_prev = %(id_sequence_prev)s
                 AND id_sequence_next =  %(id_sequence_next)s
+                AND (id_sequence_prev IN (
+                          SELECT MAQUETTE_module_sequence.id_module_sequence
+                          FROM MAQUETTE_module_sequence
+                          JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage
+                          WHERE MAQUETTE_module_sequencage.id_module = %(id_module)s
+                    )
+                    OR id_sequence_next IN (
+                          SELECT MAQUETTE_module_sequence.id_module_sequence
+                          FROM MAQUETTE_module_sequence
+                          JOIN MAQUETTE_module_sequencage ON MAQUETTE_module_sequencage.id_module_sequencage = MAQUETTE_module_sequence.id_module_sequencage
+                          WHERE MAQUETTE_module_sequencage.id_module = %(id_module)s
+                    )
+                )
         """,
         "params": {
             "id_sequence_prev": id_sequence_prev,
