@@ -27,3 +27,5 @@ certs/
 # don't add js modules on git
 front_NextJS/node_modules/
 mobility_map/node_modules/
+
+Doc_Private
