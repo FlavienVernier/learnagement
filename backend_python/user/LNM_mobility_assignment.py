@@ -1,9 +1,11 @@
 import logging
 
+from db.connection import get_connection
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from typing import Annotated, Any, Dict, List
 import time
 
+# FixMe global variable that store app data must be store in data area (BD or other) not in API backend
 assignment_progress = {
     "is_running": False,
     "progress": 0,
@@ -348,47 +350,50 @@ def save_assignments(assignments: List[dict], final_places: dict, current_user: 
       - S8_remaining_places / S9_remaining_places dans MOB_partner_university
       - remaining_places dans MOB_partner_university_places
     """
-    # --- 6a. Supprimer les affectations précédentes non validées pour éviter les fantômes ---
-    delete_pending = SQLRequest(
-        request="DELETE FROM MOB_assignment WHERE status = 'pending'",
-        params={},
-        allowedRolesRequester=["relations_internationales"]
-    )
-    db_request(current_user, delete_pending)
-
-    # --- 6b. Insérer les nouvelles affectations dans MOB_assignment ---
-    if assignments:
-        values_clause = []
-        params = {}
-        for i, assign in enumerate(assignments):
-            status = assign.get("status", "pending")
-            values_clause.append(f"(%(e{i})s, %(u{i})s, %(s{i})s, %(st{i})s)")
-            params[f"e{i}"] = assign["id_etudiant"]
-            params[f"u{i}"] = assign["id_partner_university"]
-            params[f"s{i}"] = assign["id_semestre"]
-            params[f"st{i}"] = status
-
-        query = f"""
-            INSERT INTO MOB_assignment (id_etudiant, id_partner_university, id_semestre, status)
-            VALUES {", ".join(values_clause)}
-            ON DUPLICATE KEY UPDATE
-                id_partner_university = VALUES(id_partner_university),
-                id_semestre           = VALUES(id_semestre),
-                status                = VALUES(status)
-        """
-        sql_request = SQLRequest(
-            request=query,
-            params=params,
+    with get_connection() as conn:
+        # --- 6a. Supprimer les affectations précédentes non validées pour éviter les fantômes ---
+        delete_pending = SQLRequest(
+            request="DELETE FROM MOB_assignment WHERE status = 'pending'",
+            params={},
             allowedRolesRequester=["relations_internationales"]
         )
-        db_request(current_user, sql_request)
+        db_request(current_user, delete_pending, conn=conn)
+
+        # --- 6b. Insérer les nouvelles affectations dans MOB_assignment ---
+        if assignments:
+            values_clause = []
+            params = {}
+            for i, assign in enumerate(assignments):
+                status = assign.get("status", "pending")
+                values_clause.append(f"(%(e{i})s, %(u{i})s, %(s{i})s, %(st{i})s)")
+                params[f"e{i}"] = assign["id_etudiant"]
+                params[f"u{i}"] = assign["id_partner_university"]
+                params[f"s{i}"] = assign["id_semestre"]
+                params[f"st{i}"] = status
+
+            query = f"""
+                INSERT INTO MOB_assignment (id_etudiant, id_partner_university, id_semestre, status)
+                VALUES {", ".join(values_clause)}
+                ON DUPLICATE KEY UPDATE
+                    id_partner_university = VALUES(id_partner_university),
+                    id_semestre           = VALUES(id_semestre),
+                    status                = VALUES(status)
+            """
+            sql_request = SQLRequest(
+                request=query,
+                params=params,
+                allowedRolesRequester=["relations_internationales"]
+            )
+            db_request(current_user, sql_request,  conn=conn)
 
 
 
 @router.get("/university/admin/assignment/status",
             tags=["admin", "mobility"],
             summary="Get assignment progress")
-def get_assignment_status():
+def get_assignment_status(
+    current_user: Annotated[User, Depends(get_current_active_user)], # to require connected user
+):
     return assignment_progress
 
 def execute_assignment_task(payload: AssignmentRunPayload, current_user: User):
@@ -490,30 +495,32 @@ def save_mobility_quotas(
     payload: MobilityQuotasUpdatePayload,
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
-    # D'abord, supprimer les anciens quotas pour cette année
-    delete_query = """
-        DELETE FROM MOB_filiere_quotas 
-        WHERE annee_scolaire = %(annee_scolaire)s
-    """
-    sql_request = SQLRequest(request=delete_query, params={"annee_scolaire": payload.annee_scolaire}, allowedRolesRequester=["relations_internationales"])
-    db_request(current_user, sql_request)
-    
-    # Ensuite, insérer les nouveaux quotas
-    insert_query = """
-        INSERT INTO MOB_filiere_quotas (id_filiere, annee_scolaire, id_semestre, places)
-        VALUES (%(id_filiere)s, %(annee_scolaire)s, %(id_semestre)s, %(places)s)
-    """
-    for quota in payload.quotas:
-        params = {
-            "id_filiere": quota.id_filiere,
-            "annee_scolaire": payload.annee_scolaire,
-            "id_semestre": quota.id_semestre,
-            "places": quota.places
-        }
-        sql_request = SQLRequest(request=insert_query, params=params, allowedRolesRequester=["relations_internationales"])
-        db_request(current_user, sql_request)
-        
-    return {"message": "Quotas sauvegardés avec succès."}
+    allowed = ["relations_internationales"]
+    with get_connection() as conn:
+        # D'abord, supprimer les anciens quotas pour cette année
+        delete_query = """
+            DELETE FROM MOB_filiere_quotas 
+            WHERE annee_scolaire = %(annee_scolaire)s
+        """
+        sql_request = SQLRequest(request=delete_query, params={"annee_scolaire": payload.annee_scolaire}, allowedRolesRequester=allowed)
+        db_request(current_user, sql_request, conn=conn)
+
+        # Ensuite, insérer les nouveaux quotas
+        insert_query = """
+            INSERT INTO MOB_filiere_quotas (id_filiere, annee_scolaire, id_semestre, places)
+            VALUES (%(id_filiere)s, %(annee_scolaire)s, %(id_semestre)s, %(places)s)
+        """
+        for quota in payload.quotas:
+            params = {
+                "id_filiere": quota.id_filiere,
+                "annee_scolaire": payload.annee_scolaire,
+                "id_semestre": quota.id_semestre,
+                "places": quota.places
+            }
+            sql_request = SQLRequest(request=insert_query, params=params, allowedRolesRequester=allowed)
+            db_request(current_user, sql_request, conn=conn)
+
+        return {"message": "Quotas sauvegardés avec succès."}
 
 @router.get("/university/etudiant/{id_etudiant}/quota",
             tags=["etudiant", "mobility"],

@@ -1,5 +1,7 @@
 import dotenv
 import re
+
+from auth.authenticate_tools import decode_access_token
 #import mysql.connector
 from sqlalchemy import text
 from sqlalchemy.exc import TimeoutError as PoolTimeout, SQLAlchemyError
@@ -305,7 +307,6 @@ def load_enseignant_responsibilities(rows: list[dict]) -> list[dict]:
     Transforme les lignes SQL à plat en liste de responsabilités avec
     leurs dimensions sous forme de dict.
     """
-    print(rows)
 
     resp_map = {}
     for row in rows:
@@ -353,7 +354,8 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     )
     #print(token, flush=True)
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        #payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = decode_access_token(token)
         user_login = payload.get("login")
         #print("userlogin", userlogin, flush=True)
         if user_login is None:
@@ -430,52 +432,30 @@ def _to_named(sql: str) -> str:
     """Shim transitoire : %(x)s -> :x (à supprimer après migration des requêtes)."""
     return _PYFORMAT.sub(r":\1", sql)
 
-def db_request(requester: User, request: SQLRequest):
-    # vérification via le système de règles
+def _execute(conn: Connection, request: SQLRequest) -> list[dict]:
+    result = conn.execute(text(_to_named(request.request)), request.params or {})
+    return [dict(r) for r in result.mappings()] if result.returns_rows else []
 
+
+def db_request(requester: User, request: SQLRequest, conn: Connection | None = None):
+    """
+    Sans `conn` : une connexion et une transaction pour cette seule requête (comportement actuel).
+    Avec `conn` : la requête s'exécute dans la transaction de l'appelant, sans commit ici.
+    L'appelant ouvre la transaction avec `with get_connection() as conn:`.
+    """
 
     if requester:
         logger.info(f"User {requester.id} has role {requester.roles} requests {request}")
-
     else:
         logger.info(f"Anonymous user requests {request}")
 
-    check_access(
-        request=request,
-        user=requester,
-    )
+    check_access(request=request, user=requester)
     
     rows = []
-    connection = None
-    cursor = None
-    # try:
-    #     connection = mysql.connector.connect(**db_connexion())
-    #     cursor = connection.cursor(dictionary=True)
-    #
-    #     if request.params:
-    #         cursor.execute(request.request, request.params)
-    #         #cursor.execute(sqlalchemy.text(request.request), request.params)
-    #     else:
-    #         cursor.execute(request.request)
-    #         #cursor.execute(sqlalchemy.text(request.request))
-    #
-    #     if getattr(cursor, "with_rows", False):
-    #         rows = cursor.fetchall()
-    #     else:
-    #         rows = []
-    #     #logger.info(f"User {requester.id} has {rows}")
-    #     connection.commit()
-    # except Exception as e:
-    #     logger.exception(e)
-    #     raise HTTPException(status_code=500, detail=f"Database request failed: {e}")
-    # finally:
-    #     if cursor is not None:
-    #         cursor.close()
-    #     if connection is not None:
-    #         connection.close()
-    # #return json.dumps([dict(ix) for ix in rows]) # return string
-    # return [dict(ix) for ix in rows] # return list that will be converted to json
+
     try:
+        if conn is not None:
+            return _execute(conn, request)
         with get_connection() as conn:
             result = conn.execute(text(_to_named(request.request)), request.params or {})
             rows = [dict(r) for r in result.mappings()] if result.returns_rows else []
@@ -483,7 +463,7 @@ def db_request(requester: User, request: SQLRequest):
         raise HTTPException(status_code=503, detail="Database busy, retry later")
     except Exception as e:
         logger.exception(e)
-        raise HTTPException(status_code=500, detail=f"Database request failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Database request failed")
     return rows
 
 

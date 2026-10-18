@@ -39,6 +39,12 @@ envs = {"dev", "prod"}
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
+
+ALGORITHM = "HS256"
+MIN_KEY_BYTES = 32   # RFC 7518 §3.2 pour HS256
+DEFAULT_SESSION_TIMEOUT = 300
+MAX_SESSION_TIMEOUT = 60 * 60 * 24 * 1   # 1 jours
+
 #############################################################
 # Lernagement security
 
@@ -77,17 +83,17 @@ def __security_check():
         logging.info(f"{GREEN}App run from '{git_branch}' branch with '{os.environ['ENV']}' environment{NC}")
 
 #def generate_nextauth_secret(base_secret: str) -> bytes:
-def __generate_secret__() -> bytes:
+def __generate_secret__(info: str) -> bytes:
     base_secret = os.urandom(32).hex()
     """
     Génère une clé dérivée compatible avec NextAuth à partir d'un secret de base.
     """
-    info = "NextAuth.js Generated Encryption Key".encode('utf-8')
+
     hkdf = HKDF(
         algorithm=hashes.SHA256(),
         length=32,  # 32 octets pour une clé symétrique
         salt=b"",    # pas de sel ici, mais peut être personnalisé
-        info=info
+        info=info.encode('utf-8')
     )
     derived_key = hkdf.derive(base_secret.encode('utf-8'))
     return derived_key
@@ -219,8 +225,10 @@ def __generate_base_env():
 
     default_env_vars["COMPOSE_PROJECT_NAME"] = f"learnagement_{instance_name}"
 
-    default_env_vars["INSTANCE_SECRET"] = str(__generate_secret__().hex())
-    default_env_vars["NEXTAUTH_SECRET"] = str(__generate_secret__().hex())
+
+    default_env_vars["CAS_SERVICE_TOKEN"] = str(__generate_secret__( info = "CAS Generated Encryption Key").hex())
+    default_env_vars["JWT_SIGNING_KEY"] = str(__generate_secret__( info = "LNM Generated Encryption Key").hex())
+    default_env_vars["NEXTAUTH_SECRET"] = str(__generate_secret__( info = "NextAuth.js Generated Encryption Key").hex())
     protocol = "http"
     default_env_vars["FRONT_PHP_PROTOCOL"] = protocol
 

@@ -46,7 +46,7 @@ def decode_token(token, leeway=30):
 
     if not token:
         return False
-    secret_key = os.getenv("INSTANCE_SECRET")
+    secret_key = os.getenv("JWT_SIGNING_KEY")
     try:
         decode_options = {
             "verify_signature": bool(secret_key),
@@ -63,6 +63,7 @@ def decode_token(token, leeway=30):
             decode_kwargs["algorithms"] = ["HS256"]
 
         payload = jwt.decode(token, **decode_kwargs)
+
         logging.info(payload.__repr__())
         return payload
 

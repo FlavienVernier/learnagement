@@ -22,7 +22,7 @@ load_dotenv()
 app = FlaskAuth(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME])
 
 server = app.server
-server.secret_key = os.getenv('INSTANCE_SECRET')
+server.secret_key = os.getenv('JWT_SIGNING_KEY')
 time_out = int(os.getenv('SESSION_TIMEOUT'))
 
 registered_callbacks = set()

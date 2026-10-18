@@ -101,7 +101,7 @@ const handler = NextAuth({
     pages: {
         signIn: "/connection",
     },
-    secret: process.env.INSTANCE_SECRET
+    secret: process.env.JWT_SIGNING_KEY
 })
 
 export { handler as GET, handler as POST }

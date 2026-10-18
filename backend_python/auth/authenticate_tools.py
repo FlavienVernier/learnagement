@@ -4,10 +4,11 @@ import dotenv
 from datetime import datetime, timedelta, timezone
 import jwt
 from typing import Annotated
+from fastapi import HTTPException, status
 
 dotenv.load_dotenv(".env")
 
-SECRET_KEY = os.getenv("INSTANCE_SECRET")
+JWT_SIGNING_KEY = os.getenv("JWT_SIGNING_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_SECONDS = int(os.getenv("SESSION_TIMEOUT"))
 
@@ -38,6 +39,16 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     expire = datetime.now(timezone.utc) + expires_delta
 
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, JWT_SIGNING_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
+def decode_access_token(token: str) -> dict:
+    """Décode et valide un JWT. Lève HTTPException(401) si invalide."""
+    try:
+        return jwt.decode(token, JWT_SIGNING_KEY, algorithms=[ALGORITHM])
+    except jwt.PyJWTError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+        ) from e

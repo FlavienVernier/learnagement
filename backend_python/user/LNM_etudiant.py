@@ -1,7 +1,8 @@
 import logging
 
 from fastapi import APIRouter, Depends
-from typing import Annotated, Dict, Any
+from typing import Annotated, Dict, Any, Optional
+from pydantic import BaseModel, model_validator
 
 from api.dependencies import db_request, get_current_active_user
 from models.request import SQLRequest
@@ -44,14 +45,27 @@ def get_etudiants(
     return db_request(current_user, SQLRequest(**request))
 
 
+class AbsencesFilters(BaseModel):
+    id_responsable: Optional[int] = None
+    id_enseignant: Optional[int] = None
+
+    @model_validator(mode="after")
+    def check_exclusive(self):
+        if self.id_responsable is not None and self.id_enseignant is not None:
+            raise ValueError(
+                "Fournissez soit id_responsable, soit id_enseignant, pas les deux"
+            )
+        return self
+
 @router.get("/etudiants/absences",
             tags=["student", "administratif"],
             summary="Students",
             description="Return the list of students")
 def get_etudiants_absences(
     current_user: Annotated[User, Depends(get_current_active_user)],
-    id_responsable: int = -1,
-    id_enseignant: int = -1,
+    #id_responsable: int = -1,
+    #id_enseignant: int = -1,
+    filters: Annotated[AbsencesFilters, Depends()],
 ):
     request = {
         "request" : f"""SELECT ExplicitSecondaryKs_LNM_etudiant.ExplicitSecondaryK as etudiant, 
@@ -76,20 +90,20 @@ def get_etudiants_absences(
     }
 
     # if id_responsable filter is set
-    if id_responsable == current_user.id:
+    if current_user.mmain_role == "enseignant" and filters.id_responsable is not None:
         request["request"] += f""" WHERE MAQUETTE_module.id_responsable = %(id_responsable)s"""
         request["params"] = {
-            "id_responsable": id_responsable,
+            "id_responsable": filters.id_responsable,
         }
-        request["allowedRolesRequester"]["owner"] = {"role": "enseignant", "id": "id_responsable"},
+        request["allowedRolesRequester"]["owner"] = {"role": "enseignant", "id": "id_responsable"}
 
     # if id_enseignant filter is set
-    elif id_enseignant == current_user.id:
+    elif current_user.mmain_role == "enseignant" and filters.id_enseignant is not None:
         request["request"]  += f""" WHERE CLASS_session.id_enseignant = %(id_enseignant)s"""
         request["params"] = {
-            "id_enseignant": id_enseignant,
+            "id_enseignant": filters.id_enseignant,
         }
-        request["allowedRolesRequester"]["owner"] = {"role": "enseignant", "id": "id_enseignant"},
+        request["allowedRolesRequester"]["owner"] = {"role": "enseignant", "id": "id_enseignant"}
 
     return db_request(current_user, SQLRequest(**request))
 
@@ -196,7 +210,10 @@ def get_etudiant(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester" : ["connected_user"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester" : {
+            #"roles": ["connected_user"]},
+            "roles": []},
+            "owner": {"role": "etudiant", 'id':"id_etudiant"},
     }
     return db_request(current_user, SQLRequest(**request))
 

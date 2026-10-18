@@ -90,7 +90,7 @@ requests["struct"]["leaf_table"] = f"""
     AND `TABLE_NAME` NOT IN
         (SELECT `TABLE_NAME`
         FROM `information_schema`.`KEY_COLUMN_USAGE`
-        WHERE `TABLE_SCHEMA` = 'learnagement'
+        WHERE `TABLE_SCHEMA` = '""" + os.getenv("MYSQL_DB") + """'
             AND `CONSTRAINT_NAME` LIKE "FK%")"""
 
 ''' 

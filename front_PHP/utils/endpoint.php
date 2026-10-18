@@ -76,7 +76,7 @@ function python_endpoint($method, $path, $data, $token) {
 
 
 function cas_endpoint($method, $path, $data = null) {
-    $casToken = getenv("INSTANCE_SECRET");
+    $casToken = getenv("CAS_SERVICE_TOKEN");
 
     if ($method === "GET" && $data) {
         $path .= "?" . http_build_query($data);

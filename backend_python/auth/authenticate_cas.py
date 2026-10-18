@@ -1,6 +1,7 @@
 import os
 import json
-import mysql.connector
+import hmac
+
 
 from fastapi import HTTPException, status, Header
 from typing import Annotated, Optional
@@ -25,11 +26,33 @@ class CasUserProvision(BaseModel):
 
 # --- Vérification du token de service CAS ---
 def verify_cas_service_token(x_cas_token: Annotated[Optional[str], Header()] = None):
-    expected = os.getenv("INSTANCE_SECRET")
-    if not x_cas_token or x_cas_token != expected:
+    expected = os.getenv("CAS_SERVICE_TOKEN")
+
+    if not expected:
+        # Config cassée : on refuse tout, on ne loggue pas la valeur
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="CAS service token not configured",
+        )
+    if not x_cas_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid CAS service token"
+            detail="Missing CAS service token",
+        )
+
+    # Comparaison à temps constant
+    try:
+        # encode() force bytes → lève TypeError si non-ASCII (désiré)
+        if not hmac.compare_digest(x_cas_token.encode("utf-8"), expected.encode("utf-8")):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid CAS service token",
+            )
+    except TypeError:
+        # Caractères non-ASCII → token invalide par construction
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid CAS service token",
         )
 
 async def authenticate_cas(data: CasUserProvision) -> Token:

@@ -15,9 +15,9 @@ from typing import Annotated
 
 dotenv.load_dotenv(".env")
 
-SECRET_KEY = os.getenv("INSTANCE_SECRET")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_SECONDS = int(os.getenv("SESSION_TIMEOUT"))
+#SECRET_KEY = os.getenv("INSTANCE_SECRET")
+#ALGORITHM = "HS256"
+#ACCESS_TOKEN_EXPIRE_SECONDS = int(os.getenv("SESSION_TIMEOUT"))
 
 router = APIRouter()
 

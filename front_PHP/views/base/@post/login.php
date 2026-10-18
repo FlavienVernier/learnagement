@@ -36,7 +36,7 @@ try {
     }
 
     $jwt = $response_json["access_token"];
-    $secretKey = $_ENV["INSTANCE_SECRET"];
+    $secretKey = $_ENV["JWT_SIGNING_KEY"];
     try {
         $decoded = JWT::decode(
             $jwt,

@@ -5,6 +5,8 @@ from fastapi.responses import StreamingResponse
 import io
 import openpyxl
 from datetime import datetime
+
+from pygments.lexers.julia import allowed_variable
 from typing import Annotated
 from typing import Dict, List, Optional, Tuple
 from pydantic import BaseModel, Field
@@ -12,6 +14,9 @@ from pydantic import BaseModel, Field
 from api.dependencies import db_request, get_current_active_user
 from models.request import SQLRequest
 from models.user import User
+
+from functools import partial
+from db.connection import get_connection
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +57,7 @@ def _sync_university_places(
     current_user: User,
     id_partner_university: int,
     places: List[UniversityPlacePayload],
+    conn,
 ) -> None:
     normalized_places: Dict[Tuple[int, int], int] = {}
     for place in places:
@@ -79,7 +85,7 @@ def _sync_university_places(
         },
         "allowedRolesRequester": ["relations_internationales"],
     }
-    db_request(current_user, SQLRequest(**delete_places_request))
+    db_request(current_user, SQLRequest(**delete_places_request), conn=conn)
 
     for place in resolved_places:
         insert_place_request = {
@@ -95,7 +101,7 @@ def _sync_university_places(
             },
             "allowedRolesRequester": ["relations_internationales"],
         }
-        db_request(current_user, SQLRequest(**insert_place_request))
+        db_request(current_user, SQLRequest(**insert_place_request), conn=conn)
 
 
 @router.get("/university",
@@ -331,79 +337,78 @@ def delete_university_from_wishes(
 ):
     if current_user.id != id_etudiant:
         raise HTTPException(status_code=403, detail="Unauthorized access")
-
-    request = {
-        "request": """
-                        SELECT priority, submission_date
-                        FROM MOB_wishes
-                        WHERE id_etudiant = %(id_etudiant)s
-                          AND id_partner_university = %(id_partner_university)s
-                          AND id_semestre = %(id_semestre)s
-                    """,
-        "params": {
-            "id_etudiant": id_etudiant,
-            "id_partner_university": id_partner_university,
-            "id_semestre": id_semestre,
-        },
-        "allowedRolesRequester": {
+    allowed = {
             "roles": [],
             "owner": {"role": "etudiant", "id": "id_etudiant"},
-        },
-    }
-    #if(current_user.id == id_etudiant):
-    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        }
+    with get_connection() as conn:
+        request = {
+            "request": """
+                            SELECT priority, submission_date
+                            FROM MOB_wishes
+                            WHERE id_etudiant = %(id_etudiant)s
+                              AND id_partner_university = %(id_partner_university)s
+                              AND id_semestre = %(id_semestre)s
+                        """,
+            "params": {
+                "id_etudiant": id_etudiant,
+                "id_partner_university": id_partner_university,
+                "id_semestre": id_semestre,
+            },
+            "allowedRolesRequester": allowed,
+        }
+        #if(current_user.id == id_etudiant):
+        #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
-    check_rows = db_request(current_user, SQLRequest(**request))
-    if not check_rows:
-        raise HTTPException(status_code=404, detail="Voeu introuvable.")
+        check_rows = db_request(current_user, SQLRequest(**request), conn=conn)
+        if not check_rows:
+            raise HTTPException(status_code=404, detail="Voeu introuvable.")
 
-    if check_rows[0].get("submission_date") is not None:
-        raise HTTPException(status_code=400, detail="Vos voeux ont déjà été soumis et ne peuvent plus être modifiés.")
+        if check_rows[0].get("submission_date") is not None:
+            raise HTTPException(status_code=400, detail="Vos voeux ont déjà été soumis et ne peuvent plus être modifiés.")
 
-    removed_priority = int(check_rows[0]["priority"])
 
-    request = {
-        "request": """
-                        DELETE FROM MOB_wishes
-                        WHERE id_etudiant = %(id_etudiant)s
-                          AND id_partner_university = %(id_partner_university)s
-                          AND id_semestre = %(id_semestre)s
-                    """,
-        "params": {
-            "id_etudiant": id_etudiant,
-            "id_partner_university": id_partner_university,
-            "id_semestre": id_semestre,
-        },
-        "allowedRolesRequester": {
-            "roles": [],
-            "owner": {"role": "etudiant", "id": "id_etudiant"},
-        },
-    }
-    #if(current_user.id == id_etudiant):
-    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        removed_priority = int(check_rows[0]["priority"])
 
-    db_request(current_user, SQLRequest(**request))
+        request = {
+            "request": """
+                            DELETE FROM MOB_wishes
+                            WHERE id_etudiant = %(id_etudiant)s
+                              AND id_partner_university = %(id_partner_university)s
+                              AND id_semestre = %(id_semestre)s
+                        """,
+            "params": {
+                "id_etudiant": id_etudiant,
+                "id_partner_university": id_partner_university,
+                "id_semestre": id_semestre,
+            },
+            "allowedRolesRequester": allowed,
+        }
+        #if(current_user.id == id_etudiant):
+        #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
-    request = {
-        "request": """
-                        UPDATE MOB_wishes
-                        SET priority = priority - 1
-                        WHERE id_etudiant = %(id_etudiant)s
-                          AND priority > %(removed_priority)s
-                    """,
-        "params": {
-            "id_etudiant": id_etudiant,
-            "removed_priority": removed_priority,
-        },
-        "allowedRolesRequester": {
-            "roles": [],
-            "owner": {"role": "etudiant", "id": "id_etudiant"},
-        },
-    }
+        db_request(current_user, SQLRequest(**request), conn=conn)
 
-    #if(current_user.id == id_etudiant):
-    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
-    db_request(current_user, SQLRequest(**request))
+        request = {
+            "request": """
+                            UPDATE MOB_wishes
+                            SET priority = priority - 1
+                            WHERE id_etudiant = %(id_etudiant)s
+                              AND priority > %(removed_priority)s
+                        """,
+            "params": {
+                "id_etudiant": id_etudiant,
+                "removed_priority": removed_priority,
+            },
+            "allowedRolesRequester": {
+                "roles": [],
+                "owner": {"role": "etudiant", "id": "id_etudiant"},
+            },
+        }
+
+        #if(current_user.id == id_etudiant):
+        #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        db_request(current_user, SQLRequest(**request), conn=conn)
 
     return {"message": "Voeu supprime."}
 
@@ -419,139 +424,130 @@ def move_university_wish(
     direction: str,
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
-    if current_user.id != id_etudiant:
-        raise HTTPException(status_code=403, detail="Unauthorized access")
+    # if current_user.id != id_etudiant:
+    #     raise HTTPException(status_code=403, detail="Unauthorized access")
+    allowed = {
+            "roles": [],
+            "owner": {"role": "etudiant", "id": "id_etudiant"},
+        }
 
     if direction not in ["up", "down"]:
         raise HTTPException(status_code=400, detail="Direction invalide. Utilisez 'up' ou 'down'.")
 
-    request = {
-        "request": """
-                        SELECT priority, submission_date
-                        FROM MOB_wishes
-                        WHERE id_etudiant = %(id_etudiant)s
-                          AND id_partner_university = %(id_partner_university)s
-                          AND id_semestre = %(id_semestre)s
-                    """,
-        "params": {
-            "id_etudiant": id_etudiant,
-            "id_partner_university": id_partner_university,
-            "id_semestre": id_semestre,
-        },
-        "allowedRolesRequester": {
-            "roles": [],
-            "owner": {"role": "etudiant", "id": "id_etudiant"},
-        },
-    }
-    #if(current_user.id == id_etudiant):
-    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
-    current_rows = db_request(current_user, SQLRequest(**request))
-    if not current_rows:
-        raise HTTPException(status_code=404, detail="Voeu introuvable.")
+    with get_connection() as conn:
+        request = {
+            "request": """
+                            SELECT priority, submission_date
+                            FROM MOB_wishes
+                            WHERE id_etudiant = %(id_etudiant)s
+                              AND id_partner_university = %(id_partner_university)s
+                              AND id_semestre = %(id_semestre)s
+                        """,
+            "params": {
+                "id_etudiant": id_etudiant,
+                "id_partner_university": id_partner_university,
+                "id_semestre": id_semestre,
+            },
+            "allowedRolesRequester": allowed,
+        }
+        #if(current_user.id == id_etudiant):
+        #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        current_rows = db_request(current_user, SQLRequest(**request), conn=conn)
+        if not current_rows:
+            raise HTTPException(status_code=404, detail="Voeu introuvable.")
 
-    if current_rows[0].get("submission_date") is not None:
-        raise HTTPException(status_code=400, detail="Vos voeux ont déjà été soumis et ne peuvent plus être modifiés.")
+        if current_rows[0].get("submission_date") is not None:
+            raise HTTPException(status_code=400, detail="Vos voeux ont déjà été soumis et ne peuvent plus être modifiés.")
 
-    current_priority = int(current_rows[0]["priority"])
-    target_priority = current_priority - 1 if direction == "up" else current_priority + 1
+        current_priority = int(current_rows[0]["priority"])
+        target_priority = current_priority - 1 if direction == "up" else current_priority + 1
 
-    request = {
-        "request": """
-                        SELECT id_partner_university, id_semestre
-                        FROM MOB_wishes
-                        WHERE id_etudiant = %(id_etudiant)s
-                          AND priority = %(target_priority)s
-                    """,
-        "params": {
-            "id_etudiant": id_etudiant,
-            "target_priority": target_priority,
-        },
-        "allowedRolesRequester": {
-            "roles": [],
-            "owner": {"role": "etudiant", "id": "id_etudiant"},
-        },
-    }
-    #if(current_user.id == id_etudiant):
-    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        request = {
+            "request": """
+                            SELECT id_partner_university, id_semestre
+                            FROM MOB_wishes
+                            WHERE id_etudiant = %(id_etudiant)s
+                              AND priority = %(target_priority)s
+                        """,
+            "params": {
+                "id_etudiant": id_etudiant,
+                "target_priority": target_priority,
+            },
+            "allowedRolesRequester": allowed,
+        }
+        #if(current_user.id == id_etudiant):
+        #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
 
-    target_rows = db_request(current_user, SQLRequest(**request))
-    if not target_rows:
-        raise HTTPException(status_code=400, detail="Impossible de deplacer ce voeu plus loin.")
+        target_rows = db_request(current_user, SQLRequest(**request), conn=conn)
+        if not target_rows:
+            raise HTTPException(status_code=400, detail="Impossible de deplacer ce voeu plus loin.")
 
-    target_id_partner_university = int(target_rows[0]["id_partner_university"])
-    target_id_semestre = int(target_rows[0]["id_semestre"])
+        target_id_partner_university = int(target_rows[0]["id_partner_university"])
+        target_id_semestre = int(target_rows[0]["id_semestre"])
 
-    # Step 1: move current wish to a temporary priority to avoid unique collisions.
-    request = {
-        "request": """
-                        UPDATE MOB_wishes
-                        SET priority = 0
-                        WHERE id_etudiant = %(id_etudiant)s
-                          AND id_partner_university = %(current_id_partner_university)s
-                          AND id_semestre = %(id_semestre)s
-                    """,
-        "params": {
-            "id_etudiant": id_etudiant,
-            "current_id_partner_university": id_partner_university,
-            "id_semestre": id_semestre,
-        },
-        "allowedRolesRequester": {
-            "roles": [],
-            "owner": {"role": "etudiant", "id": "id_etudiant"},
-        },
-    }
-    #if(current_user.id == id_etudiant):
-    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
-    db_request(current_user, SQLRequest(**request))
 
-    # Step 2: move target wish into current position.
-    request = {
-        "request": """
-                        UPDATE MOB_wishes
-                        SET priority = %(current_priority)s
-                        WHERE id_etudiant = %(id_etudiant)s
-                          AND id_partner_university = %(target_id_partner_university)s
-                          AND id_semestre = %(target_id_semestre)s
-                    """,
-        "params": {
-            "id_etudiant": id_etudiant,
-            "target_id_partner_university": target_id_partner_university,
-            "target_id_semestre": target_id_semestre,
-            "current_priority": current_priority,
-        },
-        "allowedRolesRequester": {
-            "roles": [],
-            "owner": {"role": "etudiant", "id": "id_etudiant"},
-        },
-    }
-    #if(current_user.id == id_etudiant):
-    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
-    db_request(current_user, SQLRequest(**request))
+        # Step 1: move current wish to a temporary priority to avoid unique collisions.
+        request = {
+            "request": """
+                            UPDATE MOB_wishes
+                            SET priority = 0
+                            WHERE id_etudiant = %(id_etudiant)s
+                              AND id_partner_university = %(current_id_partner_university)s
+                              AND id_semestre = %(id_semestre)s
+                        """,
+            "params": {
+                "id_etudiant": id_etudiant,
+                "current_id_partner_university": id_partner_university,
+                "id_semestre": id_semestre,
+            },
+            "allowedRolesRequester": allowed,
+        }
+        #if(current_user.id == id_etudiant):
+        #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        db_request(current_user, SQLRequest(**request), conn=conn)
 
-    # Step 3: move current wish from temporary value to target position.
-    request = {
-        "request": """
-                        UPDATE MOB_wishes
-                        SET priority = %(target_priority)s
-                        WHERE id_etudiant = %(id_etudiant)s
-                          AND id_partner_university = %(current_id_partner_university)s
-                          AND id_semestre = %(id_semestre)s
-                          AND priority = 0
-                    """,
-        "params": {
-            "id_etudiant": id_etudiant,
-            "current_id_partner_university": id_partner_university,
-            "id_semestre": id_semestre,
-            "target_priority": target_priority,
-        },
-        "allowedRolesRequester": {
-            "roles": [],
-            "owner": {"role": "etudiant", "id": "id_etudiant"},
-        },
-    }
-    #if(current_user.id == id_etudiant):
-    #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
-    db_request(current_user, SQLRequest(**request))
+        # Step 2: move target wish into current position.
+        request = {
+            "request": """
+                            UPDATE MOB_wishes
+                            SET priority = %(current_priority)s
+                            WHERE id_etudiant = %(id_etudiant)s
+                              AND id_partner_university = %(target_id_partner_university)s
+                              AND id_semestre = %(target_id_semestre)s
+                        """,
+            "params": {
+                "id_etudiant": id_etudiant,
+                "target_id_partner_university": target_id_partner_university,
+                "target_id_semestre": target_id_semestre,
+                "current_priority": current_priority,
+            },
+            "allowedRolesRequester": allowed,
+        }
+        #if(current_user.id == id_etudiant):
+        #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        db_request(current_user, SQLRequest(**request), conn=conn)
+
+        # Step 3: move current wish from temporary value to target position.
+        request = {
+            "request": """
+                            UPDATE MOB_wishes
+                            SET priority = %(target_priority)s
+                            WHERE id_etudiant = %(id_etudiant)s
+                              AND id_partner_university = %(current_id_partner_university)s
+                              AND id_semestre = %(id_semestre)s
+                              AND priority = 0
+                        """,
+            "params": {
+                "id_etudiant": id_etudiant,
+                "current_id_partner_university": id_partner_university,
+                "id_semestre": id_semestre,
+                "target_priority": target_priority,
+            },
+            "allowedRolesRequester": allowed,
+        }
+        #if(current_user.id == id_etudiant):
+        #    request["allowedRolesRequester"] += [current_user.ExplicitSecondaryK]
+        db_request(current_user, SQLRequest(**request), conn=conn)
 
     return {"message": "Voeu deplace.", "direction": direction}
 
@@ -768,32 +764,45 @@ def create_university_ri(
         "allowedRolesRequester": ["relations_internationales"],
     }
 
+    # try:
+    #     db_request(current_user, SQLRequest(**insert_request))
+    # except Exception as exc:
+    #     raise HTTPException(status_code=400, detail=f"Creation impossible: {exc}")
+    #
+    # select_request = {
+    #     "request": """
+    #                     SELECT id_partner_university
+    #                     FROM MOB_partner_university
+    #                     WHERE name = %(name)s
+    #                       AND country = %(country)s
+    #                     ORDER BY id_partner_university DESC
+    #                     LIMIT 1
+    #                 """,
+    #     "params": {
+    #         "name": name,
+    #         "country": country,
+    #     },
+    #     "allowedRolesRequester": ["relations_internationales"],
+    # }
+    # rows = db_request(current_user, SQLRequest(**select_request))
+    # if not rows:
+    #     raise HTTPException(status_code=500, detail="Universite creee mais identifiant introuvable.")
+    #
+    # id_partner_university = int(rows[0]["id_partner_university"])
+    # _sync_university_places(current_user, id_partner_university, payload.places)
     try:
-        db_request(current_user, SQLRequest(**insert_request))
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Creation impossible: {exc}")
-
-    select_request = {
-        "request": """
-                        SELECT id_partner_university
-                        FROM MOB_partner_university
-                        WHERE name = %(name)s
-                          AND country = %(country)s
-                        ORDER BY id_partner_university DESC
-                        LIMIT 1
-                    """,
-        "params": {
-            "name": name,
-            "country": country,
-        },
-        "allowedRolesRequester": ["relations_internationales"],
-    }
-    rows = db_request(current_user, SQLRequest(**select_request))
-    if not rows:
-        raise HTTPException(status_code=500, detail="Universite creee mais identifiant introuvable.")
-
-    id_partner_university = int(rows[0]["id_partner_university"])
-    _sync_university_places(current_user, id_partner_university, payload.places)
+        with get_connection() as conn:
+            db_request(current_user, SQLRequest(**insert_request), conn=conn)
+            rows = db_request(current_user, SQLRequest(
+                request="SELECT LAST_INSERT_ID() AS id_partner_university",
+                allowedRolesRequester=["relations_internationales"],
+            ), conn=conn)
+            id_partner_university = int(rows[0]["id_partner_university"])
+            _sync_university_places(current_user, id_partner_university, payload.places, conn)
+    except HTTPException as exc:
+        if exc.status_code == 403:
+            raise
+        raise HTTPException(status_code=400, detail=f"Creation impossible: {exc.detail}")
 
     return {
         "message": "Universite creee.",
@@ -810,6 +819,8 @@ def update_university_ri(
     payload: UniversityAdminPayload,
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
+    allowed = ["relations_internationales"]
+
     exists_request = {
         "request": """
                         SELECT id_partner_university
@@ -819,7 +830,7 @@ def update_university_ri(
         "params": {
             "id_partner_university": id_partner_university,
         },
-        "allowedRolesRequester": ["relations_internationales"],
+        "allowedRolesRequester": allowed,
     }
     rows = db_request(current_user, SQLRequest(**exists_request))
     if not rows:
@@ -865,14 +876,22 @@ def update_university_ri(
             "S8_total_places": payload.S8_total_places,
             "S9_total_places": payload.S9_total_places,
         },
-        "allowedRolesRequester": ["relations_internationales"],
+        "allowedRolesRequester": allowed,
     }
 
+    # try:
+    #     db_request(current_user, SQLRequest(**update_request))
+    #     _sync_university_places(current_user, id_partner_university, payload.places)
+    # except Exception as exc:
+    #     raise HTTPException(status_code=400, detail=f"Mise a jour impossible: {exc}")
     try:
-        db_request(current_user, SQLRequest(**update_request))
-        _sync_university_places(current_user, id_partner_university, payload.places)
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Mise a jour impossible: {exc}")
+        with get_connection() as conn:
+            db_request(current_user, SQLRequest(**update_request), conn=conn)
+            _sync_university_places(current_user, id_partner_university, payload.places, conn)
+    except HTTPException as exc:
+        if exc.status_code == 403:
+            raise
+        raise HTTPException(status_code=400, detail=f"Mise a jour impossible: {exc.detail}")
 
     return {
         "message": "Universite mise a jour.",
@@ -1427,11 +1446,12 @@ def export_mobility_diagnostics(
         headers=headers_dict
     )
 
-def sync_db_remaining_places(current_user):
+def sync_db_remaining_places(current_user, conn=None):
     """
     Recalculates the remaining places for all universities and specialties based
     strictly on the number of 'accepted' assignments.
     """
+    allowed = ["relations_internationales"]
     query1 = """
         UPDATE MOB_partner_university u
         SET S8_remaining_places = IFNULL(u.S8_total_places, 0) - (
@@ -1449,7 +1469,6 @@ def sync_db_remaining_places(current_user):
               AND a.status = 'accepted'
         )
     """
-    db_request(current_user, SQLRequest(request=query1, params=None, allowedRolesRequester=["relations_internationales"]))
 
     query2 = """
         UPDATE MOB_partner_university_places p
@@ -1464,7 +1483,13 @@ def sync_db_remaining_places(current_user):
               AND a.status = 'accepted'
         )
     """
-    db_request(current_user, SQLRequest(request=query2, params=None, allowedRolesRequester=["relations_internationales"]))
+    if conn:
+        db_request(current_user, SQLRequest(request=query1, params=None, allowedRolesRequester=allowed), conn=conn)
+        db_request(current_user, SQLRequest(request=query2, params=None, allowedRolesRequester=allowed), conn=conn)
+    else:
+        with get_connection() as conn:
+            db_request(current_user, SQLRequest(request=query1, params=None, allowedRolesRequester=allowed), conn=conn)
+            db_request(current_user, SQLRequest(request=query2, params=None, allowedRolesRequester=allowed), conn=conn)
 
 @router.get("/university/admin/places/export",
             tags=["admin", "mobility"],
@@ -1723,13 +1748,14 @@ def submit_student_decision(
 def close_assignment_phase(
     current_user: Annotated[User, Depends(get_current_active_user)]
 ):
-    sql_request = SQLRequest(
-        request="UPDATE MOB_assignment SET status = 'declined' WHERE status = 'pending'",
-        params=None,
-        allowedRolesRequester=["relations_internationales"]
-    )
-    db_request(current_user, sql_request)
-    sync_db_remaining_places(current_user)
+    with get_connection() as conn:
+        sql_request = SQLRequest(
+            request="UPDATE MOB_assignment SET status = 'declined' WHERE status = 'pending'",
+            params=None,
+            allowedRolesRequester=["relations_internationales"]
+        )
+        db_request(current_user, sql_request, conn=conn)
+        sync_db_remaining_places(current_user, conn=conn)
     return {"message": "Toutes les affectations en attente ont été refusées."}
 
 @router.post("/university/admin/campaign/launch",
@@ -1739,76 +1765,78 @@ def launch_mobility_campaign(
     payload: CampaignLaunchRequestPayload,
     current_user: Annotated[User, Depends(get_current_active_user)]
 ):
-    # 1. Update doublants
-    doublant_ids = []
-    if payload.doublants:
-        for d in payload.doublants:
-            doublant_ids.append(d.id_etudiant)
-            # Supprimer affectations / voeux existants pour le doublant
-            db_request(current_user, SQLRequest(
-                request="DELETE FROM MOB_assignment WHERE id_etudiant = %(id)s",
-                params={"id": d.id_etudiant},
-                allowedRolesRequester=["relations_internationales"]
-            ))
-            db_request(current_user, SQLRequest(
-                request="DELETE FROM MOB_wishes WHERE id_etudiant = %(id)s",
-                params={"id": d.id_etudiant},
-                allowedRolesRequester=["relations_internationales"]
-            ))
-            # Maj du score
-            db_request(current_user, SQLRequest(
-                request="UPDATE LNM_etudiant SET mobility_z_score = %(z)s WHERE id_etudiant = %(id)s",
-                params={"z": d.z_score, "id": d.id_etudiant},
-                allowedRolesRequester=["relations_internationales"]
-            ))
+    with get_connection() as conn:
 
-    # 2. Calculer stats par filière pour les autres
-    # On prend tous les étudiants de 4ème année ayant une note
-    doublant_filter = ""
-    if doublant_ids:
-        doublant_filter = f"AND e.id_etudiant NOT IN ({','.join(map(str, doublant_ids))})"
+        # 1. Update doublants
+        doublant_ids = []
+        if payload.doublants:
+            for d in payload.doublants:
+                doublant_ids.append(d.id_etudiant)
+                # Supprimer affectations / voeux existants pour le doublant
+                db_request(current_user, SQLRequest(
+                    request="DELETE FROM MOB_assignment WHERE id_etudiant = %(id)s",
+                    params={"id": d.id_etudiant},
+                    allowedRolesRequester=["relations_internationales"]
+                ), conn=conn)
+                db_request(current_user, SQLRequest(
+                    request="DELETE FROM MOB_wishes WHERE id_etudiant = %(id)s",
+                    params={"id": d.id_etudiant},
+                    allowedRolesRequester=["relations_internationales"]
+                ), conn=conn)
+                # Maj du score
+                db_request(current_user, SQLRequest(
+                    request="UPDATE LNM_etudiant SET mobility_z_score = %(z)s WHERE id_etudiant = %(id)s",
+                    params={"z": d.z_score, "id": d.id_etudiant},
+                    allowedRolesRequester=["relations_internationales"]
+                ), conn=conn)
 
-    stats_query = f"""
-        SELECT p.id_filiere, AVG(e.mobility_note) as mean_note, STDDEV(e.mobility_note) as std_note
-        FROM LNM_etudiant e
-        JOIN LNM_promo p ON e.id_promo = p.id_promo
-        WHERE p.annee = 4 AND e.mobility_note IS NOT NULL {doublant_filter}
-        GROUP BY p.id_filiere
-    """
-    stats_req = db_request(current_user, SQLRequest(request=stats_query, params=None, allowedRolesRequester=["relations_internationales"]))
+        # 2. Calculer stats par filière pour les autres
+        # On prend tous les étudiants de 4ème année ayant une note
+        doublant_filter = ""
+        if doublant_ids:
+            doublant_filter = f"AND e.id_etudiant NOT IN ({','.join(map(str, doublant_ids))})"
 
-    stats_map = {}
-    if stats_req and isinstance(stats_req, list):
-        for row in stats_req:
-            stats_map[row['id_filiere']] = row
+        stats_query = f"""
+            SELECT p.id_filiere, AVG(e.mobility_note) as mean_note, STDDEV(e.mobility_note) as std_note
+            FROM LNM_etudiant e
+            JOIN LNM_promo p ON e.id_promo = p.id_promo
+            WHERE p.annee = 4 AND e.mobility_note IS NOT NULL {doublant_filter}
+            GROUP BY p.id_filiere
+        """
+        stats_req = db_request(current_user, SQLRequest(request=stats_query, params=None, allowedRolesRequester=["relations_internationales"]), conn=conn)
 
-    # 3. Récupérer et mettre à jour les autres étudiants
-    students_query = f"""
-        SELECT e.id_etudiant, e.mobility_note, p.id_filiere
-        FROM LNM_etudiant e
-        JOIN LNM_promo p ON e.id_promo = p.id_promo
-        WHERE p.annee = 4 {doublant_filter}
-    """
-    students_req = db_request(current_user, SQLRequest(request=students_query, params=None, allowedRolesRequester=["relations_internationales"]))
+        stats_map = {}
+        if stats_req and isinstance(stats_req, list):
+            for row in stats_req:
+                stats_map[row['id_filiere']] = row
 
-    if students_req and isinstance(students_req, list):
-        for student in students_req:
-            note = student.get('mobility_note')
-            f_id = student.get('id_filiere')
-            z_score = 0.0
-            if note is not None and f_id in stats_map:
-                f_stats = stats_map[f_id]
-                std = float(f_stats.get('std_note') or 0.0)
-                mean = float(f_stats.get('mean_note') or 0.0)
-                if std > 0:
-                    z_score = round((float(note) - mean) / std, 4)
+        # 3. Récupérer et mettre à jour les autres étudiants
+        students_query = f"""
+            SELECT e.id_etudiant, e.mobility_note, p.id_filiere
+            FROM LNM_etudiant e
+            JOIN LNM_promo p ON e.id_promo = p.id_promo
+            WHERE p.annee = 4 {doublant_filter}
+        """
+        students_req = db_request(current_user, SQLRequest(request=students_query, params=None, allowedRolesRequester=["relations_internationales"]), conn=conn)
 
-            # Update
-            db_request(current_user, SQLRequest(
-                request="UPDATE LNM_etudiant SET mobility_z_score = %(z)s WHERE id_etudiant = %(id)s",
-                params={"z": z_score, "id": student['id_etudiant']},
-                allowedRolesRequester=["relations_internationales"]
-            ))
+        if students_req and isinstance(students_req, list):
+            for student in students_req:
+                note = student.get('mobility_note')
+                f_id = student.get('id_filiere')
+                z_score = 0.0
+                if note is not None and f_id in stats_map:
+                    f_stats = stats_map[f_id]
+                    std = float(f_stats.get('std_note') or 0.0)
+                    mean = float(f_stats.get('mean_note') or 0.0)
+                    if std > 0:
+                        z_score = round((float(note) - mean) / std, 4)
+
+                # Update
+                db_request(current_user, SQLRequest(
+                    request="UPDATE LNM_etudiant SET mobility_z_score = %(z)s WHERE id_etudiant = %(id)s",
+                    params={"z": z_score, "id": student['id_etudiant']},
+                    allowedRolesRequester=["relations_internationales"]
+                ), conn=conn)
 
     return {"message": "Campagne lancée et scores calculés avec succès."}
 

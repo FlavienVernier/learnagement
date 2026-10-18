@@ -49,7 +49,7 @@ router = APIRouter()
 #             "id_module": id_module,
 #             "id_etudiant": id_etudiant,
 #         },
-#         "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
+#         "allowedRolesRequester": ["connected_user"],
 #     }
 #     res = db_request(current_user, SQLRequest(**request))
 #     print(("res", res), flush=True)
@@ -167,7 +167,9 @@ def get_modules_responsable(
         "params": {
             "id_responsable": id_responsable,
         },
-        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": {
+            "roles": ["enseignant", "administratif"],
+        },
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -256,7 +258,9 @@ SELECT
         "params": {
             "id_intervenant": id_intervenant,
         },
-        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": {
+            "roles": ["enseignant", "administratif"],
+        },
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -284,7 +288,7 @@ def get_modules_etudiant(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -316,7 +320,9 @@ def get_sequencages_responsable(
         "params": {
             "id_responsable": id_responsable,
         },
-        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": {
+            "roles": ["enseignant", "administratif"],
+        },
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -354,7 +360,9 @@ def get_sequences_responsable(
         "params": {
             "id_responsable": id_responsable,
         },
-        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": {
+            "roles": ["enseignant", "administratif"],
+        },
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -398,7 +406,9 @@ def get_sessions_responsable(
         "params": {
             "id_responsable": id_responsable,
         },
-        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": {
+            "roles": ["enseignant", "administratif"],
+        },
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -529,7 +539,9 @@ def get_data_gantt_endpoint(
             "id_responsable_prv": id_responsable,
             "id_responsable_nxt": id_responsable,
         },
-        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": {
+            "roles": ["enseignant", "administratif"],
+        },
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -602,7 +614,7 @@ def get_data_gantt_endpoint_etudiant(
         "params": {
             "id_etudiant": id_etudiant,
         },
-        "allowedRolesRequester": ["connected_user"],  # ToDo check allowedRolesRequester
+        "allowedRolesRequester": ["connected_user"],
     }
     return db_request(current_user, SQLRequest(**request))
 
@@ -799,6 +811,11 @@ def add_sequencage(
     id_module: int,
     current_user: Annotated[User, Depends(get_current_active_user)],
     data: Dict[str, Any],):
+
+    required = ['nombre', 'id_seance_type', 'id_groupe_type', 'duree_h']
+    missing = [f for f in required if f not in data or data[f] in (None, "")]
+    if missing:
+        raise HTTPException(status_code=422, detail=f"Champs manquants : {missing}")
 
     if 'id_intervenant_principal' in data.keys() and data['id_intervenant_principal'] is not None and data['id_intervenant_principal'] != "":
         request = {

@@ -86,7 +86,7 @@
             if ($result && isset($result['access_token'])) {
                 // Le backend a géré seul le lookup/provisionnement
                 $jwt = $result["access_token"];
-                $secretKey = $_ENV["INSTANCE_SECRET"];
+                $secretKey = $_ENV["JWT_SIGNING_KEY"];
                 try {
                     $decoded = JWT::decode(
                         $jwt,

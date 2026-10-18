@@ -179,7 +179,8 @@ class TestAuthenticateCas:
         monkeypatch.setenv("CAS_ALLOWED_GROUPS_4_ADMINISTRATIF", "")
         monkeypatch.setenv("CAS_ALLOWED_GROUPS_4_ENSEIGNANT", "enseignants")
         monkeypatch.setenv("CAS_ALLOWED_GROUPS_4_ETUDIANT", "etudiants idu4-fise")
-        monkeypatch.setenv("INSTANCE_SECRET", "secret")
+        monkeypatch.setenv("CAS_SERVICE_TOKEN", str("secret_cas" + "a" * 64))
+        monkeypatch.setenv("JWT_SIGNING_KEY", str("secret_jwt" + "b" * 64))
         monkeypatch.setenv("SESSION_TIMEOUT", "900")
 
     @pytest.mark.asyncio

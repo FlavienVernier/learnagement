@@ -18,36 +18,38 @@ class CalendarUpdate(BaseModel):
 # Helper : Obtenir le rôle et le vrai ID depuis la vue
 #
 ######################################################
-def get_user_role_and_id(current_user: User):
-    """
-    Interroge la vue SQL pour récupérer le vrai ID et le rôle 
-    basé sur l'mail de l'utilisateur connecté.
-    """
-    req = {
-        "request": "SELECT id, role FROM VIEW_users_default_role WHERE mail = %(mail)s LIMIT 1;",
-        # Assure-toi que l'attribut s'appelle bien "mail" dans ton modèle User.
-        # Si c'est "mail" ou "username", modifie la ligne ci-dessous.
-        "params": {"mail": current_user.mail}, 
-        "allowedRolesRequester": ["connected_user"], # ToDo check allowedRolesRequester
-    }
-    
-    response = db_request(current_user, SQLRequest(**req))
-    
-    if not isinstance(response, list) or len(response) == 0:
-        raise HTTPException(status_code=404, detail="Utilisateur introuvable dans la vue des rôles.")
-        
-    user_data = response[0]
-    user_type = user_data.get("role", "etudiant").lower()
-    role_id = user_data.get("id")
-    
-    # Détermination de la bonne colonne
-    role_col = "id_etudiant"
-    if user_type == "enseignant":
-        role_col = "id_enseignant"
-    elif user_type == "administratif":
-        role_col = "id_administratif"
-        
-    return role_id, role_col, user_type
+
+# NEVER used
+# def get_user_role_and_id(current_user: User):
+#     """
+#     Interroge la vue SQL pour récupérer le vrai ID et le rôle
+#     basé sur l'mail de l'utilisateur connecté.
+#     """
+#     req = {
+#         "request": "SELECT id, role FROM VIEW_users_default_role WHERE mail = %(mail)s LIMIT 1;",
+#         # Assure-toi que l'attribut s'appelle bien "mail" dans ton modèle User.
+#         # Si c'est "mail" ou "username", modifie la ligne ci-dessous.
+#         "params": {"mail": current_user.mail},
+#         "allowedRolesRequester": ["connected_user"],
+#     }
+#
+#     response = db_request(current_user, SQLRequest(**req))
+#
+#     if not isinstance(response, list) or len(response) == 0:
+#         raise HTTPException(status_code=404, detail="Utilisateur introuvable dans la vue des rôles.")
+#
+#     user_data = response[0]
+#     user_type = user_data.get("role", "etudiant").lower()
+#     role_id = user_data.get("id")
+#
+#     # Détermination de la bonne colonne
+#     role_col = "id_etudiant"
+#     if user_type == "enseignant":
+#         role_col = "id_enseignant"
+#     elif user_type == "administratif":
+#         role_col = "id_administratif"
+#
+#     return role_id, role_col, user_type
 
 
 ######################################################
@@ -72,21 +74,22 @@ def get_user_calendar_urls(
         # "request": f"""
         #     SELECT url_name, url
         #     FROM LNM_calendar
-        #     WHERE {role_col} = %(role_id)s
+        #     WHERE {role_col} = %(user_id)s
         #     ORDER BY url_name ASC;
         # """,
         "request": f"""
             SELECT *
             FROM LNM_calendar 
-            WHERE {fields} = %(role_id)s 
+            WHERE {fields} = %(user_id)s 
             ORDER BY url_name ASC;
         """,
         "params": {
-            "role_id": id,
+            "user_id": id,
         },
-        # FixMe  Security vulnerability user is not check and structural role cannot be discriminate : access removed
-        "allowedRolesRequester": ["connected_user"],
-        #"allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles":[],
+            "owner": {"role": current_user.main_role, "id": "user_id"}
+        },
     }
 
     return db_request(current_user, SQLRequest(**request))
@@ -102,7 +105,7 @@ def get_user_calendar_urls(
              tags=["calendar"],
              summary="Update User Calendar URL",
              description="Saves a specific iCal URL")
-def update_user_calendar_url(
+def add_user_calendar_url(
     id: int,
     data: CalendarUpdate,
     current_user: Annotated[User, Depends(get_current_active_user)],
@@ -112,17 +115,18 @@ def update_user_calendar_url(
     request = {
         "request": f"""
             INSERT INTO LNM_calendar (url_name, {fields}, url) 
-            VALUES (%(url_name)s, %(role_id)s, %(url)s)
+            VALUES (%(url_name)s, %(user_id)s, %(url)s)
             ON DUPLICATE KEY UPDATE url = %(url)s, url_name = %(url_name)s;
         """,
         "params": {
             "url_name": data.url_name,
-            "role_id": id,
+            "user_id": id,
             "url": data.url,
         },
-        # FixMe  Security vulnerability user is not check and structural role cannot be discriminate : access removed
-        # "allowedRolesRequester": ["connected_user"],
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles":[],
+            "owner": {"role": current_user.main_role, "id": "user_id"}
+        },
     }
     
     return db_request(current_user, SQLRequest(**request))
@@ -137,21 +141,26 @@ def update_user_calendar_url(
     data: CalendarUpdate,
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
+    fields = f"id_{current_user.main_role}"
+
     request = {
         "request": f"""
             UPDATE `LNM_calendar` 
             SET `url_name` = %(url_name)s,
                 `url` = %(url)s
             WHERE id_calendar = %(id_calendar)s
+                AND {fields} = %(user_id)s
         """,
         "params": {
             "url_name": data.url_name,
             "url": data.url,
             "id_calendar": id_calendar,
+            "user_id": id, # To check ownership
         },
-        # FixMe  Security vulnerability user is not check and structural role cannot be discriminate : access removed
-        # "allowedRolesRequester": ["connected_user"].
-        "allowedRolesRequester": [],
+        "allowedRolesRequester": {
+            "roles":[],
+            "owner": {"role": current_user.main_role, "id": "user_id"}
+        },
     }
 
     return db_request(current_user, SQLRequest(**request))
