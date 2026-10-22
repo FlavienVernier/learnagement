@@ -111,7 +111,12 @@ def generate_external_cert(
 
     generate_self_signed_cert(
         common_name=domain,
-        san_dns_names=[domain, "localhost"],
+        san_dns_names=[
+            domain,
+            "localhost",
+            os.environ["BACKEND_PYTHON_DOCKER_URL"],
+            f"backend_python_{os.environ["INSTANCE_NAME"]}",
+        ],
         san_ip_addresses=san_ips,
         output_dir=output_dir,
         days_valid=365,
