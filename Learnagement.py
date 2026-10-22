@@ -5,37 +5,19 @@ import os
 import sys
 import shutil
 import subprocess
-import time
-import socket
 import datetime
-from time import sleep
 
 import dotenv
-import re
 import asyncio
 import click
+from click_default_group import DefaultGroup
 #from dotenv import load_dotenv
-from getpass import getpass
-from cryptography.hazmat.primitives.kdf.hkdf import HKDF
-from cryptography.hazmat.primitives import hashes
+from env import __load_env_file, save_env_file, __set_env, __generate_base_env, propagate_env
 from pwdlib import PasswordHash
 from pwdlib.hashers.bcrypt import BcryptHasher
 from pathlib import Path
 
-from sqlalchemy import true
-
-# Couleurs pour les messages (non directement nécessaires dans Python mais émulation via ANSI codes)
-RED = "\033[0;31m"
-GREEN = "\033[0;32m"
-YELLOW='\033[0;33m'
-#Blue='\033[0;34m'
-#Purple='\033[0;35m'
-#Cyan='\033[0;36m'
-#White='\033[0;37m'
-NC = "\033[0m"  # No color
-
-containers = ["docker", "backend_python", "front_PHP", "front_DashPlotly", "front_NextJS", ]
-envs = {"dev", "prod"}
+from config import RED, GREEN, YELLOW, NC, containers_system, containers_prod, containers_dev, envs
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
@@ -82,196 +64,6 @@ def __security_check():
     else:
         logging.info(f"{GREEN}App run from '{git_branch}' branch with '{os.environ['ENV']}' environment{NC}")
 
-#def generate_nextauth_secret(base_secret: str) -> bytes:
-def __generate_secret__(info: str) -> bytes:
-    base_secret = os.urandom(32).hex()
-    """
-    Génère une clé dérivée compatible avec NextAuth à partir d'un secret de base.
-    """
-
-    hkdf = HKDF(
-        algorithm=hashes.SHA256(),
-        length=32,  # 32 octets pour une clé symétrique
-        salt=b"",    # pas de sel ici, mais peut être personnalisé
-        info=info.encode('utf-8')
-    )
-    derived_key = hkdf.derive(base_secret.encode('utf-8'))
-    return derived_key
-
-
-#############################################################
-# Lernagement env management
-
-def __scan_envs(directory="."):
-    for filename in os.listdir(directory):
-        match = re.match(r'^\.env_(.+)\.env$', filename)
-        if match:
-            envs.add(match.group(1))
-
-def update_env_variable(env_variables, key=None, value=None):
-    updated = re.sub(
-        rf'^{key}=.*$',
-        f'{key}={value}',
-        env_variables,
-        flags=re.MULTILINE
-    )
-    return updated
-
-
-def __load_env_file(filepath: str) -> dict:
-    """
-    Lit un fichier env et retourne son contenu sous forme de dictionnaire.
-    Ignore les lignes vides et les commentaires (commençant par #).
-
-    Args:
-        filepath: Chemin vers le fichier .env
-
-    Returns:
-        Dictionnaire {clé: valeur} des variables d'environnement
-    """
-    env_vars = {}
-
-    with open(filepath, 'r', encoding='utf-8') as f:
-        for line in f:
-            line = line.strip()
-
-            # Ignorer les lignes vides et les commentaires
-            if not line or line.startswith('#'):
-                continue
-
-            # Séparer sur le premier '=' uniquement
-            if '=' not in line:
-                continue
-
-            key, _, value = line.partition('=')
-            key = key.strip()
-            value = value.strip()
-
-            # Supprimer les guillemets entourants si présents
-            if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
-                value = value[1:-1]
-
-            env_vars[key] = value
-
-    return env_vars
-
-
-def save_env_file(env_vars: dict, filepath: str) -> None:
-    """
-    Sauvegarde un dictionnaire sous forme de fichier .env.
-
-    Args:
-        env_vars: Dictionnaire {clé: valeur} des variables d'environnement
-        filepath: Chemin vers le fichier .env à créer/écraser
-    """
-    with open(filepath, 'w', encoding='utf-8') as f:
-        for key, value in env_vars.items():
-            # Ajouter des guillemets si la valeur contient des espaces
-            if ' ' in str(value):
-                f.write(f'{key}="{value}"\n')
-            else:
-                f.write(f'{key}={value}\n')
-
-
-def __set_env(env_vars: dict, filepath: str) -> dict:
-    """
-    Met à jour un dictionnaire de variables d'environnement avec les valeurs
-    contenues dans un fichier .env. Seules les clés déjà présentes dans le
-    dictionnaire sont mises à jour.
-
-    Args:
-        env_vars: Dictionnaire de référence {clé: valeur}
-        filepath: Chemin vers le fichier .env source
-
-    Returns:
-        Nouveau dictionnaire avec les valeurs mises à jour
-    """
-    file_vars = __load_env_file(filepath)
-
-    return {
-        key: file_vars.get(key, value)
-        for key, value in env_vars.items()
-    }
-
-
-# Generate default env variables
-def get_local_ip_and_hostname() -> tuple[str, str]:
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        # Ne se connecte pas vraiment, juste pour déterminer l'interface sortante
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-    except Exception:
-        ip = "127.0.0.1"
-    finally:
-        s.close()
-
-    # Résolution DNS inverse (équivalent nslookup) : si pas de PTR record, hostname = IP
-    try:
-        hostname = socket.gethostbyaddr(ip)[0]
-    except (socket.herror, socket.gaierror):
-        hostname = ip
-
-    return ip, hostname
-
-def __generate_base_env():
-    default_env_vars = __load_env_file("__env_skeleton.env")
-
-    # Instance
-
-    instance_name = input("Give the intance name (lowercase): ").lower()
-    default_env_vars["INSTANCE_NAME"] = instance_name
-    default_env_vars["COMPOSE_PROJECT_NAME"] = f"learnagement_{instance_name}"
-
-    default_env_vars["COMPOSE_PROJECT_NAME"] = f"learnagement_{instance_name}"
-
-
-    default_env_vars["CAS_SERVICE_TOKEN"] = str(__generate_secret__( info = "CAS Generated Encryption Key").hex())
-    default_env_vars["JWT_SIGNING_KEY"] = str(__generate_secret__( info = "LNM Generated Encryption Key").hex())
-    default_env_vars["NEXTAUTH_SECRET"] = str(__generate_secret__( info = "NextAuth.js Generated Encryption Key").hex())
-    protocol = "http"
-    default_env_vars["FRONT_PHP_PROTOCOL"] = protocol
-
-    default_env_vars["INSTANCE_PROTOCOL"] = protocol
-    default_env_vars["INSTANCE_IP"], default_env_vars["INSTANCE_URL"] = get_local_ip_and_hostname()
-
-    # MySQL
-    default_env_vars["MYSQL_SERVER"] = f"learnagement_mysql_{instance_name}"
-    default_env_vars["MYSQL_ROOT_PASSWORD"] = getpass("Give the MySQL Root password: ")
-    default_env_vars["MYSQL_USER_PASSWORD"] = getpass("Give the MySQL User password: ")
-    default_env_vars["LEARNAGEMENT_ADMINISTRATOR_PASSWORD"] = getpass("Give the Learnagement Administrator password: ")
-
-    #ToDo check if passwords are different if prod env
-    # ...
-
-    # Backend
-    default_env_vars["BACKEND_PYTHON_DOCKER_URL"] = f"learnagement_backend_python_{instance_name}"
-
-    return default_env_vars
-
-
-def update_env_file_variable(env_file=".env", key=None, value=None):
-    if key and value:
-        with open(env_file, 'r') as f:
-            content = f.read()
-
-        updated = update_env_variable(content, key, value)
-
-        with open(env_file, 'w') as f:
-            f.write(updated)
-
-        logging.warning(f"{YELLOW}Environment variables changed!{NC}")
-
-    # Load environment variables from the .env file
-    dotenv.load_dotenv()
-
-def propagate_env():
-    source_path = os.path.join("./", ".env")
-
-    for container in containers:
-        target_path = os.path.join(container, ".env")
-        shutil.copy(source_path, target_path)
-        logging.info(f"{GREEN}Copied: {source_path} -> {target_path}{NC}")
 
 
 
@@ -646,7 +438,7 @@ def __from_scratch__():
         except FileNotFoundError as e:
             logging.exception(e)
 
-        for container in containers:
+        for container in containers_system + containers_dev + containers_prod:
             try:
                 target_path = os.path.join(container, ".env")
                 os.remove(target_path)
@@ -714,7 +506,7 @@ def __stop__():
 ############################################
 # Lernagement commands
 
-@click.group()
+@click.group(cls=DefaultGroup, default='start', default_if_no_args=True)
 def cli(): pass
 
 # Generate default .env for dev environment
@@ -733,7 +525,7 @@ def generate_env(env="dev"):
 @click.option("--env", type=click.Choice(envs), default=None, help="Environment to use, (use previously used if not set)")
 def start(docker_option=None, restart:bool=False, rebuild:bool=False, test:bool=False, from_scratch:bool=False, env=None):
 
-    logging.info(f"{GREEN}Starting application with: {locals()} {NC}" )
+    logging.info(f"{GREEN}Starting application with: {locals()} {NC}")
 
     if not docker_option:
         docker_option = []

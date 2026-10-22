@@ -1,0 +1,198 @@
+import os
+import dotenv
+import logging
+
+def gen_docker_compose_yml(containers: list):
+    dotenv.load_dotenv()
+    try:
+        INSTANCE_NAME = os.getenv("INSTANCE_NAME")
+        MYSQL_DB = os.getenv("MYSQL_DB")
+        MYSQL_USER_LOGIN =  os.getenv("MYSQL_USER_LOGIN")
+        MYSQL_USER_PASSWORD = os.getenv("MYSQL_USER_PASSWORD")
+        MYSQL_ROOT_PASSWORD = os.getenv("MYSQL_ROOT_PASSWORD")
+        PHPMYADMIN_PORT = os.getenv("PHPMYADMIN_PORT")
+        PHPMYADMIN_DOCKER_PORT = os.getenv("PHPMYADMIN_DOCKER_PORT")
+        BACKEND_PYTHON_PORT = os.getenv("BACKEND_PYTHON_PORT")
+        BACKEND_PYTHON_DOCKER_PORT = os.getenv("BACKEND_PYTHON_DOCKER_PORT")
+        ENV = os.getenv("ENV")
+        SSL_INTERNAL_DIR = os.getenv("SSL_INTERNAL_DIR")
+        DOCKER_SSL_INTERNAL_DIR = os.getenv("DOCKER_SSL_INTERNAL_DIR")
+        INSTANCE_PROTOCOL = os.getenv("INSTANCE_PROTOCOL")
+        FRONT_PHP_PORT = os.getenv("FRONT_PHP_PORT")
+        FRONT_PHP_DOCKER_PORT = os.getenv("FRONT_PHP_DOCKER_PORT")
+        SSL_EXTERNAL_DIR = os.getenv("SSL_EXTERNAL_DIR")
+        DOCKER_SSL_EXTERNAL_DIR = os.getenv("DOCKER_SSL_EXTERNAL_DIR")
+        FRONT_NEXTAUTH_PORT = os.getenv("FRONT_NEXTAUTH_PORT")
+        FRONT_NEXTAUTH_DOCKER_PORT = os.getenv("FRONT_NEXTAUTH_DOCKER_PORT")
+        FRONT_DASH_PORT = os.getenv("FRONT_DASH_PORT")
+        FRONT_DASH_DOCKER_PORT = os.getenv("FRONT_DASH_DOCKER_PORT")
+    except Exception as e:
+        logging.error(e)
+
+    docker_compose_parts = {
+    "head": """
+services:
+    """,
+    "mysql": f"""
+    mysql_${INSTANCE_NAME}:
+        container_name: learnagement_mysql_${INSTANCE_NAME}
+        image: mysql:8.4
+        restart: always
+        networks:
+            - learnagement_back_${INSTANCE_NAME}
+        # ports
+            # NEVER SET PORTS FOR DB
+        command: --mysql-native-password=ON
+        environment:
+            - MYSQL_DATABASE=${MYSQL_DB}
+            - MYSQL_USER=${MYSQL_USER_LOGIN}
+            - MYSQL_PASSWORD=${MYSQL_USER_PASSWORD}
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+        volumes:
+            - ../db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+            - ./mysql/conf.d:/etc/mysql/conf.d
+            - learnagement_persistent_db_${INSTANCE_NAME}:/var/lib/mysql
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u$MYSQL_USER_LOGIN", "-p$MYSQL_USER_PASSWORD"]
+            start_period: 5s
+            interval: 5s
+            timeout: 5s
+            retries: 55
+    """,
+    "phpmyadmin": f"""
+    phpmyadmin_${INSTANCE_NAME}:
+        container_name: learnagement_phpmyadmin_${INSTANCE_NAME}
+        image: phpmyadmin
+        restart: always
+        networks:
+            - learnagement_back_${INSTANCE_NAME}
+        ports:
+            - ${PHPMYADMIN_PORT}:${PHPMYADMIN_DOCKER_PORT}
+        environment:
+            - PMA_HOST=mysql_${INSTANCE_NAME}
+            - RELATIONA_DISPLAY=D
+            - APACHE_HTTP_PORT_NUMBER=${PHPMYADMIN_DOCKER_PORT}
+        volumes:
+            - ./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
+        depends_on:
+            mysql_${INSTANCE_NAME}:
+                condition: service_healthy
+    """,
+    "backend_python": f"""
+    backend_python_${INSTANCE_NAME}:
+        container_name: learnagement_backend_python_${INSTANCE_NAME}
+        build: ./backend_python/
+        restart: no
+        networks:
+            - learnagement_back_${INSTANCE_NAME}
+            - learnagement_front_${INSTANCE_NAME}
+        ports:
+            - ${BACKEND_PYTHON_PORT}:${BACKEND_PYTHON_DOCKER_PORT}
+        environment:
+            - INSTANCE_NAME=${INSTANCE_NAME}
+            - ENV=${ENV}
+        volumes:
+            - ../backend_python/:/app/
+            - ../${SSL_INTERNAL_DIR}:${DOCKER_SSL_INTERNAL_DIR}:ro
+        depends_on:
+            mysql_${INSTANCE_NAME}:
+                condition: service_healthy
+        healthcheck:
+            test: ["CMD", "curl", "-fk", "${INSTANCE_PROTOCOL}://127.0.0.1:4000/health"]
+            start_period: 10s
+            interval: 5s
+            timeout: 5s
+            retries: 55
+    """,
+    "front_php": f"""
+    front_php_${INSTANCE_NAME}:
+        container_name: learnagement_php_${INSTANCE_NAME}
+        build: ./front_PHP/
+        restart: always
+        networks:
+              - learnagement_front_${INSTANCE_NAME}
+        ports:
+            - "${FRONT_PHP_PORT}:${FRONT_PHP_DOCKER_PORT}"
+        environment:
+            - INSTANCE_NAME=${INSTANCE_NAME}
+            - ENV=${ENV}
+        volumes:
+            - ../front_PHP:/var/www/html
+            - ./log/php:/var/log/apache2
+            - ./front_PHP/lnm-php.ini:/usr/local/etc/php/conf.d/lnm-php.ini
+            - ../${SSL_INTERNAL_DIR}:${DOCKER_SSL_INTERNAL_DIR}:ro
+            - ../${SSL_EXTERNAL_DIR}:${DOCKER_SSL_EXTERNAL_DIR}:ro
+        depends_on:
+            backend_python_${INSTANCE_NAME}:
+                condition: service_healthy
+    """,
+    "front_nextjs": f"""
+    front_nextjs_${INSTANCE_NAME}:
+        container_name: learnagement_nextjs_${INSTANCE_NAME}
+        build: ./front_NextJS
+        restart: always
+        networks:
+              - learnagement_front_${INSTANCE_NAME}
+        ports:
+            - "${FRONT_NEXTAUTH_PORT}:${FRONT_NEXTAUTH_DOCKER_PORT}"
+        environment:
+            - INSTANCE_NAME=${INSTANCE_NAME}
+            - ENV=${ENV}
+        volumes:
+            - ../front_NextJS:/app
+            - ../front_NextJS/node_modules:/app/node_modules
+            - ../${SSL_INTERNAL_DIR}:${DOCKER_SSL_INTERNAL_DIR}:ro
+            - ../${SSL_EXTERNAL_DIR}:${DOCKER_SSL_EXTERNAL_DIR}:ro
+        depends_on:
+            backend_python_${INSTANCE_NAME}:
+                condition: service_healthy
+    """,
+    "front_dashplotly": f"""
+    front_dashplotly_${INSTANCE_NAME}:
+        container_name: learnagement_python_web_server_${INSTANCE_NAME}
+        build: ./front_DashPlotly/
+        restart: always
+        networks:
+              - learnagement_front_${INSTANCE_NAME}
+        ports:
+            - "${FRONT_DASH_PORT}:${FRONT_DASH_DOCKER_PORT}"
+        environment:
+            - INSTANCE_NAME=${INSTANCE_NAME}
+            - ENV=${ENV}
+        volumes:
+            - ../front_DashPlotly/:/app/
+            - ../front_DashPlotly/data/:/data/
+            - ../${SSL_INTERNAL_DIR}:${DOCKER_SSL_INTERNAL_DIR}:ro
+            - ../${SSL_EXTERNAL_DIR}:${DOCKER_SSL_EXTERNAL_DIR}:ro
+        depends_on:
+            backend_python_${INSTANCE_NAME}:
+                condition: service_healthy
+    """,
+    "volumes": f"""
+volumes:
+    learnagement_persistent_db_${INSTANCE_NAME}:
+    """,
+    "networks": f"""
+networks:
+    # network to access to fronts (only fronts and backends on this network)
+    learnagement_front_${INSTANCE_NAME}:
+        name: learnagement_front_${INSTANCE_NAME}
+        driver: bridge
+    # network to access to back (only backends and data storages on this network)
+    learnagement_back_${INSTANCE_NAME}:
+        name: learnagement_back_${INSTANCE_NAME}
+        driver: bridge
+    
+    """,
+    }
+    os.chdir("docker")
+
+    docker_compose_file = "docker-compose.yml"
+    with open(docker_compose_file, 'w') as file:
+        file.write(docker_compose_parts["head"])
+        for container in containers:
+            file.write(docker_compose_parts[container])
+        file.write(docker_compose_parts["volumes"])
+        file.write(docker_compose_parts["networks"])
+
+    os.chdir("..")

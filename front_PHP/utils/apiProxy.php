@@ -33,6 +33,7 @@ function forwardToBackend(
     unset($ch);
 
     if ($response === false) {
+        getLogger()->error("Forwarding to backend error: " . $curlError);
         return ['status' => 0, 'body' => null, 'error' => $curlError];
     }
 

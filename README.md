@@ -14,7 +14,15 @@ Python 3.
 
 ## Installation et lancement
 
-### Dev Mode
+### Dev Mode (Bootstrap)
+
+Création de l'environnement, installation ou mise à jour des requirements, lancement de l'app
+```bash
+python3 bootstrap.py
+```
+L'environnement sera créé dans /.venv
+
+### Dev Mode (a la mano)
 
 Initialisation de l'environnement à ne faire qu'une seule fois
 ```bash
@@ -44,21 +52,20 @@ python Learnagement.py --help
 
 Generate self certificate:
 ```bash
-mkdir certs
-cd certs
-openssl req \                                                  
-  -x509 \
-  -newkey rsa:4096 \
-  -nodes \
-  -keyout key.pem \
-  -out cert.pem \
-  -days 365
-cd -
+python Learnagement_Security.py 
 ```
+
+Generate environment
+```bash
+python bootstrap.py generate-env --env prod
+```
+
+Edit the .env file to configure your instance.
 
 Run with prod environnement (secure):
 ```bash
-python Learnagement.py start --env
+source .venv/bin/activate
+python Learnagement.py start --env prod
 ```
 Note, containers will rebuild.
 
