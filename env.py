@@ -6,7 +6,7 @@ from getpass import getpass
 
 import dotenv
 from tools import get_local_ip_and_hostname, __generate_secret__
-from config import GREEN, YELLOW, NC, containers_system, containers_prod, containers_dev, envs
+from config import GREEN, YELLOW, NC, containers, container_app_dirs, envs
 
 
 def __scan_envs(directory="."):
@@ -124,7 +124,7 @@ def __generate_base_env():
     default_env_vars["INSTANCE_IP"], default_env_vars["INSTANCE_URL"] = get_local_ip_and_hostname()
 
     # MySQL
-    default_env_vars["MYSQL_SERVER"] = f"learnagement_mysql_{instance_name}"
+    default_env_vars["MYSQL_SERVER"] = f"learnagement_data_mysql_{instance_name}"
     default_env_vars["MYSQL_ROOT_PASSWORD"] = getpass("Give the MySQL Root password: ")
     default_env_vars["MYSQL_USER_PASSWORD"] = getpass("Give the MySQL User password: ")
     default_env_vars["LEARNAGEMENT_ADMINISTRATOR_PASSWORD"] = getpass("Give the Learnagement Administrator password: ")
@@ -156,8 +156,26 @@ def update_env_file_variable(env_file=".env", key=None, value=None):
 
 def propagate_env():
     source_path = os.path.join("./", ".env")
+    dotenv.load_dotenv()
 
-    for container in containers_system + containers_dev + containers_prod:
-        target_path = os.path.join(container, ".env")
-        shutil.copy(source_path, target_path)
-        logging.info(f"{GREEN}Copied: {source_path} -> {target_path}{NC}")
+    for container in containers[os.environ["ENV"]]:
+        if container_app_dirs[container]:
+            target_path = os.path.join(container_app_dirs[container], ".env")
+            shutil.copy(source_path, target_path)
+            logging.info(f"{GREEN}Copied: {source_path} -> {target_path}{NC}")
+
+def remove_env_file():
+        for container in containers[os.environ["ENV"]]:
+            if container_app_dirs[container]:
+                try:
+                    target_path = os.path.join(container_app_dirs[container], ".env")
+                    os.remove(target_path)
+                except FileNotFoundError as e:
+                    logging.exception(e)
+
+        try:
+            os.remove(".env")
+            os.remove(".env_dev.env")
+            os.remove(".env_prod.env")
+        except FileNotFoundError as e:
+            logging.exception(e)

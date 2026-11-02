@@ -9,7 +9,31 @@ RED = "\033[0;31m"
 GREEN = "\033[0;32m"
 YELLOW='\033[0;33m'
 NC = "\033[0m"  # No color
-containers_system = ["docker", "backend_python", ] # system docker
-containers_prod = ["front_PHP", "front_DashPlotly", ] # available in prod and dev
-containers_dev = ["front_NextJS", ] # available only in dev
+#containers_system = ["docker", "backend_python", ] # system docker
+#containers_prod = ["front_PHP", "front_DashPlotly", ] # available in prod and dev
+#containers_dev = ["front_NextJS", ] # available only in dev
+containers = {
+    "dev":["data_mysql",
+            "phpmyadmin",
+            "backend_python",
+            "front_php",
+            "front_dashplotly",
+            "front_nextjs", # Only in dev
+           ],
+    "prod":["data_mysql",
+            "phpmyadmin",
+            "backend_python",
+            "front_php",
+            "front_dashplotly",
+            ],
+}
+container_app_dirs = {
+        "data_mysql": "db",
+        "phpmyadmin": None,
+        "backend_python": "backend_python",
+        "front_php": "front_php",
+        "front_dashplotly": "front_dashplotly",
+        "front_nextjs": "front_nextjs",
+}
+
 envs = {"dev", "prod"}

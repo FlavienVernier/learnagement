@@ -692,7 +692,7 @@ def list_university_catalog_ri(
                         LEFT JOIN LNM_filiere f ON f.id_filiere = pl.id_filiere
                         ORDER BY u.name ASC, f.nom_filiere ASC, pl.annee ASC
                     """,
-        "allowedRolesRequester": ["relations_internationales"],
+        "allowedRolesRequester": ["connected_user"],
     }
     universities = db_request(current_user, SQLRequest(**request_catalog))
 
@@ -705,7 +705,7 @@ def list_university_catalog_ri(
                         WHERE annee IN (4, 5)
                         ORDER BY annee ASC
                     """,
-        "allowedRolesRequester": ["relations_internationales"],
+        "allowedRolesRequester": ["connected_user"],
     }
     semesters = db_request(current_user, SQLRequest(**request_semesters))
 

@@ -7,17 +7,18 @@ import shutil
 import subprocess
 import datetime
 
+import docker_compose
 import dotenv
 import asyncio
 import click
 from click_default_group import DefaultGroup
 #from dotenv import load_dotenv
-from env import __load_env_file, save_env_file, __set_env, __generate_base_env, propagate_env
+from env import __load_env_file, save_env_file, __set_env, __generate_base_env, propagate_env, remove_env_file
 from pwdlib import PasswordHash
 from pwdlib.hashers.bcrypt import BcryptHasher
 from pathlib import Path
 
-from config import RED, GREEN, YELLOW, NC, containers_system, containers_prod, containers_dev, envs
+from config import RED, GREEN, YELLOW, NC, containers, envs
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
@@ -431,19 +432,8 @@ def __from_scratch__():
             os.remove(os.path.join("docker", "docker-compose.yml"))
         except FileNotFoundError as e:
             logging.exception(e)
-        try:
-            os.remove(".env")
-            os.remove(".env_dev.env")
-            os.remove(".env_prod.env")
-        except FileNotFoundError as e:
-            logging.exception(e)
 
-        for container in containers_system + containers_dev + containers_prod:
-            try:
-                target_path = os.path.join(container, ".env")
-                os.remove(target_path)
-            except FileNotFoundError as e:
-                logging.exception(e)
+        remove_env_file()
 
         logging.info(f"{GREEN}The application was reset to its initial state.{NC}")
 
@@ -467,7 +457,9 @@ async def __start__(docker_option=None):
     __dbConfiguration__()
     __dbData_configuration__()
 
-    __docker_configuration__()
+    #__docker_configuration__()
+    docker_compose.gen_docker_compose_yml(containers[os.environ["ENV"]])
+
     __security_check()
     task = asyncio.create_task(__run_dockers__(docker_option))
 

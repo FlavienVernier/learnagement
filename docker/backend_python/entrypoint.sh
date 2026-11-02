@@ -3,10 +3,18 @@
 
 cd /app
 
-apt-get update && apt-get install -y \
-    libldap2-dev \
-    libsasl2-dev \
-    libssl-dev
+apt-get -o APT::Status-Fd=0 \
+        -o Dpkg::Progress-Fancy=0 \
+        -o APT::Color=0 \
+        -o Acquire::http::Timeout=60 \
+        -o Debug::pkgAcquire::Worker=0 \
+        update
+apt-get -o APT::Status-Fd=0 \
+        -o Dpkg::Progress-Fancy=0 \
+        install -y \
+        libldap2-dev \
+        libsasl2-dev \
+        libssl-dev
 
 python -m venv docker_venv
 
