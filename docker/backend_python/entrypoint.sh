@@ -3,16 +3,23 @@
 
 cd /app
 
-python -m venv docker_venv
+VENV_PATH=/opt/docker_venv
+python -m venv "$VENV_PATH"
 
-. docker_venv/bin/activate
+. "$VENV_PATH/bin/activate"
 
-# Vérifier si l'installation a déjà été effectuée
-if [ ! -f "docker_venv/.installed" ]; then
+# Réinstaller si les dépendances ont changé depuis la dernière installation.
+requirements_hash=$(sha256sum requirements.txt | cut -d ' ' -f 1)
+installed_hash=""
+if [ -f "$VENV_PATH/.installed" ]; then
+    installed_hash=$(cat "$VENV_PATH/.installed")
+fi
+
+if [ "$installed_hash" != "$requirements_hash" ]; then
     echo "Première installation des dépendances..."
     pip install --upgrade pip
     pip install -r requirements.txt
-    touch docker_venv/.installed
+    printf '%s' "$requirements_hash" > "$VENV_PATH/.installed"
 else
     echo "Dépendances déjà installées, on passe..."
 fi

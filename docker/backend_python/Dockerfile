@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3.14
 
 # Define container app directory
 RUN mkdir /app

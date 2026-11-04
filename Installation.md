@@ -33,7 +33,7 @@ Lors du lancement de l'application veillez à :
 - Nommer votre instance ( ici dev )
 - Entrer un mot de passe Root pour la BDD ( ici toto )
 - Entrer un mot de passe pour le User de la BDD ( ici toto )
-- Lorsque le ligne Then press enter apparait, copier et coller le fichier ```.\db\freeData\V0.0.5__data_small.```sql  dans le dossier ```.\db\data\``` puis appuyer sur "Enter" pour continuer le lancement de l'application.
+- Lorsque le ligne Then press enter apparait, copier et coller le fichier ```.\db\freeData\V0.0.5__data_small.sql```  dans le dossier ```.\db\data\``` puis appuyer sur "Enter" pour continuer le lancement de l'application.
   ![image](.\ImagesMarkdown\EtapeLancement2.png)
 
 - Docker :
