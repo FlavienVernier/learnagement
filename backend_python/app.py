@@ -107,3 +107,5 @@ if __name__ == "__main__":
         })
 
     uvicorn.run(app, **uvicorn_kwargs)
+
+    # ToDo test FastGRPC https://github.com/barakplasma/FastGRPC

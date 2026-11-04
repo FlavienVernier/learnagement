@@ -15,6 +15,8 @@ import sys
 import os
 import venv
 
+from git import install_hooks, write_commit_file
+
 VENV_DIR = ".venv"
 APP_MODULE = "Learnagement"
 REQUIREMENTS = "requirements.txt"
@@ -43,6 +45,25 @@ def install_dependencies(pip: str) -> None:
     else:
         print(f"!! {REQUIREMENTS} introuvable, installation ignorée.")
 
+def configure_git() -> None:
+    """
+    Met en place le suivi automatique du hash de commit :
+    - installe les hooks Git (post-commit, post-merge, post-rewrite) ;
+    - écrit immédiatement `.commit_id` pour la session en cours
+      (utile si les hooks viennent d'être installés ou en cas de premier clone).
+    """
+    written = install_hooks(repo_dir=".", short=True)
+    if written:
+        print(f">> Hooks Git installés ({len(written)}) : {', '.join(h.name for h in written)}")
+    else:
+        print("!! Pas de dépôt Git détecté, hooks non installés.")
+
+    commit = write_commit_file(short=True)
+    if commit:
+        print(f">> Commit courant : {commit}")
+    else:
+        print("!! Impossible de lire le hash de commit.")
+
 def run_app(python: str, args: list[str]) -> None:
     """Lance l'application dans le venv avec les arguments fournis."""
     print(">> Lancement de l'application...")
@@ -58,6 +79,7 @@ def main() -> None:
     create_venv()
     pip, python = get_venv_executables()
     install_dependencies(pip)
+    configure_git()
     run_app(python, args)
 
 if __name__ == "__main__":

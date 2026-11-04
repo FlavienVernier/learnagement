@@ -13,7 +13,8 @@ import asyncio
 import click
 from click_default_group import DefaultGroup
 #from dotenv import load_dotenv
-from env import __load_env_file, save_env_file, __set_env, __generate_base_env, propagate_env, remove_env_file
+from env import save_env_file, __set_env, propagate_env, remove_env_file, __load_all_env, __scan_envs, load_env
+from git import __get_git_branch
 from pwdlib import PasswordHash
 from pwdlib.hashers.bcrypt import BcryptHasher
 from pathlib import Path
@@ -30,16 +31,6 @@ MAX_SESSION_TIMEOUT = 60 * 60 * 24 * 1   # 1 jours
 
 #############################################################
 # Lernagement security
-
-def __get_git_branch():
-    try:
-        branch = subprocess.check_output(
-            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-            stderr=subprocess.DEVNULL
-        ).decode("utf-8").strip()
-        return branch
-    except Exception:
-        return None
 
 def __check_certificates():
     dotenv.load_dotenv()
@@ -345,38 +336,9 @@ def __validate_env__(ctx, param, value):
 #############################################################
 # Lernagement command options
 
-def __generate_env__(env="dev"):
-    if not os.path.exists(".env"):
-
-        if not os.path.exists(".env_dev.env"):
-            shutil.copy("__env_default_dev.env", ".env_dev.env")
-        if not os.path.exists(".env_prod.env"):
-            shutil.copy("__env_default_prod.env", ".env_prod.env")
-
-        logging.warning(f"{YELLOW}env file doesn't exist, generate it with '{env}' environnement {NC}")
-
-        env_vars = __generate_base_env()
-
-        #env_vars = __set_env(env_vars, "env_default.env")
-
-        # if(env == "dev"):
-        #     env_vars = __set_env(env_vars, "env_dev.env")
-        # elif(env == "prod"):
-        #     env_vars = __set_env(env_vars, "env_prod.env")
-
-        if not os.path.exists(f".env_{env}.env"):
-            logging.error(f"{RED}Specific env file '.env_{env}.env' doesn't exist{NC}")
-            exit()
-        env_vars = __set_env(env_vars, f".env_{env}.env")
-
-        save_env_file(env_vars, ".env")
-
-    propagate_env()
-    dotenv.load_dotenv()
-
 def __from_env__(env=None):
-    __generate_env__()
-    if env:
+    load_env(env)
+    if env != os.environ["ENV"]:
 
         logging.info(f"{GREEN}Switch to env: {env}{NC}")
 
@@ -386,17 +348,15 @@ def __from_env__(env=None):
         except FileNotFoundError as e:
             logging.exception(e)
 
-        env_vars = __load_env_file(".env")
-        if env == "prod":
-            env_vars = __set_env(env_vars, ".env_prod.env")
+        remove_env_file()
 
-        else:
-            env_vars = __set_env(env_vars, ".env_dev.env")
+        load_env(env)
 
-        save_env_file(env_vars, ".env")
 
-    # Update .env for each sub-app
-    propagate_env()
+        # Update .env for each sub-app
+        propagate_env()
+        logging.info(f"{YELLOW}Environment switched, restart required{NC}")
+        exit()
 
 def __from_scratch__():
     dotenv.load_dotenv()
@@ -450,7 +410,7 @@ async def __start__(docker_option=None):
     if not docker_option:
         docker_option = []
     # __mainConfiguration__()
-    __generate_env__()
+    load_env(None)
 
     dotenv.load_dotenv()
 
@@ -505,7 +465,7 @@ def cli(): pass
 @cli.command(help="Generate environment without starting the application")
 @click.option("--env", type=click.Choice(envs), default="dev", help="Environment to use: " + ", ".join(envs))
 def generate_env(env="dev"):
-    __generate_env__(env)
+    load_env(env)
 
 
 @cli.command(help="Start the application")
@@ -627,6 +587,7 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
         with open(triggerFile, 'w') as fout:
             fout.writelines(data[1:])
 
+# FixMe PASSWORD SAVED !!!
 @cli.command(help="Export the current instance as a zip archive")
 def exportInstance():
     dotenv.load_dotenv()
