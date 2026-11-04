@@ -2,11 +2,11 @@ import logging
 import os
 import re
 import shutil
-from getpass import getpass
+
 
 import dotenv
 from dotenv import dotenv_values
-from tools import get_local_ip_and_hostname, __generate_secret__
+from tools import get_local_ip_and_hostname, __generate_secret__, __ask
 from config import GREEN, YELLOW, NC, containers, container_app_dirs, envs, RED
 
 ############################
@@ -166,7 +166,8 @@ def __generate_base_env():
 
     # Instance
 
-    instance_name = input("Give the intance name (lowercase): ").lower()
+    #instance_name = input("Give the intance name (lowercase): ").lower()
+    instance_name = __ask("Give the intance name (lowercase): ").lower()
     default_env_vars["INSTANCE_NAME"] = instance_name
     default_env_vars["COMPOSE_PROJECT_NAME"] = f"learnagement_{instance_name}"
 
@@ -184,10 +185,12 @@ def __generate_base_env():
 
     # MySQL
     default_env_vars["MYSQL_SERVER"] = f"learnagement_data_mysql_{instance_name}"
-    default_env_vars["MYSQL_ROOT_PASSWORD"] = getpass("Give the MySQL Root password: ")
-    default_env_vars["MYSQL_USER_PASSWORD"] = getpass("Give the MySQL User password: ")
-    default_env_vars["LEARNAGEMENT_ADMINISTRATOR_PASSWORD"] = getpass("Give the Learnagement Administrator password: ")
-
+    #default_env_vars["MYSQL_ROOT_PASSWORD"] = getpass("Give the MySQL Root password: ")
+    #default_env_vars["MYSQL_USER_PASSWORD"] = getpass("Give the MySQL User password: ")
+    #default_env_vars["LEARNAGEMENT_ADMINISTRATOR_PASSWORD"] = getpass("Give the Learnagement Administrator password: ")
+    default_env_vars["MYSQL_ROOT_PASSWORD"] = __ask("MySQL Root password: ", secret=True)
+    default_env_vars["MYSQL_USER_PASSWORD"] = __ask("Give the MySQL User password: ", secret=True)
+    default_env_vars["LEARNAGEMENT_ADMINISTRATOR_PASSWORD"] =  __ask("Give the Learnagement Administrator password: ", secret=True)
     #ToDo check if passwords are different if prod env
     # ...
 
@@ -252,7 +255,9 @@ def load_env(env: str | None = None):
 
         #logging.warning(f"{YELLOW}env file doesn't exist, generate it with '{env}' environnement {NC}")
         if not env:
-            env = input(f"{YELLOW}env file doesn't exist and environment not specified, give the required environment (alpha lowercase): {NC}").lower()
+            print(f"{YELLOW}env file doesn't exist and environment not specified.{NC}")
+            env = __ask("Give the required environment (alpha lowercase): ").lower()
+            #env = input("Give the required environment (alpha lowercase): ").lower()
 
         env_vars = __generate_base_env()
 

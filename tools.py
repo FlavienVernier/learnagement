@@ -1,5 +1,8 @@
 import os
 import socket
+import sys
+
+from getpass import getpass
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
@@ -40,4 +43,12 @@ def __generate_secret__(info: str) -> bytes:
     derived_key = hkdf.derive(base_secret.encode('utf-8'))
     return derived_key
 
-
+def __ask(prompt: str, secret: bool = False, env_key: str | None = None) -> str:
+    if env_key and os.environ.get(env_key):
+        return os.environ[env_key]
+    if not sys.stdin.isatty():
+        raise RuntimeError(
+            f"Entrée interactive impossible (pas de TTY) : définis {env_key or 'la valeur'} "
+            "en variable d'environnement."
+        )
+    return getpass(prompt) if secret else input(prompt)
