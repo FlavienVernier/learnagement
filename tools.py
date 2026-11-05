@@ -7,6 +7,16 @@ from getpass import getpass
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
+import atexit, termios
+
+
+def __protect_tty__():
+    if not sys.stdin.isatty():
+        return
+    fd = sys.stdin.fileno()
+    saved = termios.tcgetattr(fd)
+    atexit.register(lambda: termios.tcsetattr(fd, termios.TCSADRAIN, saved))
+
 
 def get_local_ip_and_hostname() -> tuple[str, str]:
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

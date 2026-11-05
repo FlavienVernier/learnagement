@@ -20,9 +20,17 @@ from pwdlib.hashers.bcrypt import BcryptHasher
 from pathlib import Path
 
 from config import RED, GREEN, YELLOW, NC, containers, envs
+from tools import __protect_tty__
 
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+logging.basicConfig(format=f'{RED}Learnagement   |{NC}  %(asctime)s,%(msecs)03d - %(levelname)s - %(message)s',
+                    level=logging.INFO,
+                    datefmt='%Y-%m-%d %H:%M:%S'
+                    )
 
+#logging.basicConfig(
+#    format='%(levelname)s: %(message)s', level=logging.INFO,
+#    handlers=[logging.StreamHandler(), logging.FileHandler("learnagement.log", encoding="utf-8")],
+#)
 
 ALGORITHM = "HS256"
 MIN_KEY_BYTES = 32   # RFC 7518 §3.2 pour HS256
@@ -71,7 +79,7 @@ def __set_lnm_administrator__():
     request = f"""INSERT INTO `LNM_administratif`(`id_administratif`, `nom`, `prenom`, `mail`, `login`, `password`, `password_updated`)
                 VALUES(NULL, 'Administrator', 'Administrator', 'administrator@lnm.fr', NULL, '{hashed_passwd}', '0')"""
 
-    container_name = "learnagement_mysql_" + os.environ["INSTANCE_NAME"]
+    container_name = os.environ["MYSQL_SERVER"]
     db_user = os.environ["MYSQL_USER_LOGIN"]
     db_password = os.environ["MYSQL_USER_PASSWORD"]
     db_name = os.environ["MYSQL_DB"]
@@ -89,10 +97,12 @@ def __set_lnm_administrator__():
 
         # Code MySQL 1062 = Duplicate entry -> l'administrateur existe déjà, ce n'est pas une erreur
         if "1062" in stderr or "Duplicate entry" in stderr:
-            print("L'administrateur existe déjà, aucune action nécessaire.")
+            logging.info(f"{GREEN}L'administrateur existe déjà, aucune action nécessaire.{NC}")
             return None
-
+        logging.info(f"{RED}Add administrator: {result.stderr.strip()}{NC}")
         raise RuntimeError(result.stderr.strip())
+
+    logging.info(f"{GREEN}Administrator added{NC}")
 
     return result.stdout
 
@@ -104,8 +114,18 @@ async def __wait_for_mysql_healthy__(container_name: str, timeout: int = 300, po
         cmd = os.environ["DOCKER_COMMAND"].split(" ") + [
             "inspect", "--format={{.State.Health.Status}}", container_name
         ]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        status = result.stdout.strip()
+        # result = subprocess.run(cmd, capture_output=True, text=True)
+        # status = result.stdout.strip()
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            #text=True
+        )
+        stdout, _ = await proc.communicate()
+        #status = stdout.strip()
+        status = stdout.decode().strip()
+        logging.info(f"{container_name} health: {status!r}")
 
         if status == "healthy":
             return True
@@ -124,7 +144,7 @@ async def __set_lnm_administrator_with_retry__(max_retries: int = 10, retry_dela
     last_error = None
 
     for attempt in range(1, max_retries + 1):
-        print("Tentative d'ajout de l'Administrateur")
+        logging.info("Tentative d'ajout de l'Administrateur")
         try:
             result = await asyncio.to_thread(__set_lnm_administrator__)
             return result
@@ -188,38 +208,13 @@ def __dbData_configuration__():
     data_folder = os.path.join("db", "data")
     try:
         os.makedirs(data_folder, exist_ok=False) # if it exists, an exception is thrown
-        # Dossiers source et cible
-        #free_data_folder = "db/freeData"
-
-        # Vérifie si le dossier cible existe, sinon le crée
-        #os.makedirs(data_folder, exist_ok=True)
 
         print("If you want an initial data set, put it into 'db/data' folder with name matches with [0-9]*.sql.")
         print("Free data samples are available at 'db/freeData' folder.")
         input("Then press enter")
-        # if "y" == input("Do you want to start with free data (y/n)? "):
-        #     # Parcourt tous les fichiers dans le dossier source
-        #     for filename in os.listdir(free_data_folder):
-        #         source_path = os.path.join(free_data_folder, filename)
-        #         target_path = os.path.join(data_folder, filename)
-        #
-        #         # Vérifie si l'élément est un fichier (et non un dossier)
-        #         if os.path.isfile(source_path):
-        #             # Copie le fichier
-        #             shutil.copy(source_path, target_path)
-        #             print(f"Copied: {source_path} -> {target_path}")
             
     except OSError as error:
         logging.info(f"{GREEN}Data already exist in 'db/data'!{NC}")
-        
-    # # Chemin vers le fichier db/data/README
-    # readme_path = os.path.join(data_folder, "README")
-    # # Texte à ajouter
-    # text_to_append = "This folder contains data inserted into DB when the system is launch at the first time.  If it doesn't exist it will contans free data"
-    # # Ouvrir le fichier en mode ajout et écrire le texte
-    # with open(readme_path, "a") as file:
-    #     file.write(text_to_append)
-    #     file.write("\n")  # Ajoute une nouvelle ligne, comme `echo` le ferait
 
     os.chdir("db")
     subprocess.run([sys.executable, "insertPrivateData.py"], check=True)
@@ -271,26 +266,27 @@ async def __run_dockers__(docker_option):
     logging.info(f"{GREEN}Run Docker{NC}")
     
     os.chdir("docker")
-    
-    if os.name == 'nt':
-        #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose up'],stdin=subprocess.PIPE)
-        #prog.stdin.write(b'password')
-        prog = subprocess.Popen(['docker', 'compose', 'up'] + docker_option)
-        prog.communicate()
-    else:    
-        subprocess.run(os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + ["up"] + docker_option, check=True)
 
-    # Pause pour laisser Docker démarrer
-    # time.sleep(5)
-    #
-    # if os.name == 'nt':
-    #     #prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose ps'],stdin=subprocess.PIPE)
-    #     #prog.stdin.write(b'password')
-    #     prog = subprocess.Popen(['docker', 'compose', 'ps'])
-    #     #prog.stdin.write(b'password')
-    #     prog.communicate()
-    # else:
-    #     subprocess.run(os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + ["ps"], check=True)
+    docker_compose_cmd = os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + ["up"] + (docker_option or [])
+
+    env = {**os.environ, "COMPOSE_MENU": "false"}
+    proc = await asyncio.create_subprocess_exec(
+        *docker_compose_cmd,
+        env=env,
+        stdout=None, #asyncio.subprocess.PIPE,
+        stderr=None, #asyncio.subprocess.PIPE
+    )
+
+    #await proc.wait()
+    try:
+        await proc.wait()
+    except asyncio.CancelledError:
+        logging.warning("Docker compose arrêté par l'utilisateur")
+        proc.terminate()  # Arrête proprement les conteneurs
+        raise
+    except Exception as e:
+        logging.error(f"Erreur Docker: {e}")
+        raise
         
     os.chdir("..")
     return "done"
@@ -406,10 +402,11 @@ async def __start__(docker_option=None):
                                                                             os.environ["DOCKER_COMPOSE_COMMAND"]):
         logging.warning(f"{YELLOW}Instance already running{NC}")
         return
+    #else first run or not running
 
     if not docker_option:
         docker_option = []
-    # __mainConfiguration__()
+
     load_env(None)
 
     dotenv.load_dotenv()
@@ -417,23 +414,40 @@ async def __start__(docker_option=None):
     __dbConfiguration__()
     __dbData_configuration__()
 
-    #__docker_configuration__()
     docker_compose.gen_docker_compose_yml(containers[os.environ["ENV"]])
 
     __security_check()
-    task = asyncio.create_task(__run_dockers__(docker_option))
 
-    await task
+    container_name = os.environ["MYSQL_SERVER"]
+    # task = asyncio.create_task(__run_dockers__(docker_option))
+    # await __wait_for_mysql_healthy__(container_name)
+    docker_task = asyncio.create_task(__run_dockers__(docker_option))
+    health_task = asyncio.create_task(__wait_for_mysql_healthy__(container_name))
+    # ToDo refactor : add health to all dockers, create task waits all docker healthy
 
-    container_name = "learnagement_mysql_" + os.environ["INSTANCE_NAME"]
-    await __wait_for_mysql_healthy__(container_name)
+    done, pending = await asyncio.wait(
+        {docker_task, health_task},
+        return_when=asyncio.FIRST_COMPLETED
+    )
+
+    if docker_task in done:
+        # Docker a échoué → annule l'attente de MySQL
+        if docker_task.exception():
+            health_task.cancel()
+            raise docker_task.exception()
+        # Docker a fini (Ctrl+C) → arrête tout
+        health_task.cancel()
+        return
 
     await __set_lnm_administrator_with_retry__()
 
-    logging.info(f"{GREEN}Web Apps will run on: {os.environ['INSTANCE_URL']}{NC}")
-    logging.info(f"{GREEN}PHPMyAdmin will run on: http://127.0.0.1:{os.environ['PHPMYADMIN_PORT']}{NC}")
+    # ToDo Waits all dockers healthy
 
-    await task
+    logging.info(f"{GREEN}Web Apps runs on: {os.environ['INSTANCE_PROTOCOL']}://{os.environ['INSTANCE_URL']}:{os.environ['FRONT_PHP_PORT']}{NC}")
+    logging.info(f"{GREEN}PHPMyAdmin runs on: http://127.0.0.1:{os.environ['PHPMYADMIN_PORT']}{NC}")
+    logging.info(f"{GREEN}Admin is deactivated by default{NC}")
+
+    await docker_task
 
 def __stop__():
     dotenv.load_dotenv()
@@ -476,32 +490,37 @@ def generate_env(env="dev"):
 @click.option("--from_scratch", is_flag=True, help="Reset the application to its initial state (IRREVERSIBLE)")
 @click.option("--env", type=click.Choice(envs), default=None, help="Environment to use, (use previously used if not set)")
 def start(docker_option=None, restart:bool=False, rebuild:bool=False, test:bool=False, from_scratch:bool=False, env=None):
+    try:
+        logging.info(f"{GREEN}Starting application with: {locals()} {NC}")
 
-    logging.info(f"{GREEN}Starting application with: {locals()} {NC}")
+        if not docker_option:
+            docker_option = []
+        if restart:
+            if test:
+                logging.warning(f"{YELLOW}You cannot test restart.{NC}")
+                return
+            #ToDo check restart with switch env
+            logging.warning(f"{YELLOW}Restart sometimes unstable.{NC}")
+            __stop__()
 
-    if not docker_option:
-        docker_option = []
-    if restart:
-        if test:
-            logging.warning(f"{YELLOW}You cannot test restart.{NC}")
+
+        if from_scratch:
+            __from_scratch__()
+
+        if env:
+            __from_env__(env)
+            rebuild = True
+
+        if rebuild and not test:
+            asyncio.run(__start__(docker_option=["--build"] + docker_option))
             return
-        #ToDo check restart with switch env
-        logging.warning(f"{YELLOW}Restart sometimes unstable.{NC}")
+        if not test:
+            asyncio.run(__start__(docker_option))
+    except Exception as e:
+        logging.error(f"{RED}An error occured while starting the application: {e}.{NC}")
+    finally:
         __stop__()
 
-
-    if from_scratch:
-        __from_scratch__()
-
-    if env:
-        __from_env__(env)
-        rebuild = True
-
-    if rebuild and not test:
-        asyncio.run(__start__(docker_option=["--build"] + docker_option))
-        return
-    if not test:
-        asyncio.run(__start__(docker_option))
 
 
 def __filecmp__(file1, file2):
@@ -660,9 +679,11 @@ def gui():
 import signal
 
 def handle_signal(signum, _frame):
-    stop()
+    raise KeyboardInterrupt
 
 if __name__ == "__main__":
     signal.signal(signal.SIGTERM, handle_signal)
     signal.signal(signal.SIGINT, handle_signal)
+    if os.name != "nt":
+        __protect_tty__()
     cli()

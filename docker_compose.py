@@ -73,7 +73,7 @@ services:
             - RELATIONA_DISPLAY=D
             - APACHE_HTTP_PORT_NUMBER={PHPMYADMIN_DOCKER_PORT}
         volumes:
-            - ./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
+            - ./phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php:ro
         depends_on:
             data_mysql_{INSTANCE_NAME}:
                 condition: service_healthy
