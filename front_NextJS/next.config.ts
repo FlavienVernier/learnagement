@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+    logging: {
+        incomingRequests: {
+            ignore: [/^\/health$/],
+        },
+    },
 };
 
 export default nextConfig;

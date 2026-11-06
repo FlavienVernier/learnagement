@@ -27,7 +27,11 @@ function getLogger(): \Monolog\Logger {
     static $log = null;
     if ($log === null) {
         $log = new \Monolog\Logger('name');
-        $log->pushHandler(new \Monolog\Handler\StreamHandler('php://stdout', Level::Info));
+
+        $path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+        $level = ($path === '/health') ? Level::Warning : Level::Info;
+
+        $log->pushHandler(new \Monolog\Handler\StreamHandler('php://stdout', $level));
     }
     return $log;
 }

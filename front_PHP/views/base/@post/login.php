@@ -70,10 +70,10 @@ try {
             $jwt
         );
         $t->router->redirect('dashboard');
-    } else if (boolval($decoded->password2update)){
+    /*} else if (boolval($decoded->password2update)){
         $_SESSION["type"] = array_values(array_intersect($decoded->roles,$types))[0];
         $_SESSION["id"] = $decoded->id;
-        echo $t->render('base/init_password', ['email' => $email]);
+        echo $t->render('base/init_password', ['email' => $email]);*/
     } else {
         // theoriquement ce point ne doit jamais être atteint
         $t->router->redirect('login');

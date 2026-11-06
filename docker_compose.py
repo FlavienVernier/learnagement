@@ -1,6 +1,7 @@
 import os
 import dotenv
 import logging
+import asyncio
 
 def gen_docker_compose_yml(containers: list):
     dotenv.load_dotenv()
@@ -20,6 +21,7 @@ def gen_docker_compose_yml(containers: list):
         INSTANCE_PROTOCOL = os.getenv("INSTANCE_PROTOCOL")
         FRONT_PHP_PORT = os.getenv("FRONT_PHP_PORT")
         FRONT_PHP_DOCKER_PORT = os.getenv("FRONT_PHP_DOCKER_PORT")
+        FRONT_PHP_PROTOCOL = os.getenv("FRONT_PHP_PROTOCOL")
         SSL_EXTERNAL_DIR = os.getenv("SSL_EXTERNAL_DIR")
         DOCKER_SSL_EXTERNAL_DIR = os.getenv("DOCKER_SSL_EXTERNAL_DIR")
         FRONT_NEXTAUTH_PORT = os.getenv("FRONT_NEXTAUTH_PORT")
@@ -98,7 +100,7 @@ services:
             data_mysql_{INSTANCE_NAME}:
                 condition: service_healthy
         healthcheck:
-            test: ["CMD", "curl", "-fk", "{INSTANCE_PROTOCOL}://127.0.0.1:4000/health"]
+            test: ["CMD", "curl", "-fk", "{INSTANCE_PROTOCOL}://127.0.0.1:{BACKEND_PYTHON_DOCKER_PORT}/health"]
             start_period: 10s
             interval: 5s
             timeout: 5s
@@ -125,6 +127,12 @@ services:
         depends_on:
             backend_python_{INSTANCE_NAME}:
                 condition: service_healthy
+        healthcheck:
+            test: ["CMD", "curl", "-fk", "{FRONT_PHP_PROTOCOL}://127.0.0.1:{FRONT_PHP_DOCKER_PORT}/health"]
+            start_period: 10s
+            interval: 5s
+            timeout: 5s
+            retries: 55
     """,
     "front_nextjs": f"""
     front_nextjs_{INSTANCE_NAME}:
@@ -146,6 +154,12 @@ services:
         depends_on:
             backend_python_{INSTANCE_NAME}:
                 condition: service_healthy
+        healthcheck:
+            test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:{FRONT_NEXTAUTH_DOCKER_PORT}/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+            start_period: 30s
+            interval: 5s
+            timeout: 5s
+            retries: 55
     """,
     "front_dashplotly": f"""
     front_dashplotly_{INSTANCE_NAME}:
@@ -167,6 +181,12 @@ services:
         depends_on:
             backend_python_{INSTANCE_NAME}:
                 condition: service_healthy
+        healthcheck:
+            test: ["CMD", "curl", "-fk", "{FRONT_PHP_PROTOCOL}://127.0.0.1:{FRONT_DASH_DOCKER_PORT}/health"]
+            start_period: 10s
+            interval: 5s
+            timeout: 5s
+            retries: 55
     """,
     "volumes": f"""
 volumes:
@@ -196,3 +216,69 @@ networks:
         file.write(docker_compose_parts["networks"])
 
     os.chdir("..")
+
+import json
+
+async def __wait_for_all_dockers_ready__(timeout: int = 60, poll_interval: int = 3):
+    """Attend que tous les conteneurs du projet soient 'running' (et 'healthy' s'ils ont un healthcheck)."""
+    cmd = os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + [
+        "-p", os.environ["COMPOSE_PROJECT_NAME"], "ps", "--all", "--format", "json"
+    ]
+    elapsed = 0
+    while elapsed < timeout:
+        proc = await asyncio.create_subprocess_exec(
+            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        )
+        stdout, _ = await proc.communicate()
+
+        containers_state = []
+        for line in stdout.decode().splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            data = json.loads(line)
+            containers_state.extend(data if isinstance(data, list) else [data])
+        #logging.info(containers_state)
+        def ok(c):
+            if c.get("State") == "exited" and c.get("ExitCode") == 0:
+                return True  # conteneur ponctuel terminé normalement
+            return c.get("State") == "running" and c.get("Health", "") in ("", "healthy")
+
+        if containers_state and all(ok(c) for c in containers_state):
+            return True
+
+        await asyncio.sleep(poll_interval)
+        elapsed += poll_interval
+
+    raise TimeoutError(f"Tous les conteneurs ne sont pas prêts après {timeout}s")
+
+
+async def __wait_for_mysql_healthy__(container_name: str, timeout: int = 300, poll_interval: int = 2):
+    """Attend que le conteneur MySQL soit 'healthy' selon son healthcheck Docker."""
+    elapsed = 0
+    while elapsed < timeout:
+        cmd = os.environ["DOCKER_COMMAND"].split(" ") + [
+            "inspect", "--format={{.State.Health.Status}}", container_name
+        ]
+        # result = subprocess.run(cmd, capture_output=True, text=True)
+        # status = result.stdout.strip()
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            #text=True
+        )
+        stdout, _ = await proc.communicate()
+        #status = stdout.strip()
+        status = stdout.decode().strip()
+        logging.info(f"{container_name} health: {status!r}")
+
+        if status == "healthy":
+            return True
+        elif status == "unhealthy":
+            raise RuntimeError(f"Le conteneur {container_name} est en état 'unhealthy'")
+
+        await asyncio.sleep(poll_interval)
+        elapsed += poll_interval
+
+    raise TimeoutError(f"Timeout : {container_name} n'est pas devenu 'healthy' après {timeout}s")

@@ -132,6 +132,10 @@
         echo $t->render('base/404');
     });
 
+    $t->router->get('/health', '404', function () use ($t) {
+        echo $t->render('base/health');
+    });
+
     $t->router->get('/login', 'login', function () use ($t, $user) {
         requireGuest($user, $t->router);
         echo $t->render('base/login');

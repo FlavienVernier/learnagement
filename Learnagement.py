@@ -12,8 +12,10 @@ import dotenv
 import asyncio
 import click
 from click_default_group import DefaultGroup
+
+from docker_compose import __wait_for_mysql_healthy__
 #from dotenv import load_dotenv
-from env import save_env_file, __set_env, propagate_env, remove_env_file, __load_all_env, __scan_envs, load_env
+from env import propagate_env, remove_env_file, load_env
 from git import __get_git_branch
 from pwdlib import PasswordHash
 from pwdlib.hashers.bcrypt import BcryptHasher
@@ -105,37 +107,6 @@ def __set_lnm_administrator__():
     logging.info(f"{GREEN}Administrator added{NC}")
 
     return result.stdout
-
-
-async def __wait_for_mysql_healthy__(container_name: str, timeout: int = 300, poll_interval: int = 2):
-    """Attend que le conteneur MySQL soit 'healthy' selon son healthcheck Docker."""
-    elapsed = 0
-    while elapsed < timeout:
-        cmd = os.environ["DOCKER_COMMAND"].split(" ") + [
-            "inspect", "--format={{.State.Health.Status}}", container_name
-        ]
-        # result = subprocess.run(cmd, capture_output=True, text=True)
-        # status = result.stdout.strip()
-        proc = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            #text=True
-        )
-        stdout, _ = await proc.communicate()
-        #status = stdout.strip()
-        status = stdout.decode().strip()
-        logging.info(f"{container_name} health: {status!r}")
-
-        if status == "healthy":
-            return True
-        elif status == "unhealthy":
-            raise RuntimeError(f"Le conteneur {container_name} est en état 'unhealthy'")
-
-        await asyncio.sleep(poll_interval)
-        elapsed += poll_interval
-
-    raise TimeoutError(f"Timeout : {container_name} n'est pas devenu 'healthy' après {timeout}s")
 
 
 async def __set_lnm_administrator_with_retry__(max_retries: int = 10, retry_delay: int = 3):
@@ -442,6 +413,7 @@ async def __start__(docker_option=None):
     await __set_lnm_administrator_with_retry__()
 
     # ToDo Waits all dockers healthy
+    await docker_compose.__wait_for_all_dockers_ready__()
 
     logging.info(f"{GREEN}Web Apps runs on: {os.environ['INSTANCE_PROTOCOL']}://{os.environ['INSTANCE_URL']}:{os.environ['FRONT_PHP_PORT']}{NC}")
     logging.info(f"{GREEN}PHPMyAdmin runs on: http://127.0.0.1:{os.environ['PHPMYADMIN_PORT']}{NC}")

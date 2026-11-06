@@ -8,7 +8,9 @@ export default withAuth({
 
 export const config = {
     matcher: [
-        "/homepage:path*",
-        "/modules:path*"
+        //"/homepage:path*",
+        //"/modules:path*",
+        // Protège tout sauf : health, api, assets Next, favicon et fichiers statiques (avec extension)
+        "/((?!health|_next/static|_next/image|favicon.ico).*)"
     ],
 }
