@@ -13,7 +13,8 @@ NC = "\033[0m"  # No color
 #containers_prod = ["front_PHP", "front_DashPlotly", ] # available in prod and dev
 #containers_dev = ["front_NextJS", ] # available only in dev
 containers = {
-    "dev":["data_mysql",
+    "dev":[ "data_mysql",
+            "data_mysql_sidecar_backup",
             "phpmyadmin",
             "backend_python",
             "front_php",
@@ -21,6 +22,7 @@ containers = {
             "front_nextjs", # Only in dev
            ],
     "prod":["data_mysql",
+            "data_mysql_sidecar_backup",
             "phpmyadmin",
             "backend_python",
             "front_php",
@@ -29,6 +31,7 @@ containers = {
 }
 container_app_dirs = {
         "data_mysql": "db",
+        "data_mysql_sidecar_backup": None,
         "phpmyadmin": None,
         "backend_python": "backend_python",
         "front_php": "front_php",

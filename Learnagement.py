@@ -6,6 +6,7 @@ import sys
 import shutil
 import subprocess
 import datetime
+import traceback
 
 import docker_compose
 import dotenv
@@ -24,7 +25,7 @@ from pathlib import Path
 from config import RED, GREEN, YELLOW, NC, containers, envs
 from tools import __protect_tty__
 
-logging.basicConfig(format=f'{RED}Learnagement   |{NC}  %(asctime)s,%(msecs)03d - %(levelname)s - %(message)s',
+logging.basicConfig(format=f'{RED}Learnagement [%(filename)s:%(lineno)d] |{NC}  %(asctime)s,%(msecs)03d - %(levelname)s - %(message)s',
                     level=logging.INFO,
                     datefmt='%Y-%m-%d %H:%M:%S'
                     )
@@ -394,13 +395,12 @@ async def __start__(docker_option=None):
     # await __wait_for_mysql_healthy__(container_name)
     docker_task = asyncio.create_task(__run_dockers__(docker_option))
     health_task = asyncio.create_task(__wait_for_mysql_healthy__(container_name))
-    # ToDo refactor : add health to all dockers, create task waits all docker healthy
 
+    # Wait DB ready or docker compose crash
     done, pending = await asyncio.wait(
         {docker_task, health_task},
         return_when=asyncio.FIRST_COMPLETED
     )
-
     if docker_task in done:
         # Docker a échoué → annule l'attente de MySQL
         if docker_task.exception():
@@ -410,9 +410,10 @@ async def __start__(docker_option=None):
         health_task.cancel()
         return
 
+    # Add The Admin user
     await __set_lnm_administrator_with_retry__()
 
-    # ToDo Waits all dockers healthy
+    # Waits all dockers healthy
     await docker_compose.__wait_for_all_dockers_ready__()
 
     logging.info(f"{GREEN}Web Apps runs on: {os.environ['INSTANCE_PROTOCOL']}://{os.environ['INSTANCE_URL']}:{os.environ['FRONT_PHP_PORT']}{NC}")
@@ -489,6 +490,7 @@ def start(docker_option=None, restart:bool=False, rebuild:bool=False, test:bool=
         if not test:
             asyncio.run(__start__(docker_option))
     except Exception as e:
+        traceback.print_exc()
         logging.error(f"{RED}An error occured while starting the application: {e}.{NC}")
     finally:
         __stop__()
@@ -526,7 +528,7 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
     logging.info(f"{GREEN}BackUp DB{NC}")
 
     now = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
-    
+
     if os.name == 'nt':
         logging.warning(f"{YELLOW}Not yet implemented for Windows.{NC}")
     else:
@@ -540,7 +542,7 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
         # display MySQL server version
         cmd = os.environ["DOCKER_COMMAND"].split(" ") + ["exec", "-it", "learnagement_mysql_" + os.environ["INSTANCE_NAME"], "mysqld", "--version"]
         os.system(" ".join(cmd))
-       
+
         # get Learnagement db schemas
         structureFile = os.path.join(backup_folder,"0_struct_" + now + ".sql")
         cmd = os.environ["DOCKER_COMMAND"].split(" ") + ["exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-data", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "--no-tablespaces", "learnagement", ">", structureFile]

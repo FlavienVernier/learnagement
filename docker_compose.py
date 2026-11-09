@@ -6,26 +6,42 @@ import asyncio
 def gen_docker_compose_yml(containers: list):
     dotenv.load_dotenv()
     try:
+        ENV = os.getenv("ENV")
         INSTANCE_NAME = os.getenv("INSTANCE_NAME")
+
+        MYSQL_SERVER = os.getenv("MYSQL_SERVER")
         MYSQL_DB = os.getenv("MYSQL_DB")
         MYSQL_USER_LOGIN =  os.getenv("MYSQL_USER_LOGIN")
         MYSQL_USER_PASSWORD = os.getenv("MYSQL_USER_PASSWORD")
         MYSQL_ROOT_PASSWORD = os.getenv("MYSQL_ROOT_PASSWORD")
+
+        TZ = os.getenv("TZ")
+        BACKUP = os.getenv("BACKUP")
+        BACKUP_AT = os.getenv("BACKUP_AT")
+        BACKUP_DIRECTORY = os.getenv("BACKUP_DIRECTORY")
+        BACKUP_RETENTION_DAYS = os.getenv("BACKUP_RETENTION_DAYS")
+
         PHPMYADMIN_PORT = os.getenv("PHPMYADMIN_PORT")
         PHPMYADMIN_DOCKER_PORT = os.getenv("PHPMYADMIN_DOCKER_PORT")
+
         BACKEND_PYTHON_PORT = os.getenv("BACKEND_PYTHON_PORT")
         BACKEND_PYTHON_DOCKER_PORT = os.getenv("BACKEND_PYTHON_DOCKER_PORT")
-        ENV = os.getenv("ENV")
+
         SSL_INTERNAL_DIR = os.getenv("SSL_INTERNAL_DIR")
         DOCKER_SSL_INTERNAL_DIR = os.getenv("DOCKER_SSL_INTERNAL_DIR")
+
         INSTANCE_PROTOCOL = os.getenv("INSTANCE_PROTOCOL")
+
         FRONT_PHP_PORT = os.getenv("FRONT_PHP_PORT")
         FRONT_PHP_DOCKER_PORT = os.getenv("FRONT_PHP_DOCKER_PORT")
         FRONT_PHP_PROTOCOL = os.getenv("FRONT_PHP_PROTOCOL")
+
         SSL_EXTERNAL_DIR = os.getenv("SSL_EXTERNAL_DIR")
         DOCKER_SSL_EXTERNAL_DIR = os.getenv("DOCKER_SSL_EXTERNAL_DIR")
+
         FRONT_NEXTAUTH_PORT = os.getenv("FRONT_NEXTAUTH_PORT")
         FRONT_NEXTAUTH_DOCKER_PORT = os.getenv("FRONT_NEXTAUTH_DOCKER_PORT")
+
         FRONT_DASH_PORT = os.getenv("FRONT_DASH_PORT")
         FRONT_DASH_DOCKER_PORT = os.getenv("FRONT_DASH_DOCKER_PORT")
     except Exception as e:
@@ -60,6 +76,30 @@ services:
             interval: 5s
             timeout: 5s
             retries: 55
+    """,
+    "data_mysql_sidecar_backup": f"""
+    data_mysql_sidecar_backup_{INSTANCE_NAME}:
+        container_name: learnagement_data_mysql_sidecar_backup_{INSTANCE_NAME}
+        image: mysql: 8.4  # même image/version que votre service MySQL
+        restart: unless - stopped
+        init: true  # arrêt propre (SIGTERM) malgré le sleep
+        depends_on:
+            db:  # nom réel de votre service MySQL
+                condition: service_healthy
+        entrypoint: ["/bin/bash", "/opt/backup.sh"]
+        environment:
+            TZ: ${TZ: -Europe / Paris}
+            BACKUP: ${BACKUP: -false}
+            BACKUP_AT: ${BACKUP_AT: -00: 00}
+            BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS: -}
+            MYSQL_SERVER: ${MYSQL_SERVER}
+            MYSQL_DB: ${MYSQL_DB}
+            MYSQL_USER_LOGIN: ${MYSQL_USER_LOGIN}
+            MYSQL_USER_PASSWORD: ${MYSQL_USER_PASSWORD}
+        volumes:
+            -./ backup / backup.sh: / opt / backup.sh: ro
+            - ${BACKUP_DIRECTORY: -.. / db / backup}: / backup
+            - learnagement_persistent_backup_state_{INSTANCE_NAME}: / state
     """,
     "phpmyadmin": f"""
     phpmyadmin_{INSTANCE_NAME}:
@@ -191,6 +231,7 @@ services:
     "volumes": f"""
 volumes:
     learnagement_persistent_db_{INSTANCE_NAME}:
+    learnagement_persistent_backup_state_{INSTANCE_NAME}:
     """,
     "networks": f"""
 networks:
