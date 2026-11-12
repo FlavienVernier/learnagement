@@ -1,0 +1,1262 @@
+[
+    {
+        "module": "LANG501_PACY",
+        "heures": {
+            "cm": null,
+            "td": 40.5,
+            "tp": null,
+            "contact_total": 40.5
+        }
+    },
+    {
+        "module": "SHES501_PACY",
+        "heures": {
+            "cm": null,
+            "td": 21,
+            "tp": null,
+            "contact_total": 21
+        }
+    },
+    {
+        "module": "SHES505_PACY",
+        "heures": {
+            "cm": null,
+            "td": 1.5,
+            "tp": null,
+            "contact_total": 1.5
+        }
+    },
+    {
+        "module": "ADCO501_PACY",
+        "heures": {
+            "cm": 3,
+            "td": 12,
+            "tp": null,
+            "contact_total": 15
+        }
+    },
+    {
+        "module": "PROJ500_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "ACCO501_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "DDRS501_PACY",
+        "heures": {
+            "cm": 15,
+            "td": 12,
+            "tp": null,
+            "contact_total": 27
+        }
+    },
+    {
+        "module": "INFO501_PACY",
+        "heures": {
+            "cm": 3,
+            "td": 6,
+            "tp": 12,
+            "contact_total": 21
+        }
+    },
+    {
+        "module": "INFO502_PACY",
+        "heures": {
+            "cm": 6,
+            "td": 4.5,
+            "tp": 12,
+            "contact_total": 22.5
+        }
+    },
+    {
+        "module": "MATH500_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "MATH501_PACY",
+        "heures": {
+            "cm": 20.5,
+            "td": 37.5,
+            "tp": null,
+            "contact_total": 58.0
+        }
+    },
+    {
+        "module": "PROJ531_IDU",
+        "heures": {
+            "cm": 6,
+            "td": 30,
+            "tp": 4,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "ISOC531_IDU",
+        "heures": {
+            "cm": 13.5,
+            "td": 22.5,
+            "tp": 4,
+            "contact_total": 40.0
+        }
+    },
+    {
+        "module": "INFO532_IDU",
+        "heures": {
+            "cm": 12,
+            "td": 12,
+            "tp": 16,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "INFO503_PACY",
+        "heures": {
+            "cm": 6,
+            "td": 6,
+            "tp": 12,
+            "contact_total": 24
+        }
+    },
+    {
+        "module": "INFO531_IDU",
+        "heures": {
+            "cm": 10.5,
+            "td": 9,
+            "tp": 16,
+            "contact_total": 35.5
+        }
+    },
+    {
+        "module": "PROJ601_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "SHES601_PACY",
+        "heures": {
+            "cm": 10.5,
+            "td": 9,
+            "tp": null,
+            "contact_total": 19.5
+        }
+    },
+    {
+        "module": "SHES602_PACY",
+        "heures": {
+            "cm": 15,
+            "td": 4.5,
+            "tp": null,
+            "contact_total": 19.5
+        }
+    },
+    {
+        "module": "DATA601_PACY",
+        "heures": {
+            "cm": 6,
+            "td": null,
+            "tp": null,
+            "contact_total": 6
+        }
+    },
+    {
+        "module": "PROJ602_PACY",
+        "heures": {
+            "cm": null,
+            "td": 9,
+            "tp": null,
+            "contact_total": 9
+        }
+    },
+    {
+        "module": "LANG601_PACY",
+        "heures": {
+            "cm": null,
+            "td": 40.5,
+            "tp": null,
+            "contact_total": 40.5
+        }
+    },
+    {
+        "module": "LANG602_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "PROJ600_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "ACCO601_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "INFO631_IDU",
+        "heures": {
+            "cm": 10.5,
+            "td": 10.5,
+            "tp": 20,
+            "contact_total": 41.0
+        }
+    },
+    {
+        "module": "PROJ631_IDU",
+        "heures": {
+            "cm": null,
+            "td": 42,
+            "tp": null,
+            "contact_total": 42
+        }
+    },
+    {
+        "module": "MATH631_IDU",
+        "heures": {
+            "cm": 18,
+            "td": 18,
+            "tp": null,
+            "contact_total": 36
+        }
+    },
+    {
+        "module": "INFO634_IDU",
+        "heures": {
+            "cm": 9,
+            "td": 21,
+            "tp": 8,
+            "contact_total": 38
+        }
+    },
+    {
+        "module": "INFO633_IDU",
+        "heures": {
+            "cm": null,
+            "td": 13.5,
+            "tp": null,
+            "contact_total": 13.5
+        }
+    },
+    {
+        "module": "INFO632_IDU",
+        "heures": {
+            "cm": 10.5,
+            "td": 13.5,
+            "tp": 16,
+            "contact_total": 40.0
+        }
+    },
+    {
+        "module": "ISOC631_IDU",
+        "heures": {
+            "cm": 13.5,
+            "td": 15,
+            "tp": 12,
+            "contact_total": 40.5
+        }
+    },
+    {
+        "module": "PROJ632_IDU",
+        "heures": {
+            "cm": 2,
+            "td": 16,
+            "tp": null,
+            "contact_total": 18
+        }
+    },
+    {
+        "module": "SHES703_PACY",
+        "heures": {
+            "cm": null,
+            "td": 13.5,
+            "tp": 3.5,
+            "contact_total": 17.0
+        }
+    },
+    {
+        "module": "SHES704_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "LANG701_PACY",
+        "heures": {
+            "cm": null,
+            "td": 40.5,
+            "tp": null,
+            "contact_total": 40.5
+        }
+    },
+    {
+        "module": "LANG702_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "PROJ700_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "ACCO701_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "DATA731_IDU",
+        "heures": {
+            "cm": 12,
+            "td": null,
+            "tp": 24,
+            "contact_total": 36
+        }
+    },
+    {
+        "module": "INFO731_IDU",
+        "heures": {
+            "cm": 13.5,
+            "td": 22.5,
+            "tp": 4,
+            "contact_total": 40.0
+        }
+    },
+    {
+        "module": "MATH741_IDU",
+        "heures": {
+            "cm": 18,
+            "td": 18,
+            "tp": null,
+            "contact_total": 36
+        }
+    },
+    {
+        "module": "INFO732_IDU",
+        "heures": {
+            "cm": 7.5,
+            "td": 6,
+            "tp": 24,
+            "contact_total": 37.5
+        }
+    },
+    {
+        "module": "PROJ731_IDU",
+        "heures": {
+            "cm": null,
+            "td": 20,
+            "tp": null,
+            "contact_total": 20
+        }
+    },
+    {
+        "module": "INFO733_IDU",
+        "heures": {
+            "cm": 18,
+            "td": 16,
+            "tp": 4,
+            "contact_total": 38
+        }
+    },
+    {
+        "module": "DATA732_IDU",
+        "heures": {
+            "cm": 12,
+            "td": 23.5,
+            "tp": null,
+            "contact_total": 35.5
+        }
+    },
+    {
+        "module": "INFO734_IDU",
+        "heures": {
+            "cm": 12,
+            "td": 24,
+            "tp": null,
+            "contact_total": 36
+        }
+    },
+    {
+        "module": "ISOC731_IDU",
+        "heures": {
+            "cm": 15,
+            "td": 21,
+            "tp": 4,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "SHES802_PACY",
+        "heures": {
+            "cm": 9,
+            "td": 10.5,
+            "tp": null,
+            "contact_total": 19.5
+        }
+    },
+    {
+        "module": "SHES803_PACY",
+        "heures": {
+            "cm": 18,
+            "td": 7.5,
+            "tp": null,
+            "contact_total": 25.5
+        }
+    },
+    {
+        "module": "LANG801_PACY",
+        "heures": {
+            "cm": null,
+            "td": 40.5,
+            "tp": null,
+            "contact_total": 40.5
+        }
+    },
+    {
+        "module": "LANG802_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "PROJ800_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "ACCO801_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "PROJ801_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "DATA831_IDU",
+        "heures": {
+            "cm": 7.5,
+            "td": null,
+            "tp": 12,
+            "contact_total": 19.5
+        }
+    },
+    {
+        "module": "DATA832_IDU",
+        "heures": {
+            "cm": 9,
+            "td": 9,
+            "tp": 12,
+            "contact_total": 30
+        }
+    },
+    {
+        "module": "INFO831_IDU",
+        "heures": {
+            "cm": 9,
+            "td": 9,
+            "tp": 12,
+            "contact_total": 30
+        }
+    },
+    {
+        "module": "PROJ831_IDU",
+        "heures": {
+            "cm": null,
+            "td": 20,
+            "tp": null,
+            "contact_total": 20
+        }
+    },
+    {
+        "module": "PROJ832_IDU",
+        "heures": {
+            "cm": 4,
+            "td": 16,
+            "tp": null,
+            "contact_total": 20
+        }
+    },
+    {
+        "module": "INFO832_IDU",
+        "heures": {
+            "cm": 12,
+            "td": 20,
+            "tp": 8,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "INFO833_IDU",
+        "heures": {
+            "cm": 12,
+            "td": 13.5,
+            "tp": 15,
+            "contact_total": 40.5
+        }
+    },
+    {
+        "module": "INFO834_IDU",
+        "heures": {
+            "cm": 4.5,
+            "td": 4.5,
+            "tp": 32,
+            "contact_total": 41.0
+        }
+    },
+    {
+        "module": "ISOC831_IDU",
+        "heures": {
+            "cm": 30,
+            "td": null,
+            "tp": null,
+            "contact_total": 30
+        }
+    },
+    {
+        "module": "PROJ901_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "LANG901_PACY",
+        "heures": {
+            "cm": null,
+            "td": 40.5,
+            "tp": null,
+            "contact_total": 40.5
+        }
+    },
+    {
+        "module": "LANG902_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "PROJ900_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "INFO931_IDU",
+        "heures": {
+            "cm": 12,
+            "td": 12,
+            "tp": 16,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "INFO932_IDU",
+        "heures": {
+            "cm": 7.5,
+            "td": 7.5,
+            "tp": 24,
+            "contact_total": 39.0
+        }
+    },
+    {
+        "module": "PROJ931_IDU",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": 40,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "DATA931_IDU",
+        "heures": {
+            "cm": 12,
+            "td": 12,
+            "tp": 16,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "ISOC931_IDU",
+        "heures": {
+            "cm": 6,
+            "td": 12,
+            "tp": 20,
+            "contact_total": 38
+        }
+    },
+    {
+        "module": "PROJ932_IDU",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": 40,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "PROJ001_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "ACCO501_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "LANG510_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": 37,
+            "tp": null,
+            "contact_total": 37
+        }
+    },
+    {
+        "module": "SHES510_SEAIDUFISA",
+        "heures": {
+            "cm": 20,
+            "td": 12,
+            "tp": null,
+            "contact_total": 32
+        }
+    },
+    {
+        "module": "SHES511_SEAIDUFISA",
+        "heures": {
+            "cm": 10,
+            "td": 12,
+            "tp": 4,
+            "contact_total": 26
+        }
+    },
+    {
+        "module": "PROJ501_PACYFISA",
+        "heures": {
+            "cm": 4,
+            "td": null,
+            "tp": 8,
+            "contact_total": 12
+        }
+    },
+    {
+        "module": "STAG501_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "PROJ531_IDU",
+        "heures": {
+            "cm": 6,
+            "td": 30,
+            "tp": 4,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "ISOC531_IDU",
+        "heures": {
+            "cm": 13.5,
+            "td": 22.5,
+            "tp": 4,
+            "contact_total": 40.0
+        }
+    },
+    {
+        "module": "INFO532_IDU",
+        "heures": {
+            "cm": 12,
+            "td": 12,
+            "tp": 16,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "INFO530_IDUFISA",
+        "heures": {
+            "cm": null,
+            "td": 20,
+            "tp": null,
+            "contact_total": 20
+        }
+    },
+    {
+        "module": "INFO533_IDUFISA",
+        "heures": {
+            "cm": 12,
+            "td": 40,
+            "tp": null,
+            "contact_total": 52
+        }
+    },
+    {
+        "module": "MATH532_IDUFISA",
+        "heures": {
+            "cm": null,
+            "td": 40,
+            "tp": null,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "SHES611_SEAIDUFISA",
+        "heures": {
+            "cm": 4,
+            "td": 6,
+            "tp": null,
+            "contact_total": 10
+        }
+    },
+    {
+        "module": "SHES612_SEAIDUFISA",
+        "heures": {
+            "cm": 4,
+            "td": 6,
+            "tp": null,
+            "contact_total": 10
+        }
+    },
+    {
+        "module": "ACCO601_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "LANG610_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": 30,
+            "tp": null,
+            "contact_total": 30
+        }
+    },
+    {
+        "module": "LANG611_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": 30,
+            "tp": null,
+            "contact_total": 30
+        }
+    },
+    {
+        "module": "PROJ601_PACYFISA",
+        "heures": {
+            "cm": 1,
+            "td": null,
+            "tp": 4,
+            "contact_total": 5
+        }
+    },
+    {
+        "module": "STAG601_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "DATA601_PACY",
+        "heures": {
+            "cm": 6,
+            "td": null,
+            "tp": null,
+            "contact_total": 6
+        }
+    },
+    {
+        "module": "INFO631_IDU",
+        "heures": {
+            "cm": 10.5,
+            "td": 10.5,
+            "tp": 20,
+            "contact_total": 41.0
+        }
+    },
+    {
+        "module": "INFO632_IDU",
+        "heures": {
+            "cm": 10.5,
+            "td": 13.5,
+            "tp": 16,
+            "contact_total": 40.0
+        }
+    },
+    {
+        "module": "ISOC631_IDU",
+        "heures": {
+            "cm": 13.5,
+            "td": 15,
+            "tp": 12,
+            "contact_total": 40.5
+        }
+    },
+    {
+        "module": "INFO635_IDUFISA",
+        "heures": {
+            "cm": 13.5,
+            "td": 13.5,
+            "tp": 20,
+            "contact_total": 47.0
+        }
+    },
+    {
+        "module": "INFO636_IDUFISA",
+        "heures": {
+            "cm": 9,
+            "td": 9,
+            "tp": 28,
+            "contact_total": 46
+        }
+    },
+    {
+        "module": "ACCO701_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "SHES701_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": 32,
+            "tp": null,
+            "contact_total": 32
+        }
+    },
+    {
+        "module": "SHES702_PACYFISA",
+        "heures": {
+            "cm": 24,
+            "td": null,
+            "tp": null,
+            "contact_total": 24
+        }
+    },
+    {
+        "module": "SHES711_PACYFISA",
+        "heures": {
+            "cm": 4,
+            "td": 2,
+            "tp": 8,
+            "contact_total": 14
+        }
+    },
+    {
+        "module": "LANG710_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": 34,
+            "tp": null,
+            "contact_total": 34
+        }
+    },
+    {
+        "module": "LANG711_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": 34,
+            "tp": null,
+            "contact_total": 34
+        }
+    },
+    {
+        "module": "PROJ701_PACYFISA",
+        "heures": {
+            "cm": 1,
+            "td": null,
+            "tp": 8,
+            "contact_total": 9
+        }
+    },
+    {
+        "module": "STAG701_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "DATA731_IDU",
+        "heures": {
+            "cm": 12,
+            "td": null,
+            "tp": 24,
+            "contact_total": 36
+        }
+    },
+    {
+        "module": "DATA732_IDU",
+        "heures": {
+            "cm": 12,
+            "td": 23.5,
+            "tp": null,
+            "contact_total": 35.5
+        }
+    },
+    {
+        "module": "INFO731_IDU",
+        "heures": {
+            "cm": 13.5,
+            "td": 22.5,
+            "tp": 4,
+            "contact_total": 40.0
+        }
+    },
+    {
+        "module": "ISOC731_IDU",
+        "heures": {
+            "cm": 15,
+            "td": 21,
+            "tp": 4,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "ACCO801_PACY",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "SHES801_PACYFISA",
+        "heures": {
+            "cm": 6,
+            "td": 4,
+            "tp": 12,
+            "contact_total": 22
+        }
+    },
+    {
+        "module": "LANG810_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": 40,
+            "tp": null,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "LANG811_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": 40,
+            "tp": null,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "PROJ801_PACYFISA",
+        "heures": {
+            "cm": 1,
+            "td": null,
+            "tp": 8,
+            "contact_total": 9
+        }
+    },
+    {
+        "module": "STAG801_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "DATA831_IDU",
+        "heures": {
+            "cm": 7.5,
+            "td": null,
+            "tp": 12,
+            "contact_total": 19.5
+        }
+    },
+    {
+        "module": "DATA832_IDU",
+        "heures": {
+            "cm": 9,
+            "td": 9,
+            "tp": 12,
+            "contact_total": 30
+        }
+    },
+    {
+        "module": "INFO831_IDU",
+        "heures": {
+            "cm": 9,
+            "td": 9,
+            "tp": 12,
+            "contact_total": 30
+        }
+    },
+    {
+        "module": "INFO832_IDU",
+        "heures": {
+            "cm": 12,
+            "td": 20,
+            "tp": 8,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "INFO833_IDU",
+        "heures": {
+            "cm": 12,
+            "td": 13.5,
+            "tp": 15,
+            "contact_total": 40.5
+        }
+    },
+    {
+        "module": "INFO834_IDU",
+        "heures": {
+            "cm": 4.5,
+            "td": 4.5,
+            "tp": 32,
+            "contact_total": 41.0
+        }
+    },
+    {
+        "module": "ISOC832_IDUFISA",
+        "heures": {
+            "cm": 30,
+            "td": null,
+            "tp": null,
+            "contact_total": 30
+        }
+    },
+    {
+        "module": "SHES901_PACYFISA",
+        "heures": {
+            "cm": 26,
+            "td": null,
+            "tp": null,
+            "contact_total": 26
+        }
+    },
+    {
+        "module": "SHES902_PACYFISA",
+        "heures": {
+            "cm": 22,
+            "td": 8,
+            "tp": 12,
+            "contact_total": 42
+        }
+    },
+    {
+        "module": "LANG910_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": 26,
+            "tp": null,
+            "contact_total": 26
+        }
+    },
+    {
+        "module": "LANG911_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": 26,
+            "tp": null,
+            "contact_total": 26
+        }
+    },
+    {
+        "module": "PROJ901_PACYFISA",
+        "heures": {
+            "cm": 1,
+            "td": null,
+            "tp": 12,
+            "contact_total": 13
+        }
+    },
+    {
+        "module": "STAG901_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "DATA931_IDU",
+        "heures": {
+            "cm": 12,
+            "td": 12,
+            "tp": 16,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "INFO931_IDU",
+        "heures": {
+            "cm": 12,
+            "td": 12,
+            "tp": 16,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "INFO932_IDU",
+        "heures": {
+            "cm": 7.5,
+            "td": 7.5,
+            "tp": 24,
+            "contact_total": 39.0
+        }
+    },
+    {
+        "module": "PROJ933_IDUFISA",
+        "heures": {
+            "cm": 6,
+            "td": 44,
+            "tp": null,
+            "contact_total": 50
+        }
+    },
+    {
+        "module": "PROJ001_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": 12,
+            "contact_total": 12
+        }
+    },
+    {
+        "module": "STAG001_PACYFISA",
+        "heures": {
+            "cm": null,
+            "td": null,
+            "tp": null,
+            "contact_total": null
+        }
+    },
+    {
+        "module": "SHES031_IDUFISA",
+        "heures": {
+            "cm": 40,
+            "td": null,
+            "tp": null,
+            "contact_total": 40
+        }
+    },
+    {
+        "module": "INFO031_IDUFISA",
+        "heures": {
+            "cm": null,
+            "td": 33,
+            "tp": null,
+            "contact_total": 33
+        }
+    },
+    {
+        "module": "DATA031_IDUFISA",
+        "heures": {
+            "cm": null,
+            "td": 33,
+            "tp": null,
+            "contact_total": 33
+        }
+    }
+]
