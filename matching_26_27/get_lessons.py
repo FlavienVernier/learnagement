@@ -15,7 +15,8 @@ def adjust_name_module(name_module):
     
 name_module = adjust_name_module("INFO732_IDU")
 
-path_edt_json = Path(__file__).resolve().parent / "edt.json"
+snapshots_path = Path(__file__).resolve().parents[2] / "snapshots" / "IDU"
+path_edt_json = sorted(snapshots_path.glob("*/edt.json"))[-1]
 
 #### chercher tous les cours du module demandé dans le fichier edt.json
 def get_lessons(name_maq):
