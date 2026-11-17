@@ -102,9 +102,11 @@ __requests = {
                             MAQUETTE_module.code_module, 
                             MAQUETTE_module.nom, 
                             APC_apprentissage_critique.libelle_apprentissage, 
-                            APC_niveau.niveau, APC_niveau.libelle_niveau, 
+                            APC_niveau.niveau, 
+                            APC_niveau.libelle_niveau, 
                             APC_competence.code_competence, 
-                            APC_competence.libelle_competence
+                            APC_competence.libelle_competence,
+                            APC_composante_essentielle.libelle_composante_essentielle
                         FROM LNM_filiere
                                  JOIN LNM_promo ON LNM_promo.id_filiere = LNM_filiere.id_filiere
                                  JOIN LNM_statut ON LNM_statut.id_statut = LNM_promo.id_statut
@@ -115,6 +117,7 @@ __requests = {
                                  JOIN APC_apprentissage_critique ON APC_apprentissage_critique.id_apprentissage_critique = APC_apprentissage_critique_as_module.id_apprentissage_critique
                                  JOIN APC_niveau ON APC_niveau.id_niveau = APC_apprentissage_critique.id_niveau
                                  JOIN APC_competence ON APC_competence.id_competence = APC_niveau.id_competence
+                                 JOIN APC_composante_essentielle ON APC_composante_essentielle.id_competence = APC_competence.id_competence;
                     """,
         "allowedRolesRequester" : "anonymous",
     },
