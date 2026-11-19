@@ -3,77 +3,53 @@ import os
 import jwt
 from datetime import datetime, timezone, timedelta
 
+from dotenv import load_dotenv
 from functools import wraps
 
-from flask import redirect, session, jsonify
+from flask import redirect, session, request, jsonify
 from dash import Dash,  Input, Output, State
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s:%(funcName)s:%(lineno)d - %(message)s')
 
-def is_token_valid(token, leeway=30):
-    """
-    Vérifie si le token est valide et non expiré
+load_dotenv()
 
-    Args:
-        token: Le JWT à valider
+def _load_signing_key() -> str:
+    key = os.getenv("JWT_SIGNING_KEY", "").strip()
+    if not key:
+        raise RuntimeError(
+            "JWT_SIGNING_KEY est absente ou vide : refus de démarrer sans clé de signature."
+        )
+    if len(key) < 32:  # HS256 : au moins 256 bits recommandés
+        raise RuntimeError("JWT_SIGNING_KEY trop courte (32 caractères minimum).")
+    return key
 
-        leeway: Marge en secondes pour l'expiration (utile pour clock skew)
+# Échoue à l'import, donc au démarrage de l'application
+SECRET_KEY = _load_signing_key()
 
-    Returns:
-        bool: True si le token est valide, False sinon
-    """
+def decode_token(token, leeway=30) -> dict:
+    """Décode et vérifie le JWT. Lève jwt.InvalidTokenError sinon."""
+    if not token:
+        raise jwt.InvalidTokenError("Token manquant")
+
+    return jwt.decode(
+        token,
+        key=SECRET_KEY,
+        algorithms=["HS256"],            # liste fermée, jamais "none"
+        leeway=timedelta(seconds=leeway),
+        options={
+            "verify_signature": True,    # jamais conditionnel
+            "verify_exp": True,
+            "require": ["exp"],          # un token sans expiration est refusé
+        },
+    )
+
+
+def is_token_valid(token, leeway=30) -> bool:
     try:
         decode_token(token, leeway)
         return True
-    except:
+    except jwt.InvalidTokenError:        # plus de `except:` nu
         return False
-
-def decode_token(token, leeway=30):
-    """
-    Décode le token s'il est valide et non expiré
-
-    Args:
-        token: Le JWT à valider
-
-        leeway: Marge en secondes pour l'expiration (utile pour clock skew)
-
-    Returns:
-        dict: dictionaire contenant les données du token
-
-    Raises:
-        Exception: Si le token est non valide ou expiré
-    """
-
-    if not token:
-        return False
-    secret_key = os.getenv("JWT_SIGNING_KEY")
-    try:
-        decode_options = {
-            "verify_signature": bool(secret_key),
-            "verify_exp": True
-        }
-
-        decode_kwargs = {
-            "options": decode_options,
-            "leeway": timedelta(seconds=leeway)
-        }
-
-        if secret_key:
-            decode_kwargs["key"] = secret_key
-            decode_kwargs["algorithms"] = ["HS256"]
-
-        payload = jwt.decode(token, **decode_kwargs)
-
-        logging.info(payload.__repr__())
-        return payload
-
-    except jwt.ExpiredSignatureError as e:
-        logging.exception("Token expiré")
-        raise
-
-    except jwt.InvalidTokenError as e:
-        logging.exception(f"Token invalide")
-        raise
 
 class FlaskAuth(Dash):
     def __init__(self, *args, **kwargs):
@@ -82,23 +58,18 @@ class FlaskAuth(Dash):
         # Intercepter toutes les requêtes de callback
         @self.server.before_request
         def check_authentication():
-            from flask import request
 
             # Vérifier si c'est un callback Dash
-            if request.path == '/_dash-update-component':
-                data = request.get_json(silent=True)
+            if request.path != '/_dash-update-component':
+                return None
 
-                if data and "output" in data:
+            data = request.get_json(silent=True) or {}
+            output = data.get("output", "")
 
-                    # Autoriser le callback qui écrit dans 'token'
-                    if "token.data" in data["output"]:
-                        return  # on laisse passer
+            if output == "token.data":
+                return None
 
-                token = session.get('token')
-                logging.info(f"Token: {token}")
-
-                if not is_token_valid(token):
-                    session.pop('token', None)
-                    #print("Redirection-", flush=True)
-                    logging.info(f"destroy token")
-                    return
+            if not is_token_valid(session.get("token")):
+                session.pop("token", None)
+                return jsonify({"error": "unauthorized"}), 401
+            return None

@@ -34,6 +34,11 @@ logging.basicConfig(format=f'{RED}Learnagement   |{NC}  %(asctime)s,%(msecs)03d 
 #    handlers=[logging.StreamHandler(), logging.FileHandler("learnagement.log", encoding="utf-8")],
 #)
 
+from pathlib import Path
+ROOT = Path(__file__).resolve().parent
+DOCKER_DIR = ROOT / "docker"
+DB_DIR = ROOT / "db"
+
 ALGORITHM = "HS256"
 MIN_KEY_BYTES = 32   # RFC 7518 §3.2 pour HS256
 DEFAULT_SESSION_TIMEOUT = 300
@@ -187,9 +192,9 @@ def __dbData_configuration__():
     except OSError as error:
         logging.info(f"{GREEN}Data already exist in 'db/data'!{NC}")
 
-    os.chdir("db")
+    os.chdir(DB_DIR)
     subprocess.run([sys.executable, "insertPrivateData.py"], check=True)
-    os.chdir("..")
+    os.chdir(ROOT)
 
 
 
@@ -202,7 +207,7 @@ def __docker_configuration__():
     # Docker configuration
     logging.info(f"{GREEN}Docker configuration{NC}")
     
-    os.chdir("docker")
+    os.chdir(DOCKER_DIR)
     
     if not os.path.exists("docker-compose.yml"):
         shutil.copy("docker-compose.yml.skeleton", "docker-compose.yml")
@@ -226,7 +231,7 @@ def __docker_configuration__():
     elif(os.path.getmtime("docker-compose.yml.skeleton") > os.path.getmtime("docker-compose.yml")):
         logging.warning(f"{YELLOW}docker-compose.yml.skeleton has been updated, your docker-compose.yml can be deprecated{NC}")
 
-    os.chdir("..")
+    os.chdir(ROOT)
 
 
 
@@ -236,7 +241,7 @@ async def __run_dockers__(docker_option):
     # Run Docker
     logging.info(f"{GREEN}Run Docker{NC}")
     
-    os.chdir("docker")
+    os.chdir(DOCKER_DIR)
 
     docker_compose_cmd = os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + ["up"] + (docker_option or [])
 
@@ -259,7 +264,7 @@ async def __run_dockers__(docker_option):
         logging.error(f"Erreur Docker: {e}")
         raise
         
-    os.chdir("..")
+    os.chdir(ROOT)
     return "done"
 
 
@@ -427,7 +432,7 @@ def __stop__():
     # Stop App
     logging.info(f"{GREEN}Stop App{NC}")
 
-    os.chdir("docker")
+    os.chdir(DOCKER_DIR)
 
     if os.name == 'nt':
         # prog = subprocess.Popen(['runas', '/noprofile', '/user:Administrator', 'docker-compose up'],stdin=subprocess.PIPE)
@@ -437,7 +442,7 @@ def __stop__():
     else:
         subprocess.run(os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + ["down"], check=True)
 
-    os.chdir("..")
+    os.chdir(ROOT)
 
     logging.info(f"{GREEN}App stopped{NC}")
 

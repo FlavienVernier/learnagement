@@ -16,7 +16,7 @@ class HealthFilter(logging.Filter):
     def filter(self, record):
         return "/health" not in record.getMessage()
 
-logging.getLogger().addFilter(HealthFilter())
+logging.getLogger("gunicorn.access").addFilter(HealthFilter())
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s:%(funcName)s:%(lineno)d - %(message)s')
 
@@ -334,7 +334,7 @@ if __name__ == '__main__':
     is_prod = os.getenv("ENV", "dev") == "prod"
     ssl_dir = os.getenv("DOCKER_SSL_EXTERNAL_DIR")
 
-    if is_prod:
+    if is_prod:  # Exécution en prod
         import gunicorn.app.base
 
         class StandaloneApp(gunicorn.app.base.BaseApplication):
@@ -363,5 +363,5 @@ if __name__ == '__main__':
             "capture_output": True,
         }
         StandaloneApp(server, options).run()
-    else:
+    else: # Exécution en dev
         app.run(host='0.0.0.0', debug=True)

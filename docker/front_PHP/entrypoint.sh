@@ -6,13 +6,15 @@ echo "PHP container starting..."
 
 cd /var/www/html
 
-# Install dependencies only once
-if [ -f composer.json ] ; then
-    echo "Installing Composer dependencies..."
-    composer update
-    composer install --no-interaction
-else
-    echo "Composer dependencies already installed. Just update"
+# Installer les dépendances seulement si vendor/ est absent
+if [ -f composer.json ]; then
+    if [ ! -f vendor/autoload.php ]; then
+        echo "Installing Composer dependencies..."
+        composer install --no-interaction --no-progress || \
+            echo "WARNING: composer install a échoué (réseau ?), démarrage sans dépendances"
+    else
+        echo "Composer dependencies already installed."
+    fi
 fi
 
 # Activer le vhost SSL uniquement en production

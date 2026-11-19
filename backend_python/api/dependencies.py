@@ -12,7 +12,7 @@ from models.request import SQLRequest
 from models.token import TokenData
 from models.user import User, UserInDB
 from core.security import SECRET_KEY, ALGORITHM, oauth2_scheme
-from core.logging import logger
+from core.logging import logger, compact_sql
 
 from typing import Annotated
 
@@ -443,11 +443,19 @@ def db_request(requester: User, request: SQLRequest, conn: Connection | None = N
     Avec `conn` : la requête s'exécute dans la transaction de l'appelant, sans commit ici.
     L'appelant ouvre la transaction avec `with get_connection() as conn:`.
     """
+    sql_log = compact_sql(request.request)
 
     if requester:
-        logger.info(f"User {requester.id} has role {requester.roles} requests {request}")
+        logger.info(
+            f"User {requester.id} has role {requester.roles} requests "
+            f"sql='{sql_log}' params={request.params} "
+            f"allowedRolesRequester={request.allowedRolesRequester}"
+        )
     else:
-        logger.info(f"Anonymous user requests {request}")
+        logger.info(
+            f"Anonymous user requests sql='{sql_log}' params={request.params} "
+            f"allowedRolesRequester={request.allowedRolesRequester}"
+        )
 
     check_access(request=request, user=requester)
     

@@ -6,8 +6,18 @@ import shutil
 
 import dotenv
 from dotenv import dotenv_values
+from sympy.polys.domains import domain
 from tools import get_local_ip_and_hostname, __generate_secret__, __ask
 from config import GREEN, YELLOW, NC, containers, container_app_dirs, envs, RED
+
+
+import bcrypt
+
+def __generate_basic_auth(user: str, password: str) -> str:
+    hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12)).decode()
+    # Traefik/Go accepte $2y$, on normalise le préfixe de la lib Python ($2b$)
+    hashed = hashed.replace("$2b$", "$2y$", 1)
+    return f"{user}:{hashed}"
 
 ############################
 # Manage existing env files
@@ -133,11 +143,13 @@ def save_env_file(env_vars: dict, filepath: str=".env") -> None:
     """
     with open(filepath, 'w', encoding='utf-8') as f:
         for key, value in env_vars.items():
-            # Ajouter des guillemets si la valeur contient des espaces
+            comment = "# " if key == value else ""
+            if "$" in str(value):
+                f.write(f"{comment}{key}='{value}'\n")
             if ' ' in str(value):
-                f.write(f'{key}="{value}"\n')
+                f.write(f'{comment}{key}="{value}"\n')
             else:
-                f.write(f'{key}={value}\n')
+                f.write(f'{comment}{key}={value}\n')
 
 
 def __set_env(env_vars: dict, filepath: str) -> dict:
@@ -161,13 +173,14 @@ def __set_env(env_vars: dict, filepath: str) -> dict:
     }
 
 
-def __generate_base_env():
+def __generate_base_env(env: str):
     default_env_vars = __load_env_file("__env_skeleton.env")
 
     # Instance
 
     #instance_name = input("Give the intance name (lowercase): ").lower()
-    instance_name = __ask("Give the intance name (lowercase): ").lower()
+    #instance_name = __ask("Give the intance name (lowercase): ").lower()
+    instance_name = env
     default_env_vars["INSTANCE_NAME"] = instance_name
     default_env_vars["COMPOSE_PROJECT_NAME"] = f"learnagement_{instance_name}"
 
@@ -191,6 +204,20 @@ def __generate_base_env():
     default_env_vars["MYSQL_ROOT_PASSWORD"] = __ask("MySQL Root password: ", secret=True)
     default_env_vars["MYSQL_USER_PASSWORD"] = __ask("Give the MySQL User password: ", secret=True)
     default_env_vars["LEARNAGEMENT_ADMINISTRATOR_PASSWORD"] =  __ask("Give the Learnagement Administrator password: ", secret=True)
+
+    # phpMyAdmin (BasicAuth Traefik)
+    if env == "prod" :
+        traefik_mode = __ask("Traefik mode ([local], domain): ") or "local"
+        if traefik_mode == "domain" :
+            default_env_vars["DOMAIN"] = __ask("App domain (ex: learnagement.fr): ")
+            default_env_vars["ACME_EMAIL"] = __ask("ACME mail (ex: toto@learnagement.fr): ")
+        else:
+            default_env_vars["DOMAIN"] = "localhost"
+        default_env_vars["TRAEFIK_MODE"] = traefik_mode
+        pma_user = __ask("phpMyAdmin BasicAuth user [admin]: ") or "admin"
+        pma_password = __ask("phpMyAdmin BasicAuth password: ", secret=True)
+        default_env_vars["PMA_BASICAUTH"] = __generate_basic_auth(pma_user, pma_password)
+
     #ToDo check if passwords are different if prod env
     # ...
 
@@ -256,10 +283,10 @@ def load_env(env: str | None = None):
         #logging.warning(f"{YELLOW}env file doesn't exist, generate it with '{env}' environnement {NC}")
         if not env:
             print(f"{YELLOW}env file doesn't exist and environment not specified.{NC}")
-            env = __ask("Give the required environment (alpha lowercase): ").lower()
+            env = __ask(f"Give the required environment {envs}: ").lower()
             #env = input("Give the required environment (alpha lowercase): ").lower()
 
-        env_vars = __generate_base_env()
+        env_vars = __generate_base_env(env)
 
         if not os.path.exists(f".env_{env}.env"):
             logging.error(f"{RED}Specific env file '.env_{env}.env' doesn't exist{NC}")

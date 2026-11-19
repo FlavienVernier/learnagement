@@ -24,7 +24,7 @@ function delete_endpoint($url, $token) {
 }
 
 function python_endpoint($method, $path, $data, $token) {
-    getLogger()->info("methode: " . $method . ", url: " . $path . ", data " . $data . ", token: " . $token);
+    getLogger()->info("methode: " . $method . ", url: " . $path);
 
     $contentType = ($method === "GET" || $method === "DELETE")
         ? "application/x-www-form-urlencoded"
