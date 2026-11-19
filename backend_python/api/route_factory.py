@@ -1,5 +1,4 @@
 import re
-import logging
 from fastapi import APIRouter, Depends
 from typing import Annotated
 import inspect
@@ -7,8 +6,7 @@ import inspect
 from api.dependencies import db_request, get_current_active_user
 from models.request import SQLRequest
 from models.user import User
-
-logger = logging.getLogger(__name__)
+from core.logging import logger
 
 # Clés de métadonnées à exclure du SQLRequest
 _META_KEYS = {"route", "tags", "summary", "description", "auth", "auto"}

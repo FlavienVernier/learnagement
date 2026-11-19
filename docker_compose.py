@@ -476,7 +476,7 @@ async def __wait_for_all_dockers_ready__():
                 continue
             data = json.loads(line)
             containers_state.extend(data if isinstance(data, list) else [data])
-        #logging.info(containers_state)
+      
         def ok(c):
             if c.get("State") == "exited" and c.get("ExitCode") == 0:
                 return True  # conteneur ponctuel terminé normalement

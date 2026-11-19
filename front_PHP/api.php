@@ -34,8 +34,21 @@ if (!is_string($path) || !preg_match('#^/[a-zA-Z0-9_\-/]{1,255}$#', $path)) {
     // $safePath = substr(preg_replace('/[^\x20-\x7E]/', '?', $path), 0, 200);
     // getLogger()->error('Invalid path: ' . $safePath);
     http_response_code(400);
-    exit(json_encode(['error' => 'Invalid path']));
+    exit(json_encode(['error' => 'Invalid path: ' . $path]));
 }
+
+// --- 2b. Query string à relayer (hors "path") ---
+$query = $_GET;
+unset($query['path']);
+
+// N'accepter que des scalaires (pas de tableaux/objets)
+foreach ($query as $k => $v) {
+    if (!is_string($k) || !preg_match('/^[a-zA-Z0-9_]{1,64}$/', $k) || !is_scalar($v)) {
+        http_response_code(400);
+        exit(json_encode(['error' => 'Invalid query parameter']));
+    }
+}
+
 
 // --- 3. Content-Length (première barrière, si présent) ---
 $maxBytes = 1_000_000;
@@ -84,7 +97,7 @@ if (in_array($method, ['POST', 'PATCH', 'PUT', 'DELETE'], true)) {
 
 // --- 6. Appel backend ---
 try {
-    $result = forwardToBackend($path, $method, $body, 'application/json', $authHeaders);
+    $result = forwardToBackend($path, $method, $body, 'application/json', $authHeaders, $query);
 } catch (\Throwable $e) {
     getLogger()->error('[proxy] backend error: ' . $e->getMessage());
     http_response_code(502);

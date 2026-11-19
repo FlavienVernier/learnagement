@@ -178,8 +178,6 @@ def __generate_base_env(env: str):
 
     # Instance
 
-    #instance_name = input("Give the intance name (lowercase): ").lower()
-    #instance_name = __ask("Give the intance name (lowercase): ").lower()
     instance_name = env
     default_env_vars["INSTANCE_NAME"] = instance_name
     default_env_vars["COMPOSE_PROJECT_NAME"] = f"learnagement_{instance_name}"
@@ -198,9 +196,7 @@ def __generate_base_env(env: str):
 
     # MySQL
     default_env_vars["MYSQL_SERVER"] = f"learnagement_data_mysql_{instance_name}"
-    #default_env_vars["MYSQL_ROOT_PASSWORD"] = getpass("Give the MySQL Root password: ")
-    #default_env_vars["MYSQL_USER_PASSWORD"] = getpass("Give the MySQL User password: ")
-    #default_env_vars["LEARNAGEMENT_ADMINISTRATOR_PASSWORD"] = getpass("Give the Learnagement Administrator password: ")
+
     default_env_vars["MYSQL_ROOT_PASSWORD"] = __ask("MySQL Root password: ", secret=True)
     default_env_vars["MYSQL_USER_PASSWORD"] = __ask("Give the MySQL User password: ", secret=True)
     default_env_vars["LEARNAGEMENT_ADMINISTRATOR_PASSWORD"] =  __ask("Give the Learnagement Administrator password: ", secret=True)
@@ -234,21 +230,6 @@ def __generate_base_env(env: str):
     return __load_env_parts()
 
 
-# def update_env_file_variable(env_file=".env", key=None, value=None):
-#     if key and value:
-#         with open(env_file, 'r') as f:
-#             content = f.read()
-#
-#         updated = __update_env_variable(content, key, value)
-#
-#         with open(env_file, 'w') as f:
-#             f.write(updated)
-#
-#         logging.warning(f"{YELLOW}Environment variables changed!{NC}")
-#
-#     # Load environment variables from the .env file
-#     dotenv.load_dotenv()
-
 
 def propagate_env():
     source_path = os.path.join("./", ".env")
@@ -280,7 +261,6 @@ def remove_env_file():
 def load_env(env: str | None = None):
     if not os.path.exists(".env"):
 
-        #logging.warning(f"{YELLOW}env file doesn't exist, generate it with '{env}' environnement {NC}")
         if not env:
             print(f"{YELLOW}env file doesn't exist and environment not specified.{NC}")
             env = __ask(f"Give the required environment {envs}: ").lower()

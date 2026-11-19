@@ -2,8 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import uvicorn
-#import logging
-import re
+
 from core.logging import logger, access_logger
 
 import init
@@ -26,19 +25,19 @@ class bcolors:
 
 
 #app = FastAPI(dependencies=[Depends(get_query_token)])
-origins = [
-    "*"
-]
+# origins = [
+#     "*"
+# ]
 app = FastAPI()
 
 # Ajouter le middleware à l'application
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,           # Autorise ton port 40080
-    allow_credentials=True,
-    allow_methods=["*"],              # Autorise GET, POST, OPTIONS, etc.
-    allow_headers=["*"],              # Autorise Authorization, Content-Type, etc.
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=origins,           # Autorise ton port 40080
+#     allow_credentials=True,
+#     allow_methods=["*"],              # Autorise GET, POST, OPTIONS, etc.
+#     allow_headers=["*"],              # Autorise Authorization, Content-Type, etc.
+# )
 
 app.include_router(authenticate.router)
 app.include_router(check.router)

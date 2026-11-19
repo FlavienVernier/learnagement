@@ -176,7 +176,7 @@
                 <input id="newUniName" type="text" placeholder="Nom de l'université *"
                     class="border rounded px-3 py-2 text-sm" />
                 <input id="newUniCountry" type="text" placeholder="Pays *" class="border rounded px-3 py-2 text-sm" />
-                <input id="newUniCode" type="text" placeholder="Code" class="border rounded px-3 py-2 text-sm" />
+                <input id="newUniCode" type="text" placeholder="Code *" class="border rounded px-3 py-2 text-sm" />
                 <input id="newUniAddress" type="text" placeholder="Adresse"
                     class="border rounded px-3 py-2 text-sm lg:col-span-2" />
                 <input id="newUniWebsite" type="url" placeholder="Site web" class="border rounded px-3 py-2 text-sm" />
@@ -1513,12 +1513,14 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         // }
 
         //ToDo Check
-        const response = await fetch("/university/admin/${university.id_partner_university}", {
+        const endpoint =`/api.php?path=/university/admin/${university.id_partner_university}`
+        const response = await fetch(endpoint, {
             method: 'PUT',
             body: JSON.stringify(payload),
         });
         if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
+            const detail = await parseApiError(response);
+            throw new Error(`Response status: ${response.status} - ${detail}`);
         }
 
 
@@ -1698,7 +1700,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
         // }
 
         //ToDo Check
-        const response = await fetch("/university/admin", {
+        const response = await fetch("/api.php?path=/university/admin", {
             method: 'POST',
             body: JSON.stringify(payload),
         });
@@ -1842,7 +1844,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             // }
 
             //ToDo Check
-            const response = await fetch("/university/admin/wishes/force-submit", {
+            const response = await fetch("/api.php?path=/university/admin/wishes/force-submit", {
                 method: 'POST',
                 //body: JSON.stringify(payload),
             });
@@ -1862,15 +1864,13 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
     window.fetchMobilityQuotas = async function () {
         try {
-            // const response = await fetch(window.ENV.BACKEND_URL + ':' + window.ENV.BACKEND_PORT + "/university/admin/mobility-quotas?annee_scolaire=2025-2026", {
-            //     headers: { "Authorization": `Bearer ${window.ENV.USER_TOKEN}` }
-            // });
-
-            //ToDo Check
-            //FixMe hard coded url
-            const response = await fetch("/university/admin/mobility-quotas?annee_scolaire=2025-2026", {
+            
+            const params = new URLSearchParams({
+                path: '/university/admin/mobility-quotas',
+                annee_scolaire: "2025-2026", //FixMe Refactor : années hard coded
+            });
+            const response = await fetch(`/api.php?${params}`, {
                 method: 'GET',
-                //body: JSON.stringify(payload),
             });
             if (!response.ok) {
                 throw new Error(`Response status: ${response.status}`);
@@ -1917,7 +1917,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             // });
 
             //ToDo Check
-            const response = await fetch("/university/admin/mobility-quotas", {
+            const response = await fetch("/api.php?path=/university/admin/mobility-quotas", {
                 method: 'POST',
                 body: JSON.stringify({ annee_scolaire: "2025-2026", quotas: window.mobilityQuotas })
             });
@@ -2073,7 +2073,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             // }
 
             //ToDo Check
-            const response = await fetch("/university/admin/assignment/run", {
+            const response = await fetch("/api.php?path=/university/admin/assignment/run", {
                 method: 'POST',
                 body: JSON.stringify(payload)
             });
@@ -2212,22 +2212,22 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
 
                 // Populate Filiere Quotas
-                const filieres = [...new Set(window.submittedStudentsList.map(s => s.nom_filiere))].filter(Boolean).sort();
-                const container = document.getElementById('filiereQuotasContainer');
-                if (filieres.length > 0) {
-                    container.innerHTML = '';
-                    filieres.forEach(filiere => {
-                        const id_safe = 'quota_' + filiere.replace(/[^a-zA-Z0-9]/g, '_');
-                        container.innerHTML += `
-                            <div class="bg-white border border-gray-200 rounded p-2 flex flex-col justify-between">
-                                <label for="${id_safe}" class="text-xs font-semibold text-gray-700 mb-1 truncate" title="${filiere}">${filiere}</label>
-                                <input type="number" id="${id_safe}" data-filiere="${filiere}" class="filiere-quota-input w-full text-sm border-gray-300 rounded px-2 py-1" value="0" min="0">
-                            </div>
-                        `;
-                    });
-                } else {
-                    container.innerHTML = '<span class="text-xs text-gray-400 italic">Aucune filière trouvée.</span>';
-                }
+                // const filieres = [...new Set(window.submittedStudentsList.map(s => s.nom_filiere))].filter(Boolean).sort();
+                // const container = document.getElementById('filiereQuotasContainer');
+                // if (filieres.length > 0) {
+                //     container.innerHTML = '';
+                //     filieres.forEach(filiere => {
+                //         const id_safe = 'quota_' + filiere.replace(/[^a-zA-Z0-9]/g, '_');
+                //         container.innerHTML += `
+                //             <div class="bg-white border border-gray-200 rounded p-2 flex flex-col justify-between">
+                //                 <label for="${id_safe}" class="text-xs font-semibold text-gray-700 mb-1 truncate" title="${filiere}">${filiere}</label>
+                //                 <input type="number" id="${id_safe}" data-filiere="${filiere}" class="filiere-quota-input w-full text-sm border-gray-300 rounded px-2 py-1" value="0" min="0">
+                //             </div>
+                //         `;
+                //     });
+                // } else {
+                //     container.innerHTML = '<span class="text-xs text-gray-400 italic">Aucune filière trouvée.</span>';
+                // }
             }
         } catch (error) {
             console.error("Erreur chargement des étudiants soumis", error);
@@ -2403,7 +2403,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             // });
 
             //ToDo Check
-            const response = await fetch("/university/admin/campaign/launch", {
+            const response = await fetch("/api.php?path=/university/admin/campaign/launch", {
                 method: 'POST',
                 body: JSON.stringify({ doublants: window.doublantsArray })
             });
@@ -2463,7 +2463,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             // });
 
             //ToDo Check
-            const response = await fetch("/university/admin/mobility/reset-wishes/" + id, {
+            const response = await fetch("/api.php?path=/university/admin/mobility/reset-wishes/" + id, {
                 method: 'POST',
                 //body: JSON.stringify({ doublants: window.doublantsArray })
             });
@@ -2534,7 +2534,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
             // });
 
             //ToDo Check
-            const response = await fetch("/university/admin/mobility/update-assignment-status", {
+            const response = await fetch("/api.php?path=/university/admin/mobility/update-assignment-status", {
                 method: 'POST',
                 body: JSON.stringify(payload)
             });
@@ -2927,7 +2927,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
                     // if (!response.ok) throw new Error("Erreur lors de la clôture des affectations");
 
                     //ToDo Check
-                    const response = await fetch("/university/admin/mobility/assignment/close", {
+                    const response = await fetch("/api.php?path=/university/admin/mobility/assignment/close", {
                         method: 'POST',
                         //body: JSON.stringify(payload)
                     });
