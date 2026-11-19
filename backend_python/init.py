@@ -5,6 +5,7 @@ import traceback
 import dotenv
 import mysql.connector
 from core.config import bcolors
+from core.logging import logger
 
 dotenv.load_dotenv(".env")
 
@@ -118,8 +119,6 @@ requests["api"]["secondary_key"] = f"""
 
 def request(query, param=()):
 
-    #print("query/param: ", query, param, flush=True)
-
     conn = mysql.connector.connect(
         host=HOST,
         user=USER,
@@ -131,8 +130,8 @@ def request(query, param=()):
         cursor.execute(query, param)
         rows = cursor.fetchall()
     except mysql.connector.Error as err:
-        print("Impossible d'exécuter la requête :", err)
-        print(traceback.format_exc())
+        logger.error("Impossible d'exécuter la requête :", err)
+        logger.error(traceback.format_exc())
         return []
     finally:
         cursor.close()
@@ -160,8 +159,8 @@ def get_primary_key_fields(conn, table_name):
         cursor.execute(query)
         rows = cursor.fetchall()
     except mysql.connector.Error as err:
-        print("Impossible d'exécuter la requête :", err)
-        print(traceback.format_exc())
+        logger.error("Impossible d'exécuter la requête :", err)
+        logger.error(traceback.format_exc())
         return []
     finally:
         cursor.close()
@@ -188,8 +187,8 @@ def get_secondary_key_fields(conn, table_name):
         cursor.execute(query)
         rows = cursor.fetchall()
     except mysql.connector.Error as err:
-        print("Impossible d'exécuter la requête :", err)
-        print(traceback.format_exc())
+        logger.error("Impossible d'exécuter la requête :", err)
+        logger.error(traceback.format_exc())
         return []
     finally:
         cursor.close()
@@ -210,14 +209,14 @@ def get_foreign_keys(conn, table_name):
         WHERE REFERENCED_TABLE_SCHEMA = '""" + os.getenv("MYSQL_DB") + """'
           AND TABLE_NAME = '""" + table_name + """'
     """
-    #print("query", query, flush=True)
+
     cursor = conn.cursor()
     try:
         cursor.execute(query)
         rows = cursor.fetchall()
     except mysql.connector.Error as err:
-        print(f"Impossible d'exécuter la requête : {err}")
-        print(traceback.format_exc())
+        logger.error(f"Impossible d'exécuter la requête : {err}")
+        logger.error(traceback.format_exc())
         return {}
     finally:
         cursor.close()
@@ -237,15 +236,15 @@ def __build_secondary_key_request(conn, table):
 
     # get primary key fields
     primary_keys_fields = get_primary_key_fields(conn, table)
-    #print("primary_keys_fields", primary_keys_fields, flush=True)
+    logger.debug("primary_keys_fields", primary_keys_fields)
 
     # get foreign key fields (fonction à implémenter comme en PHP)
     foreign_keys_fields = get_foreign_keys(conn, table)
-    #print("foreign_keys_fields", foreign_keys_fields, flush=True)
+    logger.debug("foreign_keys_fields", foreign_keys_fields)
 
     # get secondary key fields
     secondary_keys_fields = get_secondary_key_fields(conn, table)
-    #print("secondary_keys_fields", secondary_keys_fields, flush=True)
+    logger.debug("secondary_keys_fields", secondary_keys_fields)
 
     # initial request dict
     request_as_dict = {
@@ -280,11 +279,11 @@ def __build_secondary_key_request(conn, table):
 def build_secondary_key_request(conn, table):
     # get first primary key field
     primary_key_field = get_primary_key_fields(conn, table)[0]
-    #print("Primary key field: ", primary_key_field, flush=True)
+    logger.debug("Primary key field: ", primary_key_field)
 
     # build the recursive dictionary
     secondary_key_request_dict = __build_secondary_key_request(conn, table)
-    #print("Secondary key request dict: ", secondary_key_request_dict, flush=True)
+    logger.debug("Secondary key request dict: ", secondary_key_request_dict)
 
     # convert list fields to string for SQL
     select_fields = ", ".join(secondary_key_request_dict["SELECT"])
@@ -311,38 +310,38 @@ def init():
         database=DATABASE,
     )
 
-    print("##############################################################", flush=True)
+    logger.info("##############################################################")
     tables = request(requests["check"]["table_without_secondary_K"])
     for table in tables:
-        print(bcolors.WARNING + "Warning: " + table + " has no secondary key!" + bcolors.ENDC)
+        logger.warning(bcolors.WARNING + "Warning: " + table + " has no secondary key!" + bcolors.ENDC)
 
     tables = request(requests["check"]["primaryK_namming_error"])
     for table in tables:
-        print(bcolors.WARNING + "Warning: " + table + " has wrong primary key naming!" + bcolors.ENDC)
+        logger.warning(bcolors.WARNING + "Warning: " + table + " has wrong primary key naming!" + bcolors.ENDC)
 
     linked_tables = request(requests["struct"]["linked_table"])
-    #print("Linked Tables: ", linked_tables, flush=True)
+    logger.debug("Linked Tables: ", linked_tables)
     leaf_tables = request(requests["struct"]["leaf_table"])
-    #print("Leaf Tables: ", leaf_tables, flush=True)
+    logger.debug("Leaf Tables: ", leaf_tables)
     tables = linked_tables + leaf_tables
-    #print("Table", build_secondary_key_request(conn, tables[0]), flush=True)
+    logger.debug("Table", build_secondary_key_request(conn, tables[0]))
 
     for table in tables:
-        #print(table)
+        logger.debug(table)
         query = build_secondary_key_request(conn, table)
-        #print("Table", query, flush=True)
+        logger.debug("Table", query)
         cursor = conn.cursor()
         try:
             cursor.execute(query)
             rows = cursor.fetchall()
         except mysql.connector.Error as err:
-            print(f"Impossible d'exécuter la requête \n {query}:\n {err}")
-            print(traceback.format_exc())
+            logger.error(f"Impossible d'exécuter la requête \n {query}:\n {err}")
+            logger.error(traceback.format_exc())
         finally:
             cursor.close()
 
     conn.close()
-    print(bcolors.OKGREEN + "Init BD Framework requirement done (Check previous Warning)!" + bcolors.ENDC)
+    logger.info(bcolors.OKGREEN + "Init BD Framework requirement done (Check previous Warning)!" + bcolors.ENDC)
 
 if __name__ == '__main__':
     init()

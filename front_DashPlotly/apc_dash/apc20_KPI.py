@@ -3,6 +3,8 @@ import dash_bootstrap_components as dbc
 from app_tools import get_endpoint, get_python_backend_url
 from dash import html
 
+from core.logging import logger
+
 apc_layout = html.Div(
     [
         html.H2(
@@ -188,10 +190,10 @@ def register_callbacks(app):
     
 
         data = get_endpoint(url, token)
-        print(data)
+        logger.debug(data)
 
         if data is None or data.empty:
-            print("Aucune donnée")
+            logger.debug("Aucune donnée")
             return 0, 0, 0, 0
 
         # calcul des KPI

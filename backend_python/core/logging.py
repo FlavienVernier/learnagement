@@ -1,7 +1,24 @@
 import logging
 import re
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s:%(funcName)s:%(lineno)d - %(message)s')
+format='%(asctime)s | %(levelname)s | %(filename)s:%(funcName)s:%(lineno)d | %(message)s'
+
+# Get "uvicorn.access" logger
+access_logger = logging.getLogger("uvicorn.access")
+class HealthFilter(logging.Filter):
+    def filter(self, record):
+        return "/health" not in record.getMessage()
+
+access_logger.addFilter(HealthFilter())
+
+formatter = logging.Formatter(
+    fmt=format
+)
+
+for handler in access_logger.handlers:
+    handler.setFormatter(formatter)
+
+logging.basicConfig(level=logging.INFO, format=format)
 
 logger = logging.getLogger(__name__)
 

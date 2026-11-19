@@ -14,47 +14,6 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-#####################################
-# Private functions
-#####################################
-
-# def __get_module_responsible_id(id_module: int,
-#                                 current_user: Annotated[User, Depends(get_current_active_user)], ):
-#     request = {
-#         "request" : f"""
-#             SELECT  MAQUETTE_module.id_responsable
-#             FROM MAQUETTE_module
-#             WHERE MAQUETTE_module.id_module = %(id_module)s
-#         """,
-#         "params": {
-#             "id_module": id_module,
-#         },
-#         "allowedRolesRequester": ["connected_user"],
-#     }
-#     return db_request(current_user, SQLRequest(**request))
-
-# def __participate(id_module: int, id_etudiant: int, current_user: Annotated[User, Depends(get_current_active_user)], ):
-#     request = {
-#         "request" : f"""
-#             SELECT  MAQUETTE_module.id_module, LNM_etudiant.id_etudiant
-#             FROM MAQUETTE_module
-#             JOIN MAQUETTE_module_as_learning_unit ON MAQUETTE_module_as_learning_unit.id_module = MAQUETTE_module.id_module
-#             JOIN MAQUETTE_learning_unit ON MAQUETTE_learning_unit.id_learning_unit = MAQUETTE_module_as_learning_unit.id_learning_unit
-#             JOIN LNM_promo ON LNM_promo.id_promo = MAQUETTE_learning_unit.id_promo
-#             JOIN LNM_etudiant ON LNM_etudiant.id_promo = LNM_promo.id_promo
-#             WHERE MAQUETTE_module.id_module = %(id_module)s
-#             AND LNM_etudiant.id_etudiant = %(id_etudiant)s;
-#         """,
-#         "params": {
-#             "id_module": id_module,
-#             "id_etudiant": id_etudiant,
-#         },
-#         "allowedRolesRequester": ["connected_user"],
-#     }
-#     res = db_request(current_user, SQLRequest(**request))
-#     print(("res", res), flush=True)
-#     return True
-
 
 #####################################
 # Get
@@ -876,9 +835,7 @@ def add_sequencage(
                 "predicate": is_current_user_module_responsible,
             },
         }
-    #print(type(__get_module_responsible_id(id_module, current_user)), flush=True)
-    #if current_user.id == __get_module_responsible_id(id_module, current_user)[0]["id_responsable"]:
-    #    request["allowedRolesRequester"]["roles"] += [current_user.ExplicitSecondaryK]
+
     return db_request(current_user, SQLRequest(**request))
 
 

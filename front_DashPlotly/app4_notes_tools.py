@@ -29,10 +29,6 @@ def calcul_informations(notes_promo: pd.Series, note_eleve=None):
     #ecart_type = statistics.pstdev(notes_promo)
     ecart_type = notes_promo.std()
 
-    print(moyenne, mediane, ecart_type, flush=True)
-
-    print(type(notes_promo), flush=True)
-
     X_notes = list(range(21))  # liste qui va de 0 à 20
     #Y_notes = [0] * len(X_notes)  # initialisation de la liste
     Y_notes = notes_promo.round().to_list()

@@ -131,7 +131,7 @@ def register_callbacks(app):
         if controle_selectionne=='moyenne':
             prof_data = prof_data[prof_data['promo'] == promo_selectionnee][prof_data['nom'] == matiere_selectionnee]
             notes_promo = prof_data.groupby(['etudiant'])['evaluation'].mean()
-            #print("moyenne", type(notes_promo), "\n", notes_promo, flush=True)
+
         else :
             # on récupère les données correspondant à la matière et au contrôle
             prof_data = prof_data[prof_data['promo'] == promo_selectionnee][prof_data['nom'] == matiere_selectionnee][prof_data['date'] == controle_selectionne]
@@ -139,7 +139,6 @@ def register_callbacks(app):
             # on récupère les notes des contrôles
             prof_data.set_index('etudiant', inplace=True)
             notes_promo = prof_data['evaluation']
-            #print("ctrl", type(notes_promo), "\n", notes_promo, flush=True)
 
         if notes_promo.empty:
             return go.Figure().update_layout(title="Aucune note disponible"), "Aucune note disponible"

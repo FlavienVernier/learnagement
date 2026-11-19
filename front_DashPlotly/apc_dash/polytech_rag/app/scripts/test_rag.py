@@ -1,5 +1,7 @@
 from app.services.file_service import FileService
 
+from mysql.connector.aio.logger import logger
+
 
 def main():
     service = FileService()
@@ -15,18 +17,18 @@ def main():
         "experiences"
     ]
 
-    print("=== Assistant d'orientation Polytech ===")
+    logger.info("=== Assistant d'orientation Polytech ===")
 
-    print("\nChoisir une formation :")
+    logger.info("\nChoisir une formation :")
     for i, formation in enumerate(formations, start=1):
-        print(f"{i}. {formation.upper()}")
+        logger.info(f"{i}. {formation.upper()}")
 
     formation_choice = int(input("\nVotre choix : "))
     formation = formations[formation_choice - 1]
 
-    print("\nQue voulez-vous consulter ?")
+    logger.info("\nQue voulez-vous consulter ?")
     for i, category in enumerate(categories, start=1):
-        print(f"{i}. {category}")
+        logger.info(f"{i}. {category}")
 
     category_choice = int(input("\nVotre choix : "))
     category = categories[category_choice - 1]
@@ -37,9 +39,9 @@ def main():
     if category == "projets":
         levels = ["tous", "débutant", "intermédiaire", "avancé"]
 
-        print("\nFiltrer par niveau :")
+        logger.info("\nFiltrer par niveau :")
         for i, lvl in enumerate(levels, start=1):
-            print(f"{i}. {lvl}")
+            logger.info(f"{i}. {lvl}")
 
         level_choice = int(input("\nVotre choix : "))
         level = levels[level_choice - 1]
@@ -50,7 +52,7 @@ def main():
             "ou Entrée pour ignorer : "
         ).strip()
 
-    print("\nGénération de la réponse...\n")
+    logger.info("\nGénération de la réponse...\n")
 
     answer = service.generate_answer(
         formation=formation,
@@ -59,7 +61,7 @@ def main():
         keyword=keyword
     )
 
-    print(answer)
+    logger.info(answer)
 
 
 if __name__ == "__main__":

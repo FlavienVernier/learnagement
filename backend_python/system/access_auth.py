@@ -1,4 +1,3 @@
-import logging
 import re
 import inspect
 
@@ -11,7 +10,7 @@ from typing import Annotated
 from api.dependencies import get_current_active_user
 from models.user import User
 
-logger = logging.getLogger(__name__)
+from core.logging import logger
 
 router = APIRouter()
 
@@ -376,7 +375,7 @@ def build_lineage_tree(config: dict) -> dict:
             try:
                 accesses = extract_accesses(sql)
             except Exception as e:
-                print(f"⚠️  [{file_name}.{func_name}] : {e}")
+                logger.error(f"{e}")
                 accesses = []
 
             # Regroupement par table

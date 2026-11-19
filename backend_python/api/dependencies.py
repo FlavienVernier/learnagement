@@ -352,17 +352,17 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    #print(token, flush=True)
+
     try:
-        #payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
         payload = decode_access_token(token)
         user_login = payload.get("login")
-        #print("userlogin", userlogin, flush=True)
+
         if user_login is None:
             logger.error(f"Login error with payload: {payload}")
             raise credentials_exception
         token_data = TokenData(login=user_login)
-        #print("token_data", token_data, flush=True)
+
     except InvalidTokenError as e:
         logger.error(f"Invalid token : {e}")
         raise credentials_exception

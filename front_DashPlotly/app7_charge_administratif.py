@@ -98,7 +98,6 @@ def register_callbacks(app):
         prevent_initial_call=True
     )
     def update_graph(filtre_periode, user_id, token):
-        print(filtre_periode, user_id, flush=True)
         df = app7_charge_tools.get_chargeByEnseignantId(token, user_id)
 
 
@@ -148,7 +147,6 @@ def register_callbacks(app):
         prevent_initial_call=True
     )
     def display_table(period, user_id, token):
-        print(period, user_id, flush=True)
         df = app7_charge_tools.get_chargeByEnseignantId(token, user_id)
         if period == 'all':
             df = df[['type', 'duree_h']].groupby(['type']).sum().reset_index()

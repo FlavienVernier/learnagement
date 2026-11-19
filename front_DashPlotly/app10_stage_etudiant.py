@@ -22,7 +22,6 @@ def register_callbacks(app):
         State('token', 'data'),
     )
     def display_table(user_id_fake, user_id, token):
-        print("user-id:'",user_id,"'", flush=True)
         df_stages = app10_stage_tools.get_stages_by_studentId(token, user_id)
         table_stages = dbc.Table.from_dataframe(
             df_stages,

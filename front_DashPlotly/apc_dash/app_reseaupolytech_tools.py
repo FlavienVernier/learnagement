@@ -5,6 +5,8 @@ import json
 import plotly.express as px
 import plotly.graph_objects as go
 import dash_leaflet as dl
+
+from core.logging import logger
 #==============================================================================
 # 1. FONCTIONS DE NETTOYAGE & TRAITEMENT DES DONNÉES
 # ==============================================================================
@@ -42,7 +44,7 @@ try:
     with open(file_name, 'r', encoding='utf-8') as f:
         data = json.load(f)
 except FileNotFoundError:
-    print(f"Erreur: Le fichier {file_name} est introuvable.")
+    logger.error(f"Erreur: Le fichier {file_name} est introuvable.")
     data = {}
 
 coords_ecoles = {

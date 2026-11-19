@@ -2,8 +2,9 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import uvicorn
-import logging
+#import logging
 import re
+from core.logging import logger, access_logger
 
 import init
 
@@ -22,19 +23,7 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-access_logger = logging.getLogger("uvicorn.access")
-class HealthFilter(logging.Filter):
-    def filter(self, record):
-        return "/health" not in record.getMessage()
 
-access_logger.addFilter(HealthFilter())
-
-formatter = logging.Formatter(
-    fmt="%(levelname)s:     %(filename)s:%(lineno)d - %(message)s"
-)
-
-for handler in access_logger.handlers:
-    handler.setFormatter(formatter)
 
 #app = FastAPI(dependencies=[Depends(get_query_token)])
 origins = [
@@ -90,9 +79,9 @@ async def root():
     return {"message": "Hello, I'm Learnagement BackEnd!"}
 
 if __name__ == "__main__":
-    print(bcolors.OKGREEN + "Init BD framework..." + bcolors.ENDC)
+    logger.info(bcolors.OKGREEN + "Init BD framework..." + bcolors.ENDC)
     init.init()
-    print(bcolors.OKGREEN + "Start backend Python..." + bcolors.ENDC)
+    logger.info(bcolors.OKGREEN + "Start backend Python..." + bcolors.ENDC)
 
     is_prod = os.getenv("ENV", "dev") == "prod"
     ssl_dir = os.getenv("DOCKER_SSL_INTERNAL_DIR")

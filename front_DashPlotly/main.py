@@ -1,10 +1,8 @@
-from datetime import timedelta
-import logging
-from logging import exception
+
 
 from dotenv import load_dotenv
 import os
-import jwt
+
 import dash_bootstrap_components as dbc
 from flask import session, jsonify
 from dash import Input, Output, dcc, html, State
@@ -12,13 +10,8 @@ from urllib.parse import urlparse
 from urllib.parse import parse_qs
 from auth import FlaskAuth, decode_token
 
-class HealthFilter(logging.Filter):
-    def filter(self, record):
-        return "/health" not in record.getMessage()
+from core.logging import logger
 
-logging.getLogger("gunicorn.access").addFilter(HealthFilter())
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s:%(funcName)s:%(lineno)d - %(message)s')
 
 load_dotenv()
 
@@ -144,8 +137,8 @@ if environment == "dev":
 
 def render_sidebar(section, token_arg, status):
     # AJOUTE CES DEUX LIGNES POUR LE DÉBOGAGE :
-    print(f"====== CRÉATION DU MENU POUR : {section} ======", flush=True)
-    print(f"====== CONTENU DU MENU : {menu_items[section]} ======", flush=True)
+    logger.info(f"====== CRÉATION DU MENU POUR : {section} ======")
+    logger.info(f"====== CONTENU DU MENU : {menu_items[section]} ======")
     links = []
     # Logo + titre
     links.append(html.Div([
@@ -218,7 +211,7 @@ app.layout = html.Div([
     Input('status', 'data')
 )
 def update_sidebar(url, pathname, status):
-    logging.info("update_sidebar")
+    logger.info("update_sidebar")
     args=url.strip().split('?')
     if len(args) > 1:
         token_arg = args[1]
@@ -255,7 +248,7 @@ def render_page(url, pathname, token):
         page_content = render_page_content(url, pathname, jwt_token)
         return page_content, jwt_token, user_id, main_role, status
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
         instance_protocol = os.getenv("INSTANCE_PROTOCOL")
         instance_url = os.getenv("INSTANCE_URL")
         front_php_port = os.getenv("FRONT_PHP_PORT")
@@ -265,26 +258,23 @@ def render_page(url, pathname, token):
 
 
 def check_auth_token(url):
-    logging.info("check_auth_token")
-    # print(url, flush=True)
+    logger.info("check_auth_token")
+
     parsed_url = urlparse(url)
     instance_protocol = os.getenv("INSTANCE_PROTOCOL")
     instance_url = os.getenv("INSTANCE_URL")
     front_php_port = os.getenv("FRONT_PHP_PORT")
 
     jwt_token = parse_qs(parsed_url.query)['jwt_token'][0]
-    # print(jwt_token, flush=True)
 
     session['token'] = jwt_token
 
-    # if not session.get("token") or not token:
     if not jwt_token:
-        logging.info("no token")
+        logger.info("no token")
         app.layout = html.Div([html.A(href=f"{instance_protocol}://{instance_url}:{front_php_port}/logout", target="_top", children="No Token, session closed, connection required.")])
         return "-1", "none", "none", "no token"
     #try:
     payload = decode_token(jwt_token)
-    print(payload, flush=True)
     # Attach user info to the Flask global context
     if 'enseignant' in payload["roles"]:
         return jwt_token, payload['id'], "enseignant", "Connected"
@@ -293,12 +283,12 @@ def check_auth_token(url):
     elif 'administratif' in payload["roles"]:
         return jwt_token, payload['id'], "administratif", "Connected"
     else:
-        logging.exception("Unknown user class")
+        logger.error("Unknown user class")
         raise Exception("Unknown user class")
 
 
 def render_page_content(url, pathname, token):
-    logging.info("render_page_content " + token)
+    logger.info("render_page_content " + token)
 
     parts = pathname.strip('/').split('/')  # ['enseignant', 'app2'] ou ['etudiant','app7'] ou ['enseignant'] etc.
     if len(parts) == 1:

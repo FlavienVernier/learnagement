@@ -5,6 +5,8 @@ import dash_bootstrap_components as dbc
 from pandas.core.interchange.dataframe_protocol import DataFrame
 import pandas as pd
 
+from core.logging import logger
+
 import app5_module_tools
 import app_tools
 
@@ -59,27 +61,19 @@ def update_table_sequencage(token, user_id, selected_module):
     if df.empty:
         df = pd.DataFrame(columns = ['id_module', 'nombre', 'type', 'duree_h', 'groupe_type', 'intervenant_principal'])
     df = df[df['id_module'] == selected_module][['nombre', 'type', 'duree_h', 'groupe_type', 'intervenant_principal']]
-    #df = df[df['id_module'] == selected_module]
-    #data=df.to_dict('records')
-    #print(data, flush=True)
+
     dfi = app_tools.get_enseignants(token)
     intervenant_options = [{'label': 'Aucun intervenant', 'value': None}] + [{'label': row['ExplicitSecondaryK'], 'value': row['id_enseignant']} for _, row in dfi.iterrows()]
 
     table_sequencage = dash_table.DataTable(
         id='table_sequencage',
-        # columns=[{"name": i, "id": i}
-        #          if i != 'intervenant_principal'
-        #          else {"name": i, "id": i, "editable": True, "presentation": "dropdown",}
-        #          for i in df.columns],  # columns must be defined so that DataTable be editable
+
         columns=[{"name": i, "id": i}
-                 #if i != 'intervenant_principal'
-                 #else {"name": i, "id": i, "editable": True, "presentation": "dropdown", }
                  for i in df.columns] + [{"name": 'nouvel_intervenant', "id": 'nouvel_intervenant', "editable": True, "presentation": "dropdown", }],  # columns must be defined so that DataTable be editable
         data=df.to_dict('records'),
         editable=True,
         row_deletable=True,
         dropdown={
-            #"intervenant_principal": {
             "nouvel_intervenant": {
                 "options": intervenant_options,
                 "clearable":True,
@@ -275,19 +269,18 @@ def register_callbacks_edit(app):
     def cb_add_sequencage(user_id: int, selected_module, data, button_n_clicks, token):
         if not selected_module:
             return []
-        #print(selected_module,flush=True)
+
         data[0]["id_module"] = selected_module
         data[0]["id_seance_type"] = data[0]["type"]
         data[0]["id_groupe_type"] = data[0]["groupe_type"]
         data[0]["id_intervenant_principal"] = data[0]["intervenant_principal"]
-        #print(data[0], flush=True)
+
         ret = app5_module_tools.add_moduleSequencage(token, data[0])
-        #print(ret)
+
         return update_table_sequencage(token, user_id, selected_module)#, ret
 
     # Remove
     @app.callback(
-        #Output('sequencage_info_status', 'children'),
         Input('table_sequencage', 'data_previous'),
         State('table_sequencage', 'data'),
         State('user_id', 'data'),
@@ -297,17 +290,17 @@ def register_callbacks_edit(app):
     )
     def cb_remove_sequencag(previous, current, user_id, id_module, token):
         if previous is None:
-            print("Kaboum", flush=True)
-            #return "Kaboum"
+            logger.error("Kaboum")
+
         elif len(previous) > len(current): #else row updated
             to_remove = [row for row in previous if row not in current][0]
             df = app5_module_tools.get_moduleSequencageByEnseignantId(token, user_id)
-            #print('toRemove', to_remove, flush=True)
+
             id_to_remove = df[(df['nombre'] == to_remove['nombre'])
                               & (df['type'] == to_remove['type'])
                               & (df['duree_h'] == to_remove['duree_h'])
                               & (df['groupe_type'] == to_remove['groupe_type'])][['id_module_sequencage']].iat[0, 0]
-            #print('id_toRemove', id_to_remove, flush=True)
+
             app5_module_tools.remove_moduleSequencage(token, id_module, id_to_remove)
 
     # Changement d'intervenant principal au niveau séquençage
@@ -328,7 +321,6 @@ def register_callbacks_edit(app):
             row_changed = [row for row in current  if row not in previous]
             if len(row_changed) > 0: # else callback invoked by data deleted
                 df = app5_module_tools.get_moduleSequencageByEnseignantId(token, user_id)
-                print(df, flush=True)
                 row_changed = row_changed[0]
                 new_intervenant_id = row_changed['nouvel_intervenant']
                 if new_intervenant_id is None or new_intervenant_id == "":
@@ -339,7 +331,7 @@ def register_callbacks_edit(app):
                                   & (df['duree_h'] == row_changed['duree_h'])
                                   & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0])
                 # ToDo refactoring required to get it directly
-                #id_sequencage = row_changed['id_module_sequencage']
+
                 if new_intervenant_id is None or new_intervenant_id == "":
                     ret = app5_module_tools.reset_intervenant_principal_sequencage(token, id_module, id_sequencage)
                 else:
@@ -429,14 +421,11 @@ def register_callbacks_edit(app):
         else:
             row_changed = [row for row in current if row not in previous]
             if len(row_changed) > 0:  # else callback invoked by data deleted
-                #df = app5_module_tools.get_moduleSequenceByEnseignantId(user_id)
+
                 row_changed = row_changed[0]
                 new_intervenant_id = int(row_changed['nouvel_intervenant'])
                 id_sequence = int(row_changed['id_sequence'])
-                # id_sequence = df[(df['type'] == row_changed['type'])
-                #                    & (df['numero_ordre'] == row_changed['numero_ordre'])
-                #                    & (df['duree_h'] == row_changed['duree_h'])
-                #                    & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0]
+
                 if new_intervenant_id is None or new_intervenant_id == "":
                     ret = app5_module_tools.reset_intervenant_principal_sequence(token, selected_module, id_sequence)
                 else:
@@ -496,14 +485,11 @@ def register_callbacks_edit(app):
         else:
             row_changed = [row for row in current if row not in previous]
             if len(row_changed) > 0:  # else callback invoked by data deleted
-                #df = app5_module_tools.get_moduleSequenceByEnseignantId(user_id)
+
                 row_changed = row_changed[0]
                 new_intervenant_id = int(row_changed['nouvel_intervenant'])
                 id_session = int(row_changed['id_session'])
-                # id_sequence = df[(df['type'] == row_changed['type'])
-                #                    & (df['numero_ordre'] == row_changed['numero_ordre'])
-                #                    & (df['duree_h'] == row_changed['duree_h'])
-                #                    & (df['groupe_type'] == row_changed['groupe_type'])][['id_module_sequencage']].iat[0, 0]
+
                 if new_intervenant_id is None or new_intervenant_id == "":
                     ret = app5_module_tools.reset_intervenant_session(token, selected_module, id_session)
                 else:

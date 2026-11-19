@@ -2,6 +2,19 @@ import os
 import glob
 import shutil
 
+
+import logging
+
+RED = "\033[0;31m"
+GREEN = "\033[0;32m"
+NC = "\033[0m"  # No color
+
+logging.basicConfig(format=f'{RED}Learnagement   |{NC}  %(asctime)s,%(msecs)03d - %(levelname)s - %(message)s',
+                    level=logging.INFO,
+                    datefmt='%Y-%m-%d %H:%M:%S'
+                    )
+
+
 def main():
     # Couleurs pour les messages (non directement nécessaires dans Python mais émulation via ANSI codes)
     RED = "\033[0;31m"
@@ -16,10 +29,10 @@ def main():
     # Crée le dossier cible s'il n'existe pas
     os.makedirs(target_folder, exist_ok=True)
 
-    print(f"link data from {source_folder} to {target_folder}")
+    logging.info(f"link data from {source_folder} to {target_folder}")
     # Parcourt les fichiers correspondant au motif [0-9]*.sql
     for filepath in glob.glob(os.path.join(source_folder, "V[0-9]*.sql")):
-        print(f"link {filepath}")
+        logging.info(f"link {filepath}")
         # Obtient le nom de base du fichier
         basename = os.path.basename(filepath)
         # Construit le chemin cible avec le préfixe "5_"
@@ -30,18 +43,7 @@ def main():
         source_path = os.path.join(source_folder , basename)
 
         shutil.copy(source_path, target_path)
-        # Crée ou met à jour le lien symbolique
-        # try:
-        #     if os.path.exists(target_path):  # Supprime le lien existant s'il est déjà présent
-        #         os.remove(target_path)
-        #     if os.name == 'nt':
-        #         shutil.copy(source_path, target_path)
-        #     else:
-        #         os.symlink(relative_path, target_path)
-        #
-        #     print(f"{GREEN}Created symlink: {target_path} -> {source_path}{NC}")
-        # except OSError as e:
-        #     print(f"{RED}Error creating symlink for {filepath}: {e}{NC}")
+
 
 if __name__ == "__main__":
     main()

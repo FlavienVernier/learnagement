@@ -91,15 +91,6 @@ def python_endpoint(method, url, data, token):
         # Gérer les erreurs HTTP
         resp.raise_for_status()
 
-        # Parser la réponse received as string en DataFrame
-        #json_string = resp.content.decode('utf-8')
-        #print(json_string, flush=True)
-        #f json_string != "[]":
-        #    url_data = json.loads(json_string)
-        #    return pd.read_json(io.StringIO(url_data))
-        #else:
-        #    return pd.DataFrame()
-
         # Parser la réponse JSON
         data = resp.json()
 
@@ -113,22 +104,18 @@ def python_endpoint(method, url, data, token):
 
     except Timeout as e:
         logging.exception(f"Timeout lors de l'appel à {url}")
-        #return pd.DataFrame()
         raise e
 
     except RequestException as e:
         logging.exception(f"Erreur de connexion: {e}")
-        #return pd.DataFrame()
         raise e
 
     except ValueError as e:
         logging.exception(f"Erreur lors du parsing de la réponse JSON: {e}")
-        #return pd.DataFrame()
         raise e
 
     except Exception as e:
         logging.exception(f"Erreur inattendue: {e}")
-        #return pd.DataFrame()
         raise e
 
 

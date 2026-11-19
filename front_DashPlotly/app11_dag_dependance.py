@@ -8,8 +8,11 @@ import matplotlib.colors as mcolors#
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
 
+from core.logging import logger
+
 import app11_dag_dependance_tools
 import app5_module_tools
+
 
 # DEPRECATED Must be updated
 
@@ -126,7 +129,7 @@ def compute_graph(token, id_module):
                 label = f"{node_data['type']}-{node_data['code']}"
                 hover = f"{node_data['type']} - {node_data['code']}\n{node_data['nom_module']}\n{node_data['nom_sequence'] if node_data['nom_sequence'] else ''}"
             else:
-                print(f"Mince ! Le noeud {node} n'a pas de données associées !")
+                logger.warning(f"Mince ! Le noeud {node} n'a pas de données associées !")
                 label = "Unknown"
                 hover = "No data"
             node_text.append(label)

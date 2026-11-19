@@ -29,10 +29,6 @@ logging.basicConfig(format=f'{RED}Learnagement   |{NC}  %(asctime)s,%(msecs)03d 
                     datefmt='%Y-%m-%d %H:%M:%S'
                     )
 
-#logging.basicConfig(
-#    format='%(levelname)s: %(message)s', level=logging.INFO,
-#    handlers=[logging.StreamHandler(), logging.FileHandler("learnagement.log", encoding="utf-8")],
-#)
 
 from pathlib import Path
 ROOT = Path(__file__).resolve().parent
@@ -549,22 +545,19 @@ SELECT table_name FROM information_schema.tables WHERE TABLE_SCHEMA = "learnagem
         # get Learnagement db schemas
         structureFile = os.path.join(backup_folder,"0_struct_" + now + ".sql")
         cmd = os.environ["DOCKER_COMMAND"].split(" ") + ["exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-data", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "--no-tablespaces", "learnagement", ">", structureFile]
-        #print(" ".join(cmd))
-        #print("Enter MySQL password:")
+
         os.system(" ".join(cmd))
 
         # get Learnagement DB data
         dataFile = os.path.join(backup_folder,"5_data_" + now + ".sql")
         cmd = os.environ["DOCKER_COMMAND"].split(" ") + ["exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-create-info", "--ignore-views", "--skip-triggers", "--skip-comments", "--skip-extended-insert", "--no-tablespaces", "learnagement", ">", dataFile]
-        #print(" ".join(cmd))
-        #print("Enter MySQL password:")
+
         os.system(" ".join(cmd))
 
         # get Learnagement db triggers
         triggerFile = os.path.join(backup_folder,"99_trigger_" + now + ".sql")
         cmd = os.environ["DOCKER_COMMAND"].split(" ") + ["exec", "-it", "learnagement_mysql_"+os.environ["INSTANCE_NAME"], "mysqldump", "-u", os.environ["MYSQL_USER_LOGIN"], "-p" + os.environ["MYSQL_USER_PASSWORD"], "--no-create-info", "--ignore-views", "--no-data", "--skip-comments", "--skip-extended-insert", "--no-tablespaces", "learnagement", ">", triggerFile]
-        #print(" ".join(cmd))
-        #print("Enter MySQL password:")
+
         os.system(" ".join(cmd))
 
         # Bidouille

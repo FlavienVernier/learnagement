@@ -92,9 +92,8 @@ def register_callbacks(app):
     )
 
     def update_graphique(matiere_selectionnee, controle_selectionne, user_id, token):
-        # print(matiere_selectionnee, controle_selectionne)
+
         # le calcul des notes de la promo est différent si on veut la moyenne de tous les contrôles ou seulement un cc
-        #data_matiere = app4_notes_tools.get_data_promo(matiere_selectionnee)  # mettre matiere_selectionnee au format id
 
         data_matiere = app4_notes_tools.get_notes_eleves(token, user_id)
         notes_eleve = data_matiere[data_matiere['id_module'] == matiere_selectionnee]
@@ -113,7 +112,6 @@ def register_callbacks(app):
             data_matiere = app4_notes_tools.get_data_promo(token, matiere_selectionnee)
             notes_promo = data_matiere[data_matiere['date'] == controle_selectionne]["evaluation"]
             note_eleve = notes_eleve[notes_eleve['date'] == controle_selectionne]
-            print(note_eleve, flush=True)
             note_eleve = note_eleve.iloc[0]['evaluation']
 
         else :
