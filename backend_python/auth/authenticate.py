@@ -1,7 +1,7 @@
 import os
 import dotenv
 
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
 from api.dependencies import logger
@@ -26,9 +26,10 @@ router = APIRouter()
     summary="Token",
     description="Authenticate user and return JWT token")
 async def login_for_access_token(
+    request: Request,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> Token:
-    return await authenticate_lnm.login_for_access_token(form_data)
+    return await authenticate_lnm.login_for_access_token(form_data, request)
 
 # ToDo refactor so that CAS data is CasTicket and endpoint validate the ticket
 @router.post("/token-cas",

@@ -1,5 +1,5 @@
-
-from fastapi import Depends, HTTPException, status
+from auth import login_throttle
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
 from typing import Annotated
@@ -31,14 +31,22 @@ def __authenticate_user_lnm(user_login: str, password: str):
 
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    request: Request,
 ) -> Token:
+    ip = request.client.host if request.client else "unknown"
+    login_throttle.check(form_data.username, ip)          # 429 avant tout travail
+
     user = __authenticate_user_lnm(form_data.username, form_data.password)
     if not user:
+        login_throttle.register_failure(form_data.username, ip)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    # Réinitialisation du nombre de tentatives en cas de login success
+    login_throttle.reset(form_data.username, ip)
+
     access_token = create_access_token(
         data={"id": user.id,
               "login": user.mail,

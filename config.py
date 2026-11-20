@@ -20,7 +20,8 @@ containers = {
             "front_dashplotly",
             "front_nextjs", # Only in dev
            ],
-    "prod":["reverse_proxy_traefik",
+    "prod":["socket_proxy_tecnativa",
+            "reverse_proxy_traefik",
             "data_mysql",
             "phpmyadmin",
             "backend_python",
@@ -29,6 +30,7 @@ containers = {
             ],
 }
 container_app_dirs = {
+        "socket_proxy_tecnativa": None,
         "reverse_proxy_traefik": None,
         "data_mysql": "db",
         "phpmyadmin": None,

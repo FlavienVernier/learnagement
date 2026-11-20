@@ -88,6 +88,8 @@ if __name__ == "__main__":
     uvicorn_kwargs = {
         "host": "0.0.0.0",
         "port": 4000,
+        "proxy_headers": True,
+        "forwarded_allow_ips": "172.18.0.0/16" # FixMe sous-réseau du réseau Docker partagé, Seuls l'IP Traefik devrait être indiquée
     }
 
     if is_prod:

@@ -8,7 +8,7 @@ import dotenv
 
 TRAEFIK_MODES = ("none", "local", "domain")
 TRAEFIK_SERVICE = "reverse_proxy_traefik"
-
+SOCKET_PROXY = "socket_proxy_tecnativa"
 
 ########################################
 # Configuration (lue une seule fois)
@@ -190,6 +190,7 @@ def _traefik_command(cfg: ComposeConfig) -> list:
         "--api.insecure=true",
         "--entrypoints.traefik.address=:8080",
         "--providers.docker=true",
+        f"--providers.docker.endpoint=tcp://socket_proxy_{cfg.instance}:2375",
         "--providers.docker.exposedbydefault=false",
         "--providers.file.directory=/etc/traefik/dynamic",
         "--providers.file.watch=true",
@@ -215,11 +216,46 @@ def _traefik_command(cfg: ComposeConfig) -> list:
 ########################################
 
 def _gen_head(cfg: ComposeConfig) -> str:
-    return "\nservices:\n"
+    return _svc(
+        "# NEVER EDIT THIS FILE, IT IS SELF GENERATED",
+        "",
+        "services:",
+        "",
+    )
 
+# --- socket proxy :
+def _gen_socket_proxy_tecnativa(cfg: ComposeConfig) -> str:
+    image = getattr(cfg, "socket_proxy_image", "tecnativa/docker-socket-proxy:latest")
+    swarm = getattr(cfg, "swarm", False)
 
+    envs = ["CONTAINERS=1"]                      # KEY=value, pas "KEY: value"
+    if swarm:
+        envs += ["SERVICES=1", "TASKS=1", "NETWORKS=1", "SWARM=1"]
+    envs += ["POST=0"]
+
+    return _svc(
+        f"    socket_proxy_{cfg.instance}:",
+        f"        image: {image}",
+        f"        container_name: socket_proxy_tecnativa_{cfg.instance}",
+        "        restart: unless-stopped",
+        _block("environment", envs),
+        "        volumes:",
+        "            - /var/run/docker.sock:/var/run/docker.sock:ro",
+        _networks(cfg, "socket_proxy"),
+        "        read_only: true",
+        "        tmpfs:",
+        "            - /run",
+        "            - /tmp",
+        "        security_opt:",
+        "            - no-new-privileges:true",
+        # /_ping est autorisé par défaut par le proxy ; wget est fourni par busybox (alpine) mais gène du bruit dans les logs
+        _healthcheck(["CMD", "wget", "-q", "--spider", "http://127.0.0.1:2375/_ping"], retries=20),
+        #_healthcheck(["CMD", "nc", "-z", "127.0.0.1", "2375"], retries=20),
+    )
+
+# --- Traefik :
 def _gen_reverse_proxy_traefik(cfg: ComposeConfig) -> str:
-    volumes = ["/var/run/docker.sock:/var/run/docker.sock:ro", "./traefik:/etc/traefik/dynamic:ro"]
+    volumes = ["./traefik:/etc/traefik/dynamic:ro"]      # docker.sock retiré
     if cfg.mode == "domain":
         volumes.append("./letsencrypt:/letsencrypt")
     if cfg.mode == "local":
@@ -231,8 +267,9 @@ def _gen_reverse_proxy_traefik(cfg: ComposeConfig) -> str:
         _block("command", _traefik_command(cfg)),
         _block("ports", ["80:80", "443:443", f"127.0.0.1:{cfg.traefik_api_port}:8080"]),
         _block("volumes", volumes),
-        _networks(cfg, "front", "back"),
+        _networks(cfg, "front", "back", "socket_proxy"),
         "        restart: unless-stopped",
+        _depends_on(cfg, "socket_proxy"),               # ni traefik=True, ni data_mysql
         _healthcheck(["CMD", "traefik", "healthcheck", "--ping"], retries=20),
     )
 
@@ -289,7 +326,7 @@ def _gen_backend_python(cfg: ComposeConfig) -> str:
         "        build: ./backend_python/",
         '        restart: "no"',
         _networks(cfg, "back", "front"),
-        _ports(cfg, f"{cfg.backend_port}:{cfg.backend_docker_port}", only_without_traefik=True),
+        _ports(cfg, f"127.0.0.1:{cfg.backend_port}:{cfg.backend_docker_port}"),
         _environment(cfg),
         _block("volumes", ["../backend_python/:/app/", *_ssl_volumes(cfg, external=False)]),
         _depends_on(cfg, "data_mysql"),
@@ -371,6 +408,8 @@ def _gen_volumes(cfg: ComposeConfig) -> str:
 def _gen_networks(cfg: ComposeConfig) -> str:
     return f"""
 networks:
+    learnagement_socket_proxy_{cfg.instance}:
+        internal: true
     # network to access to fronts (only fronts and backends on this network)
     learnagement_front_{cfg.instance}:
         name: learnagement_front_{cfg.instance}
@@ -384,16 +423,17 @@ networks:
 
 # Chaque clé est la fonction génératrice (cfg -> texte) de sa partie du compose
 docker_compose_parts = {
-    "head":                  _gen_head,
-    "reverse_proxy_traefik": _gen_reverse_proxy_traefik,
-    "data_mysql":            _gen_data_mysql,
-    "phpmyadmin":            _gen_phpmyadmin,
-    "backend_python":        _gen_backend_python,
-    "front_php":             _gen_front_php,
-    "front_nextjs":          _gen_front_nextjs,
-    "front_dashplotly":      _gen_front_dashplotly,
-    "volumes":               _gen_volumes,
-    "networks":              _gen_networks,
+    "head":                   _gen_head,
+    "socket_proxy_tecnativa": _gen_socket_proxy_tecnativa,
+    "reverse_proxy_traefik":  _gen_reverse_proxy_traefik,
+    "data_mysql":             _gen_data_mysql,
+    "phpmyadmin":             _gen_phpmyadmin,
+    "backend_python":         _gen_backend_python,
+    "front_php":              _gen_front_php,
+    "front_nextjs":           _gen_front_nextjs,
+    "front_dashplotly":       _gen_front_dashplotly,
+    "volumes":                _gen_volumes,
+    "networks":               _gen_networks,
 }
 
 
@@ -438,8 +478,10 @@ def gen_docker_compose_yml(containers: list):
     if unknown:
         raise ValueError(f"Conteneurs inconnus : {unknown}")
 
-    # Pas de Traefik en mode 'none'
-    selected = [c for c in containers if c != TRAEFIK_SERVICE or cfg.traefik]
+    # Pas de Traefik ni tecnativa en mode 'none'
+    selected = [c for c in containers if c not in (TRAEFIK_SERVICE, SOCKET_PROXY)]
+    if cfg.traefik:
+        selected = [SOCKET_PROXY, TRAEFIK_SERVICE] + selected
 
     compose_dir = Path("docker")   # plus de os.chdir : le script ne dépend plus du dossier courant
     parts = [
