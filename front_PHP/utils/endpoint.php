@@ -54,7 +54,10 @@ function python_endpoint($method, $path, $data, $token) {
     }
 
     if ($status == 403) {
-        throw new Exception("Access denied - missing required role");
+        getLogger()->error("Access denied - missing required role");
+        return [];
+        // Do not throw exception, return no data
+        // throw new Exception("Access denied - missing required role");
     }
 
     if ($status >= 400) {

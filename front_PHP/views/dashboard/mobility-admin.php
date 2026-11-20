@@ -1864,7 +1864,7 @@ $googleMapsApiKey = getenv('GOOGLE_MAPS_API_KEY') ?: ($_ENV['GOOGLE_MAPS_API_KEY
 
     window.fetchMobilityQuotas = async function () {
         try {
-            
+
             const params = new URLSearchParams({
                 path: '/university/admin/mobility-quotas',
                 annee_scolaire: "2025-2026", //FixMe Refactor : années hard coded
