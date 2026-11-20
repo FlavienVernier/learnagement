@@ -7,13 +7,14 @@ import shutil
 import subprocess
 import datetime
 
+import docker
 import docker_compose
 import dotenv
 import asyncio
 import click
 from click_default_group import DefaultGroup
 
-from docker_compose import __wait_for_mysql_healthy__
+from docker import __is_traefik_up, __get_traefik_urls, __wait_for_mysql_healthy__
 #from dotenv import load_dotenv
 from env import propagate_env, remove_env_file, load_env
 from git import __get_git_branch
@@ -67,8 +68,21 @@ def __security_check():
     else:
         logging.info(f"{GREEN}App run from '{git_branch}' branch with '{os.environ['ENV']}' environment{NC}")
 
+# logging urls
+async def __log_access_urls__():
+    traefik_up = await asyncio.to_thread(__is_traefik_up)
 
+    if traefik_up:
+        urls = await asyncio.to_thread(__get_traefik_urls)
+        if urls:
+            logging.info(f"{GREEN}Traefik is running, services available on:{NC}")
+            for url in urls:
+                logging.info(f"{GREEN}  - {url}{NC}")
+            return
+        logging.warning(f"{YELLOW}Traefik is up but no routers found, falling back to dev URLs{NC}")
 
+    logging.info(f"{GREEN}Web Apps runs on: {os.environ['INSTANCE_PROTOCOL']}://{os.environ['INSTANCE_URL']}:{os.environ['FRONT_PHP_PORT']}{NC}")
+    logging.info(f"{GREEN}PHPMyAdmin runs on: http://127.0.0.1:{os.environ['PHPMYADMIN_PORT']}{NC}")
 
 #############################################################
 # Lernagement BD
@@ -391,11 +405,9 @@ async def __start__(docker_option=None):
     __security_check()
 
     container_name = os.environ["MYSQL_SERVER"]
-    # task = asyncio.create_task(__run_dockers__(docker_option))
-    # await __wait_for_mysql_healthy__(container_name)
+
     docker_task = asyncio.create_task(__run_dockers__(docker_option))
     health_task = asyncio.create_task(__wait_for_mysql_healthy__(container_name))
-    # ToDo refactor : add health to all dockers, create task waits all docker healthy
 
     done, pending = await asyncio.wait(
         {docker_task, health_task},
@@ -413,11 +425,12 @@ async def __start__(docker_option=None):
 
     await __set_lnm_administrator_with_retry__()
 
-    # ToDo Waits all dockers healthy
-    await docker_compose.__wait_for_all_dockers_ready__()
+    # Waits all dockers healthy
+    await docker.__wait_for_all_dockers_ready__()
 
-    logging.info(f"{GREEN}Web Apps runs on: {os.environ['INSTANCE_PROTOCOL']}://{os.environ['INSTANCE_URL']}:{os.environ['FRONT_PHP_PORT']}{NC}")
-    logging.info(f"{GREEN}PHPMyAdmin runs on: http://127.0.0.1:{os.environ['PHPMYADMIN_PORT']}{NC}")
+    #logging.info(f"{GREEN}Web Apps runs on: {os.environ['INSTANCE_PROTOCOL']}://{os.environ['INSTANCE_URL']}:{os.environ['FRONT_PHP_PORT']}{NC}")
+    #logging.info(f"{GREEN}PHPMyAdmin runs on: http://127.0.0.1:{os.environ['PHPMYADMIN_PORT']}{NC}")
+    await __log_access_urls__()
     logging.info(f"{GREEN}Admin is deactivated by default{NC}")
 
     await docker_task

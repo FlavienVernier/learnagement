@@ -1,4 +1,3 @@
-import asyncio
 import json
 import logging
 import os
@@ -21,6 +20,7 @@ class ComposeConfig:
     env: str
     mode: str          # none | local | domain
     traefik: bool      # Traefik effectivement présent dans le compose
+    traefik_api_port: str
     domain: str
     acme_email: str
     acme_staging: bool
@@ -60,6 +60,7 @@ class ComposeConfig:
             env=env,
             mode=mode,
             traefik=(mode != "none" and TRAEFIK_SERVICE in containers),
+            traefik_api_port=envs("TRAEFIK_API_PORT", 8080),
             domain=envs("DOMAIN", "localhost"),
             acme_email=envs("ACME_EMAIL", ""),
             acme_staging=envs("ACME_STAGING", "false").strip().lower() in ("1", "true", "yes", "on"),
@@ -186,6 +187,8 @@ def _traefik_labels(cfg: ComposeConfig, name: str, subdomain: str, port: str,
 def _traefik_command(cfg: ComposeConfig) -> list:
     cmd = [
         "--ping=true",
+        "--api.insecure=true",
+        "--entrypoints.traefik.address=:8080",
         "--providers.docker=true",
         "--providers.docker.exposedbydefault=false",
         "--providers.file.directory=/etc/traefik/dynamic",
@@ -226,7 +229,7 @@ def _gen_reverse_proxy_traefik(cfg: ComposeConfig) -> str:
         "        image: traefik:v3.7",
         f"        container_name: learnagement_{TRAEFIK_SERVICE}_{cfg.instance}",
         _block("command", _traefik_command(cfg)),
-        _block("ports", ["80:80", "443:443"]),
+        _block("ports", ["80:80", "443:443", f"127.0.0.1:{cfg.traefik_api_port}:8080"]),
         _block("volumes", volumes),
         _networks(cfg, "front", "back"),
         "        restart: unless-stopped",
@@ -304,7 +307,7 @@ def _gen_front_php(cfg: ComposeConfig) -> str:
         "        restart: always",
         _networks(cfg, "front"),
         _ports(cfg, f"{cfg.php_port}:{cfg.php_docker_port}", only_without_traefik=True),
-        _traefik_labels(cfg, "front_php", "php", cfg.php_docker_port, cfg.php_protocol),
+        _traefik_labels(cfg, "front_php", "www", cfg.php_docker_port, cfg.php_protocol),
         _environment(cfg),
         _block("volumes", [
             "../front_PHP:/var/www/html",
@@ -452,71 +455,3 @@ def gen_docker_compose_yml(containers: list):
     (compose_dir / "docker-compose.yml").write_text("".join(parts), encoding="utf-8")
     logging.info(f"docker-compose.yml généré (env={cfg.env}, traefik_mode={cfg.mode}, traefik={cfg.traefik})")
 
-
-# __wait_for_all_dockers_ready__ et __wait_for_mysql_healthy__ : inchangées
-
-async def __wait_for_all_dockers_ready__():
-    """Attend que tous les conteneurs du projet soient 'running' (et 'healthy' s'ils ont un healthcheck)."""
-    timeout: int = int(os.environ["DOCKER_STARTING_TIMEOUT"])
-    poll_interval: int = 3
-    cmd = os.environ["DOCKER_COMPOSE_COMMAND"].split(" ") + [
-        "-p", os.environ["COMPOSE_PROJECT_NAME"], "ps", "--all", "--format", "json"
-    ]
-    elapsed = 0
-    while elapsed < timeout:
-        proc = await asyncio.create_subprocess_exec(
-            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-        )
-        stdout, _ = await proc.communicate()
-
-        containers_state = []
-        for line in stdout.decode().splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            data = json.loads(line)
-            containers_state.extend(data if isinstance(data, list) else [data])
-      
-        def ok(c):
-            if c.get("State") == "exited" and c.get("ExitCode") == 0:
-                return True  # conteneur ponctuel terminé normalement
-            return c.get("State") == "running" and c.get("Health", "") in ("", "healthy")
-
-        if containers_state and all(ok(c) for c in containers_state):
-            return True
-
-        await asyncio.sleep(poll_interval)
-        elapsed += poll_interval
-
-    raise TimeoutError(f"Tous les conteneurs ne sont pas prêts après {timeout}s")
-
-
-async def __wait_for_mysql_healthy__(container_name: str, timeout: int = 300, poll_interval: int = 2):
-    """Attend que le conteneur MySQL soit 'healthy' selon son healthcheck Docker."""
-    elapsed = 0
-    while elapsed < timeout:
-        cmd = os.environ["DOCKER_COMMAND"].split(" ") + [
-            "inspect", "--format={{.State.Health.Status}}", container_name
-        ]
-        # result = subprocess.run(cmd, capture_output=True, text=True)
-        # status = result.stdout.strip()
-        proc = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            #text=True
-        )
-        stdout, _ = await proc.communicate()
-        #status = stdout.strip()
-        status = stdout.decode().strip()
-        logging.info(f"{container_name} health: {status!r}")
-
-        if status == "healthy":
-            return True
-        elif status == "unhealthy":
-            raise RuntimeError(f"Le conteneur {container_name} est en état 'unhealthy'")
-
-        await asyncio.sleep(poll_interval)
-        elapsed += poll_interval
-
-    raise TimeoutError(f"Timeout : {container_name} n'est pas devenu 'healthy' après {timeout}s")
