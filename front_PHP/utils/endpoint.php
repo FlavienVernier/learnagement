@@ -50,6 +50,7 @@ function python_endpoint($method, $path, $data, $token) {
     $status = $result['status'];
 
     if ($status == 401) {
+        getLogger()->error("Invalid or expired token");
         throw new Exception("Invalid or expired token");
     }
 

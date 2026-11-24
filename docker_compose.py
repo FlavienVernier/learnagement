@@ -320,15 +320,31 @@ def _gen_phpmyadmin(cfg: ComposeConfig) -> str:
 
 
 def _gen_backend_python(cfg: ComposeConfig) -> str:
+    is_prod = cfg.env == "prod"
+    target = "prod" if is_prod else "dev"  # un ENV inattendu ne casse pas le build
+
+    volumes = _ssl_volumes(cfg, external=False)
+    if not is_prod:
+        volumes = [
+            "../backend_python:/app:ro",  # code monté en lecture seule
+            f"learnagement_backend_python_venv_{cfg.instance}:/opt/venv",  # le venv survit aux recréations
+            *volumes,
+        ]
     return _svc(
         f"    backend_python_{cfg.instance}:",
         f"        container_name: learnagement_backend_python_{cfg.instance}",
-        "        build: ./backend_python/",
+        "        build:",
+        "            context: ./backend_python/",
+        f"            target: {target}",
+        "            additional_contexts:",
+        "                os: ../backend_python",
+        "        env_file: ../.env",
         '        restart: "no"',
+        _block("volumes", volumes),
         _networks(cfg, "back", "front"),
         _ports(cfg, f"127.0.0.1:{cfg.backend_port}:{cfg.backend_docker_port}"),
-        _environment(cfg),
-        _block("volumes", ["../backend_python/:/app/", *_ssl_volumes(cfg, external=False)]),
+        #_environment(cfg),
+        #_block("volumes", ["../backend_python/:/app/", *_ssl_volumes(cfg, external=False)]),
         _depends_on(cfg, "data_mysql"),
         _healthcheck(["CMD", "curl", "-fk",
                       f"{cfg.instance_protocol}://127.0.0.1:{cfg.backend_docker_port}/health"],
@@ -337,21 +353,36 @@ def _gen_backend_python(cfg: ComposeConfig) -> str:
 
 
 def _gen_front_php(cfg: ComposeConfig) -> str:
+    is_prod = cfg.env == "prod"
+    volumes = [
+        "./log/php:/var/log/apache2",
+        "./front_PHP/lnm-php.ini:/usr/local/etc/php/conf.d/lnm-php.ini:ro",
+        *_ssl_volumes(cfg),
+    ]
+    if not is_prod:
+        volumes.insert(0, "../front_PHP:/var/www/html")
     return _svc(
         f"    front_php_{cfg.instance}:",
         f"        container_name: learnagement_php_{cfg.instance}",
-        "        build: ./front_PHP/",
+        #"        build: ./front_PHP/",
+        "        build:",
+        "            context: ./front_PHP/",
+        f"            target: {'prod' if is_prod else 'dev'}",
+        "            additional_contexts:",
+        "                os: ../front_PHP",
         "        restart: always",
+        "        env_file: ../.env",
         _networks(cfg, "front"),
         _ports(cfg, f"{cfg.php_port}:{cfg.php_docker_port}", only_without_traefik=True),
         _traefik_labels(cfg, "front_php", "www", cfg.php_docker_port, cfg.php_protocol),
-        _environment(cfg),
-        _block("volumes", [
-            "../front_PHP:/var/www/html",
-            "./log/php:/var/log/apache2",
-            "./front_PHP/lnm-php.ini:/usr/local/etc/php/conf.d/lnm-php.ini",
-            *_ssl_volumes(cfg),
-        ]),
+        #_environment(cfg),
+        _block("volumes", volumes),
+        # _block("volumes", [
+        #     "../front_PHP:/var/www/html",
+        #     "./log/php:/var/log/apache2",
+        #     "./front_PHP/lnm-php.ini:/usr/local/etc/php/conf.d/lnm-php.ini",
+        #     *_ssl_volumes(cfg),
+        # ]),
         _depends_on(cfg, "backend_python", traefik=True),
         _healthcheck(["CMD", "curl", "-fk",
                       f"{cfg.php_protocol}://127.0.0.1:{cfg.php_docker_port}/health"],
@@ -381,19 +412,43 @@ def _gen_front_nextjs(cfg: ComposeConfig) -> str:
 
 
 def _gen_front_dashplotly(cfg: ComposeConfig) -> str:
+    is_prod = cfg.env == "prod"
+    target = "prod" if is_prod else "dev"  # un ENV inattendu ne casse pas le build
+
+    volumes = _ssl_volumes(cfg)
+    # ToDo temporary data files must be removed
+    volumes = [
+        "../front_DashPlotly/data/:/data/:ro",
+        *volumes,
+    ]
+    if not is_prod:
+        volumes = [
+            "../front_dashplotly:/app",  # code monté en lecture seule
+            f"learnagement_front_dashplotly_venv_{cfg.instance}:/opt/venv",  # le venv survit aux recréations
+            *volumes,
+        ]
+
     return _svc(
         f"    front_dashplotly_{cfg.instance}:",
         f"        container_name: learnagement_python_web_server_{cfg.instance}",
-        "        build: ./front_DashPlotly/",
+        #"        build: ./front_DashPlotly/",
+        "        build:",
+        "            context: ./front_DashPlotly/",
+        f"            target: {target}",
+        "            additional_contexts:",
+        "                os: ../front_DashPlotly",
         "        restart: always",
+        "        env_file: ../.env",
+        _block("volumes", volumes),
         _networks(cfg, "front"),
         _ports(cfg, f"{cfg.dash_port}:{cfg.dash_docker_port}", only_without_traefik=True),
-        _environment(cfg),
-        _block("volumes", [
-            "../front_DashPlotly/:/app/",
-            "../front_DashPlotly/data/:/data/",
-            *_ssl_volumes(cfg),
-        ]),
+        _traefik_labels(cfg, "front_dashplotly", "dash", cfg.php_docker_port, cfg.php_protocol),
+        #_environment(cfg),
+        # _block("volumes", [
+        #     "../front_DashPlotly/:/app/",
+        #     "../front_DashPlotly/data/:/data/",
+        #     *_ssl_volumes(cfg),
+        # ]),
         _depends_on(cfg, "backend_python"),
         _healthcheck(["CMD", "curl", "-fk",
                       f"{cfg.php_protocol}://127.0.0.1:{cfg.dash_docker_port}/health"],
@@ -402,7 +457,11 @@ def _gen_front_dashplotly(cfg: ComposeConfig) -> str:
 
 
 def _gen_volumes(cfg: ComposeConfig) -> str:
-    return f"\nvolumes:\n    learnagement_persistent_db_{cfg.instance}:\n"
+    vols = [f"learnagement_persistent_db_{cfg.instance}:"]
+    if cfg.env != "prod":
+        vols.append(f"learnagement_backend_python_venv_{cfg.instance}:")
+        vols.append(f"learnagement_front_dashplotly_venv_{cfg.instance}:")
+    return "\nvolumes:\n" + "".join(f"    {v}\n" for v in vols)
 
 
 def _gen_networks(cfg: ComposeConfig) -> str:

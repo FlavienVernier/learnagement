@@ -201,6 +201,9 @@ def __generate_base_env(env: str):
     default_env_vars["MYSQL_USER_PASSWORD"] = __ask("Give the MySQL User password: ", secret=True)
     default_env_vars["LEARNAGEMENT_ADMINISTRATOR_PASSWORD"] =  __ask("Give the Learnagement Administrator password: ", secret=True)
 
+    default_env_vars["FRONT_PHP_URL"] =f"{protocol}://{default_env_vars["INSTANCE_URL"]}:{default_env_vars["FRONT_PHP_PORT"]}"
+    default_env_vars["FRONT_DASH_URL"] = f"{protocol}://{default_env_vars["INSTANCE_URL"]}:{default_env_vars["FRONT_DASH_PORT"]}"
+
     # phpMyAdmin (BasicAuth Traefik)
     if env == "prod" :
         traefik_mode = __ask("Traefik mode ([local], domain): ") or "local"
@@ -213,6 +216,10 @@ def __generate_base_env(env: str):
         pma_user = __ask("phpMyAdmin BasicAuth user [admin]: ") or "admin"
         pma_password = __ask("phpMyAdmin BasicAuth password: ", secret=True)
         default_env_vars["PMA_BASICAUTH"] = __generate_basic_auth(pma_user, pma_password)
+
+        default_env_vars["FRONT_PHP_URL"] =f"{protocol}://{default_env_vars["FRONT_PHP_SUBDOMAIN"]}.{default_env_vars["INSTANCE_URL"]}"
+        default_env_vars["FRONT_DASH_URL"] = f"{protocol}://{default_env_vars["FRONT_DASH_SUBDOMAIN"]}.{default_env_vars["INSTANCE_URL"]}"
+
 
     #ToDo check if passwords are different if prod env
     # ...

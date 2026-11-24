@@ -1,23 +1,23 @@
 #!/bin/sh
 # Be careful don't use bash and bash command
-
-# Next line moved to Dockerfile to be run only at the image creation
-#apt-get update && apt-get install -y graphviz && rm -rf /var/lib/apt/lists/*
-
+set -eu
 cd /app
 
-python -m venv docker_venv
+# Dépendances : seulement en dev (en prod elles sont dans l'image)
+if [ "$ENV" != "prod" ]; then
+    STAMP=/opt/venv/.installed
+    if [ ! -f "$STAMP" ] || [ requirements.txt -nt "$STAMP" ] || [ requirements-dev.txt -nt "$STAMP" ]; then
+        echo "Installation des dépendances..."
+        pip install --upgrade pip
+        pip install -r requirements.txt -r requirements-dev.txt
+        touch "$STAMP"
+    else
+        echo "Dépendances déjà installées, on passe..."
+    fi
 
-. docker_venv/bin/activate
-
-# Vérifier si l'installation a déjà été effectuée
-if [ ! -f "docker_venv/.installed" ] || [ "requirements.txt" -nt "docker_venv/.installed" ]; then
-    echo "Première installation des dépendances, ou nouvelle dépendance..."
-    pip install --upgrade pip
-    pip install -r requirements.txt
-    touch docker_venv/.installed
-else
-    echo "Dépendances déjà installées, on passe..."
+    # -p no:cacheprovider : pas d'écriture de .pytest_cache (code monté en :ro)
+    pytest -p no:cacheprovider || echo "Tests échoués"
 fi
 
-python main.py
+# exec : python devient PID 1 et reçoit SIGTERM (arrêt propre du conteneur)
+exec python main.py

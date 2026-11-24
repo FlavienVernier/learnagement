@@ -28,9 +28,13 @@ try {
 
     $response_json = json_decode($result['body'], true);
 
+    getLogger()->info("Backend status/body: " . substr($result['body'], 0, 120));
+    getLogger()->info("JWT key defined: " . (!empty($_ENV["JWT_SIGNING_KEY"]) ? "yes" : "NO"));
+
     if (!$response_json || !array_key_exists("access_token", $response_json)) {
         echo "<script type='text/javascript'>window.alert('Incorrect login or password.');</script>" . PHP_EOL;
         Alert::error("Incorrect login or password.");
+        getLogger()->error("Incorrect login or password.");
         $t->router->redirect('login');
         exit;
     }
@@ -49,12 +53,14 @@ try {
         getLogger()->info("Expire à : " . date('Y-m-d H:i:s', $decoded->exp) . PHP_EOL);
 
         if ($decoded->exp < time()) {
+            getLogger()->error("Token expiré");
             $t->router->redirect('login');
             throw new Exception("Token expiré");
         }
 
     } catch (Exception $e) {
         // ToDo manage expired token, expired password...
+        getLogger()->error("Token invalide : " . get_class($e) . " - " . $e->getMessage());
         echo "Token invalide : " . $e->getMessage();
         $t->router->redirect('login');
         exit;
@@ -80,5 +86,6 @@ try {
     }
 } catch (Exception $e) {
     #todo: add logs
+    getLogger()->error("Login POST failed : " . get_class($e) . " - " . $e->getMessage());
     $t->router->redirect('login');
 }
