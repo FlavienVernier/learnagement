@@ -410,7 +410,10 @@ def walk(node: dict):
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--url", default=DEFAULT_URL)
-    ap.add_argument("-o", "--out", default="idu_maquette.json")
+    ap.add_argument(
+    "-o", "--out",
+    default=Path(__file__).resolve().parent / "scrapped_data" / "idu_maquette.json"
+)
     ap.add_argument("--cache", default=".cache_formations", help="dossier de cache HTML (relancer = quasi instantane)")
     ap.add_argument("--no-details", action="store_true", help="maquette seule, sans visiter les pages UE/modules")
     ap.add_argument("--no-raw", action="store_true", help="ne pas inclure `texte_brut` des pages de detail")
@@ -464,7 +467,12 @@ def main() -> None:
         "formation": formation,
         "parcours": result_parcours,
     }
-    Path(args.out).write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    output_path = Path(args.out)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
     n_mod = sum(1 for n in targets if n["type"] == "module")
     log.info("OK -> %s (%d UE, %d modules)", args.out, len(targets) - n_mod, n_mod)
 

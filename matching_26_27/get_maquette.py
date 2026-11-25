@@ -10,8 +10,9 @@ from pathlib import Path
 # exemple d'utilisation : donner le code d'un module à l'une des versions des fonctions
 # name_module = "MATH501_PACY"
 
-path_maq_json = Path(__file__).resolve().with_name("idu_maquette.json")
-path_h_json = Path(__file__).resolve().with_name("h_maquette.json")
+dossier_json = Path(__file__).resolve().parents[1] / "scrapping" / "scrapped_data"
+path_maq_json = dossier_json / "idu_maquette.json"
+path_h_json = dossier_json / "h_maquette.json"
 
 #### version 1 : chercher une maquette à partir du fichier json complet des maquettes idu_maquette.json
 def get_maquette_verDirect(name_maq):

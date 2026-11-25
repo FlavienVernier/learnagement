@@ -3,7 +3,7 @@ import json
 
 import matplotlib.pyplot as plt
 
-json_path = Path(__file__).with_name("learnagement.json")
+json_path = Path(__file__).resolve().parents[1] / "learnagement.json"
 with json_path.open("r", encoding="utf-8") as f:
     export = json.load(f)
 
@@ -45,5 +45,7 @@ for i, valeur in enumerate(valeurs):
     plt.text(i, valeur + 1, f"{valeur:g}", ha="center")
 
 plt.tight_layout()
-plt.savefig(Path(__file__).with_name("graph.png"))
+output_path = Path(__file__).resolve().parent / "visus" / "graph.png"
+output_path.parent.mkdir(parents=True, exist_ok=True)
+plt.savefig(output_path)
 plt.show()
