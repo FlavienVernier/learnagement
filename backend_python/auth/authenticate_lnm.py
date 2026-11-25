@@ -1,3 +1,6 @@
+import hmac
+import ipaddress
+import os
 from auth import login_throttle
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
@@ -13,6 +16,19 @@ from auth.authenticate_tools import create_access_token
 
 
 password_hash = PasswordHash((BcryptHasher(),))
+
+def get_client_ip(request: Request) -> str:
+    expected = os.getenv("INTERNAL_PROXY_SECRET", "")
+    token = request.headers.get("x-internal-token", "")
+    claimed = request.headers.get("x-client-ip", "").strip()
+
+    # compare_digest sur des octets : une chaîne non ASCII lèverait TypeError
+    if expected and claimed and hmac.compare_digest(token.encode(), expected.encode()):
+        try:
+            return str(ipaddress.ip_address(claimed))
+        except ValueError:
+            pass
+    return request.client.host if request.client else "unknown"
 
 def verify_password(plain_password, hashed_password):
     return password_hash.verify(plain_password, hashed_password)
@@ -33,7 +49,8 @@ async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     request: Request,
 ) -> Token:
-    ip = request.client.host if request.client else "unknown"
+    #ip = request.client.host if request.client else "unknown"
+    ip = get_client_ip(request)
     login_throttle.check(form_data.username, ip)          # 429 avant tout travail
 
     user = __authenticate_user_lnm(form_data.username, form_data.password)

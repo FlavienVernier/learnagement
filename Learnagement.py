@@ -469,18 +469,20 @@ def generate_env(env="dev"):
 
 
 @cli.command(help="Start the application")
-@click.option("--docker_option", default=None, help="See docker compose options")
+@click.option("--docker-options", "--docker_options", default=None, help="See docker compose options")
 @click.option("--restart", is_flag=True, help="Restart the application")
 @click.option("--rebuild", is_flag=True, help="Rebuild Docker images")
 @click.option("--test", is_flag=True, help="Test options without starting the application")
-@click.option("--from_scratch", is_flag=True, help="Reset the application to its initial state (IRREVERSIBLE)")
+@click.option("--from-scratch", "--from_scratch", is_flag=True, help="Reset the application to its initial state (IRREVERSIBLE)")
 @click.option("--env", type=click.Choice(envs), default=None, help="Environment to use, (use previously used if not set)")
-def start(docker_option=None, restart:bool=False, rebuild:bool=False, test:bool=False, from_scratch:bool=False, env=None):
+def start(docker_options:str|None=None, restart:bool=False, rebuild:bool=False, test:bool=False, from_scratch:bool=False, env=None):
     try:
         logging.info(f"{GREEN}Starting application with: {locals()} {NC}")
 
-        if not docker_option:
-            docker_option = []
+
+        import shlex
+        docker_options = shlex.split(docker_options) if docker_options else []
+
         if restart:
             if test:
                 logging.warning(f"{YELLOW}You cannot test restart.{NC}")
@@ -498,10 +500,10 @@ def start(docker_option=None, restart:bool=False, rebuild:bool=False, test:bool=
             rebuild = True
 
         if rebuild and not test:
-            asyncio.run(__start__(docker_option=["--build"] + docker_option))
+            asyncio.run(__start__(docker_option=["--build"] + docker_options))
             return
         if not test:
-            asyncio.run(__start__(docker_option))
+            asyncio.run(__start__(docker_options))
     except Exception as e:
         logging.error(f"{RED}An error occured while starting the application: {e}.{NC}")
     finally:

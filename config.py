@@ -35,9 +35,9 @@ container_app_dirs = {
         "data_mysql": "db",
         "phpmyadmin": None,
         "backend_python": "backend_python",
-        "front_php": "front_php",
-        "front_dashplotly": "front_dashplotly",
-        "front_nextjs": "front_nextjs",
+        "front_php": "front_PHP",
+        "front_dashplotly": "front_DashPlotly",
+        "front_nextjs": "front_NextJS",
 }
 
 envs = {"dev", "prod"} # Lower case

@@ -13,23 +13,43 @@ try {
         "password" => $password,
     ] = $_POST;
 
+    getLogger()->info("Client IP: " . getClientIp());
+
     $data = http_build_query([
         'username' => $email,
         'password' => $password,
         'grant_type' => "password"
     ]);
 
+//    $result = forwardToBackend(
+//        path: 'token',
+//        method: 'POST',
+//        body: $data,
+//        contentType: 'application/x-www-form-urlencoded'
+//    );
+    $internalSecret = getenv('INTERNAL_PROXY_SECRET') ?: ($_ENV['INTERNAL_PROXY_SECRET'] ?? '');
+
     $result = forwardToBackend(
         path: 'token',
         method: 'POST',
         body: $data,
-        contentType: 'application/x-www-form-urlencoded'
+        contentType: 'application/x-www-form-urlencoded',
+        extraHeaders: [
+            'X-Client-IP: ' . getClientIp(),
+            'X-Internal-Token: ' . $internalSecret,
+        ]
     );
 
     $response_json = json_decode($result['body'], true);
-
-    getLogger()->info("Backend status/body: " . substr($result['body'], 0, 120));
+    
     getLogger()->info("JWT key defined: " . (!empty($_ENV["JWT_SIGNING_KEY"]) ? "yes" : "NO"));
+
+    if (($result['status'] ?? 0) === 429) {
+        getLogger()->warning("Login rate limited for IP " . getClientIp());
+        Alert::error("Too many attempts. Please try again later.");
+        $t->router->redirect('login');
+        exit;
+    }
 
     if (!$response_json || !array_key_exists("access_token", $response_json)) {
         echo "<script type='text/javascript'>window.alert('Incorrect login or password.');</script>" . PHP_EOL;

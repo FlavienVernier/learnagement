@@ -41,6 +41,9 @@ class ComposeConfig:
     nextauth_docker_port: str
     dash_port: str
     dash_docker_port: str
+    dash_protocol:str
+    front_subnet: str
+    traefik_front_ip: str
 
     @classmethod
     def from_env(cls, containers: list) -> "ComposeConfig":
@@ -60,7 +63,7 @@ class ComposeConfig:
             env=env,
             mode=mode,
             traefik=(mode != "none" and TRAEFIK_SERVICE in containers),
-            traefik_api_port=envs("TRAEFIK_API_PORT", 8080),
+            traefik_api_port=envs("TRAEFIK_API_PORT", "8080"),
             domain=envs("DOMAIN", "localhost"),
             acme_email=envs("ACME_EMAIL", ""),
             acme_staging=envs("ACME_STAGING", "false").strip().lower() in ("1", "true", "yes", "on"),
@@ -81,6 +84,9 @@ class ComposeConfig:
             nextauth_docker_port=envs("FRONT_NEXTAUTH_DOCKER_PORT"),
             dash_port=envs("FRONT_DASH_PORT"),
             dash_docker_port=envs("FRONT_DASH_DOCKER_PORT"),
+            dash_protocol=envs("FRONT_DASH_PROTOCOL"),
+            front_subnet=envs("FRONT_SUBNET"),
+            traefik_front_ip=envs("TRAEFIK_FRONT_IP"),
         )
         cfg.validate(containers)
         return cfg
@@ -95,6 +101,14 @@ class ComposeConfig:
                 raise ValueError("TRAEFIK_MODE=domain nécessite ACME_EMAIL")
         if self.traefik and "phpmyadmin" in containers and not self.pma_basicauth:
             raise ValueError("PMA_BASICAUTH est requis quand Traefik protège phpMyAdmin")
+        if self.traefik:
+            import ipaddress
+            try:
+                if ipaddress.ip_address(self.traefik_front_ip) not in ipaddress.ip_network(self.front_subnet):
+                    raise ValueError
+            except ValueError:
+                raise ValueError(
+                    "FRONT_SUBNET / TRAEFIK_FRONT_IP manquants, invalides ou incohérents (requis avec Traefik)")
 
 
 ########################################
@@ -111,17 +125,62 @@ def _list(items: list, indent: int = 12) -> str:
     return "\n".join(f'{pad}- "{item}"' for item in items)
 
 
-def _block(key: str, items: list) -> str:
+def _block_short(key: str, items: list) -> str:
     """'        key:' suivi de la liste, ou chaîne vide si la liste est vide."""
     return f"        {key}:\n{_list(items)}" if items else ""
 
+def _mapping_block(key: str, mapping: dict, indent: int = 8) -> str:
+    """
+    Rend un bloc `key:` au format mapping (long syntax).
 
-def _networks(cfg: ComposeConfig, *names: str) -> str:
-    return _block("networks", [f"learnagement_{n}_{cfg.instance}" for n in names])
+    - mapping vide / None  →  `key: {}`
+    - sinon               →  `key:` suivi des entrées indentées de 4 espaces
 
+    `indent` = indentation du `key:` (8 par défaut, niveau service).
+    """
+    pad = " " * indent
+    pad_inner = " " * (indent + 4)
+    if not mapping:
+        return f"{pad}{key}: {{}}"
+    lines = [f"{pad}{key}:"]
+    for name, options in mapping.items():
+        opts = options or {}
+        if not opts:
+            lines.append(f"{pad_inner}{name}: {{}}")
+        else:
+            lines.append(f"{pad_inner}{name}:")
+            for k, v in opts.items():
+                lines.append(f"{pad_inner}    {k}: {v}")
+    return "\n".join(lines)
+
+def _block_mapping(key: str, mapping: dict, indent: int = 8) -> str:
+    """'        key:' suivi des entrées mapping, ou chaîne vide si vide."""
+    return _mapping_block(key, mapping, indent) if mapping else ""
+
+# def _networks(cfg: ComposeConfig, ip_net:str|None=None, ip:str|None=None, *names: str) -> str:
+#     networks=[]
+#     for  n in names:
+#         networks.append(f"learnagement_{n}_{cfg.instance}")
+#         if ip_net and ip and ip_net == n:
+#             networks.append(f"    ipv4_address: {ip}")
+#     return _block_short("networks", networks)
+def _networks(
+    cfg: ComposeConfig,
+    ip_net: str | None = None,
+    ip: str | None = None,
+    *names: str,
+) -> str:
+    networks: dict[str, dict | None] = {}
+    for n in names:
+        full_name = f"learnagement_{n}_{cfg.instance}"
+        if ip_net and ip and ip_net == n:
+            networks[full_name] = {"ipv4_address": ip}
+        else:
+            networks[full_name] = None
+    return _block_mapping("networks", networks)
 
 def _environment(cfg: ComposeConfig, *extra: str) -> str:
-    return _block("environment", [f"INSTANCE_NAME={cfg.instance}", f"ENV={cfg.env}", *extra])
+    return _block_short("environment", [f"INSTANCE_NAME={cfg.instance}", f"ENV={cfg.env}", *extra])
 
 
 def _ssl_volumes(cfg: ComposeConfig, internal=True, external=True) -> list:
@@ -156,7 +215,7 @@ def _ports(cfg: ComposeConfig, mapping: str, only_without_traefik: bool = False)
     """Publie un port. Si only_without_traefik, le service n'est joignable que via Traefik quand il est actif."""
     if only_without_traefik and cfg.traefik:
         return ""
-    return _block("ports", [mapping])
+    return _block_short("ports", [mapping])
 
 
 def _traefik_labels(cfg: ComposeConfig, name: str, subdomain: str, port: str,
@@ -181,7 +240,7 @@ def _traefik_labels(cfg: ComposeConfig, name: str, subdomain: str, port: str,
         mw = f"auth_{cfg.instance}"
         labels.append(f"traefik.http.routers.{router}.middlewares={mw}")
         labels.append(f"traefik.http.middlewares.{mw}.basicauth.users=${{PMA_BASICAUTH}}")
-    return _block("labels", labels)
+    return _block_short("labels", labels)
 
 
 def _traefik_command(cfg: ComposeConfig) -> list:
@@ -238,10 +297,10 @@ def _gen_socket_proxy_tecnativa(cfg: ComposeConfig) -> str:
         f"        image: {image}",
         f"        container_name: socket_proxy_tecnativa_{cfg.instance}",
         "        restart: unless-stopped",
-        _block("environment", envs),
+        _block_short("environment", envs),
         "        volumes:",
         "            - /var/run/docker.sock:/var/run/docker.sock:ro",
-        _networks(cfg, "socket_proxy"),
+        _networks(cfg, "", "", "socket_proxy"),
         "        read_only: true",
         "        tmpfs:",
         "            - /run",
@@ -264,10 +323,10 @@ def _gen_reverse_proxy_traefik(cfg: ComposeConfig) -> str:
         f"    {TRAEFIK_SERVICE}_{cfg.instance}:",
         "        image: traefik:v3.7",
         f"        container_name: learnagement_{TRAEFIK_SERVICE}_{cfg.instance}",
-        _block("command", _traefik_command(cfg)),
-        _block("ports", ["80:80", "443:443", f"127.0.0.1:{cfg.traefik_api_port}:8080"]),
-        _block("volumes", volumes),
-        _networks(cfg, "front", "back", "socket_proxy"),
+        _block_short("command", _traefik_command(cfg)),
+        _block_short("ports", ["80:80", "443:443", f"127.0.0.1:{cfg.traefik_api_port}:8080"]),
+        _block_short("volumes", volumes),
+        _networks(cfg, "front", f"{cfg.traefik_front_ip}", "front", "back", "socket_proxy"),
         "        restart: unless-stopped",
         _depends_on(cfg, "socket_proxy"),               # ni traefik=True, ni data_mysql
         _healthcheck(["CMD", "traefik", "healthcheck", "--ping"], retries=20),
@@ -280,16 +339,16 @@ def _gen_data_mysql(cfg: ComposeConfig) -> str:
         f"        container_name: learnagement_data_mysql_{cfg.instance}",
         "        image: mysql:8.4",
         "        restart: always",
-        _networks(cfg, "back"),
+        _networks(cfg, "", "","back"),
         "        # NEVER SET PORTS FOR DB",
         "        command: --mysql-native-password=ON",
-        _block("environment", [
+        _block_short("environment", [
             "MYSQL_DATABASE=${MYSQL_DB}",
             "MYSQL_USER=${MYSQL_USER_LOGIN}",
             "MYSQL_PASSWORD=${MYSQL_USER_PASSWORD}",
             "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}",
         ]),
-        _block("volumes", [
+        _block_short("volumes", [
             "../db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d",
             "./data_mysql/conf.d:/etc/mysql/conf.d",
             f"learnagement_persistent_db_{cfg.instance}:/var/lib/mysql",
@@ -305,16 +364,16 @@ def _gen_phpmyadmin(cfg: ComposeConfig) -> str:
         f"        container_name: learnagement_phpmyadmin_{cfg.instance}",
         "        image: phpmyadmin",
         "        restart: always",
-        _networks(cfg, "back"),
+        _networks(cfg, "", "", "back"),
         # sans Traefik (dev) : accessible uniquement depuis la machine locale
         _ports(cfg, f"127.0.0.1:{cfg.pma_port}:{cfg.pma_docker_port}", only_without_traefik=True),
-        _block("environment", [
+        _block_short("environment", [
             f"PMA_HOST=data_mysql_{cfg.instance}",
             "RELATIONA_DISPLAY=D",
             f"APACHE_HTTP_PORT_NUMBER={cfg.pma_docker_port}",
         ]),
         _traefik_labels(cfg, "phpmyadmin", "phpmyadmin", cfg.pma_docker_port, "http", auth=True),
-        _block("volumes", ["./phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php:ro"]),
+        _block_short("volumes", ["./phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php:ro"]),
         _depends_on(cfg, "data_mysql", traefik=True),
     )
 
@@ -340,8 +399,8 @@ def _gen_backend_python(cfg: ComposeConfig) -> str:
         "                os: ../backend_python",
         "        env_file: ../.env",
         '        restart: "no"',
-        _block("volumes", volumes),
-        _networks(cfg, "back", "front"),
+        _block_short("volumes", volumes),
+        _networks(cfg, "", "", "back", "front"),
         _ports(cfg, f"127.0.0.1:{cfg.backend_port}:{cfg.backend_docker_port}"),
         #_environment(cfg),
         #_block("volumes", ["../backend_python/:/app/", *_ssl_volumes(cfg, external=False)]),
@@ -372,11 +431,12 @@ def _gen_front_php(cfg: ComposeConfig) -> str:
         "                os: ../front_PHP",
         "        restart: always",
         "        env_file: ../.env",
-        _networks(cfg, "front"),
+        _block_short("environment", [f"TRUSTED_PROXY_IPS={cfg.traefik_front_ip if cfg.traefik else ''}"]),
+        _networks(cfg, "", "", "front"),
         _ports(cfg, f"{cfg.php_port}:{cfg.php_docker_port}", only_without_traefik=True),
         _traefik_labels(cfg, "front_php", "www", cfg.php_docker_port, cfg.php_protocol),
         #_environment(cfg),
-        _block("volumes", volumes),
+        _block_short("volumes", volumes),
         # _block("volumes", [
         #     "../front_PHP:/var/www/html",
         #     "./log/php:/var/log/apache2",
@@ -398,10 +458,10 @@ def _gen_front_nextjs(cfg: ComposeConfig) -> str:
         f"        container_name: learnagement_nextjs_{cfg.instance}",
         "        build: ./front_NextJS",
         "        restart: always",
-        _networks(cfg, "front"),
+        _networks(cfg, "", "", "front"),
         _ports(cfg, f"{cfg.nextauth_port}:{cfg.nextauth_docker_port}", only_without_traefik=True),
         _environment(cfg),
-        _block("volumes", [
+        _block_short("volumes", [
             "../front_NextJS:/app/",
             "../front_NextJS/node_modules:/app/node_modules",
             *_ssl_volumes(cfg),
@@ -423,7 +483,7 @@ def _gen_front_dashplotly(cfg: ComposeConfig) -> str:
     ]
     if not is_prod:
         volumes = [
-            "../front_dashplotly:/app",  # code monté en lecture seule
+            "../front_DashPlotly:/app",  # code monté en lecture seule
             f"learnagement_front_dashplotly_venv_{cfg.instance}:/opt/venv",  # le venv survit aux recréations
             *volumes,
         ]
@@ -439,10 +499,10 @@ def _gen_front_dashplotly(cfg: ComposeConfig) -> str:
         "                os: ../front_DashPlotly",
         "        restart: always",
         "        env_file: ../.env",
-        _block("volumes", volumes),
-        _networks(cfg, "front"),
+        _block_short("volumes", volumes),
+        _networks(cfg, "", "", "front"),
         _ports(cfg, f"{cfg.dash_port}:{cfg.dash_docker_port}", only_without_traefik=True),
-        _traefik_labels(cfg, "front_dashplotly", "dash", cfg.php_docker_port, cfg.php_protocol),
+        _traefik_labels(cfg, "front_dashplotly", "dash", cfg.dash_docker_port, cfg.dash_protocol),
         #_environment(cfg),
         # _block("volumes", [
         #     "../front_DashPlotly/:/app/",
@@ -465,15 +525,18 @@ def _gen_volumes(cfg: ComposeConfig) -> str:
 
 
 def _gen_networks(cfg: ComposeConfig) -> str:
+    ipam = (f"        ipam:\n            config:\n                - subnet: {cfg.front_subnet}\n                  ip_range: 172.28.0.128/25\n" if cfg.traefik else "")
     return f"""
 networks:
     learnagement_socket_proxy_{cfg.instance}:
         internal: true
+        
     # network to access to fronts (only fronts and backends on this network)
     learnagement_front_{cfg.instance}:
         name: learnagement_front_{cfg.instance}
         driver: bridge
-    # network to access to back (only backends and data storages on this network)
+{ipam}
+     # network to access to back (only backends and data storages on this network)
     learnagement_back_{cfg.instance}:
         name: learnagement_back_{cfg.instance}
         driver: bridge

@@ -143,13 +143,13 @@ def save_env_file(env_vars: dict, filepath: str=".env") -> None:
     """
     with open(filepath, 'w', encoding='utf-8') as f:
         for key, value in env_vars.items():
-            comment = "# " if key == value else ""
+
             if "$" in str(value):
-                f.write(f"{comment}{key}='{value}'\n")
-            if ' ' in str(value):
-                f.write(f'{comment}{key}="{value}"\n')
+                f.write(f"{key}='{value}'\n")
+            elif ' ' in str(value):
+                f.write(f'{key}="{value}"\n')
             else:
-                f.write(f'{comment}{key}={value}\n')
+                f.write(f'{key}={value}\n')
 
 
 def __set_env(env_vars: dict, filepath: str) -> dict:
@@ -188,8 +188,10 @@ def __generate_base_env(env: str):
     default_env_vars["CAS_SERVICE_TOKEN"] = str(__generate_secret__( info = "CAS Generated Encryption Key").hex())
     default_env_vars["JWT_SIGNING_KEY"] = str(__generate_secret__( info = "LNM Generated Encryption Key").hex())
     default_env_vars["NEXTAUTH_SECRET"] = str(__generate_secret__( info = "NextAuth.js Generated Encryption Key").hex())
+    default_env_vars["INTERNAL_PROXY_SECRET"] = str(__generate_secret__( info = "Proxy IP authentifie l'en-tête X-Client-IP").hex())
     protocol = "http"
     default_env_vars["FRONT_PHP_PROTOCOL"] = protocol
+    default_env_vars["DASH_PHP_PROTOCOL"] = protocol
 
     default_env_vars["INSTANCE_PROTOCOL"] = protocol
     default_env_vars["INSTANCE_IP"], default_env_vars["INSTANCE_URL"] = get_local_ip_and_hostname()
@@ -280,6 +282,8 @@ def load_env(env: str | None = None):
             exit()
         env_vars = __set_env(env_vars, f".env_{env}.env")
 
+        # remove unset env vars (key==value)
+        env_vars ={k: v for k, v in env_vars.items() if k != v}
         save_env_file(env_vars, ".env")
     else:
         logging.info("environment already exists")
