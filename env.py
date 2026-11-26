@@ -244,6 +244,9 @@ def propagate_env():
     source_path = os.path.join("./", ".env")
     dotenv.load_dotenv()
 
+    shutil.copy(source_path, "docker")
+    logging.info(f"{GREEN}Copied: {source_path} -> docker{NC}")
+
     for container in containers[os.environ["ENV"]]:
         if container_app_dirs[container]:
             target_path = os.path.join(container_app_dirs[container], ".env")
