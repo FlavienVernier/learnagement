@@ -64,7 +64,7 @@ class ComposeConfig:
             env=env,
             mode=mode,
             traefik=(mode != "none" and TRAEFIK_SERVICE in containers),
-            traefik_api_port=envs("TRAEFIK_API_PORT", "8080"),
+            traefik_api_port=envs("TRAEFIK_API_PORT"),
             domain=envs("DOMAIN", "localhost"),
             acme_email=envs("ACME_EMAIL", ""),
             acme_staging=envs("ACME_STAGING", "false").strip().lower() in ("1", "true", "yes", "on"),
@@ -249,7 +249,7 @@ def _traefik_command(cfg: ComposeConfig) -> list:
     cmd = [
         "--ping=true",
         "--api.insecure=true",
-        f"--entrypoints.traefik.address=:{cfg.phpmyadmin_port}",
+        f"--entrypoints.traefik.address=:{cfg.traefik_api_port}",
         "--providers.docker=true",
         f"--providers.docker.endpoint=tcp://socket_proxy_{cfg.instance}:2375",
         "--providers.docker.exposedbydefault=false",
