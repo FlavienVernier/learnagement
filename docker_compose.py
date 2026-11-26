@@ -44,6 +44,7 @@ class ComposeConfig:
     dash_protocol:str
     front_subnet: str
     traefik_front_ip: str
+    phpmyadmin_port: str
 
     @classmethod
     def from_env(cls, containers: list) -> "ComposeConfig":
@@ -87,6 +88,7 @@ class ComposeConfig:
             dash_protocol=envs("FRONT_DASH_PROTOCOL"),
             front_subnet=envs("FRONT_SUBNET"),
             traefik_front_ip=envs("TRAEFIK_FRONT_IP"),
+            phpmyadmin_port=envs("PHPMYADMIN_PORT"),
         )
         cfg.validate(containers)
         return cfg
@@ -247,7 +249,7 @@ def _traefik_command(cfg: ComposeConfig) -> list:
     cmd = [
         "--ping=true",
         "--api.insecure=true",
-        "--entrypoints.traefik.address=:8080",
+        f"--entrypoints.traefik.address=:{cfg.phpmyadmin_port}",
         "--providers.docker=true",
         f"--providers.docker.endpoint=tcp://socket_proxy_{cfg.instance}:2375",
         "--providers.docker.exposedbydefault=false",
