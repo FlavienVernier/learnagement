@@ -351,7 +351,7 @@ def _gen_data_mysql(cfg: ComposeConfig) -> str:
             "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}",
         ]),
         _block_short("volumes", [
-            "../db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d",
+            "../db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro",
             "./data_mysql/conf.d:/etc/mysql/conf.d",
             f"learnagement_persistent_db_{cfg.instance}:/var/lib/mysql",
         ]),
@@ -375,7 +375,7 @@ def _gen_phpmyadmin(cfg: ComposeConfig) -> str:
             f"APACHE_HTTP_PORT_NUMBER={cfg.pma_docker_port}",
         ]),
         _traefik_labels(cfg, "phpmyadmin", "phpmyadmin", cfg.pma_docker_port, "http", auth=True),
-        _block_short("volumes", ["./phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php:ro"]),
+        _block_short("volumes", ["./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php:ro"]),
         _depends_on(cfg, "data_mysql", traefik=True),
     )
 

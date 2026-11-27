@@ -9,9 +9,13 @@
 - Firefox RESTED extension
 - Chrome Client REST extension
 
+## [Architecture Docker Compose](../ARCHITECTURE.md)
+
 ## [Dev/Prod environnement](prod.md)
 
-## [Docker](./docker/doc.md)
+## [Docker](../README.md#installation-et-lancement)
+
+## [Sécurité et architecture réseau](./Security/GeneralSecurity.md)
 
 ## [DB](db/doc.md)
 

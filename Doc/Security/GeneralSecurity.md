@@ -1,8 +1,5 @@
 # Mesures de sécurité
 
-IAG generated (claude Sonnet 5.5)
-
-> Dernière vérification contre le code : branche `dev`, commit `a3b29588` (18/10/2026).
 > Convention : ✅ garanti par le dépôt · ⚠️ dépend du déploiement (non vérifiable dans le dépôt) · ❌ non assuré par le dépôt.
 
 ## Authentification
@@ -32,12 +29,12 @@ IAG generated (claude Sonnet 5.5)
 
 ### Principe
 
-Chaque instance est déployée avec `docker compose` et utilise **deux réseaux Docker** de type `bridge`, propres à l'instance :
+La configuration Compose générée pour une instance utilise **deux réseaux Docker** de type `bridge`, propres à cette instance :
 
 | Réseau | Conteneurs rattachés | Rôle |
 |---|---|---|
 | `learnagement_front_<instance>` | `backend_python`, `front_php`, `front_nextjs`, `front_dashplotly` | Accès des interfaces au backend |
-| `learnagement_back_<instance>` | `backend_python`, `mysql`, `phpmyadmin` | Accès aux données |
+| `learnagement_back_<instance>` | `backend_python`, `data_mysql`, `phpmyadmin` | Accès aux données |
 
 - ✅ Le **backend est le seul conteneur rattaché aux deux réseaux** : c'est le point de passage obligé entre les interfaces et les données.
 - ✅ Les interfaces (PHP, NextJS, Dash) **ne partagent aucun réseau avec MySQL** : elles ne peuvent pas l'atteindre directement.
@@ -46,40 +43,7 @@ Chaque instance est déployée avec `docker compose` et utilise **deux réseaux 
 
 ### Schéma
 
-```mermaid
-flowchart LR
-    U(["Navigateur<br/>étudiant / RI"])
-    EXT["Google Maps, unpkg<br/>(carte de mobilité)"]
-    CAS["CAS de<br/>l'établissement"]
-
-    subgraph FRONT["Réseau learnagement_front"]
-        PHP["front_php<br/>Apache :443"]
-        DASH["front_dashplotly<br/>gunicorn :8050"]
-        NEXT["front_nextjs<br/>:3000"]
-    end
-
-    API["backend_python<br/>FastAPI :4000<br/>(sur les deux réseaux)"]
-
-    subgraph BACK["Réseau learnagement_back"]
-        PMA["phpmyadmin<br/>HTTP :80"]
-        DB[("mysql :3306<br/>aucun port publié")]
-    end
-
-    U -->|"L1 HTTPS (prod)"| PHP
-    U -->|"L2 HTTPS (prod)"| DASH
-    U -.->|"L3 HTTP"| NEXT
-    U -.->|"L4 HTTP"| PMA
-    U -->|"L8 HTTPS, tiers"| EXT
-    U -->|"L9 redirection"| CAS
-    PHP -->|"L5 HTTPS vérifié (prod)"| API
-    DASH -->|"L5 HTTPS vérifié (prod)"| API
-    NEXT -.->|"L5 à confirmer"| API
-    API -.->|"L6 TLS non imposé"| DB
-    PMA -.->|"L7 TLS non configuré"| DB
-    PHP -->|"L10 selon CAS_HOST"| CAS
-```
-
-Trait plein : chiffrement en production assuré par le dépôt. Trait pointillé : chiffrement non assuré par le dépôt.
+Le diagramme de référence a été déplacé à la racine : [ARCHITECTURE.md](../../ARCHITECTURE.md). Il décrit une configuration statique et ne prouve ni le démarrage ni la validation runtime des communications.
 
 ### Flux et chiffrement
 
