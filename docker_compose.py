@@ -249,7 +249,7 @@ def _traefik_command(cfg: ComposeConfig) -> list:
     cmd = [
         "--ping=true",
         "--api.insecure=true",
-        f"--entrypoints.traefik.address=:{cfg.traefik_api_port}",
+        f"--entrypoints.traefik.address=:8080",
         "--providers.docker=true",
         f"--providers.docker.endpoint=tcp://socket_proxy_{cfg.instance}:2375",
         "--providers.docker.exposedbydefault=false",
