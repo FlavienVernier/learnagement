@@ -9,7 +9,6 @@ L'App Web s'organise autour de différents objectifs enrichis par les axes de d�
 
 Cette vue résume la topologie Docker Compose : PHP, Next.js, Dash, Backend, MySQL et phpMyAdmin, les réseaux Front/Back et les flux confirmés. Elle distingue les composants optionnels et les services externes; elle ne constitue pas une preuve de fonctionnement runtime. [ARCHITECTURE.md](ARCHITECTURE.md) est la référence complète.
 
-<!-- mermaid-checked: no \n, no em-dash/en-dash, no {} in labels, subgraphs are id["label"], arrows are -->|"label"|, all subgraphs closed by end, ids unique -->
 ```mermaid
 flowchart LR
     Browser["Navigateur"]
