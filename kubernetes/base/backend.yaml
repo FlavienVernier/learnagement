@@ -1,0 +1,115 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: learnagement
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: backend
+  ports:
+    - name: http
+      port: 4000
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: learnagement
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: backend
+        app.kubernetes.io/part-of: learnagement
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: backend
+          image: learnagement/backend-k8s:REPLACE_WITH_BUILT_IMAGE
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - name: http
+              containerPort: 4000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: learnagement-network-config
+          env:
+            - name: MYSQL_DB
+              valueFrom:
+                secretKeyRef:
+                  name: learnagement-database-credentials
+                  key: MYSQL_DATABASE
+            - name: MYSQL_USER_LOGIN
+              valueFrom:
+                secretKeyRef:
+                  name: learnagement-database-credentials
+                  key: MYSQL_USER
+            - name: MYSQL_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: learnagement-database-credentials
+                  key: MYSQL_PASSWORD
+            - name: JWT_SIGNING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: learnagement-auth-secrets
+                  key: JWT_SIGNING_KEY
+            - name: SESSION_TIMEOUT
+              valueFrom:
+                configMapKeyRef:
+                  name: learnagement-app-config
+                  key: SESSION_TIMEOUT
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            exec:
+              command:
+                - python
+                - -c
+                - import os,socket; socket.create_connection((os.environ["MYSQL_SERVER"], int(os.environ["MYSQL_PORT"])), timeout=2).close()
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

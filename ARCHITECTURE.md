@@ -1,72 +1,93 @@
 # Learnagement architecture
 
-This diagram describes the Docker Compose configuration generated for one instance. It is a static view: it does not prove that services start or communicate at runtime. No Kubernetes manifest is present on this branch.
+Cette vue résume la topologie Learnagement telle qu'elle est préparée dans le dépôt. Elle décrit les interfaces PHP, Next.js et Dash, le Backend Python, MySQL, les réseaux Front/Back, phpMyAdmin et les intégrations externes confirmées. Traefik, le socket proxy et Groq sont représentés seulement selon leur usage réel ou leur caractère optionnel.
+
+Le diagramme est une description statique de Docker Compose et ne prouve ni un démarrage runtime, ni les communications réelles. Le socle Kubernetes présent dans le dépôt est préliminaire et n'a pas été appliqué à un cluster.
 
 ## Docker Compose topology
 
 <!-- mermaid-checked: no \n, no em-dash/en-dash, no {} in labels, subgraphs are id["label"], arrows are -->|"label"|, all subgraphs closed by end, ids unique -->
 ```mermaid
 flowchart LR
-    U["Navigateur"]
+    Browser["Navigateur"]
+
+    subgraph Interfaces["Interfaces utilisateur"]
+        PHP["PHP"]
+        Next["Next.js"]
+        Dash["Dash"]
+    end
+
+    Backend["Backend Python"]
+    MySQL[("MySQL")]
+    PMA["phpMyAdmin"]
+    Volume[("Volume MySQL Docker")]
+
+    FrontNet["Réseau Front Docker"]
+    BackNet["Réseau Back Docker"]
+    SocketNet["Réseau socket proxy"]
+
+    subgraph ProxyOptionnel["Proxy optionnel"]
+        Traefik["Traefik"]
+        SocketProxy["Socket proxy Docker"]
+    end
+
     CAS["CAS externe"]
+    Groq["API Groq"]
 
-    subgraph SERVICES["Services Compose sélectionnés pour l'instance"]
-        MYSQL["data_mysql_INSTANCE"]
-        PMA["phpmyadmin_INSTANCE"]
-        API["backend_python_INSTANCE"]
-        PHP["front_php_INSTANCE"]
-        NEXT["front_nextjs_INSTANCE"]
-        DASH["front_dashplotly_INSTANCE"]
-        DB[("Compose volume learnagement_persistent_db_INSTANCE")]
-    end
+    PHP -.->|"membre du réseau"| FrontNet
+    Next -.->|"membre du réseau"| FrontNet
+    Dash -.->|"membre du réseau"| FrontNet
+    Backend -.->|"membre du réseau"| FrontNet
+    Backend -.->|"membre du réseau"| BackNet
+    MySQL -.->|"membre du réseau"| BackNet
+    PMA -.->|"membre du réseau"| BackNet
+    Traefik -.->|"membre du réseau"| FrontNet
+    Traefik -.->|"membre du réseau"| BackNet
+    Traefik -.->|"membre du réseau"| SocketNet
+    SocketProxy -.->|"membre du réseau"| SocketNet
 
-    FRONTNET["Réseau bridge learnagement_front_INSTANCE"]
-    BACKNET["Réseau bridge learnagement_back_INSTANCE"]
-    SOCKETNET["Socket network key learnagement_socket_proxy_INSTANCE"]
+    Browser -->|"port direct sans proxy"| PHP
+    Browser -->|"port direct sans proxy"| Next
+    Browser -->|"port direct sans proxy"| Dash
+    Browser -->|"port local ou route protégée"| PMA
+    Browser -->|"HTTPS si configuré"| Traefik
+    Traefik -->|"route HTTPS"| PHP
+    Traefik -->|"route HTTPS"| Dash
+    Traefik -->|"route HTTPS avec BasicAuth"| PMA
 
-    subgraph OPTIONAL["Proxy optionnel si Traefik est sélectionné"]
-        SOCKET["socket_proxy_INSTANCE"]
-        TRAEFIK["reverse_proxy_traefik_INSTANCE"]
-    end
+    PHP -->|"HTTP ou HTTPS configuré"| Backend
+    Next -->|"HTTP ou HTTPS configuré"| Backend
+    Dash -->|"HTTP ou HTTPS configuré"| Backend
+    Backend -->|"TCP 3306"| MySQL
+    PMA -->|"administration SQL"| MySQL
+    MySQL -->|"données persistantes"| Volume
+    PHP -->|"validation de ticket"| CAS
+    Dash -->|"requêtes chatbot"| Groq
 
-    PHP -.->|"member"| FRONTNET
-    NEXT -.->|"member"| FRONTNET
-    DASH -.->|"member"| FRONTNET
-    API -.->|"member"| FRONTNET
-    API -.->|"member"| BACKNET
-    MYSQL -.->|"member"| BACKNET
-    PMA -.->|"member"| BACKNET
-    TRAEFIK -.->|"member"| FRONTNET
-    TRAEFIK -.->|"member"| BACKNET
-    TRAEFIK -.->|"member"| SOCKETNET
-    SOCKET -.->|"member"| SOCKETNET
+    MySQL -.->|"service healthy requis"| Backend
+    MySQL -.->|"service healthy requis"| PMA
+    Backend -.->|"service healthy requis"| PHP
+    Backend -.->|"service healthy requis"| Next
+    Backend -.->|"service healthy requis"| Dash
+    SocketProxy -.->|"service healthy requis"| Traefik
+    Traefik -.->|"service healthy requis"| PHP
+    Traefik -.->|"service healthy requis"| PMA
 
-    MYSQL -->|"stores data"| DB
-    MYSQL -.->|"health gate: service_healthy"| API
-    MYSQL -.->|"health gate: service_healthy"| PMA
-    API -.->|"health gate: service_healthy"| PHP
-    API -.->|"health gate: service_healthy"| NEXT
-    API -.->|"health gate: service_healthy"| DASH
-    SOCKET -.->|"service_healthy prerequisite"| TRAEFIK
-    TRAEFIK -.->|"health gate when selected"| PHP
-    TRAEFIK -.->|"health gate when selected"| PMA
+    classDef ui fill:#DBEAFE,stroke:#1D4ED8,color:#1E3A8A,stroke-width:2px;
+    classDef backend fill:#DCFCE7,stroke:#15803D,color:#14532D,stroke-width:2px;
+    classDef data fill:#FEF3C7,stroke:#B45309,color:#78350F,stroke-width:2px;
+    classDef network fill:#E5E7EB,stroke:#4B5563,color:#111827,stroke-width:2px;
+    classDef optional fill:#F3E8FF,stroke:#7E22CE,color:#581C87,stroke-width:2px;
+    classDef external fill:#FCE7F3,stroke:#BE185D,color:#831843,stroke-width:2px;
 
-    U -->|"published port when no proxy"| PHP
-    U -->|"published port when proxy is off"| NEXT
-    U -->|"published port when proxy is off"| DASH
-    U -->|"loopback port when no proxy"| PMA
-    U -->|"HTTPS route when proxy selected"| TRAEFIK
-    TRAEFIK -->|"HTTPS route"| PHP
-    TRAEFIK -->|"HTTPS route"| DASH
-    TRAEFIK -->|"HTTPS route with BasicAuth"| PMA
-
-    PHP -->|"HTTP dev; HTTPS configured prod"| API
-    DASH -->|"HTTP dev; HTTPS configured prod"| API
-    NEXT -->|"configured scheme; TLS trust unverified"| API
-    API -->|"MySQL TCP 3306; TLS not enforced"| MYSQL
-    PMA -->|"MySQL protocol; TLS not configured here"| MYSQL
-    U -.->|"CAS login if configured"| CAS
-    PHP -.->|"CAS_HOST serviceValidate; scheme is configurable"| CAS
+    class Browser,PHP,Next,Dash ui;
+    class Backend backend;
+    class MySQL,Volume data;
+    class FrontNet,BackNet,SocketNet network;
+    class PMA,Traefik,SocketProxy optional;
+    class CAS,Groq external;
 ```
 
-MySQL uses TCP 3306 only on the Back network; Compose does not publish that port on the host. For health dependencies, arrows point from the required healthy service to the service it gates. The socket-proxy network and MySQL volume use Compose keys; Docker applies the project scope where no explicit network or volume name is set.
+**Légende :** bleu = interfaces; vert = Backend; ambre = MySQL et persistance; gris = réseaux; violet = composants optionnels; rose = intégrations externes. Les traits pleins représentent les appels et les données; les pointillés représentent l'appartenance réseau ou une dépendance de santé Compose.
+
+Le Backend est connecté aux deux réseaux; MySQL et phpMyAdmin sont sur Back. Le port MySQL n'est pas publié sur l'hôte. Groq est appelé directement par le chatbot Dash; aucun service IA autonome ni Ollama n'est représenté comme composant Learnagement confirmé.

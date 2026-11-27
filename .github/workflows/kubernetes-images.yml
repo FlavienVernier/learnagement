@@ -1,0 +1,301 @@
+name: Kubernetes image validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/kubernetes-images.yml"
+      - "docker_compose.py"
+      - "tools.py"
+      - "docker/kubernetes/**"
+      - "kubernetes/**"
+      - "tests/integration/**"
+      - "backend_python/**"
+      - "!backend_python/**/.env"
+      - "!backend_python/**/.env.*"
+      - "!backend_python/**/*.pem"
+      - "!backend_python/**/*.key"
+      - "!backend_python/**/*.crt"
+      - "!backend_python/**/*.p12"
+      - "front_PHP/**"
+      - "!front_PHP/vendor/**"
+      - "!front_PHP/**/.env"
+      - "!front_PHP/**/.env.*"
+      - "!front_PHP/**/*.pem"
+      - "!front_PHP/**/*.key"
+      - "!front_PHP/**/*.crt"
+      - "!front_PHP/**/*.p12"
+      - "front_NextJS/**"
+      - "!front_NextJS/node_modules/**"
+      - "!front_NextJS/.next/**"
+      - "!front_NextJS/tests/**"
+      - "!front_NextJS/tsconfig.tsbuildinfo"
+      - "!front_NextJS/**/.env"
+      - "!front_NextJS/**/.env.*"
+      - "!front_NextJS/**/*.pem"
+      - "!front_NextJS/**/*.key"
+      - "!front_NextJS/**/*.crt"
+      - "!front_NextJS/**/*.p12"
+      - "front_DashPlotly/**"
+      - "!front_DashPlotly/tests/**"
+      - "!front_DashPlotly/data/**"
+      - "!front_DashPlotly/**/__pycache__/**"
+      - "!front_DashPlotly/**/.pytest_cache/**"
+      - "!front_DashPlotly/**/.env"
+      - "!front_DashPlotly/**/.env.*"
+      - "!front_DashPlotly/**/*.pem"
+      - "!front_DashPlotly/**/*.key"
+      - "!front_DashPlotly/**/*.crt"
+      - "!front_DashPlotly/**/*.p12"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-manifests:
+    name: Validate Kubernetes manifests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Install manifest validator dependency
+        run: python3 -m pip install --disable-pip-version-check -r kubernetes/requirements-validation.txt
+
+      - name: Render and validate manifests
+        run: |
+          set -euo pipefail
+          kubectl kustomize kubernetes/base > "$RUNNER_TEMP/learnagement-kubernetes.yaml"
+          python3 -B kubernetes/validate_base.py
+          python3 - "$RUNNER_TEMP/learnagement-kubernetes.yaml" <<'PY'
+          import sys
+          import yaml
+
+          with open(sys.argv[1], encoding="utf-8") as rendered:
+              list(yaml.safe_load_all(rendered))
+          print("PASS: rendered YAML parsed")
+          PY
+
+  test-interservice-contracts:
+    name: Test mocked interservice HTTP contracts
+    runs-on: ubuntu-latest
+    container: python:3.14-slim
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Install isolated contract-test dependencies
+        run: python -m pip install --disable-pip-version-check -r tests/integration/requirements.txt
+
+      - name: Run HTTP, Compose, and platform import regressions
+        run: >-
+          python -m pytest -q
+          tests/integration/test_dash_backend_http_contract.py
+          tests/integration/test_compose_startup_order.py
+          tests/integration/test_windows_cli_import.py
+
+  test-backend:
+    name: Test Backend unit suite without services
+    runs-on: ubuntu-latest
+    container: python:3.13-slim
+    timeout-minutes: 20
+    env:
+      ENV: dev
+      JWT_SIGNING_KEY: ci-only-test-signing-key-not-a-secret
+      SESSION_TIMEOUT: "900"
+      PYTHONPATH: backend_python
+      PYTHON_DOTENV_DISABLED: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Install Backend and test dependencies
+        run: >-
+          python -m pip install --disable-pip-version-check
+          -r backend_python/requirements.txt
+          -r backend_python/requirements-test.txt
+
+      - name: Run Backend unit tests
+        run: python -m pytest -q backend_python/tests
+
+  build-and-smoke:
+    name: Build and smoke-test four application images
+    needs:
+      - validate-manifests
+      - test-interservice-contracts
+      - test-backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Build Backend image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: docker/kubernetes/backend/Dockerfile
+          tags: learnagement/backend-k8s:ci-${{ github.sha }}
+          push: false
+          load: true
+
+      - name: Smoke-test Backend image
+        env:
+          IMAGE: learnagement/backend-k8s:ci-${{ github.sha }}
+          CONTAINER: learnagement-backend-smoke-${{ github.run_id }}-${{ github.run_attempt }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(docker run --rm --entrypoint id "$IMAGE" -u)" = "10001"
+          docker run --rm --entrypoint sh "$IMAGE" -c 'test ! -e /app/.env'
+          cleanup() {
+            docker stop "$CONTAINER" >/dev/null 2>&1 || true
+            docker rm "$CONTAINER" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          docker run --detach --name "$CONTAINER" \
+            --publish 127.0.0.1:44000:4000 \
+            --env SESSION_TIMEOUT=900 \
+            "$IMAGE"
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:44000/health | python3 -c 'import json,sys; assert json.load(sys.stdin).get("status") == "ok"; print("PASS: Backend /health")'; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs "$CONTAINER"
+          exit 1
+
+      - name: Build PHP image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: docker/kubernetes/front-php/Dockerfile
+          tags: learnagement/front-php-k8s:ci-${{ github.sha }}
+          push: false
+          load: true
+
+      - name: Smoke-test PHP image
+        env:
+          IMAGE: learnagement/front-php-k8s:ci-${{ github.sha }}
+          CONTAINER: learnagement-php-smoke-${{ github.run_id }}-${{ github.run_attempt }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(docker run --rm --entrypoint id "$IMAGE" -u)" = "33"
+          docker run --rm --entrypoint php "$IMAGE" -r 'foreach (["curl", "dom", "mysqli", "simplexml"] as $extension) { if (!extension_loaded($extension)) { fwrite(STDERR, "Missing PHP extension: $extension\n"); exit(1); } }'
+          docker run --rm --entrypoint sh "$IMAGE" -c 'test ! -e /var/www/html/.env'
+          cleanup() {
+            docker stop "$CONTAINER" >/dev/null 2>&1 || true
+            docker rm "$CONTAINER" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          docker run --detach --name "$CONTAINER" \
+            --publish 127.0.0.1:44080:8080 \
+            "$IMAGE"
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:44080/health >/dev/null; then
+              printf '%s\n' "PASS: PHP /health"
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs "$CONTAINER"
+          exit 1
+
+      - name: Build Next.js image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: docker/kubernetes/front-nextjs/Dockerfile
+          tags: learnagement/front-nextjs:ci-${{ github.sha }}
+          push: false
+          load: true
+
+      - name: Smoke-test Next.js image
+        env:
+          IMAGE: learnagement/front-nextjs:ci-${{ github.sha }}
+          CONTAINER: learnagement-nextjs-smoke-${{ github.run_id }}-${{ github.run_attempt }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(docker run --rm --entrypoint node "$IMAGE" -p 'process.stdout.write(String(process.getuid()))')" = "1000"
+          docker run --rm --entrypoint sh "$IMAGE" -c 'test ! -e /app/.env'
+          cleanup() {
+            docker stop "$CONTAINER" >/dev/null 2>&1 || true
+            docker rm "$CONTAINER" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          docker run --detach --name "$CONTAINER" \
+            --publish 127.0.0.1:43001:3000 \
+            "$IMAGE"
+          for attempt in $(seq 1 30); do
+            if response=$(curl --silent --fail http://127.0.0.1:43001/health); then
+              printf '%s' "$response" | python3 -c 'import json,sys; assert json.load(sys.stdin).get("status") == "ok"'
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs "$CONTAINER"
+          exit 1
+
+      - name: Build Dash image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: docker/kubernetes/front-dash/Dockerfile
+          tags: learnagement/front-dash:ci-${{ github.sha }}
+          push: false
+          load: true
+
+      - name: Smoke-test Dash image
+        env:
+          IMAGE: learnagement/front-dash:ci-${{ github.sha }}
+          CONTAINER: learnagement-dash-smoke-${{ github.run_id }}-${{ github.run_attempt }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(docker run --rm --entrypoint python "$IMAGE" -c 'import os; print(os.getuid())')" = "10001"
+          docker run --rm --entrypoint sh "$IMAGE" -c 'test ! -e /app/.env'
+          cleanup() {
+            docker stop "$CONTAINER" >/dev/null 2>&1 || true
+            docker rm "$CONTAINER" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          docker run --detach --name "$CONTAINER" \
+            --publish 127.0.0.1:48051:8050 \
+            --env SESSION_TIMEOUT=900 \
+            "$IMAGE"
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:48051/health >/dev/null; then
+              printf '%s\n' "PASS: Dash /health"
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs "$CONTAINER"
+          exit 1
+
+      - name: Remove test images
+        if: always()
+        run: |
+          docker image rm \
+            "learnagement/backend-k8s:ci-${GITHUB_SHA}" \
+            "learnagement/front-php-k8s:ci-${GITHUB_SHA}" \
+            "learnagement/front-nextjs:ci-${GITHUB_SHA}" \
+            "learnagement/front-dash:ci-${GITHUB_SHA}" \
+            2>/dev/null || true

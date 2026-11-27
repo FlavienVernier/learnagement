@@ -1,0 +1,15 @@
+**
+!backend_python/
+!backend_python/**
+
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/*.crt
+**/*.p12
+backend_python/**/__pycache__/
+backend_python/**/.pytest_cache/
+backend_python/**/docker_venv/
+backend_python/**/.venv/
+backend_python/**/tests/

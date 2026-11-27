@@ -4,13 +4,6 @@ Ce runbook prépare uniquement la validation future de MySQL puis du Backend.
 Aucune instruction ci-dessous ne doit être exécutée pendant cette préparation.
 Il ne transforme pas les contrôles statiques ou simulés en validation runtime.
 
-Le générateur et le squelette Compose montent maintenant les scripts SQL en
-lecture seule. Ce point est couvert statiquement par
-[`test_compose_startup_order.py`](../tests/integration/test_compose_startup_order.py).
-La Phase A reste **NO-GO** tant que le Compose généré n'a pas été inspecté dans
-l'environnement isolé et que tous les prérequis GO ci-dessous ne sont pas
-satisfaits. Aucun démarrage ni script SQL n'a été exécuté pour cette correction.
-
 ## 1. Prérequis GO/NO-GO
 
 Avant toute action, exécuter le préflight immédiatement avant le démarrage :
@@ -45,7 +38,7 @@ Une différence entre un projet Compose et les ressources DEV ne suffit pas à
 prouver l'isolation : les noms explicites de conteneurs/réseaux et le volume
 effectif doivent tous être absents avant la création.
 
-## 2. Architecture et comportement de démarrage confirmés
+## 2. Architecture confirmée
 
 La séquence attendue est :
 
@@ -62,17 +55,11 @@ SQLAlchemy est construit paresseusement dans
 connexion réelle n'est ouverte que lorsqu'une fonction appelle
 `get_connection()` ou `get_read_connection()`.
 
-Dans `origin/dev` (`0fed8de6`), le point d'entrée Docker exécute
-`python app.py`. Quand `app.py` est lancé directement, il appelle
-`init.init()` avant de démarrer Uvicorn. Cette initialisation se connecte à
-MySQL et exécute `CREATE OR REPLACE VIEW` pour les vues
-`ExplicitSecondaryKs_<table>`.
-
-`init.py --apply` n'est pas une option définie par le code. En revanche,
-`python init.py --apply` exécute quand même `init()` via le bloc
-`if __name__ == "__main__"` et ignore l'argument. Ne pas lancer cette commande.
-Le démarrage du Backend doit donc attendre MySQL et l'approbation du propriétaire
-des données pour cette initialisation.
+Le démarrage normal du Backend ne doit pas appeler
+[backend_python/init.py](../backend_python/init.py). Ce module initialise des
+vues secondaires uniquement avec `python init.py --apply`; cette commande ne
+doit pas être exécutée dans le premier démarrage sans autorisation du propriétaire
+des données.
 
 L'état `/health` confirme uniquement qu'une réponse HTTP est disponible :
 [backend_python/app.py](../backend_python/app.py). Il ne vérifie ni

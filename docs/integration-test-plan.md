@@ -17,41 +17,18 @@ that the deployed services communicate.
 ## Commands
 
 ```powershell
-py -3.13 -m pytest -q tests\integration\test_compose_startup_order.py
-py -3.13 -m pytest -q tests\integration\test_backend_mysql_contract.py
-py -3.13 -m pytest -q tests\integration\test_http_contract_sources.py
-py -3.13 -m pytest -q tests\integration\test_dash_backend_http_contract.py
+python -m pytest -q tests\integration\test_compose_startup_order.py
+python -m pytest -q tests\integration\test_backend_mysql_contract.py
+python -m pytest -q tests\integration\test_http_contract_sources.py
+python -m pytest -q tests\integration\test_dash_backend_http_contract.py
+python -m pytest -q tests\integration\test_windows_cli_import.py
 ```
 
 The suite must not need Docker, MySQL, service DEV, real secrets, or private
-data. The integration requirement file reuses the repository's dependency
-manifests and adds PyYAML for parsing generated Compose YAML. The transferred
-suite contains 27 collected cases across four pytest files. They validate
-static sources, Compose generation, or local HTTP/engine simulations; they do
-not prove runtime Docker or MySQL communication.
-
-Use Python 3.13 or newer for the full suite: the current Dash source imports
-`warnings.deprecated`, which is unavailable in Python 3.11. The latest local
-re-execution in the `feature/orchestration` worktree passed 27 cases with
-Python 3.13; pytest emitted one Dash-plugin deprecation warning. The suite
-includes local HTTP simulation, not calls to a real Backend, Docker, or MySQL.
-
-## Compose bind-mount source caveat
-
-Static inspection found that the isolated MySQL procedure must prepare both
-`db\docker-entrypoint-initdb.d` and `docker\data_mysql\conf.d`; the first-start
-runbook creates them explicitly. The phpMyAdmin configuration and PHP ini
-mount sources exist in this checkout. Full-stack sources
-`front_NextJS\node_modules`, `front_DashPlotly\data`, `docker\log\php`, and
-the configured certificate directories are absent here. In particular, an
-empty `node_modules` bind mount could hide dependencies already present in a
-container image. Resolve these sources and review the resulting Compose
-configuration before any full-stack runtime test. This is a static path check;
-Docker was not run.
-
-The Windows CLI test is not transferred: the approved base still imports
-`termios` from `tools.py`, and changing that functional module is outside this
-transfer.
+data. The integration requirement file documents the dependencies of these
+tests. The focused suite currently contains 28 tests; they validate static
+sources or local HTTP/engine simulations and do not prove runtime Docker
+communication.
 
 ## INT-001 — Backend / MySQL configuration
 
@@ -70,16 +47,13 @@ transfer.
 ## INT-002 — Backend / MySQL unavailable
 
 - **Objective:** distinguish engine construction from a real availability check.
-- **Preconditions:** separate runtime MySQL instance and real credentials;
-  Backend startup also runs `init.init()` and creates/replaces secondary-key
-  views.
+- **Preconditions:** separate runtime MySQL instance and real credentials.
 - **Action:** start MySQL with no Backend, then add Backend and call a read-only
   query.
 - **Expected:** known 503 behavior for unavailable/busy database in the
   implemented paths; no silent fallback.
 - **Proof:** logs, HTTP status, health state and read-only SQL result.
-- **Status:** not executed; requires an isolated MySQL/Backend runtime and
-  approved test credentials.
+- **Status:** blocked until runtime resources are available.
 
 ## INT-003 — PHP / Backend proxy
 
@@ -91,7 +65,7 @@ transfer.
 - **Expected:** source permits GET/POST/PATCH/PUT/DELETE; Bearer is forwarded;
   cURL timeout is 30 seconds; unavailable Backend returns status 0.
 - **Proof:** pytest static assertions or PHP runtime capture.
-- **Status:** static test executable; PHP runtime not executed.
+- **Status:** static test executable; PHP runtime blocked.
 
 ## INT-004 — PHP login / CAS
 
@@ -101,8 +75,7 @@ transfer.
 - **Expected:** valid credentials return JWT-shaped response; invalid login
   returns 401; CAS service token policy is enforced.
 - **Proof:** HTTP status, redacted response shape and headers.
-- **Status:** not executed; requires an approved test account and owner
-  confirmation for the CAS flow.
+- **Status:** blocked and owned by PHP/Backend/CAS responsible parties.
 
 ## INT-005 — Next.js proxy
 
@@ -135,8 +108,7 @@ transfer.
 - **Expected:** bearer and payload content match; HTTP and network failures
   propagate; invalid JSON does not become empty or fallback data.
 - **Proof:** pytest observations from the mock HTTP server.
-- **Status:** 10 simulated HTTP cases passed in the transfer; runtime
-  real-Backend test not executed.
+- **Status:** existing tests executed; runtime real-Backend test not executed.
 
 ## INT-008 — IA / Backend
 

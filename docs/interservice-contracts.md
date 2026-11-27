@@ -64,9 +64,6 @@ database, pas HTTP.
 - Timeout du pool : 10 secondes.
 - Le Backend retourne HTTP 503 pour une base indisponible ou un pool saturé
   dans les chemins où l'erreur est interceptée.
-- Au démarrage, `app.py` appelle `init.init()` avant Uvicorn; cette routine
-  ouvre une connexion MySQL et crée/remplace des vues `ExplicitSecondaryKs_*`.
-  Le comportement est confirmé statiquement, pas en runtime.
 
 **Incohérence à résoudre**
 
@@ -85,7 +82,8 @@ de configuration avant la prochaine génération.
 - Résolution DNS depuis un nouveau checkout isolé.
 
 Références : [connection.py](../backend_python/db/connection.py),
-[docker_compose.py](../docker_compose.py), [env.py](../env.py).
+[docker_compose.py](../docker_compose.py),
+[env.py](../env.py), [__env_skeleton.env](../__env_skeleton.env).
 
 ### 3.2 PHP ↔ Backend Python
 
@@ -204,8 +202,9 @@ marge de leeway de 30 secondes et stocke le token dans la session.
 
 `tests/integration/test_dash_backend_http_contract.py` vérifie un serveur HTTP
 simulé pour GET/POST/PATCH/DELETE, le header Bearer, les formats, les réponses
-vides, 503 et timeout. Ses 10 cas ont passé pendant la vérification du transfert;
-ils ne remplacent pas un appel runtime au Backend réel.
+vides, 503 et timeout. Le test a été exécuté dans une mission antérieure mais
+n'a pas été relancé dans cette mission; il ne remplace pas un appel runtime au
+Backend réel.
 
 Références : [app_tools.py](../front_DashPlotly/app_tools.py),
 [auth Dash](../front_DashPlotly/auth.py),
@@ -220,25 +219,6 @@ avec `GROQ_API_KEY`, puis ses fonctions locales interrogent les APIs Backend
 via Dash `app_tools`. Ce n'est pas une intégration par un service IA autonome
 discutant directement avec FastAPI.
 
-La clé est lue depuis l'environnement du processus Dash. Le Compose attend
-`../.env` pour le conteneur Dash. Dans le worktree audité, ce fichier est
-absent et le squelette `__env_skeleton.env` ne déclare pas `GROQ_API_KEY`.
-Aucune valeur de secret n'a été lue; l'intégration Groq n'est donc pas
-configurée dans ce worktree.
-
-Le sous-module `polytech_rag` est intégré au hub APC de Dash. Son entrypoint
-`app/main.py` construit une application Dash; le callback RAG utilise
-`FileService` pour lire les PDF locaux et produire une réponse à partir de leur
-texte. Aucun serveur FastAPI RAG autonome n'a été trouvé. Bien que ses
-requirements mentionnent FastAPI et Uvicorn, aucun `FastAPI()` ni lancement
-Uvicorn n'est présent dans ce sous-module.
-
-Un autre composant Dash, `apc_dash/app_metier_erreur.py`, référence
-`http://localhost:8000/audit/competences/incoherences`. Aucun service Compose
-ni endpoint serveur correspondant n'a été trouvé dans le dépôt. Cet appel ne
-définit ni timeout ni retry et reste à confirmer par le propriétaire du
-module; il ne constitue pas un contrat d'intégration disponible.
-
 **Contrat actuellement partiellement confirmé**
 
 - destination Groq : `https://api.groq.com/openai/v1/chat/completions`;
@@ -249,8 +229,6 @@ module; il ne constitue pas un contrat d'intégration disponible.
 - gestion des statuts 429, 401 et autres HTTP;
 - jusqu'à huit itérations pour résoudre des appels d'outils;
 - les outils exécutent ensuite les appels Dash/Backend avec le JWT utilisateur.
-- aucun retry HTTP; les erreurs de transport ne sont pas converties en contrat
-  de réponse stable.
 
 **Non implémenté**
 
@@ -265,13 +243,6 @@ Le responsable IA devra fournir : URL/service réseau, endpoint, méthode,
 payload, authentification, format des réponses, erreurs, timeout, retry,
 modèle/provider, taille maximale des messages, et gestion des données
 pédagogiques.
-
-**Préparation d'orchestration restante.** Aucun service IA indépendant n'est
-ajouté à Compose ou Kubernetes avant réception et validation de ce contrat.
-L'intégration pourra alors préciser le nom DNS, le port, le réseau, le
-healthcheck/readiness, les dépendances de démarrage, les limites de ressources
-et l'injection du secret via une configuration dédiée. Ces éléments ne sont
-pas encore configurés ni validés.
 
 Références : [chatbot Groq](../front_DashPlotly/apc_dash/apc20_chatbot_backend.py),
 [outils chatbot](../front_DashPlotly/apc_dash/apc20_chatbot_tools.py).
@@ -314,12 +285,12 @@ Références : [chatbot Groq](../front_DashPlotly/apc_dash/apc20_chatbot_backend
 
 | Test | Préconditions | Action | Résultat attendu | Preuve à collecter | Statut |
 |---|---|---|---|---|---|
-| Backend ↔ MySQL | MySQL neuf isolé, `.env` local, scripts disponibles | Ajouter puis démarrer le Backend seulement après MySQL healthy | Connexion applicative, lecture simple réussie, pool disponible | logs Backend, état SQLAlchemy, requête de lecture autorisée | Non exécuté; requiert un runtime isolé |
+| Backend ↔ MySQL | MySQL neuf isolé, `.env` local, scripts disponibles | Ajouter puis démarrer le Backend seulement après MySQL healthy | Connexion applicative, lecture simple réussie, pool disponible | logs Backend, état SQLAlchemy, requête de lecture autorisée | Bloqué par ressources/runtime |
 | PHP vers `/token` | MySQL + Backend démarrés | Soumettre des identifiants factices validés par données de test | 200 + `access_token`; mauvais mot de passe = 401 | réponse HTTP redacted, logs, header WWW-Authenticate | À créer; données réelles nécessaires |
 | PHP vers `/api.php` | session PHP avec JWT factice/valide | GET `/health` puis route protégée avec/sans JWT | santé propagée; JWT valide autorisé; absent/expiré = 401/403 | status, corps, headers Bearer observés | Test statique possible; runtime bloqué |
 | Next.js `/token` | Backend disponible | POST form-urlencoded avec compte factice | 200, JWT décodé, NextAuth session créée | status NextAuth, payload redacted, cookie | À créer; runtime bloqué |
 | Next.js proxy | session NextAuth valide | GET `/api/proxy/health` puis route Backend protégée | Backend status conservé en succès/erreur | status, cookie, logs proxy | À créer; runtime bloqué |
-| Dash vers Backend | JWT valide, certificat interne disponible | GET/POST/PATCH/DELETE vers endpoints factices | formats corrects, Bearer propagé, DataFrame attendu | log HTTP serveur simulé ou réel; réponse | Test simulé exécuté; Backend réel non testé |
+| Dash vers Backend | JWT valide, certificat interne disponible | GET/POST/PATCH/DELETE vers endpoints factices | formats corrects, Bearer propagé, DataFrame attendu | log HTTP serveur simulé ou réel; réponse | Test simulé existant; réel bloqué |
 | Dashboard indisponible | arrêter uniquement la simulation, pas DEV | appeler les fonctions Dash avec Backend injoignable | Timeout/RequestException propagé sans données trompeuses | test timeout, durée, exception | Test simulé existant |
 | Erreur Backend 503 | mock ou instance contrôlée | appeler une route avec base indisponible | 503 reconnu; aucune donnée fallback silencieuse | status, détail, logs | Test Dash simulé existant; global à créer |
 | Backend MySQL pool saturé | base réelle isolée | dépasser le pool par chargement contrôlé | 503 "Database busy" ou indisponibilité explicite | status/log/error | À créer; bloqué dépendance DB |
@@ -346,7 +317,7 @@ L'étape 6 est **partiellement convergente** :
 - Next.js ↔ Backend est partiellement confirmé; ses politiques d'erreur et son
   timeout restent incomplets.
 - Backend ↔ MySQL est structurellement confirmé mais sa connexion et son
-  initialisation n'ont pas été validées en runtime.
+  initialisation restent bloquées par le runtime.
 - Le futur service IA reste une préparation technique; aucun contrat entre un
   service IA autonome et Backend n'est actuellement implémenté.
 

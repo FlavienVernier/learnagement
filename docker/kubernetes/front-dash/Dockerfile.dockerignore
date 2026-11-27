@@ -1,0 +1,14 @@
+**
+!front_DashPlotly/
+!front_DashPlotly/**
+
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/*.crt
+**/*.p12
+front_DashPlotly/tests/
+front_DashPlotly/data/
+front_DashPlotly/**/__pycache__/
+front_DashPlotly/**/.pytest_cache/

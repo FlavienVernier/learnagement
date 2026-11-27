@@ -29,3 +29,16 @@ front_NextJS/node_modules/
 mobility_map/node_modules/
 
 Doc_Private
+
+# Track only the Kubernetes validation workflow under the hidden .github directory.
+!.github/
+.github/*
+!.github/workflows/
+.github/workflows/*
+!.github/workflows/kubernetes-images.yml
+
+# Composer's dependency lockfile is required for reproducible PHP builds.
+!front_PHP/composer.lock
+
+# A local duplicate of the tracked Next.js /health route is not for delivery.
+front_NextJS/app/health/route.ts

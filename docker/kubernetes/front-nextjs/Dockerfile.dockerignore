@@ -1,0 +1,15 @@
+**
+!front_NextJS/
+!front_NextJS/**
+
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/*.crt
+**/*.p12
+front_NextJS/node_modules/
+front_NextJS/.next/
+front_NextJS/tests/
+front_NextJS/tsconfig.tsbuildinfo
+front_NextJS/app/health/route.ts

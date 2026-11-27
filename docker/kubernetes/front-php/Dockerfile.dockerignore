@@ -1,0 +1,17 @@
+**
+!front_PHP/
+!front_PHP/**
+!docker/
+!docker/kubernetes/
+!docker/kubernetes/front-php/
+!docker/kubernetes/front-php/apache-kubernetes.conf
+
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/*.crt
+**/*.p12
+front_PHP/vendor/
+front_PHP/.git/
+front_PHP/**/__pycache__/

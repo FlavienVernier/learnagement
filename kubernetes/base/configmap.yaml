@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: learnagement-network-config
+data:
+  ENV: dev
+  INSTANCE_PROTOCOL: http
+  MYSQL_SERVER: mysql
+  MYSQL_PORT: "3306"
+  BACKEND_PYTHON_DOCKER_URL: backend
+  BACKEND_PYTHON_DOCKER_PORT: "4000"

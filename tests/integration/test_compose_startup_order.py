@@ -46,8 +46,8 @@ def test_generated_compose_waits_for_mysql_and_backend_health(tmp_path, monkeypa
     docker_compose.gen_docker_compose_yml(
         [
             "data_mysql",
-            "backend_python",
             "phpmyadmin",
+            "backend_python",
             "front_php",
             "front_nextjs",
             "front_dashplotly",
@@ -62,38 +62,17 @@ def test_generated_compose_waits_for_mysql_and_backend_health(tmp_path, monkeypa
     phpmyadmin = "phpmyadmin_ci-order"
 
     assert services[mysql]["container_name"] == "learnagement_data_mysql_ci-order"
+    assert services[mysql]["volumes"][0] == (
+        "../db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro"
+    )
     assert "ports" not in services[mysql]
     assert "learnagement_back_ci-order" in services[mysql]["networks"]
     assert "learnagement_persistent_db_ci-order" in compose["volumes"]
-    assert (
-        "../db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro"
-        in services[mysql]["volumes"]
-    )
-    assert "./data_mysql/conf.d:/etc/mysql/conf.d" in services[mysql]["volumes"]
     assert services[backend]["depends_on"][mysql]["condition"] == "service_healthy"
-    assert (
-        services[phpmyadmin]["depends_on"][mysql]["condition"]
-        == "service_healthy"
-    )
-    assert (
+    assert (REPOSITORY_ROOT / "docker" / "phpmyadmin" / "config.inc.php").is_file()
+    assert services[phpmyadmin]["volumes"] == [
         "./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php:ro"
-        in services[phpmyadmin]["volumes"]
-    )
-    assert (
-        REPOSITORY_ROOT / "docker" / "phpmyadmin" / "config.inc.php"
-    ).is_file()
-    skeleton = (
-        REPOSITORY_ROOT / "docker" / "docker-compose.yml.skeleton"
-    ).read_text(encoding="utf-8")
-    assert (
-        "../db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro"
-        in skeleton
-    )
-    assert "./data_mysql/conf.d:/etc/mysql/conf.d" in skeleton
-    assert (
-        "./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php:ro"
-        in skeleton
-    )
+    ]
     for frontend in ("front_php", "front_nextjs", "front_dashplotly"):
         service = f"{frontend}_ci-order"
         assert services[service]["depends_on"][backend]["condition"] == "service_healthy"

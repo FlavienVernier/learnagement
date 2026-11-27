@@ -4,15 +4,6 @@ This procedure is for the first controlled MySQL start only. It must be run
 from a dedicated checkout, never from a checkout used by DEV. It does not
 initialize a previously used volume or include private SQL data.
 
-## Current status: static preparation only; runtime NO-GO
-
-The Compose generator and skeleton on this branch mount the SQL staging
-directory read-only. `test_compose_startup_order.py` checks this statically.
-That check does not validate a generated Compose file or prove a MySQL runtime.
-Do not start a service as part of this preparation; runtime remains NO-GO until
-the isolated checkout, generated configuration, resources, and all preconditions
-below have been reviewed immediately before an explicitly approved start.
-
 ## Preconditions
 
 Do not continue unless all of these conditions are met:
@@ -55,12 +46,7 @@ versioned scripts from `db\sql`:
 ```powershell
 New-Item -ItemType Directory -Force db\docker-entrypoint-initdb.d
 Copy-Item db\sql\*.sql db\docker-entrypoint-initdb.d\
-New-Item -ItemType Directory -Force docker\data_mysql\conf.d
 ```
-
-The MySQL configuration directory is mounted by the generator and skeleton.
-Create it explicitly so Compose does not need to infer a missing bind-mount
-source. Leave it empty unless an approved MySQL configuration file is supplied.
 
 Compare the source and staged files by name, size, and SHA-256 before
 generating Compose:
@@ -99,32 +85,16 @@ python -c "import docker_compose; docker_compose.gen_docker_compose_yml(['data_m
 
 This writes the ignored file `docker\docker-compose.yml`. Do not display it
 without redacting the MySQL credentials. Validate its effective Compose
-configuration without starting a service. Keep the rendered configuration in
-memory; do not print it because it contains resolved environment values:
+configuration without starting a service:
 
 ```powershell
 $project = (Get-Content .env | Where-Object { $_ -match '^COMPOSE_PROJECT_NAME=' } |
     Select-Object -First 1).Split('=', 2)[1]
-$configJson = docker compose --project-name $project -f docker\docker-compose.yml config --format json | Out-String
-if ($LASTEXITCODE -ne 0) { throw 'Compose configuration validation failed.' }
-$composeConfig = $configJson | ConvertFrom-Json
-$composeConfig.services.PSObject.Properties |
-    ForEach-Object {
-        [pscustomobject]@{
-            Service = $_.Name
-            Image = $_.Value.image
-            Container = $_.Value.container_name
-            EnvironmentNames = ($_.Value.environment.PSObject.Properties.Name -join ',')
-            Networks = ($_.Value.networks.PSObject.Properties.Name -join ',')
-            Ports = ($_.Value.ports | ConvertTo-Json -Compress)
-            Volumes = ($_.Value.volumes | ConvertTo-Json -Compress)
-        }
-    } |
-    Format-Table -AutoSize
+docker compose --project-name $project -f docker\docker-compose.yml config --format json
 ```
 
-The displayed environment column contains names only, never values. Confirm all
-of the following before proceeding:
+Inspect the rendered JSON locally and confirm all of the following before
+proceeding:
 
 - the only service is `data_mysql_<INSTANCE_NAME>`;
 - image is `mysql:8.4`;

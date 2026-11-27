@@ -1,0 +1,307 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: front-php
+  labels:
+    app.kubernetes.io/name: front-php
+    app.kubernetes.io/part-of: learnagement
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: front-php
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-php
+  labels:
+    app.kubernetes.io/name: front-php
+    app.kubernetes.io/part-of: learnagement
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: front-php
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: front-php
+        app.kubernetes.io/part-of: learnagement
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: front-php
+          image: learnagement/front-php-k8s:REPLACE_WITH_BUILT_IMAGE
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 33
+            runAsGroup: 33
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: learnagement-network-config
+          volumeMounts:
+            - name: php-runtime-env
+              mountPath: /var/www/html/.env
+              subPath: .env
+              readOnly: true
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: php-runtime-env
+          secret:
+            secretName: learnagement-php-runtime
+            items:
+              - key: .env
+                path: .env
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: front-nextjs
+  labels:
+    app.kubernetes.io/name: front-nextjs
+    app.kubernetes.io/part-of: learnagement
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: front-nextjs
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-nextjs
+  labels:
+    app.kubernetes.io/name: front-nextjs
+    app.kubernetes.io/part-of: learnagement
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: front-nextjs
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: front-nextjs
+        app.kubernetes.io/part-of: learnagement
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: front-nextjs
+          image: learnagement/front-nextjs:REPLACE_WITH_BUILT_IMAGE
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: learnagement-network-config
+          env:
+            - name: JWT_SIGNING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: learnagement-auth-secrets
+                  key: JWT_SIGNING_KEY
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: front-dash
+  labels:
+    app.kubernetes.io/name: front-dash
+    app.kubernetes.io/part-of: learnagement
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: front-dash
+  ports:
+    - name: http
+      port: 8050
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-dash
+  labels:
+    app.kubernetes.io/name: front-dash
+    app.kubernetes.io/part-of: learnagement
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: front-dash
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: front-dash
+        app.kubernetes.io/part-of: learnagement
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: front-dash
+          image: learnagement/front-dash:REPLACE_WITH_BUILT_IMAGE
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - name: http
+              containerPort: 8050
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: learnagement-network-config
+          env:
+            - name: JWT_SIGNING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: learnagement-auth-secrets
+                  key: JWT_SIGNING_KEY
+            - name: SESSION_TIMEOUT
+              valueFrom:
+                configMapKeyRef:
+                  name: learnagement-app-config
+                  key: SESSION_TIMEOUT
+            - name: INSTANCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: learnagement-app-config
+                  key: INSTANCE_URL
+            - name: FRONT_PHP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: learnagement-app-config
+                  key: FRONT_PHP_PORT
+            - name: FRONT_NEXTAUTH_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: learnagement-app-config
+                  key: FRONT_NEXTAUTH_PORT
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 2Gi
