@@ -1,3 +1,4 @@
+# Purpose: define the internal Backend Service and Deployment, including health probes and external configuration references.
 apiVersion: v1
 kind: Service
 metadata:

@@ -1,3 +1,4 @@
+# Purpose: provide non-secret internal service names and protocol/port settings for the Kubernetes workloads.
 apiVersion: v1
 kind: ConfigMap
 metadata:

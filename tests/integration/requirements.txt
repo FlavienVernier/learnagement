@@ -1,3 +1,4 @@
+# Dependencies for the isolated orchestration integration-contract tests.
 pandas==3.0.6
 pytest==9.2.0
 PyYAML==6.0.3

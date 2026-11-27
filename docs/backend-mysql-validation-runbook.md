@@ -1,5 +1,7 @@
 # Runbook de validation Backend / MySQL
 
+> Objectif : guider une validation isolée et non destructive de MySQL puis du Backend.
+
 Ce runbook prépare uniquement la validation future de MySQL puis du Backend.
 Aucune instruction ci-dessous ne doit être exécutée pendant cette préparation.
 Il ne transforme pas les contrôles statiques ou simulés en validation runtime.

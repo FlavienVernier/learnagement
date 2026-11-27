@@ -1,5 +1,7 @@
 # Checklist de préparation au déploiement Kubernetes
 
+> Objectif : suivre les prérequis, autorisations et preuves à réunir avant tout déploiement Kubernetes.
+
 Cette checklist est un gate opératoire, pas une autorisation de déploiement.
 Le socle `kubernetes/base/` n'a pas été appliqué à un cluster. Toute action
 sur un cluster, une base réelle ou un service DEV exige une autorisation

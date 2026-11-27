@@ -1,5 +1,7 @@
 # Matrice de préparation Kubernetes
 
+> Objectif : décrire l'état réel du socle Kubernetes, ses preuves statiques et les blocages avant déploiement.
+
 ## Périmètre et preuves
 
 ### État du checkout de livraison — 17 novembre 2026

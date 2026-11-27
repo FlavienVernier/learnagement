@@ -1,3 +1,4 @@
+# Purpose: restrict the Dash image build context and exclude local secrets/data artifacts.
 **
 !front_DashPlotly/
 !front_DashPlotly/**

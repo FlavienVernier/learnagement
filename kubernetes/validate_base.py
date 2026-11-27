@@ -1,3 +1,5 @@
+"""Statically validate rendered Kubernetes resources and their Dockerfile contracts."""
+
 from __future__ import annotations
 
 import subprocess

@@ -1,3 +1,4 @@
+# Purpose: build the non-root FastAPI Backend image used by the Kubernetes Deployment.
 FROM python:3.14-slim AS dependencies
 
 WORKDIR /build

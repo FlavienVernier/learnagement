@@ -1,3 +1,4 @@
+# Purpose: build the non-root PHP/Apache image on the Kubernetes service port.
 FROM php:8.5-apache AS php-base
 
 RUN apt-get update \

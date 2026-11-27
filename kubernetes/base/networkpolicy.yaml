@@ -1,3 +1,4 @@
+# Purpose: restrict MySQL and Backend ingress and limit Backend egress to MySQL and DNS.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

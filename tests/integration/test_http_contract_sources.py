@@ -1,3 +1,5 @@
+"""Check source-level HTTP and authentication contracts between services."""
+
 from pathlib import Path
 
 

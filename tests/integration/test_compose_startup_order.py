@@ -1,3 +1,5 @@
+"""Check generated Compose services, health dependencies, ports, and mounts."""
+
 import sys
 from pathlib import Path
 

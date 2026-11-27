@@ -1,5 +1,7 @@
 # Guide de livraison Learnagement
 
+> Objectif : regrouper les procédures, responsabilités et gates nécessaires à une livraison contrôlée.
+
 Ce guide consolide les procédures déjà présentes dans le dépôt pour préparer
 une livraison. Il ne remplace ni les contrats applicatifs, ni les procédures
 isolées, ni les gates Kubernetes. Il ne constitue pas une preuve de validation

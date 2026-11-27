@@ -1,3 +1,4 @@
+# Purpose: declare the dedicated Kubernetes namespace for Learnagement resources.
 apiVersion: v1
 kind: Namespace
 metadata:

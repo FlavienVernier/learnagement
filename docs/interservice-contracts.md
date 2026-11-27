@@ -1,5 +1,7 @@
 # Contrats interservices Learnagement
 
+> Objectif : inventorier les contrats observés entre interfaces, Backend, base de données et fournisseurs externes.
+
 ## Niveau de preuve
 
 - **Confirmé** : démontré directement par le code ou un test existant.

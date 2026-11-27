@@ -1,3 +1,4 @@
+# Purpose: restrict the PHP image build context and include only its required runtime sources.
 **
 !front_PHP/
 !front_PHP/**

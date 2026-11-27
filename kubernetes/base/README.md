@@ -1,5 +1,7 @@
 # Learnagement Kubernetes base (préliminaire)
 
+> Objectif : expliquer les ressources Kustomize, la configuration externe attendue et les limites du socle non déployé.
+
 Ce Kustomize base matérialise les ressources et frontières réseau ciblées. Il
 n'est pas prêt à être déployé. Dans le checkout de livraison courant, aucune
 image n'a été construite ou publiée; les quatre images applicatives restent

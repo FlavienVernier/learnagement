@@ -1,3 +1,4 @@
+# Purpose: define the PHP, Next.js, and Dash Services/Deployments and their probes, resources, and external settings.
 apiVersion: v1
 kind: Service
 metadata:

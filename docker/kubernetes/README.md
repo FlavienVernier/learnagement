@@ -1,5 +1,7 @@
 # Images Kubernetes Learnagement
 
+> Objectif : documenter les images dédiées au socle Kubernetes, leur construction et leurs limites de validation.
+
 Les anciens résultats et commandes de build ci-dessous documentent le
 checkout de récupération. Dans le checkout de livraison courant, les images
 n'ont pas été construites; la CI prépare des tags temporaires `ci-<SHA>` sans

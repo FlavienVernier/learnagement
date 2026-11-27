@@ -1,5 +1,7 @@
 # Learnagement integration test plan
 
+> Purpose: distinguish isolated automated checks from service-backed runtime integration tests.
+
 This plan separates executable isolated tests from runtime tests that require
 Docker and real services. It does not turn a mock or static check into proof
 that the deployed services communicate.

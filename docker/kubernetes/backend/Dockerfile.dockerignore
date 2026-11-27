@@ -1,3 +1,4 @@
+# Purpose: restrict the Backend image build context and exclude local secrets/artifacts.
 **
 !backend_python/
 !backend_python/**

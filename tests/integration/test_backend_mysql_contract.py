@@ -1,3 +1,5 @@
+"""Verify Backend-to-MySQL configuration without opening a database connection."""
+
 import importlib
 import sys
 import warnings

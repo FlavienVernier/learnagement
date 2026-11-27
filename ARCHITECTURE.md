@@ -1,5 +1,7 @@
 # Learnagement architecture
 
+> Objectif : présenter les services Learnagement, leurs flux et les limites entre la configuration déclarée et le runtime.
+
 Cette vue résume la topologie Learnagement telle qu'elle est préparée dans le dépôt. Elle décrit les interfaces PHP, Next.js et Dash, le Backend Python, MySQL, les réseaux Front/Back, phpMyAdmin et les intégrations externes confirmées. Traefik, le socket proxy et Groq sont représentés seulement selon leur usage réel ou leur caractère optionnel.
 
 Le diagramme est une description statique de Docker Compose et ne prouve ni un démarrage runtime, ni les communications réelles. Le socle Kubernetes présent dans le dépôt est préliminaire et n'a pas été appliqué à un cluster.

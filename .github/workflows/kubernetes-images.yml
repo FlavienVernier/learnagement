@@ -1,3 +1,4 @@
+# Purpose: statically validate Kubernetes resources, run isolated tests, and build/smoke-test images without publishing them.
 name: Kubernetes image validation
 
 on:

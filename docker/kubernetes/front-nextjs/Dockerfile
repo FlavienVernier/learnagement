@@ -1,3 +1,4 @@
+# Purpose: build the non-root production Next.js image used by the Kubernetes Deployment.
 FROM node:26-bookworm-slim AS build
 
 WORKDIR /app

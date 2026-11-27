@@ -1,3 +1,4 @@
+# Purpose: restrict the Next.js image build context and exclude local secrets/build artifacts.
 **
 !front_NextJS/
 !front_NextJS/**

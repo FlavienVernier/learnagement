@@ -1,5 +1,7 @@
 # First isolated MySQL start
 
+> Purpose: prepare a guarded first MySQL start in a dedicated checkout without touching DEV data.
+
 This procedure is for the first controlled MySQL start only. It must be run
 from a dedicated checkout, never from a checkout used by DEV. It does not
 initialize a previously used volume or include private SQL data.

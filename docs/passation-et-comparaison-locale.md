@@ -1,5 +1,7 @@
 # Passation et comparaison locale de Learnagement
 
+> Objectif : transmettre l'état d'orchestration et fournir une méthode sûre de comparaison entre checkouts.
+
 Ce document transmet l'état réel de l'orchestration Learnagement et décrit
 comment comparer deux copies locales sans écraser les travaux respectifs.
 Il ne remplace pas les documents spécialisés. Il ne constitue pas une preuve
