@@ -230,7 +230,8 @@ def _traefik_labels(cfg: ComposeConfig, name: str, subdomain: str, port: str,
     rules=[f"`{subdomain}.{cfg.domain}`", f"`{subdomain}.{cfg.instance_url}`"]
     labels = [
         "traefik.enable=true",
-        f"traefik.http.routers.{router}.rule=Host({', '.join(rules)})",
+        f"traefik.http.routers.{router}.rule={' || '.join(f'Host({r})' for r in rules)}",
+        #f"traefik.http.routers.{router}.rule=Host(`{subdomain}.{cfg.domain}`)",
         f"traefik.http.routers.{router}.entrypoints=websecure",
         f"traefik.http.routers.{router}.tls=true",
         f"traefik.http.services.{router}.loadbalancer.server.port={port}",

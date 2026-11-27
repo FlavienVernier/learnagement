@@ -1,4 +1,3 @@
-#dotenv==0.9.9
 python-dotenv~=1.2.2
 sqlalchemy==2.1.9
 mysql-connector-python==26.10.0
@@ -10,11 +9,13 @@ pwdlib==0.4.2
 
 pwdlib[bcrypt]==0.4.2
 pydantic==2.14.4
-typing==3.7.4.3
+#typing==3.7.4.3
+
+# python-multipart required by fastapi
 python-multipart==0.0.34
 sqlglot==30.33.0
 
-httpx==0.28.1
+#httpx==0.29.0
 openpyxl==3.1.5
 
 pygments==2.21.0
