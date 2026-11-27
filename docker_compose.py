@@ -30,6 +30,7 @@ class ComposeConfig:
     backend_port: str
     backend_docker_port: str
     instance_protocol: str
+    instance_url: str
     ssl_internal_dir: str
     docker_ssl_internal_dir: str
     ssl_external_dir: str
@@ -74,6 +75,7 @@ class ComposeConfig:
             backend_port=envs("BACKEND_PYTHON_PORT"),
             backend_docker_port=envs("BACKEND_PYTHON_DOCKER_PORT"),
             instance_protocol=envs("INSTANCE_PROTOCOL"),
+            instance_url=envs("INSTANCE_URL"),
             ssl_internal_dir=envs("SSL_INTERNAL_DIR"),
             docker_ssl_internal_dir=envs("DOCKER_SSL_INTERNAL_DIR"),
             ssl_external_dir=envs("SSL_EXTERNAL_DIR"),
@@ -225,9 +227,10 @@ def _traefik_labels(cfg: ComposeConfig, name: str, subdomain: str, port: str,
     if not cfg.traefik:
         return ""
     router = f"{name}_{cfg.instance}"
+    rules=[f"`{subdomain}.{cfg.domain}`", f"`{subdomain}.{cfg.instance_url}`"]
     labels = [
         "traefik.enable=true",
-        f"traefik.http.routers.{router}.rule=Host(`{subdomain}.{cfg.domain}`)",
+        f"traefik.http.routers.{router}.rule=Host({', '.join(rules)})",
         f"traefik.http.routers.{router}.entrypoints=websecure",
         f"traefik.http.routers.{router}.tls=true",
         f"traefik.http.services.{router}.loadbalancer.server.port={port}",

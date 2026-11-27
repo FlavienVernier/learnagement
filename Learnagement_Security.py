@@ -109,6 +109,9 @@ def generate_external_cert(
     if public_ip:
         san_ips.append(public_ip)
 
+    print("Public Ips: ", public_ip)
+    print("Domains: ", domain)
+
     generate_self_signed_cert(
         common_name=domain,
         san_dns_names=[
